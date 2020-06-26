@@ -1,0 +1,94 @@
+v1
+
+basic terrain generation
+non-interpolated player movement
+
+v2
+
+map sync
+interpolated player movement
+
+v3
+
+players look somewhat like minecraft models
+
+v4
+
+added steve skin
+walking animation
+punching animation
+
+v5
+
+added nametag support
+
+v6
+
+added player health + regeneration
+added PvP
+
+v7
+
+added chat messaging
+
+v8
+
+support multiple chunks with multiple textures
+
+v9
+
+added terrain generation
+loading and unloading chunks functionality
+
+v10
+
+support serverside chunk loading
+
+
+v11
+
+blocking breaking animation
+added trees (i just had to make the trees generate outside the chunk)
+
+v12
+
+added items (with the ability to select which items to place from the toolbar)
+added fog
+
+v13
+
+added the ability to drop items and collect them
+items despawn after 30 seconds
+
+v14
+
+added ore generation
+added player knockback (finally!)
+
+v15
+
+added basic crafting + inventory UI
+can only craft wooden planks
+
+v16
+
+added day night cycle (synced in multiplayer)
+
+TODO:
+interpolate entities
+change grass to dirt when mined
+make updateVoxelGeometry() take less time
+
+Bugs:
+
+Death message not synced across all players (specifically client)
+Diagonal collision detection not fully resolved
+Blocks not placing when shifting
+
+Suggestions:
+
+set a limit on how many times i update the geometry per frame
+Add command line
+
+
+SAVE AN ARRAY OF REQUESTED BLOCKS BASED ON THE CHUNKS SO TREES CAN SPAWN PROPERLY

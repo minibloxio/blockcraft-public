@@ -1,0 +1,28 @@
+{
+  "name": "interplanetarium",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "morgan": "^1.9.1",
+    "ola": "^1.1.0",
+    "serve-favicon": "^2.5.0",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victoryqwei/Interplanetarium.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/victoryqwei/Interplanetarium/issues"
+  },
+  "homepage": "https://github.com/victoryqwei/Interplanetarium#readme"
+}
