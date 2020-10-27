@@ -29,7 +29,8 @@ class Player {
 		this.knockbackVelocity = new THREE.Vector3();
 
 		this.speed = 2;
-		this.maxSpeed = 3.5;
+		this.walkSpeed = 2;
+		this.sprintSpeed = 3.5;
 		this.distanceMoved = 0;
 
 		this.fly = false;
@@ -70,7 +71,21 @@ class Player {
 		this.halfDepth = blockSize * 0.3;
 		this.halfHeight = blockSize * 0.8;
 
-		this.miningDelay = 750
+		this.miningDelay = [
+			Infinity,
+			1,
+			1,
+			1,
+			1,
+			1,
+			0.5,
+			1,
+			1,
+			1,
+			1,
+			1,
+			Infinity
+		]
 		;
 		this.placingDelay = 200;
 
@@ -82,9 +97,10 @@ class Player {
 		this.chunksToLoad = [];
 		this.chunksToUnload = [];
 
-		this.renderDistance = 10;
+		this.renderDistance = 4;
 		this.chunkLoadingRate = 1;
 		this.chunkTick = Date.now();
+		this.chunkDelay = 100;
 
 		// Hand
 		this.addBody();
@@ -199,8 +215,11 @@ class Player {
 
 		var picked = []
 		for (var i = 0; i < intersects.length; i++) {
-			if (!(intersects[i].object.name == "wireframe" || intersects[i].object.name == "item"))
+			let object = intersects[i].object;
+			let isWater = world.getVoxel(object.position.x/blockSize, object.position.y/blockSize, object.position.z/blockSize) == 14;
+			if (!(object.name == "wireframe" || object.name == "item" || isWater)) {
 				picked.push(intersects[i])
+			}
 		}
 
 		// Get the closest block
@@ -274,37 +293,41 @@ class Player {
 
 			let miningDelta = (Date.now() - this.key.leftClick) // How much time passed while mining
 
+			let voxel = world.getVoxel(x, y, z);
+			let minable = voxel != 1 && voxel != 14;
+
+			if (!minable)
+				return;
+
+			let miningDelay = (this.onObject ? this.miningDelay[voxel-1] : this.miningDelay[voxel-1] * 3) * 750;
+
 			// Continous mining of blocks by holding right click
-			if (this.key.leftClick && miningDelta > this.miningDelay) { // Break block
+			if (this.key.leftClick && miningDelta > miningDelay) { // Break block
 				this.key.leftClick = Date.now();
 				this.mine_box.visible = false;
 				this.prevSelect = undefined;
 
-				let uvVoxel = world.getVoxel(x, y, z)-1;
-
-				if (uvVoxel > 0) {
-					this.closest = {
-						distance: Infinity
-					}
-					this.click = false;
-
-					// Remove blocks
-					world.setVoxel(x, y, z, 0);
-				    updateVoxelGeometry(x, y, z);
-
-					// Send data to server
-					socket.emit('setBlock', {
-						x: x,
-						y: y,
-						z: z,
-						t: 0,
-						v: uvVoxel + 1
-					})
+				this.closest = {
+					distance: Infinity
 				}
+				this.click = false;
+
+				// Remove blocks
+				world.setVoxel(x, y, z, 0);
+			    updateVoxelGeometry(x, y, z);
+
+				// Send data to server
+				socket.emit('setBlock', {
+					x: x,
+					y: y,
+					z: z,
+					t: 0,
+					v: voxel
+				})
 			} else if (this.key.leftClick && this.stoppedPunching) { // Continue punching animation
 				this.punching = true;
 				this.stoppedPunching = false;
-			} else if (this.key.leftClick && miningDelta < this.miningDelay) { 
+			} else if (this.key.leftClick && miningDelta < miningDelay) { 
 				// Check if player is mining the same block
 				if (this.prevSelect == undefined) {
 					this.prevSelect = new THREE.Vector3(x, y, z);
@@ -323,7 +346,7 @@ class Player {
 			if (this.key.leftClick) {
 				// Update mining progress indicator
 				
-				this.mine_box.material = mining_progress[Math.floor(miningDelta/this.miningDelay*mining_progress.length).clamp(0, mining_progress.length-1)].material
+				this.mine_box.material = mining_progress[Math.floor(miningDelta/miningDelay*mining_progress.length).clamp(0, mining_progress.length-1)].material
 				this.mine_box.visible = true;
 			}
 		
@@ -406,11 +429,14 @@ class Player {
 
 		if (this.fly) {
 			this.velocity.y -= previousVelocity.y * 10.0 * delta;
+		} else {
+			if (colorPass.enabled) {
+				this.velocity.y = -50 * 50.0 * delta; // Sinking
+			} else {
+				this.velocity.y -= 9.81 * 50.0 * delta; // 100.0 = mass	
+			}	
 		}
 
-		if (!this.fly) {
-			this.velocity.y -= 9.81 * 50.0 * delta; // 100.0 = mass
-		}
 		this.direction.x = this.key.left + this.key.right;
 		this.direction.y = this.key.up + this.key.down;
 		this.direction.z = this.key.forward + this.key.backward;
@@ -421,7 +447,8 @@ class Player {
 
 		if ( this.key.forward || this.key.backward ) this.velocity.z -= this.direction.z * 400.0 * delta;
 		if ( this.key.left || this.key.right ) this.velocity.x -= this.direction.x * 400.0 * delta;
-		if ( (this.key.down || this.key.up) && this.fly ) this.velocity.y -= this.direction.y * 400.0 * delta;
+		if ( (this.key.down || this.key.up) && this.fly) this.velocity.y -= this.direction.y * 400.0 * delta;
+		if ( (this.key.down || this.key.up) && !this.fly && this.inWater) this.velocity.y = -20 * this.direction.y * 400.0 * delta;
 
 		// Reset shift position
 
@@ -476,7 +503,7 @@ class Player {
 				if (axis === 'y' && !this.fly) {
 					// Test for y
 					this.controls.getObject().position['y'] += newMove['y'];
-					if (this.collides() && this.velocity.y < 0 || this.position.y <= blockSize) {
+					if (this.collides() && !this.inWater && this.velocity.y < 0 || this.position.y <= blockSize) {
 						this.onObject = true;
 						newMove['y'] = 0;
 					} else if (this.collides()) {
@@ -549,24 +576,27 @@ class Player {
 		this.savedPosition = this.controls.getObject().position.clone();
 
 		// Update movement
+
+		this.sprintSpeed = this.inWater ? 2 : 3.5;
+		this.walkSpeed = this.inWater ? 1 : 2;
 		if (this.key.sprint) {
-			if (this.speed < this.maxSpeed) {
+			if (this.speed < this.sprintSpeed) {
 				this.speed += delta * 10;
 			} else {
-				this.speed = this.maxSpeed;
+				this.speed = this.sprintSpeed;
 			}
 		} else {
-			if (this.speed > 2) {
+			if (this.speed > this.walkSpeed) {
 				this.speed -= delta * 10;
 			} else {
-				this.speed = 2;
+				this.speed = this.walkSpeed;
 			}
 		}
 		this.positionYOffset = 0;
 		if (this.key.sneak && !this.fly) {
 			this.speed = 0.5;
 			if (!this.fly) {
-				this.controls.getObject().position['y'] += -2;
+				this.controls.getObject().position['y'] += -this.walkSpeed;
 				this.halfHeight = blockSize * 0.6
 			}
 		}
@@ -627,7 +657,7 @@ class Player {
 			let dist = Math.sqrt(Math.pow(cellPos.x - parseInt(cell[0]), 2) + Math.pow(cellPos.z - parseInt(cell[2]), 2))
 
 
-			if (dist > this.renderDistance*1.5) {
+			if (dist > this.renderDistance * 0.75) {
 				this.chunksToUnload.push({
 					x: parseInt(cell[0]),
 					y: parseInt(cell[1]),
@@ -646,7 +676,7 @@ class Player {
 	    let direction = 'up';
 
 	    for ( let i = 0; i < this.renderDistance*this.renderDistance; i++ ) {
-	    	for (let y = 0; y < 10; y++) {
+	    	for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
 	    		let cellX = cellPos.x + x;
 				let cellY = y;
 				let cellZ = cellPos.z + z;
@@ -701,10 +731,11 @@ class Player {
 	    }
 
 	    // Request, load, and unload
-		if (Date.now()-this.chunkTick > 0) {
+		if (Date.now()-this.chunkTick > this.chunkDelay) {
 			this.chunkTick = Date.now();
 			// Request chunks based on loading rate
 			if (this.chunksToLoad.length < 10) {
+				this.chunkDelay = 0
 				let requestedChunks = [];
 				for (var i = 0; i < this.chunkLoadingRate; i++) {
 					let chunk = this.chunksToRequest[i];
@@ -714,6 +745,8 @@ class Player {
 					}
 				}
 				socket.emit('requestChunk', requestedChunks) // Call server to load this chunk
+			} else {
+				this.chunkDelay = 100;
 			}
 				
 			// Load chunks based on loading rate
@@ -752,107 +785,81 @@ class Player {
 		player.updateChunks(world);
 	}
 
+	collideVoxel(x, y, z) {
+		var voxel = world.getVoxel(x, y, z)
+		if (voxel > 0 && voxel != 14)
+			return voxel;
+	}
+
 	collides() {
-		// head and feet
+
+		// Under water
+		var x = Math.floor(player.position.x/blockSize);
+		var y = Math.floor((player.position.y-blockSize*1.6)/blockSize);
+		var z = Math.floor(player.position.z/blockSize);
+
+		var voxel = world.getVoxel(x, y, z)
+		this.inWater = voxel == 14;
+
+		var x = Math.floor(player.position.x/blockSize);
+		var y = Math.floor((player.position.y)/blockSize);
+		var z = Math.floor(player.position.z/blockSize);
+
+		var voxel = world.getVoxel(x, y, z)
+		colorPass.enabled = voxel == 14;
+		
+
+		// Head and feet
+
 		var x = Math.floor(player.position.x/blockSize);
 		var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
 		var z = Math.floor(player.position.z/blockSize);
 
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
+		if (this.collideVoxel(x, y, z)) return true;
 
 		var x = Math.floor(player.position.x/blockSize);
 		var y = Math.floor((player.position.y+blockSize*0.2)/blockSize);
 		var z = Math.floor(player.position.z/blockSize);
 
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
+		if (this.collideVoxel(x, y, z)) return true;
 
 		// Top
-		var x = Math.floor((player.position.x-blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y)/blockSize);
-		var z = Math.floor((player.position.z-blockSize*0.25)/blockSize);
 
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
+		for (let i = -1; i < 2; i+=2) {
+			for (let j = -1; j < 2; j+=2) {
+				var x = Math.floor((player.position.x+i*blockSize*0.25)/blockSize);
+				var y = Math.floor((player.position.y)/blockSize);
+				var z = Math.floor((player.position.z+i*blockSize*0.25)/blockSize);
 
-		var x = Math.floor((player.position.x-blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y)/blockSize);
-		var z = Math.floor((player.position.z+blockSize*0.25)/blockSize);
-
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
-
-		var x = Math.floor((player.position.x+blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y)/blockSize);
-		var z = Math.floor((player.position.z-blockSize*0.25)/blockSize);
-
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
-
-		var x = Math.floor((player.position.x+blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y)/blockSize);
-		var z = Math.floor((player.position.z+blockSize*0.25)/blockSize);
-
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
+				if (this.collideVoxel(x, y, z)) return true;
+			}
+		}
 
 		// Middle
-		var x = Math.floor((player.position.x-blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y-blockSize*0.8)/blockSize);
-		var z = Math.floor((player.position.z-blockSize*0.25)/blockSize);
 
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
+		for (let i = -1; i < 2; i+=2) {
+			for (let j = -1; j < 2; j+=2) {
+				var x = Math.floor((player.position.x+i*blockSize*0.25)/blockSize);
+				var y = Math.floor((player.position.y-blockSize*0.8)/blockSize);
+				var z = Math.floor((player.position.z+j*blockSize*0.25)/blockSize);
 
-		var x = Math.floor((player.position.x-blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y-blockSize*0.8)/blockSize);
-		var z = Math.floor((player.position.z+blockSize*0.25)/blockSize);
-
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
-
-		var x = Math.floor((player.position.x+blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y-blockSize*0.8)/blockSize);
-		var z = Math.floor((player.position.z-blockSize*0.25)/blockSize);
-
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
-
-		var x = Math.floor((player.position.x+blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y-blockSize*0.8)/blockSize);
-		var z = Math.floor((player.position.z+blockSize*0.25)/blockSize);
-
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
+				if (this.collideVoxel(x, y, z)) return true;
+			}
+		}
+		
 
 		// Bottom
-		var x = Math.floor((player.position.x-blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
-		var z = Math.floor((player.position.z-blockSize*0.25)/blockSize);
 
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
+		for (let i = -1; i < 2; i+=2) {
+			for (let j = -1; j < 2; j+=2) {
+				var x = Math.floor((player.position.x+i*blockSize*0.25)/blockSize);
+				var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
+				var z = Math.floor((player.position.z+j*blockSize*0.25)/blockSize);
 
-		var x = Math.floor((player.position.x-blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
-		var z = Math.floor((player.position.z+blockSize*0.25)/blockSize);
+				if (this.collideVoxel(x, y, z)) return true;
+			}
+		}
 
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
-
-		var x = Math.floor((player.position.x+blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
-		var z = Math.floor((player.position.z-blockSize*0.25)/blockSize);
-
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
-
-		var x = Math.floor((player.position.x+blockSize*0.25)/blockSize);
-		var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
-		var z = Math.floor((player.position.z+blockSize*0.25)/blockSize);
-
-		if (world.getVoxel(x, y, z) > 0)
-			return true;
+		
 	}
 }

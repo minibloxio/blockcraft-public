@@ -65,7 +65,7 @@ class Light {
 						new THREE.BoxGeometry( Math.random()*200+100, 16, Math.random()*200+100 ),
 						new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.4, transparent: true } )
 					);
-				cloud.position.set(Math.random()*3000-1500, Math.random()*200 + blockSize*80, Math.random()*3000-1500)
+				cloud.position.set(Math.random()*3000-1500 + player.position.x, Math.random()*200 + blockSize*80, Math.random()*3000-1500 + player.position.z)
 				scene.add(cloud);
 
 				this.clouds.push(cloud);
@@ -113,7 +113,7 @@ class Light {
 
 		// Update fog based on render distance
 		scene.fog.near = (player.renderDistance-3)*blockSize*cellSize;
-		scene.fog.far = player.renderDistance*blockSize*cellSize;
+		scene.fog.far = Infinity;
 	}
 }
 

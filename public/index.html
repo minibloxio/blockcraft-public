@@ -35,9 +35,9 @@
 				height: 100%;
 
 				text-align: center;
-				background-color: black;
+				/*background-color: black;
 				background-image: url("https://blockcraft.victorwei.com/textures/blocks/dirt.png");
-				background-repeat: repeat;
+				background-repeat: repeat;*/
 				z-index: 3;
 
 				font-family: "Minecraft-Regular";
@@ -164,6 +164,15 @@
 		<script src="javascripts/resources/jquery.js"></script>
 		<script src="javascripts/resources/rle-encoding.js"></script>
 
+		<!-- Load Postprocessing -->
+		<script src="javascripts/postprocessing/EffectComposer.js"></script>
+		<script src="javascripts/postprocessing/BloomPass.js"></script>
+		<script src="javascripts/postprocessing/RenderPass.js"></script>
+		<script src="javascripts/postprocessing/ShaderPass.js"></script>
+		<script src="javascripts/postprocessing/CopyShader.js"></script>
+		<script src="javascripts/postprocessing/UnrealBloomPass.js"></script>
+		<script src="javascripts/postprocessing/LuminosityHighPassShader.js"></script>
+
 		<!-- Load Classes -->
 		<script src="javascripts/classes/World.js"></script>
 		<script src="javascripts/classes/Player.js"></script>
@@ -176,6 +185,8 @@
 		<script src="javascripts/server.js"></script>
 		<script src="javascripts/lights.js"></script>
 		<script src="javascripts/core.js"></script>
+		<script src="javascripts/client.js"></script>
+		<script src="javascripts/worker.js"></script>
 		<script src="javascripts/input.js"></script>
 		<script src="javascripts/helper.js"></script>
 		<script src="javascripts/hud.js"></script>
@@ -193,7 +204,7 @@
 				<br />
 				<br />
 				<span id="renderDistanceValue" class="slider-text">Render Distance: 10</span>
-				<input type="range" min="1" max="32" value="10" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px">
+				<input type="range" min="1" max="32" value="2" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px">
 				<br />
 				<br />
 				<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
@@ -223,7 +234,37 @@
 
 		<input id="chat-input" type="text" placeholder="> Press Enter to Chat" maxlength="100">
 
+		<script type="x-shader/x-vertex" id="vertexshader">
+
+			varying vec2 vUv;
+
+			void main() {
+
+				vUv = uv;
+
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+			}
+
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentshader">
+
+			uniform sampler2D baseTexture;
+			uniform sampler2D bloomTexture;
+
+			varying vec2 vUv;
+
+			void main() {
+
+				gl_FragColor = ( texture2D( baseTexture, vUv ) + vec4( 1.0 ) * texture2D( bloomTexture, vUv ) );
+
+			}
+
+		</script>
+
 		<script>
+
 			// Remove warning
 			var originalWarning = console.warn; // back up the original method
 			console.warn = function(){}; // now warnings do nothing!

@@ -32,8 +32,8 @@ class Texture {
 						  let tex = texture;
               tex.magFilter = THREE.NearestFilter;
               tex.minFilter = THREE.NearestFilter;
-				     	return new THREE.MeshLambertMaterial({map: tex, side: THREE.FrontSide,
-                shadowSide: THREE.FrontSide,
+				     	return new THREE.MeshLambertMaterial({map: tex, side: THREE.DoubleSide,
+                shadowSide: THREE.DoubleSide,
                 alphaTest: 0.1,
                 transparent: true
               })
@@ -75,6 +75,7 @@ fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
 var stone = new Texture(['./blocks/stone.png'])
 var bedrock = new Texture(['./blocks/bedrock.png'])
 var dirt = new Texture(['./blocks/dirt.png'])
+var water = new Texture(['./blocks/water.png'])
 var sun = new Texture(['./blocks/sun.png'], false, {
 	metalness: 0,
 	type: "basic"

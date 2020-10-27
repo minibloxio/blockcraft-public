@@ -1,6 +1,7 @@
 
 var SimplexNoise = require('simplex-noise'),
-    noise = new SimplexNoise(Math.random)
+    rng1 = new SimplexNoise(Math.random),
+    rng2 = new SimplexNoise(Math.random)
 
 let blockId = {
   "bedrock": 1,
@@ -15,18 +16,25 @@ let blockId = {
   "iron_ore": 10,
   "gold_ore": 11,
   "crafting_table": 12,
-  "planks": 13
+  "planks": 13,
+  "water": 14
 }
 
 function blockToID(blockName) {
   return blockId[blockName]
 }
+
+function noise1(nx, ny) { return rng1.noise2D(nx, ny)/2 + 0.5; }
+function noise2(nx, ny) { return rng2.noise2D(nx, ny)/2 + 0.5; }
    
 module.exports = class World {
   constructor(options) {
   	// World seed
   	this.seed = Math.random();
-    noise = new SimplexNoise(this.seed);
+    rng1 = new SimplexNoise(this.seed);
+    rng2 = new SimplexNoise(this.seed+0.2 > 1 ? this.seed - 0.8 : this.seed+0.2);
+
+    this.waterLevel = 40;
 
     // Cell management
   	this.blockSize = 16;
@@ -155,6 +163,31 @@ module.exports = class World {
 		return newArray;
   }
 
+  getHeight(xPos, zPos) {
+    let width = 128;
+    let height = 128;
+    let heightNoise = 90;
+
+    var nx = xPos/width - 0.5, ny = zPos/height - 0.5;
+    var e = (1.00 * noise1( 1 * nx,  1 * ny)
+           + 0.50 * noise1( 2 * nx,  2 * ny)
+           + 0.25 * noise1( 4 * nx,  4 * ny)
+           + 0.13 * noise1( 8 * nx,  8 * ny)
+           + 0.06 * noise1(16 * nx, 16 * ny)
+           + 0.03 * noise1(32 * nx, 32 * ny));
+    e /= (1.00+0.50+0.25+0.13+0.06+0.03);
+    e = Math.pow(e, 5.00);
+    var m = (1.00 * noise2( 1 * nx,  1 * ny)
+           + 0.75 * noise2( 2 * nx,  2 * ny)
+           + 0.33 * noise2( 4 * nx,  4 * ny)
+           + 0.33 * noise2( 8 * nx,  8 * ny)
+           + 0.33 * noise2(16 * nx, 16 * ny)
+           + 0.50 * noise2(32 * nx, 32 * ny));
+    m /= (1.00+0.75+0.33+0.33+0.33+0.50);
+    
+    return Math.floor(e*heightNoise)+30;
+  }
+
   generateCell(cellX, cellY, cellZ) {
   	let cell = this.cells[`${cellX},${cellY},${cellZ}`];
   	let cellExists = false;
@@ -174,8 +207,9 @@ module.exports = class World {
         // Get cell offset
         let xPos = x + cellX * cellSize;
         let zPos = z + cellZ * cellSize;
+
+        const height = this.getHeight(xPos, zPos);
         
-        const height = Math.floor((noise.noise2D(xPos/30, zPos/30)+1)*5)+30;
         for (let y = 0; y < cellSize; ++y) {
           // Get cell offset for y
           let yPos = y + cellY * cellSize;
@@ -183,51 +217,44 @@ module.exports = class World {
           if (this.getVoxel(xPos, yPos, zPos) > 0)
           	continue;
 
-          const cave = (noise.noise3D(xPos*0.05, yPos*caveSparsity, zPos*0.05)+1)/2;
+          const cave = (rng1.noise3D(xPos*0.05, yPos*caveSparsity, zPos*0.05)+1)/2;
 
           //noise = new SimplexNoise(this.seed + 0.1);
-          const coal = noise.noise3D(xPos*coalSparsity, yPos*coalSparsity, zPos*coalSparsity);
+          const coal = rng1.noise3D(xPos*coalSparsity, yPos*coalSparsity, zPos*coalSparsity);
           //noise = new SimplexNoise(this.seed + 0.2);
-          const iron = noise.noise3D(xPos*ironSparsity, yPos*ironSparsity, zPos*ironSparsity);
+          const iron = rng1.noise3D(xPos*ironSparsity, yPos*ironSparsity, zPos*ironSparsity);
           //noise = new SimplexNoise(this.seed + 0.3);
-          const gold = noise.noise3D(xPos*goldSparsity, yPos*goldSparsity, zPos*goldSparsity);
+          const gold = rng1.noise3D(xPos*goldSparsity, yPos*goldSparsity, zPos*goldSparsity);
           //noise = new SimplexNoise(this.seed + 0.4);
-          const diamond = noise.noise3D(xPos*diamondSparsity, yPos*diamondSparsity, zPos*diamondSparsity);
+          const diamond = rng1.noise3D(xPos*diamondSparsity, yPos*diamondSparsity, zPos*diamondSparsity);
           //noise = new SimplexNoise(this.seed);
          
           // Terrain generation
           let blockID = 0;
+          if (yPos > height && yPos <= this.waterLevel)
+              blockID = "water";
+
           if (cave > 0.1) {
             if (yPos == height) {
-              blockID = blockToID("grass");
-
+              blockID = "grass";
             } else if (yPos < height && yPos > height-3) {
-              blockID = blockToID("dirt");
+              blockID = "dirt";
             } else if (yPos <= height-3 && yPos > 0) {
-              blockID = blockToID("stone");
+              blockID = "stone";
               // Ore generation
 
-              if (coal > 0.6 && yPos > 24) {
-                blockID = blockToID("coal_ore")
-              }
-
-              if (iron > 0.7 && yPos > 18) {
-                blockID = blockToID("iron_ore")
-              }
-
-              if (gold > 0.9 && yPos < 18) {
-                blockID = blockToID("gold_ore")
-              }
-
-              if (diamond > 0.9 && yPos < 12) {
-                blockID = blockToID("diamond_ore")
-              }
+              blockID = (coal > 0.6 && yPos > 24) ? "coal_ore" : blockID
+              blockID = (iron > 0.7 && yPos > 18) ? "iron_ore" : blockID
+              blockID = (gold > 0.9 && yPos < 18) ? "gold_ore" : blockID
+              blockID = (diamond > 0.9 && yPos < 12) ? "diamond_ore" : blockID
             }
           }
 
           if (yPos == 0) {
-            blockID = blockToID("bedrock"); // Force bedrock layer
+            blockID = "bedrock"; // Force bedrock layer
           }
+
+          blockID = blockToID(blockID);
 
           this.setVoxel(xPos, yPos, zPos, blockID);
         }
@@ -241,11 +268,11 @@ module.exports = class World {
 	    		// Get cell offset
 	        let xPos = x + cellX * cellSize;
 	        let zPos = z + cellZ * cellSize;
-	        const height = Math.floor((noise.noise2D(xPos/30, zPos/30)+1)*5)+30;
+	        const height = this.getHeight(xPos, zPos)
 	    		// Add fauna
-	        let tree = noise.noise3D(xPos/30, height, zPos/30)*noise.noise2D(xPos, zPos) > 0.5;
+	        let tree = rng1.noise3D(xPos/30, height, zPos/30)*rng1.noise2D(xPos, zPos) > 0.5 && height > this.waterLevel;
 
-	        if ((noise.noise3D(xPos*0.05, height*caveSparsity, zPos*0.05)+1)/2 <= 0.1)
+	        if ((rng1.noise3D(xPos*0.05, height*caveSparsity, zPos*0.05)+1)/2 <= 0.1)
 	        	continue;
 
 					// Add trees?
@@ -301,6 +328,7 @@ module.exports = class World {
 	    }
 	  }
   }
+
   deleteCell(chunk) {
     delete this.cells[chunk.id];
     let object = scene.getObjectByName(chunk.id);
@@ -329,6 +357,7 @@ module.exports = class World {
 					delete this.entities[entity_id];
   			}
 
+        // Entity gravity
   			var x = Math.floor(entity.pos.x/blockSize);
 				var y = Math.floor((entity.pos.y)/blockSize);
 				var dy = Math.floor((entity.pos.y-2)/blockSize);

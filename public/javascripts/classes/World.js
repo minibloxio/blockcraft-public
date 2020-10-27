@@ -1,3 +1,12 @@
+function noise1(nx, ny) { return rng1.noise2D(nx, ny)/2 + 0.5; }
+function noise2(nx, ny) { return rng2.noise2D(nx, ny)/2 + 0.5; }
+
+var worker = new Worker('javascripts/worker.js');
+
+worker.addEventListener('message', e => {
+  console.log(e.data);
+})
+
 class World {
   constructor(options) {
     this.seed = undefined;
@@ -11,7 +20,7 @@ class World {
     this.cellSliceSize = cellSize * cellSize;
     this.cells = {};
 
-    this.buildHeight = cellSize * 9;
+    this.buildHeight = cellSize * 3;
 
     this.entities = {};
   }
@@ -86,6 +95,31 @@ class World {
   setCell(data) {
 
   }
+  getHeight(xPos, zPos) {
+    let width = 128;
+    let height = 128;
+    let heightNoise = 90;
+
+    var nx = xPos/width - 0.5, ny = zPos/height - 0.5;
+    var e = (1.00 * noise1( 1 * nx,  1 * ny)
+           + 0.50 * noise1( 2 * nx,  2 * ny)
+           + 0.25 * noise1( 4 * nx,  4 * ny)
+           + 0.13 * noise1( 8 * nx,  8 * ny)
+           + 0.06 * noise1(16 * nx, 16 * ny)
+           + 0.03 * noise1(32 * nx, 32 * ny));
+    e /= (1.00+0.50+0.25+0.13+0.06+0.03);
+    e = Math.pow(e, 5.00);
+    var m = (1.00 * noise2( 1 * nx,  1 * ny)
+           + 0.75 * noise2( 2 * nx,  2 * ny)
+           + 0.33 * noise2( 4 * nx,  4 * ny)
+           + 0.33 * noise2( 8 * nx,  8 * ny)
+           + 0.33 * noise2(16 * nx, 16 * ny)
+           + 0.50 * noise2(32 * nx, 32 * ny));
+    m /= (1.00+0.75+0.33+0.33+0.33+0.50);
+    
+    return Math.floor(e*heightNoise)+30;
+  }
+
   generateCell(cellX, cellY, cellZ) {
     if (!this.cells[`${cellX},${cellY},${cellZ}`]) { // Check if chunk already exists
       const {cellSize} = this;
@@ -98,31 +132,36 @@ class World {
           let xPos = x + cellX * cellSize;
           let zPos = z + cellZ * cellSize;
           
-          const height = Math.floor((noise.noise2D(xPos/30, zPos/30)+1)*5)+30;
+          const height = this.getHeight(xPos, zPos);
           for (let y = 0; y < cellSize; ++y) {
             // Get cell offset for y
             let yPos = y + cellY * cellSize;
             let caveSparsity = 0.02;
 
-            const cave = (noise.noise3D(xPos*0.05, yPos*caveSparsity, zPos*0.05)+1)/2;
+            const cave = (rng1.noise3D(xPos*0.05, yPos*caveSparsity, zPos*0.05)+1)/2;
 
             let blockID = 0;
+            let waterLevel = 40;
+            if (yPos > height && yPos <= waterLevel)
+                blockID = "water";
            
             // Terrain generation
             if (cave > 0.1) {
               if (yPos == height) {
-                blockID = blockToID("grass");
+                blockID = "grass";
 
               } else if (yPos < height && yPos > height-3) {
-                blockID = blockToID("dirt");
+                blockID = "dirt";
               } else if (yPos <= height-3 && yPos > 0) {
-                blockID = blockToID("stone");
+                blockID = "stone";
               }
             }
 
             if (yPos == 0) {
-              blockID = blockToID("bedrock"); // Force bedrock layer
+              blockID = "bedrock"; // Force bedrock layer
             }
+
+            blockID = blockToID(blockID)
 
             if (blockID > 0)
               isEmpty = false;
@@ -142,13 +181,36 @@ class World {
     if (object) {
       object.visible = false;
       if (permanently) {
-        object.geometry.dispose();
-        object.material.dispose();
+        /*object.geometry.dispose();
+        object.material.dispose();*/
         scene.remove(object);
       }
     }
   }
+
+  addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel) {
+    const {cellSize, tileSize, tileTextureWidth, tileTextureHeight} = this;
+
+    const ndx = positions.length / 3;
+    for (const {pos, uv} of corners) {
+      let xPos = (pos[0] + x);
+      let yPos = (pos[1] + y);
+      let zPos = (pos[2] + z);
+
+      positions.push(xPos*this.blockSize, yPos*this.blockSize, zPos*this.blockSize);
+      normals.push(...dir);
+      uvs.push(
+            (uvVoxel +   uv[0]) * tileSize / tileTextureWidth,
+        1 - (uvRow + 1 - uv[1]) * tileSize / tileTextureHeight);
+    }
+    indices.push(
+      ndx, ndx + 1, ndx + 2,
+      ndx + 2, ndx + 1, ndx + 3,
+    );
+  }
+
   generateGeometryDataForCell(cellX, cellY, cellZ) {
+
     const {cellSize, tileSize, tileTextureWidth, tileTextureHeight} = this;
     const positions = [];
     const normals = [];
@@ -169,27 +231,37 @@ class World {
             // voxel 0 is sky (empty) so for UVs we start at 0
             const uvVoxel = voxel - 1;
             // There is a voxel here but do we need faces for it?
-            for (const {dir, corners, uvRow} of World.faces) {
-              const neighbor = this.getVoxel(
-                  voxelX + dir[0],
-                  voxelY + dir[1],
-                  voxelZ + dir[2]);
-              if (!neighbor) {
-                // this voxel has no neighbor in this direction so we need a face.
-                const ndx = positions.length / 3;
-                for (const {pos, uv} of corners) {
-                  positions.push((pos[0] + x)*this.blockSize, (pos[1] + y)*this.blockSize, (pos[2] + z)*this.blockSize);
-                  normals.push(...dir);
-                  uvs.push(
-                        (uvVoxel +   uv[0]) * tileSize / tileTextureWidth,
-                    1 - (uvRow + 1 - uv[1]) * tileSize / tileTextureHeight);
+            if (voxel != 14) {
+              for (const {dir, corners, uvRow} of World.faces) {
+
+                const neighbor = this.getVoxel(
+                    voxelX + dir[0],
+                    voxelY + dir[1],
+                    voxelZ + dir[2]);
+                if ((!neighbor || (neighbor == 14))) {
+                  // this voxel has no neighbor in this direction so we need a face.
+                  this.addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
                 }
-                indices.push(
-                  ndx, ndx + 1, ndx + 2,
-                  ndx + 2, ndx + 1, ndx + 3,
-                );
+
               }
             }
+
+            if (voxel == 14) { // Water
+              for (const {dir, corners, uvRow} of World.faces) {
+
+                const neighbor = this.getVoxel(
+                    voxelX + dir[0],
+                    voxelY + dir[1],
+                    voxelZ + dir[2]);
+                if (neighbor == 0) {
+                  // this voxel has no neighbor in this direction so we need a face.
+                  this.addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
+                }
+
+              }
+
+            }
+              
           }
         }
       }
@@ -235,8 +307,6 @@ class World {
     };
   }
 }
-
-
 
 World.faces = [
   { // left
@@ -311,7 +381,12 @@ function updateCellGeometry(x, y, z) {
 	let mesh = cellIdToMesh[cellId];
 	const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
 
+  var t = Date.now();
 	const {positions, normals, uvs, indices} = world.generateGeometryDataForCell(cellX, cellY, cellZ);
+  console.log(Date.now()-t);
+
+  console.log("YEAHHH")
+
 	const positionNumComponents = 3;
 	geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
 	const normalNumComponents = 3;
@@ -375,7 +450,8 @@ let blockId = {
   "iron_ore": 10,
   "gold_ore": 11,
   "crafting_table": 12,
-  "planks": 13
+  "planks": 13,
+  "water": 14
 }
 
 var block = [];
@@ -391,7 +467,7 @@ const texture = texture_loader.load('./textures/blocks/texture-atlas.png');
 texture.magFilter = THREE.NearestFilter;
 texture.minFilter = THREE.NearestFilter;
 
-const cellSize = 8;
+const cellSize = 32;
 const tileSize = 16;
 const tileTextureWidth = 256;
 const tileTextureHeight = 64;
@@ -407,9 +483,9 @@ const geometry = new THREE.BufferGeometry();
 var material = new THREE.MeshLambertMaterial({
 	map: texture,
 	side: THREE.FrontSide,
-	alphaTest: 0.1,
-	transparent: true,
-  overdraw: true
+  transparent: true,
+  overdraw: true,
+  depthWrite: true
 });
 
 const positionNumComponents = 3;

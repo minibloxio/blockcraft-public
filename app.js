@@ -65,7 +65,7 @@ var players = {
 	}*/
 };
 
-const cellSize = 8;
+const cellSize = 32;
 const tileSize = 16;
 const tileTextureWidth = 80;
 const tileTextureHeight = 64;
@@ -245,10 +245,10 @@ io.on('connection', function(socket_) {
 });
 
 // Update server function
-var tick = -1000;
+var tick = 1000;
 let dt = 50;
 setInterval(function () {
-	tick += 1;
+	tick += 0;
 	// Regeneration
 	if (tick % 100 == 0) {
 		for (let id in players) {
