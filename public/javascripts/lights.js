@@ -30,6 +30,8 @@ class Light {
 	    this.dir.shadow.camera.near = 0;
 	    this.dir.shadow.bias = -0.0001;
 
+	    let {blockSize, cellSize} = world;
+
 	    // Fog
 	    scene.fog = new THREE.Fog("lightblue", 0, blockSize*cellSize*5)
 	    scene.background = new THREE.Color("rgba(255, 0, 0, 0)")
@@ -37,7 +39,7 @@ class Light {
 	    // Sun
 	    this.sun = loadSprite('./sun.png', 1000);
 		this.sun.castShadow = false;
-		this.t = 0;
+		this.t = 1000;
 		this.dayNightCycle = true;
 		this.daySpeed = 0.001;
 
@@ -51,6 +53,7 @@ class Light {
 	}
 
 	generateClouds(type) {
+		let {blockSize} = world;
 		for (let cloud of this.clouds) {
 			scene.remove(cloud);
 		}
@@ -63,7 +66,7 @@ class Light {
 			for (let i = 0; i < 100; i++) {
 				let cloud = new THREE.Mesh(
 						new THREE.BoxGeometry( Math.random()*200+100, 16, Math.random()*200+100 ),
-						new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.4, transparent: true } )
+						new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.4, transparent: true , overdraw: true} )
 					);
 				cloud.position.set(Math.random()*3000-1500 + player.position.x, Math.random()*200 + blockSize*80, Math.random()*3000-1500 + player.position.z)
 				scene.add(cloud);
@@ -110,6 +113,7 @@ class Light {
 		scene.background = color;
 		scene.fog.color = color;
 
+		let {blockSize, cellSize} = world;
 
 		// Update fog based on render distance
 		scene.fog.near = (player.renderDistance-3)*blockSize*cellSize;

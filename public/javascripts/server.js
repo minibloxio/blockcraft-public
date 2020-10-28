@@ -6,6 +6,8 @@ function addMesh(geometry, material) {
 }
 
 function addPlayer(players, id) {
+	let {blockSize} = world;
+
 	let p = players[id];
 
 	// Set position of entity
@@ -14,34 +16,34 @@ function addPlayer(players, id) {
 	p.dir = Ola({x:0, y:0, z:0}, 50);
 
 	// Add head
-	p.head = addMesh(new THREE.BoxGeometry(playerDim.headSize, playerDim.headSize, playerDim.headSize), head.material);
+	p.head = addMesh(new THREE.BoxGeometry(player.dim.headSize, player.dim.headSize, player.dim.headSize), head.material);
 	p.head.position.set(0, blockSize*0.2, 0);
 
 	p.neck = new THREE.Object3D();
 	p.neck.add(p.head);
 
 	// Add body
-	p.body = addMesh(new THREE.BoxGeometry(playerDim.torso, playerDim.torsoHeight, playerDim.legSize), body.material);
+	p.body = addMesh(new THREE.BoxGeometry(player.dim.torso, player.dim.torsoHeight, player.dim.legSize), body.material);
 	p.body.position.set(0, -blockSize*0.45, 0);
 
 	// Add arms
-	p.leftArm = addMesh(new THREE.BoxGeometry(playerDim.armSize, playerDim.armHeight, playerDim.armSize), arm.material)
-	p.leftArm.position.set(-playerDim.armSize*3/2, -blockSize*0.45, 0);
+	p.leftArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), arm.material)
+	p.leftArm.position.set(-player.dim.armSize*3/2, -blockSize*0.45, 0);
 
-	p.rightArm = addMesh(new THREE.BoxGeometry(playerDim.armSize, playerDim.armHeight, playerDim.armSize), arm.material)
+	p.rightArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), arm.material)
 	p.rightArm.position.set(0, -blockSize*0.3, 0);
 
 	// Shoulder joints
 	p.rightShoulder = new THREE.Object3D();
-	p.rightShoulder.position.set(playerDim.armSize*3/2, -blockSize*0.15, 0);
+	p.rightShoulder.position.set(player.dim.armSize*3/2, -blockSize*0.15, 0);
 	p.rightShoulder.add(p.rightArm);
 
 	// Add legs
-	p.leftLeg = addMesh(new THREE.BoxGeometry(playerDim.legSize, playerDim.legHeight, playerDim.legSize), leg.material)
-	p.leftLeg.position.set(-playerDim.legSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
+	p.leftLeg = addMesh(new THREE.BoxGeometry(player.dim.legSize, player.dim.legHeight, player.dim.legSize), leg.material)
+	p.leftLeg.position.set(-player.dim.legSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
 
-	p.rightLeg = addMesh(new THREE.BoxGeometry(playerDim.legSize, playerDim.legHeight, playerDim.legSize), leg.material)
-	p.rightLeg.position.set(playerDim.armSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
+	p.rightLeg = addMesh(new THREE.BoxGeometry(player.dim.legSize, player.dim.legHeight, player.dim.legSize), leg.material)
+	p.rightLeg.position.set(player.dim.armSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
 
 	// Add nametag
 	var name_geometry = new THREE.TextGeometry( p.name, {
@@ -79,7 +81,7 @@ function addPlayer(players, id) {
 function updatePlayers(serverPlayers) {
 	for (let id in players) {
 		let p = players[id];
-		if (p.pos && p.rot) {
+		if (p.pos && p.rot && serverPlayers[id]) {
 			// Set new player location
 			p.pos.set({x: serverPlayers[id].pos.x, y: serverPlayers[id].pos.y, z: serverPlayers[id].pos.z});
 			p.rot.set({x: serverPlayers[id].rot.x, y: serverPlayers[id].rot.y, z: serverPlayers[id].rot.z});
@@ -123,6 +125,8 @@ function updatePlayers(serverPlayers) {
 }
 
 function updatePlayer(p) {
+	let {blockSize} = world;
+
 	p.entity.position.set(p.pos.x, p.pos.y, p.pos.z);
 	p.skeleton.rotation.set(p.rot.x, p.rot.y, p.rot.z);
 	p.neck.rotation.x = p.dir.y;

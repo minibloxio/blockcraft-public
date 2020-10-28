@@ -64,25 +64,3 @@ function RLEdecode(array) {
 
 }
 
-function deltaEncode (array) {
-	var newArray=[];
-	var lastval=0;
-	var count=0;
-	var i;
-	for(i=0;i<array.length;i++){
-		newArray[i] = array[i] - lastval;
-		lastval = array[i];
-	}
-	return newArray;
-}
-function deltaDecode (array) {
-	var newArray=[];
-	var lastval=0;
-	var count=0;
-	var i;
-	for(i=0;i<array.length;i++){
-		lastval= newArray[i] = array[i] + lastval;
-	}
-	return newArray;
-
-}

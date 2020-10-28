@@ -1,7 +1,7 @@
 // Classes
 
 class Player {
-	constructor(camera) {
+	constructor(camera, blockSize) {
 		// 3d stuff
 		this.controls = new THREE.PointerLockControls( camera );;
 		this.controls.getObject().position.y += blockSize*75;
@@ -30,7 +30,9 @@ class Player {
 
 		this.speed = 2;
 		this.walkSpeed = 2;
+		this.maxWalkSpeed = 2;
 		this.sprintSpeed = 3.5;
+		this.maxSprintSpeed = 3.5;
 		this.distanceMoved = 0;
 
 		this.fly = false;
@@ -65,11 +67,24 @@ class Player {
 		this.punching = false;
 		this.drop = false; // Drop item
 
+		this.lastRaycast = Date.now();
+
 		// Player appearance
 
 		this.halfWidth = blockSize * 0.3;
 		this.halfDepth = blockSize * 0.3;
 		this.halfHeight = blockSize * 0.8;
+
+		this.dim = {
+			torso: 0.5*blockSize,
+			torsoHeight: 0.75*blockSize,
+			armSize: 0.25*blockSize,
+			armHeight: 0.75*blockSize,
+			legSize: 0.25*blockSize,
+			legHeight: 0.75*blockSize,
+			headSize: 0.55*blockSize,
+			height: 1.8*blockSize
+		}
 
 		this.miningDelay = [
 			Infinity,
@@ -85,8 +100,8 @@ class Player {
 			1,
 			1,
 			Infinity
-		]
-		;
+		];
+		this.miningDelayConstant = 0;
 		this.placingDelay = 200;
 
 		// Player info
@@ -97,7 +112,7 @@ class Player {
 		this.chunksToLoad = [];
 		this.chunksToUnload = [];
 
-		this.renderDistance = 4;
+		this.renderDistance = 8;
 		this.chunkLoadingRate = 1;
 		this.chunkTick = Date.now();
 		this.chunkDelay = 100;
@@ -202,6 +217,7 @@ class Player {
     };
 
     select(update) {
+		let {blockSize} = world;
     	// Crosshair selection for blocks
 
 		var intersects;
@@ -248,6 +264,7 @@ class Player {
     }
 
     punch() {
+		let {blockSize} = world;
     	this.selectcaster.far = blockSize * 3;
 
     	let playerBoxes = [];
@@ -285,6 +302,8 @@ class Player {
     }
 
 	mine() {
+		let {blockSize} = world;
+
 		// Check if block is mined
 		if (this.closest.point && this.closest.face) {
 			let x = Math.floor((this.closest.point.x-this.closest.face.normal.x)/blockSize);
@@ -299,7 +318,7 @@ class Player {
 			if (!minable)
 				return;
 
-			let miningDelay = (this.onObject ? this.miningDelay[voxel-1] : this.miningDelay[voxel-1] * 3) * 750;
+			let miningDelay = (this.onObject ? this.miningDelay[voxel-1] : this.miningDelay[voxel-1] * 3) * this.miningDelayConstant;
 
 			// Continous mining of blocks by holding right click
 			if (this.key.leftClick && miningDelta > miningDelay) { // Break block
@@ -345,9 +364,14 @@ class Player {
 			}
 			if (this.key.leftClick) {
 				// Update mining progress indicator
-				
-				this.mine_box.material = mining_progress[Math.floor(miningDelta/miningDelay*mining_progress.length).clamp(0, mining_progress.length-1)].material
-				this.mine_box.visible = true;
+
+				let index = Math.floor(miningDelta/miningDelay*mining_progress.length).clamp(0, mining_progress.length-1);
+
+				if (mining_progress[index]) {
+					this.mine_box.material = mining_progress[index].material
+					this.mine_box.visible = true;
+				}
+					
 			}
 		
 		} else {
@@ -357,6 +381,7 @@ class Player {
 	}
 
 	placeBlock() {
+		let {blockSize} = world;
 		// Continous placing of blocks by holding right click
 		if (this.key.rightClick && Date.now() - this.key.rightClick > this.placingDelay) {
 			this.key.rightClick = Date.now();
@@ -422,6 +447,8 @@ class Player {
 	}
 
 	checkCollision(delta) {
+		let {blockSize} = world;
+
 		var previousVelocity = this.velocity.clone();
 
 		this.velocity.x -= previousVelocity.x * 10.0 * delta;
@@ -441,7 +468,7 @@ class Player {
 		this.direction.y = this.key.up + this.key.down;
 		this.direction.z = this.key.forward + this.key.backward;
 		
-		this.direction.normalize(); // this ensures consistent movements in all directipns
+		this.direction.normalize(); // this ensures consistent movements in all directions
 		//this.velocity.x = 0;
 		//this.velocity.z = 0;
 
@@ -504,10 +531,14 @@ class Player {
 					// Test for y
 					this.controls.getObject().position['y'] += newMove['y'];
 					if (this.collides() && !this.inWater && this.velocity.y < 0 || this.position.y <= blockSize) {
+						let jumpDiff = Math.floor((this.prevHeight - this.position.y)/blockSize)-3;
+
+						if (jumpDiff > 0) {
+							socket.emit('takeDamage', jumpDiff)
+							this.prevHeight = this.position.y;
+						}
+
 						this.onObject = true;
-						newMove['y'] = 0;
-					} else if (this.collides()) {
-						this.velocity.y = 0;
 						newMove['y'] = 0;
 					}
 					// Put back before testing y
@@ -559,11 +590,15 @@ class Player {
 
 		// Jump
 		if (map[32] && !showChatBar) {
-			if (!player.fly && player.onObject) {
-				player.velocity.y += 150;
+			if (!this.fly && this.onObject) {
+				this.velocity.y += 150;
 			} else {
-				player.key.up = -1;
+				this.key.up = -1;
 			}
+		}
+
+		if (this.onObject) {
+			this.prevHeight = this.position.y;
 		}
 
 		// Stuck in block
@@ -577,8 +612,8 @@ class Player {
 
 		// Update movement
 
-		this.sprintSpeed = this.inWater ? 2 : 3.5;
-		this.walkSpeed = this.inWater ? 1 : 2;
+		this.sprintSpeed = this.inWater ? this.maxWalkSpeed : this.maxSprintSpeed;
+		this.walkSpeed = this.inWater ? this.maxWalkSpeed/2 : this.maxWalkSpeed;
 		if (this.key.sprint) {
 			if (this.speed < this.sprintSpeed) {
 				this.speed += delta * 10;
@@ -634,18 +669,19 @@ class Player {
 	}
 
 	updateClient(data) {
-		if (data.hp > player.hp) {
+		if (data.hp > this.hp) {
 			heartUp = true;
 		}
-		player.hp = data.hp;
-		if (player.hp <= 0) { // Add client death message
+		this.hp = data.hp;
+		if (this.hp <= 0) { // Add client death message
 
 		}
 
-		player.toolbar = data.toolbar;
+		this.toolbar = data.toolbar;
 	}
 
 	updateChunks() {
+		let {blockSize, cellSize} = world;
 		let t = Date.now();
 		// Update chunks
 
@@ -744,7 +780,9 @@ class Player {
 						requestedChunks.push(chunk);
 					}
 				}
-				socket.emit('requestChunk', requestedChunks) // Call server to load this chunk
+				if (requestedChunks.length > 0) {
+					socket.emit('requestChunk', requestedChunks) // Call server to load this chunk
+				}
 			} else {
 				this.chunkDelay = 100;
 			}
@@ -777,12 +815,16 @@ class Player {
 	}
 
 	update(delta, world) {
-		player.select(true);
+		if (Date.now() - this.lastRaycast > 100) {
+			player.select(true);
+			this.lastRaycast = Date.now();
+		}
+
 		player.mine();
 		player.placeBlock();
 		player.dropItem();
 		player.checkCollision(delta);
-		player.updateChunks(world);
+		player.updateChunks();
 	}
 
 	collideVoxel(x, y, z) {
@@ -792,6 +834,7 @@ class Player {
 	}
 
 	collides() {
+		let {blockSize} = world;
 
 		// Under water
 		var x = Math.floor(player.position.x/blockSize);

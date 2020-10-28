@@ -48,17 +48,18 @@ class Texture {
 	}
 }
 
-class Block {
-	constructor(block) {
-		this.block = new THREE.Mesh(blockGeometry, block.material);
-		/*this.block.position.set(x, y, z);
-		this.position = this.block.position.set(x, y, z);*/
-		/*this.block.castShadow = true;
-		this.block.receiveShadow = true;*/
+// Initialize the texture atlas
+const texture_loader = new THREE.TextureLoader();
+const texture = texture_loader.load('./textures/blocks/texture-atlas.png');
+texture.magFilter = THREE.NearestFilter;
+texture.minFilter = THREE.NearestFilter;
 
-		return this.block;
-	}
-}
+var material = new THREE.MeshLambertMaterial({
+  map: texture,
+  side: THREE.FrontSide,
+  transparent: true,
+  depthWrite: true
+});
 
 // Font texture
 var fontLoader = new THREE.FontLoader();

@@ -1,29 +1,7 @@
 function noise1(nx, ny) { return rng1.noise2D(nx, ny)/2 + 0.5; }
 function noise2(nx, ny) { return rng2.noise2D(nx, ny)/2 + 0.5; }
 
-var worker = new Worker('javascripts/worker.js');
-
-worker.addEventListener('message', e => {
-  console.log(e.data);
-})
-
 class World {
-  constructor(options) {
-    this.seed = undefined;
-
-  	this.blockSize = 16;
-    this.cellSize = options.cellSize;
-    this.tileSize = options.tileSize;
-    this.tileTextureWidth = options.tileTextureWidth;
-    this.tileTextureHeight = options.tileTextureHeight;
-    const {cellSize} = this;
-    this.cellSliceSize = cellSize * cellSize;
-    this.cells = {};
-
-    this.buildHeight = cellSize * 3;
-
-    this.entities = {};
-  }
   computeVoxelOffset(x, y, z) {
     const {cellSize, cellSliceSize} = this;
     const voxelX = THREE.MathUtils.euclideanModulo(x, cellSize) | 0;
@@ -42,9 +20,9 @@ class World {
   }
   computeCellFromPlayer(x, y, z) {
     const {cellSize} = this;
-    const cellX = Math.floor(x / cellSize / blockSize);
-    const cellY = Math.floor(y / cellSize / blockSize);
-    const cellZ = Math.floor(z / cellSize / blockSize);
+    const cellX = Math.floor(x / cellSize / this.blockSize);
+    const cellY = Math.floor(y / cellSize / this.blockSize);
+    const cellZ = Math.floor(z / cellSize / this.blockSize);
     return {
       x: cellX,
       y: cellY,
@@ -92,187 +70,29 @@ class World {
     const voxelOffset = this.computeVoxelOffset(x, y, z);
     return cell[voxelOffset];
   }
-  setCell(data) {
 
-  }
-  getHeight(xPos, zPos) {
-    let width = 128;
-    let height = 128;
-    let heightNoise = 90;
-
-    var nx = xPos/width - 0.5, ny = zPos/height - 0.5;
-    var e = (1.00 * noise1( 1 * nx,  1 * ny)
-           + 0.50 * noise1( 2 * nx,  2 * ny)
-           + 0.25 * noise1( 4 * nx,  4 * ny)
-           + 0.13 * noise1( 8 * nx,  8 * ny)
-           + 0.06 * noise1(16 * nx, 16 * ny)
-           + 0.03 * noise1(32 * nx, 32 * ny));
-    e /= (1.00+0.50+0.25+0.13+0.06+0.03);
-    e = Math.pow(e, 5.00);
-    var m = (1.00 * noise2( 1 * nx,  1 * ny)
-           + 0.75 * noise2( 2 * nx,  2 * ny)
-           + 0.33 * noise2( 4 * nx,  4 * ny)
-           + 0.33 * noise2( 8 * nx,  8 * ny)
-           + 0.33 * noise2(16 * nx, 16 * ny)
-           + 0.50 * noise2(32 * nx, 32 * ny));
-    m /= (1.00+0.75+0.33+0.33+0.33+0.50);
-    
-    return Math.floor(e*heightNoise)+30;
+  blockToID(blockName) {
+    return this.blockId[blockName]
   }
 
   generateCell(cellX, cellY, cellZ) {
     if (!this.cells[`${cellX},${cellY},${cellZ}`]) { // Check if chunk already exists
       const {cellSize} = this;
-
-      let isEmpty = true;
-
-      for (let z = 0; z < cellSize; ++z) {
-        for (let x = 0; x < cellSize; ++x) {
-          // Get cell offset
-          let xPos = x + cellX * cellSize;
-          let zPos = z + cellZ * cellSize;
-          
-          const height = this.getHeight(xPos, zPos);
-          for (let y = 0; y < cellSize; ++y) {
-            // Get cell offset for y
-            let yPos = y + cellY * cellSize;
-            let caveSparsity = 0.02;
-
-            const cave = (rng1.noise3D(xPos*0.05, yPos*caveSparsity, zPos*0.05)+1)/2;
-
-            let blockID = 0;
-            let waterLevel = 40;
-            if (yPos > height && yPos <= waterLevel)
-                blockID = "water";
-           
-            // Terrain generation
-            if (cave > 0.1) {
-              if (yPos == height) {
-                blockID = "grass";
-
-              } else if (yPos < height && yPos > height-3) {
-                blockID = "dirt";
-              } else if (yPos <= height-3 && yPos > 0) {
-                blockID = "stone";
-              }
-            }
-
-            if (yPos == 0) {
-              blockID = "bedrock"; // Force bedrock layer
-            }
-
-            blockID = blockToID(blockID)
-
-            if (blockID > 0)
-              isEmpty = false;
-
-            this.setVoxel(xPos, yPos, zPos, blockID);
-          }
-        }
-      }
-
-      if (!isEmpty)
-        updateCellGeometry(cellX * cellSize, cellY * cellSize, cellZ * cellSize);
+      this.cells[`${cellX},${cellY},${cellZ}`] = new Uint8Array(Math.pow(cellSize, 3))
     }
   }
+
   deleteCell(chunk, permanently) {
     delete this.cells[chunk.id];
     let object = scene.getObjectByName(chunk.id);
     if (object) {
       object.visible = false;
       if (permanently) {
-        /*object.geometry.dispose();
-        object.material.dispose();*/
+        object.geometry.dispose();
+        object.material.dispose();
         scene.remove(object);
       }
     }
-  }
-
-  addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel) {
-    const {cellSize, tileSize, tileTextureWidth, tileTextureHeight} = this;
-
-    const ndx = positions.length / 3;
-    for (const {pos, uv} of corners) {
-      let xPos = (pos[0] + x);
-      let yPos = (pos[1] + y);
-      let zPos = (pos[2] + z);
-
-      positions.push(xPos*this.blockSize, yPos*this.blockSize, zPos*this.blockSize);
-      normals.push(...dir);
-      uvs.push(
-            (uvVoxel +   uv[0]) * tileSize / tileTextureWidth,
-        1 - (uvRow + 1 - uv[1]) * tileSize / tileTextureHeight);
-    }
-    indices.push(
-      ndx, ndx + 1, ndx + 2,
-      ndx + 2, ndx + 1, ndx + 3,
-    );
-  }
-
-  generateGeometryDataForCell(cellX, cellY, cellZ) {
-
-    const {cellSize, tileSize, tileTextureWidth, tileTextureHeight} = this;
-    const positions = [];
-    const normals = [];
-    const uvs = [];
-    const indices = [];
-    const startX = cellX * cellSize;
-    const startY = cellY * cellSize;
-    const startZ = cellZ * cellSize;
-
-    for (let y = 0; y < cellSize; ++y) {
-      const voxelY = startY + y;
-      for (let z = 0; z < cellSize; ++z) {
-        const voxelZ = startZ + z;
-        for (let x = 0; x < cellSize; ++x) {
-          const voxelX = startX + x;
-          const voxel = this.getVoxel(voxelX, voxelY, voxelZ);
-          if (voxel) {
-            // voxel 0 is sky (empty) so for UVs we start at 0
-            const uvVoxel = voxel - 1;
-            // There is a voxel here but do we need faces for it?
-            if (voxel != 14) {
-              for (const {dir, corners, uvRow} of World.faces) {
-
-                const neighbor = this.getVoxel(
-                    voxelX + dir[0],
-                    voxelY + dir[1],
-                    voxelZ + dir[2]);
-                if ((!neighbor || (neighbor == 14))) {
-                  // this voxel has no neighbor in this direction so we need a face.
-                  this.addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
-                }
-
-              }
-            }
-
-            if (voxel == 14) { // Water
-              for (const {dir, corners, uvRow} of World.faces) {
-
-                const neighbor = this.getVoxel(
-                    voxelX + dir[0],
-                    voxelY + dir[1],
-                    voxelZ + dir[2]);
-                if (neighbor == 0) {
-                  // this voxel has no neighbor in this direction so we need a face.
-                  this.addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
-                }
-
-              }
-
-            }
-              
-          }
-        }
-      }
-    }
-
-    return {
-      positions,
-      normals,
-      uvs,
-      indices,
-    };
   }
 
   generateGeometryDataForItem(uvVoxel) {
@@ -287,7 +107,7 @@ class World {
       // this voxel has no neighbor in this direction so we need a face.
       const ndx = positions.length / 3;
       for (const {pos, uv} of corners) {
-        positions.push((pos[0]*blockSize/4), (pos[1]*blockSize/4), (pos[2]*blockSize/4));
+        positions.push((pos[0]*this.blockSize/4), (pos[1]*this.blockSize/4), (pos[2]*this.blockSize/4));
         normals.push(...dir);
         uvs.push(
               (uvVoxel +   uv[0]) * tileSize / tileTextureWidth,
@@ -371,142 +191,102 @@ World.faces = [
   },
 ];
 
-const cellIdToMesh = {};
-function updateCellGeometry(x, y, z) {
-
-	const cellX = Math.floor(x / cellSize);
-	const cellY = Math.floor(y / cellSize);
-	const cellZ = Math.floor(z / cellSize);
-	const cellId = world.computeCellId(x, y, z);
-	let mesh = cellIdToMesh[cellId];
-	const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
-
-  var t = Date.now();
-	const {positions, normals, uvs, indices} = world.generateGeometryDataForCell(cellX, cellY, cellZ);
-  console.log(Date.now()-t);
-
-  console.log("YEAHHH")
-
-	const positionNumComponents = 3;
-	geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
-	const normalNumComponents = 3;
-	geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
-	const uvNumComponents = 2;
-	geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
-	geometry.setIndex(indices);
-	geometry.computeBoundingSphere();
-
-	if (!mesh) {
-  	mesh = new THREE.Mesh(geometry, material);
-  	mesh.name = cellId;
-  	mesh.castShadow = true;
-  	mesh.receiveShadow = true;
-  	cellIdToMesh[cellId] = mesh;
-  	scene.add(mesh);
-  	mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
-    mesh.updateMatrix();
-    mesh.matrixAutoUpdate = false;
-	}
-}
-
 const neighborOffsets = [
-	[ 0,  0,  0], // self
-	[-1,  0,  0], // left
-	[ 1,  0,  0], // right
-	[ 0, -1,  0], // down
-	[ 0,  1,  0], // up
-	[ 0,  0, -1], // back
-	[ 0,  0,  1], // front
+  [ 0,  0,  0], // self
+  [-1,  0,  0], // left
+  [ 1,  0,  0], // right
+  [ 0, -1,  0], // down
+  [ 0,  1,  0], // up
+  [ 0,  0, -1], // back
+  [ 0,  0,  1], // front
 ];
 
+let workerIndex = 0;
+const cellIdToMesh = {};
+
 function updateVoxelGeometry(x, y, z) {
-	const updatedCellIds = {};
-	for (const offset of neighborOffsets) {
-		const ox = (x + offset[0]);
-		const oy = (y + offset[1]);
-		const oz = (z + offset[2]);
-		const cellId = world.computeCellId(ox, oy, oz);
-		if (!updatedCellIds[cellId]) { // Don't reupdate the cell once updated
-			updatedCellIds[cellId] = true;
-			updateCellGeometry(ox, oy, oz);
-		}
-	}
+  let {blockSize, cellSize} = world;
+
+  let worldData = {
+    cellSize: world.cellSize,
+    cellSliceSize: world.cellSliceSize,
+    tileSize: world.tileSize,
+    tileTextureWidth: world.tileTextureWidth,
+    tileTextureHeight: world.tileTextureHeight,
+    blockSize: world.blockSize
+  } 
+  const updatedCellIds = {};
+
+  let cells = [];
+
+  let cellData = {};
+
+  for (const offset of neighborOffsets) {
+    const ox = (x + offset[0]);
+    const oy = (y + offset[1]);
+    const oz = (z + offset[2]);
+    const cellId = world.computeCellId(ox, oy, oz);
+    if (!updatedCellIds[cellId]) { // Don't reupdate the cell once updated
+      updatedCellIds[cellId] = true;
+
+      const cellX = Math.floor(ox / cellSize);
+      const cellY = Math.floor(oy / cellSize);
+      const cellZ = Math.floor(oz / cellSize);
+
+      cellData[cellId] = world.cells[cellId];
+
+      cells.push([cellX, cellY, cellZ, cellId]);
+    }
+  }
+
+  voxelWorkers[workerIndex].postMessage([worldData, cellData, cells])
+  workerIndex += 1;
+  if (workerIndex == voxelWorkers.length) {
+    workerIndex = 0;
+  }
+}
+
+async function updateVoxelMesh(e) {
+  let cells = e.data;
+
+  for (let cell of cells) {
+    await updateCellMesh({data: cell})
+  }
+
+}
+
+function updateCellMesh(e) {
+  let {blockSize, cellSize} = world;
+  var [{positions, normals, uvs, indices}, cellX, cellY, cellZ, cellId] = e.data;
+
+  let mesh = cellIdToMesh[cellId];
+  const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
+
+  const positionNumComponents = 3;
+  geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
+  const normalNumComponents = 3;
+  geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
+  const uvNumComponents = 2;
+  geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
+  geometry.setIndex(indices);
+  geometry.computeBoundingSphere();
+
+  if (!mesh) {
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.name = cellId;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    cellIdToMesh[cellId] = mesh;
+    scene.add(mesh);
+    mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
+    mesh.updateMatrix();
+    mesh.matrixAutoUpdate = false;
+  }
 }
 
 function randInt(min, max) {
-	return Math.floor(Math.random() * (max - min) + min);
+  return Math.floor(Math.random() * (max - min) + min);
 }
-
-let blockId = {
-  "bedrock": 1,
-  "stone": 2,
-  "dirt": 3,
-  "cobblestone": 4,
-  "grass": 5,
-  "wood": 6,
-  "leaves": 7,
-  "coal_ore": 8,
-  "diamond_ore": 9,
-  "iron_ore": 10,
-  "gold_ore": 11,
-  "crafting_table": 12,
-  "planks": 13,
-  "water": 14
-}
-
-var block = [];
-
-function blockToID(blockName) {
-  return blockId[blockName]
-}
-
-// Add the world
-
-const texture_loader = new THREE.TextureLoader();
-const texture = texture_loader.load('./textures/blocks/texture-atlas.png');
-texture.magFilter = THREE.NearestFilter;
-texture.minFilter = THREE.NearestFilter;
-
-const cellSize = 32;
-const tileSize = 16;
-const tileTextureWidth = 256;
-const tileTextureHeight = 64;
-const world = new World({
-	cellSize,
-	tileSize,
-	tileTextureWidth,
-	tileTextureHeight,
-});
-
-const {positions, normals, uvs, indices} = world.generateGeometryDataForCell(0, 0, 0);
-const geometry = new THREE.BufferGeometry();
-var material = new THREE.MeshLambertMaterial({
-	map: texture,
-	side: THREE.FrontSide,
-  transparent: true,
-  overdraw: true,
-  depthWrite: true
-});
-
-const positionNumComponents = 3;
-const normalNumComponents = 3;
-const uvNumComponents = 2;
-geometry.setAttribute(
-	'position',
-	new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents)
-);
-geometry.setAttribute(
-	'normal',
-	new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents)
-);
-geometry.setAttribute(
-	'uv',
-	new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents)
-);
-geometry.setIndex(indices);
-const mesh = new THREE.Mesh(geometry, material);
-mesh.castShadow = true;
-mesh.receiveShadow = true;
 
 // Add entity
 

@@ -5,9 +5,11 @@ socket.on('init', function (data) {
 	if (initialized)
 		location.reload(true);
 
-	let serverPlayers = data.serverPlayers;
+	// Receive common world attritutes
+	Object.assign(world, data.world)
 
 	// Receive current server players
+	let serverPlayers = data.serverPlayers;
 	for (let id in serverPlayers) {
 		if (id != socket.id) {
 			players[id] = serverPlayers[id];
@@ -16,11 +18,6 @@ socket.on('init', function (data) {
 			}
 		}
 	}
-
-	// Receive world seed
-	rng1 = new SimplexNoise(data.worldSeed);
-    rng2 = new SimplexNoise(data.worldSeed+0.2 > 1 ? data.worldSeed - 0.8 : data.worldSeed+0.2);
-	world.seed = data.worldSeed;
 
 	// Add pre-existing entities
 	var newEntities = data.entities;
@@ -38,19 +35,28 @@ socket.on('init', function (data) {
 })
 
 // Update chunk
+
+
+
 socket.on('receiveChunk', function (data) {
 	for (let chunk of data) {
-		world.cells[`${chunk.pos.x},${chunk.pos.y},${chunk.pos.z}`] = RLEdecode(chunk.cell);
-
-		updateCellGeometry(chunk.pos.x*cellSize, chunk.pos.y*cellSize, chunk.pos.z*cellSize);
-		player.chunksToLoad.push(chunk.pos)
+		rleWorker.postMessage(chunk); // Send decoding to the rleWorker
 	}
+})
+
+rleWorker.addEventListener('message', e => {
+	let chunk = e.data;
+
+	world.cells[`${chunk.pos.x},${chunk.pos.y},${chunk.pos.z}`] = chunk.cell;
+
+  	//updateCellGeometry(chunk.pos.x*cellSize, chunk.pos.y*cellSize, chunk.pos.z*cellSize);
+	player.chunksToLoad.push(chunk.pos)
 })
 
 // Add newcoming players
 socket.on('addPlayer', function (data) {
 	// Add to players
-	if (data.id != socket.id) { // Check if not own player
+	if (data.id != socket.id) { // Check if not own player1``
 		players[data.id] = data;
 
 		addPlayer(players, data.id);
@@ -63,14 +69,13 @@ socket.on('addPlayer', function (data) {
 })
 
 socket.on('removePlayer', function (id) {
-	if (!initialized)
+	if (!initialized || !players[id])
 		return;
 
 	addChat({text: players[id].name + " has left the server", 
 		color: "yellow"
 	});
 	scene.remove(players[id].entity);
-	offscene.remove(players[id].entity);
 	delete players[id];
 })
 

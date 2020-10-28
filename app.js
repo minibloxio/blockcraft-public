@@ -51,23 +51,11 @@ rl.on('line', (input) => {
 });
 
 // Setup server
-var blockSize = 16;
-var players = {
-	/*"test": {
-		id: "test",
-		name: "Herobrine",
-		pos: {x: blockSize * 4,y: blockSize * 50,z: blockSize * 4},
-		rot: {x: 0,y: 0,z: 0},
-		dir: {x: 0,y: 0,z: 0},
-		hp: 10,
-		walking: true,
-		punching: true
-	}*/
-};
+var players = {};
 
-const cellSize = 32;
+const cellSize = 16;
 const tileSize = 16;
-const tileTextureWidth = 80;
+const tileTextureWidth = 256;
 const tileTextureHeight = 64;
 const world = new World({
 	cellSize,
@@ -80,6 +68,8 @@ var updatedBlocks = [];
 var newEntities = [];
 
 var punches = [];
+
+function pick(obj,props){if(!obj||!props)return;var picked={};props.forEach(function(prop){picked[prop]=obj[prop]});return picked};
 
 // Server-client connection architecture
 io.on('connection', function(socket_) {
@@ -97,6 +87,7 @@ io.on('connection', function(socket_) {
 		punching: false,
 		pickupDelay: Date.now()
 	}
+
 	socket.on('join', function () {
 		io.emit('addPlayer', players[socket.id])
 		console.log(socket.id.substr(0, 5), "has joined at", new Date().toLocaleTimeString())
@@ -104,10 +95,8 @@ io.on('connection', function(socket_) {
 		// Send initialization data to client (world data, online players)
 		socket.emit('init', {
 			serverPlayers: players,
-			serverMap: world.cells,
-			worldSeed: world.seed,
-			entities: world.entities,
-			tick: tick
+			world: Object.assign({}, world, {cells: {}, cellDeltas: undefined}),
+			tick: tick,
 		});
 	})
 
@@ -156,8 +145,15 @@ io.on('connection', function(socket_) {
 		}
 	})
 
+	socket.on('takeDamage', function (data) {
+		if (players[socket.id]) {
+			players[socket.id].hp -= data*0.5;
+		}
+	})
+
 	// World functionality
 	socket.on('setBlock', function (data) {
+		let {blockSize} = world;
 		// Update server world
 		players[socket.id].punching = true;
 		world.setVoxel(data.x, data.y, data.z, data.t, true, true);
@@ -188,6 +184,7 @@ io.on('connection', function(socket_) {
 	})
 
 	socket.on('dropItem', function (data) {
+		let {blockSize} = world;
 		players[socket.id].pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
 		for (let t of players[socket.id].toolbar) {
 			if (!t)
@@ -248,7 +245,7 @@ io.on('connection', function(socket_) {
 var tick = 1000;
 let dt = 50;
 setInterval(function () {
-	tick += 0;
+	tick += 1;
 	// Regeneration
 	if (tick % 100 == 0) {
 		for (let id in players) {

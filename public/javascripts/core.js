@@ -8,73 +8,63 @@ $(document).ready(function () {
 })
 
 // Three.js
-var scene, renderer, light, sky, stats, composer, colorShader;
+var scene, renderer, world, light, sky, stats, composer, colorShader;
 var loaded = 0;
-
-// World
-var blockSize = 16;
-var blockGeometry = new THREE.BoxGeometry( blockSize, blockSize, blockSize );
-var chunks = [];
 
 // Stats
 var prevTime = performance.now();
 var statistics = [];
 
 // Camera
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, blockSize*10000);
+var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000);
 var player;
 
 // Mouse
 var mouse = new THREE.Vector2();
-var previousBlock = {
-	object: undefined
+
+var players = {};
+
+var rleWorker = new Worker('javascripts/workers/rle-worker.js');
+
+let voxelWorkers = [];
+for (let i = 0; i < 8; i++) {
+	voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
+	voxelWorkers[i].addEventListener('message', e => {
+	  updateVoxelMesh(e);
+	})
 }
 
-let playerDim = {
-	torso: blockSize*0.5,
-	torsoHeight: blockSize*0.75,
-	armSize: blockSize*0.25,
-	armHeight: blockSize*0.75,
-	legSize: blockSize*0.25,
-	legHeight: blockSize*0.75,
-	headSize: blockSize*0.55,
-	height: blockSize*1.8
-}
-var players = {};
 
 function init() {
 	console.log('Initalizing BlockCraft...')
 	console.log('Socket ID:', socket.id)
 	// Initialize pointer lock
 	initPointerLock();
-	// Setup scene
 
-	// Add the scene
+	// Add scene
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color( 0xffffff );
 
-	// Add player controls
+	// Add world
+	world = new World();
 
-	player = new Player(camera);
+	// Add player
+	player = new Player(camera, 16);
 	scene.add( player.controls.getObject() );
 
 	// Add light
-
 	light = new Light();
 
     // Add statistics to record
     statistics.push(new Stat("Pos", player.position, false, 2))
 
     // Finalize by adding the renderer
-
 	renderer = new THREE.WebGLRenderer( { antialias: true, logarithmicDepthBuffer: true } );
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
 	
-
 	// Add statistics
 	stats = new Stats();
 	document.body.appendChild( stats.dom );

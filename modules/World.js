@@ -3,27 +3,6 @@ var SimplexNoise = require('simplex-noise'),
     rng1 = new SimplexNoise(Math.random),
     rng2 = new SimplexNoise(Math.random)
 
-let blockId = {
-  "bedrock": 1,
-  "stone": 2,
-  "dirt": 3,
-  "cobblestone": 4,
-  "grass": 5,
-  "wood": 6,
-  "leaves": 7,
-  "coal_ore": 8,
-  "diamond_ore": 9,
-  "iron_ore": 10,
-  "gold_ore": 11,
-  "crafting_table": 12,
-  "planks": 13,
-  "water": 14
-}
-
-function blockToID(blockName) {
-  return blockId[blockName]
-}
-
 function noise1(nx, ny) { return rng1.noise2D(nx, ny)/2 + 0.5; }
 function noise2(nx, ny) { return rng2.noise2D(nx, ny)/2 + 0.5; }
    
@@ -34,7 +13,7 @@ module.exports = class World {
     rng1 = new SimplexNoise(this.seed);
     rng2 = new SimplexNoise(this.seed+0.2 > 1 ? this.seed - 0.8 : this.seed+0.2);
 
-    this.waterLevel = 40;
+    this.waterLevel = 10;
 
     // Cell management
   	this.blockSize = 16;
@@ -47,10 +26,29 @@ module.exports = class World {
     this.cells = {};
     this.cellDeltas = {};
 
+    this.buildHeight = cellSize * 7;
+
     // Entities
     this.entities = {};
 
+    // Block ids
 
+    this.blockId = {
+      "bedrock": 1,
+      "stone": 2,
+      "dirt": 3,
+      "cobblestone": 4,
+      "grass": 5,
+      "wood": 6,
+      "leaves": 7,
+      "coal_ore": 8,
+      "diamond_ore": 9,
+      "iron_ore": 10,
+      "gold_ore": 11,
+      "crafting_table": 12,
+      "planks": 13,
+      "water": 14
+    }
   }
   static euclideanModulo(a,b){return(a%b+b)%b}
   computeVoxelOffset(x, y, z) {
@@ -162,13 +160,16 @@ module.exports = class World {
 		};
 		return newArray;
   }
+  blockToID(blockName) {
+    return this.blockId[blockName]
+  }
 
   getHeight(xPos, zPos) {
-    let width = 128;
-    let height = 128;
-    let heightNoise = 90;
+    let size = 128
+    let heightNoise = 128;
+    let exponent = 3;
 
-    var nx = xPos/width - 0.5, ny = zPos/height - 0.5;
+    var nx = xPos/size - 0.5, ny = zPos/size - 0.5;
     var e = (1.00 * noise1( 1 * nx,  1 * ny)
            + 0.50 * noise1( 2 * nx,  2 * ny)
            + 0.25 * noise1( 4 * nx,  4 * ny)
@@ -176,7 +177,7 @@ module.exports = class World {
            + 0.06 * noise1(16 * nx, 16 * ny)
            + 0.03 * noise1(32 * nx, 32 * ny));
     e /= (1.00+0.50+0.25+0.13+0.06+0.03);
-    e = Math.pow(e, 5.00);
+    e = Math.pow(e, exponent);
     var m = (1.00 * noise2( 1 * nx,  1 * ny)
            + 0.75 * noise2( 2 * nx,  2 * ny)
            + 0.33 * noise2( 4 * nx,  4 * ny)
@@ -231,8 +232,8 @@ module.exports = class World {
          
           // Terrain generation
           let blockID = 0;
-          if (yPos > height && yPos <= this.waterLevel)
-              blockID = "water";
+          /*if (yPos > height && yPos <= this.waterLevel)
+              blockID = "water";*/
 
           if (cave > 0.1) {
             if (yPos == height) {
@@ -254,7 +255,7 @@ module.exports = class World {
             blockID = "bedrock"; // Force bedrock layer
           }
 
-          blockID = blockToID(blockID);
+          blockID = this.blockToID(blockID);
 
           this.setVoxel(xPos, yPos, zPos, blockID);
         }

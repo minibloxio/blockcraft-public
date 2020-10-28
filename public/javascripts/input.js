@@ -187,6 +187,8 @@ var onKeyDown = function ( event ) {
 };
 
 var onKeyUp = function ( event ) {
+	let {blockSize} = world;
+	
 	if (player.controls.enabled && event.keyCode == 13) {
     	showChatBar = !showChatBar;
     	if (showChatBar) {
