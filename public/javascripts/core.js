@@ -8,8 +8,9 @@ $(document).ready(function () {
 })
 
 // Three.js
-var scene, renderer, world, light, sky, stats, composer, colorShader;
-var loaded = 0;
+let scene, renderer, world, light, sky, stats, composer, colorShader, inScreen;
+let loaded = 0;
+let tick = new Ola(0)
 
 // Stats
 var prevTime = performance.now();
@@ -33,7 +34,6 @@ for (let i = 0; i < 8; i++) {
 	  updateVoxelMesh(e);
 	})
 }
-
 
 function init() {
 	console.log('Initalizing BlockCraft...')
@@ -144,10 +144,10 @@ function animate() {
 
 	// Get the frame's delta
 	var time = performance.now();
-	var delta = ( time - prevTime );
+	delta = ( time - prevTime );
 	delta /= 1000;
 
-	delta = Math.min(delta, 20)
+	delta = Math.min(delta, 0.1)
 
 	if (loaded == 2)
 		$("#start-button").text("Start")

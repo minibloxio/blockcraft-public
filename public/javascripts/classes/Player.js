@@ -101,7 +101,7 @@ class Player {
 			1,
 			Infinity
 		];
-		this.miningDelayConstant = 0;
+		this.miningDelayConstant = 750;
 		this.placingDelay = 200;
 
 		// Player info
@@ -138,6 +138,7 @@ class Player {
 	}
 
 	addBody() {
+		let {blockSize} = world;
 		// Add client arm
 		this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), armC.material);
 		this.arm.castShadow = true;
@@ -146,35 +147,35 @@ class Player {
 		this.arm.rotation.set(Math.PI, Math.PI, 0);
 		camera.add(this.arm);
 
-		/*// Add head
-		this.head = addMesh(new THREE.BoxGeometry(playerDim.headSize, playerDim.headSize, playerDim.headSize), head.material);
+		// Add head
+		this.head = addMesh(new THREE.BoxGeometry(this.dim.headSize, this.dim.headSize, this.dim.headSize), head.material);
 		this.head.position.set(0, blockSize*0.2, 0);
 
 		this.neck = new THREE.Object3D();
 		this.neck.add(this.head);
 
 		// Add body
-		this.body = addMesh(new THREE.BoxGeometry(playerDim.torso, playerDim.torsoHeight, playerDim.legSize), body.material);
+		this.body = addMesh(new THREE.BoxGeometry(this.dim.torso, this.dim.torsoHeight, this.dim.legSize), body.material);
 		this.body.position.set(0, -blockSize*0.45, 0);
 
 		// Add arms
-		this.leftArm = addMesh(new THREE.BoxGeometry(playerDim.armSize, playerDim.armHeight, playerDim.armSize), arm.material)
-		this.leftArm.position.set(-playerDim.armSize*3/2, -blockSize*0.45, 0);
+		this.leftArm = addMesh(new THREE.BoxGeometry(this.dim.armSize, this.dim.armHeight, this.dim.armSize), arm.material)
+		this.leftArm.position.set(-this.dim.armSize*3/2, -blockSize*0.45, 0);
 
-		this.rightArm = addMesh(new THREE.BoxGeometry(playerDim.armSize, playerDim.armHeight, playerDim.armSize), arm.material)
+		this.rightArm = addMesh(new THREE.BoxGeometry(this.dim.armSize, this.dim.armHeight, this.dim.armSize), arm.material)
 		this.rightArm.position.set(0, -blockSize*0.3, 0);
 
 		// Shoulder joints
 		this.rightShoulder = new THREE.Object3D();
-		this.rightShoulder.position.set(playerDim.armSize*3/2, -blockSize*0.15, 0);
+		this.rightShoulder.position.set(this.dim.armSize*3/2, -blockSize*0.15, 0);
 		this.rightShoulder.add(this.rightArm);
 
 		// Add legs
-		this.leftLeg = addMesh(new THREE.BoxGeometry(playerDim.legSize, playerDim.legHeight, playerDim.legSize), leg.material)
-		this.leftLeg.position.set(-playerDim.legSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
+		this.leftLeg = addMesh(new THREE.BoxGeometry(this.dim.legSize, this.dim.legHeight, this.dim.legSize), leg.material)
+		this.leftLeg.position.set(-this.dim.legSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
 
-		this.rightLeg = addMesh(new THREE.BoxGeometry(playerDim.legSize, playerDim.legHeight, playerDim.legSize), leg.material)
-		this.rightLeg.position.set(playerDim.armSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
+		this.rightLeg = addMesh(new THREE.BoxGeometry(this.dim.legSize, this.dim.legHeight, this.dim.legSize), leg.material)
+		this.rightLeg.position.set(this.dim.armSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
 
 		// Create skeleton of head, body, arms, and legs
 		this.skeleton = new THREE.Group();
@@ -193,7 +194,7 @@ class Player {
 		this.entity.name = this.id;
 		this.entity.add(this.skeleton);
 
-		scene.add(this.entity);*/
+		scene.add(this.entity);
 	}
 
 	vertex(vertexX, vertexY, vertexZ) {
@@ -400,12 +401,13 @@ class Player {
 			let item = this.toolbar[this.currentSlot]
 			if (item && item.v > 0 && item.c > 0) { // Place a block, not air
 				world.setVoxel(x, y, z, item.v);
-			    updateVoxelGeometry(x, y, z);
 
 			    if (this.collides()) {
 			    	world.setVoxel(x, y, z, 0);
 			    	updateVoxelGeometry(x, y, z);
 			    } else {
+
+			    	updateVoxelGeometry(x, y, z);
 			    	// Send data to server
 					socket.emit('setBlock', {
 						x: x,
@@ -446,9 +448,17 @@ class Player {
 		}
 	}
 
-	checkCollision(delta) {
+	move(delta) {
+		this.updateVelocities(delta);
+		this.updateMoveAxis(delta);
+		this.applyKnockback(delta);
+		this.checkCollision(delta);
+	}
+
+	updateVelocities(delta) {
 		let {blockSize} = world;
 
+		// Reduce velocity
 		var previousVelocity = this.velocity.clone();
 
 		this.velocity.x -= previousVelocity.x * 10.0 * delta;
@@ -458,9 +468,9 @@ class Player {
 			this.velocity.y -= previousVelocity.y * 10.0 * delta;
 		} else {
 			if (colorPass.enabled) {
-				this.velocity.y = -50 * 50.0 * delta; // Sinking
+				this.velocity.y = -50 * 50.0 * delta; // Sinking in water
 			} else {
-				this.velocity.y -= 9.81 * 50.0 * delta; // 100.0 = mass	
+				this.velocity.y -= 9.81 * 50.0 * delta; // Falling in air
 			}	
 		}
 
@@ -483,12 +493,14 @@ class Player {
 			this.controls.getObject().position['y'] = this.savedPosition['y'];
 			this.halfHeight = blockSize * 0.8;
 		}
+	}
 
+	updateMoveAxis(delta) {
 		// Get movement preview by adding up all the movement from object space
 		this.onObject = false;
 
 		var axes = ['y', 'x', 'z']
-		var newMove = new THREE.Vector3();
+		this.newMove = new THREE.Vector3();
 		
 		for (var i = 0; i < axes.length; i++) {
 			var axis = axes[i];
@@ -504,62 +516,98 @@ class Player {
 				currentVel = [original, original, original];
 			}
 			
-			var previousPosition = this.position.clone();
+			this.previousPosition = this.position.clone();
 			var currentPosition = this.controls.getObject().clone();
 			currentPosition.translateOnAxis(axesVec, currentVel[i]);
-			var move = currentPosition.position.sub(previousPosition)
-			newMove.add(move);
+			var move = currentPosition.position.sub(this.previousPosition)
+			this.newMove.add(move);
 		}
+	}
 
+	applyKnockback(delta) {
 		// Player knockback
 		let knockback = new THREE.Vector3(this.knockbackVelocity.x, this.knockbackVelocity.y, this.knockbackVelocity.z);
 		knockback.multiplyScalar(delta);
-		newMove.add(knockback);
+		this.newMove.add(knockback);
 		this.knockbackVelocity.divideScalar(1.1);
+
+		// Player camera fall knockback
+		if (Math.abs(camera.rotation.z) > 0.1) {
+			camera.rotation.z -= Math.sign(camera.rotation.z)*delta*3; // Rate at which camera rotation returns to normal
+		} else {
+			camera.rotation.z = 0;
+		}
+	}
+
+	checkCollision(delta) {
+		let {blockSize} = world;
+		var test_axes = ['y', 'x', 'z', 'xz', 'yz', 'xz', 'xyz']
 
 		// Check for collision
 		if (this.clip) {
-			var savedMove = newMove.clone();
+			var savedMove = this.newMove.clone();
 
 			// Test each axis in collsion
 			var previousPosition = this.position.clone();
 
-			for (var i = 0; i < axes.length; i++) {
-				var axis = axes[i];
+			for (let axes of test_axes) {
 
-				if (axis === 'y' && !this.fly) {
+				if (axes === 'y' && !this.fly) {
 					// Test for y
-					this.controls.getObject().position['y'] += newMove['y'];
-					if (this.collides() && !this.inWater && this.velocity.y < 0 || this.position.y <= blockSize) {
+					this.controls.getObject().position['y'] += this.newMove['y'];
+					let collision = this.collides();
+					if (!collision)
+						continue;
+
+					if (!this.inWater && this.velocity.y < 0 || this.position.y <= blockSize) {
 						let jumpDiff = Math.floor((this.prevHeight - this.position.y)/blockSize)-3;
 
-						if (jumpDiff > 0) {
+						if (inScreen && jumpDiff > 0 && jumpDiff < 500) { // Fall damage
 							socket.emit('takeDamage', jumpDiff)
+							camera.rotation.order = "YXZ"
+							camera.rotation.z = Math.PI/16 + Math.PI/64 * Math.min(20, jumpDiff); // Yoink the camera
+							this.fallCooldown = Date.now();
 							this.prevHeight = this.position.y;
 						}
 
 						this.onObject = true;
-						newMove['y'] = 0;
+						this.newMove['y'] = 0;
+
+					} else if (this.inWater || this.onObject) {
+						this.newMove['y'] = 0;
+					} else {
+						this.velocity.y = 0;
+						this.newMove['y'] = 0;
 					}
 					// Put back before testing y
 					this.controls.getObject().position['y'] = previousPosition['y'];
-				} else {
-					// Try testing x and z and y if flying
-					this.controls.getObject().position[axis] += newMove[axis];
-					if (this.collides()) {
-						newMove[axis] = 0;
+				}
+
+
+				let separate_axes = axes.split('');
+
+				for (let axis of separate_axes) {
+					this.controls.getObject().position[axis] += this.newMove[axis];
+				}
+
+				if (this.collides()) {
+					for (let axis of separate_axes) {
+						this.newMove[axis] = 0;
 
 						if (axis === 'y' && this.fly && this.velocity.y < 0) {
 							this.fly = false;
 						}
 					}
+				}
 
-					var onBlock = false;
+				for (let axis of separate_axes) {
 
 					// Test for y during shift mode
 					this.controls.getObject().position['y'] += savedMove['y'];
-					if (!(this.collides() && this.velocity.y < 0) && this.onObject && this.key.sneak) {
-						newMove[axis] = 0;
+					if (!this.collides() && this.onObject && this.key.sneak) {
+						this.position[axis] = previousPosition[axis];
+						this.velocity[axis] = 0;
+						this.newMove[axis] = 0;
 					}
 					// Put back before testing y
 					this.controls.getObject().position['y'] = previousPosition['y']
@@ -570,21 +618,21 @@ class Player {
 		}
 
 		// Update player position
-		this.controls.getObject().position['x'] += newMove['x'];
-		if (!(!this.onObject && this.key.sneak && newMove['y'] === 0) && !this.fly) {
-			this.controls.getObject().position['y'] += newMove['y'];
+		this.controls.getObject().position['x'] += this.newMove['x'];
+		if (!(!this.onObject && this.key.sneak && this.newMove['y'] === 0) && !this.fly) {
+			this.controls.getObject().position['y'] += this.newMove['y'];
 		} else {
-			this.controls.getObject().position['y'] += newMove['y'];
+			this.controls.getObject().position['y'] += this.newMove['y'];
 		}
-		this.controls.getObject().position['z'] += newMove['z'];
+		this.controls.getObject().position['z'] += this.newMove['z'];
 
 		// Stop sprinting if you hit a block
-		this.distanceMoved += previousPosition.sub(this.controls.getObject().position).length();
+		this.distanceMoved += this.previousPosition.sub(this.controls.getObject().position).length();
 		if (this.distanceMoved < 1.5 && this.onObject === false && !this.fly) {
 			this.speed = 2;
 		}
 
-		if ( this.onObject === true ) {
+		if ( this.onObject ) {
 			this.velocity.y = Math.max( 0, this.velocity.y );
 		}
 
@@ -597,13 +645,8 @@ class Player {
 			}
 		}
 
-		if (this.onObject) {
+		if (this.onObject || this.fly || this.inWater) {
 			this.prevHeight = this.position.y;
-		}
-
-		// Stuck in block
-		if (this.onObject && this.collides()) {
-			this.controls.getObject().position['y'] += 5;
 		}
 
 		// Save position
@@ -613,6 +656,8 @@ class Player {
 		// Update movement
 
 		this.sprintSpeed = this.inWater ? this.maxWalkSpeed : this.maxSprintSpeed;
+		if (this.fly) this.sprintSpeed = this.maxSprintSpeed * 2;
+		if (this.key.backward) this.sprintSpeed = this.maxWalkSpeed;
 		this.walkSpeed = this.inWater ? this.maxWalkSpeed/2 : this.maxWalkSpeed;
 		if (this.key.sprint) {
 			if (this.speed < this.sprintSpeed) {
@@ -628,9 +673,11 @@ class Player {
 			}
 		}
 		this.positionYOffset = 0;
-		if (this.key.sneak && !this.fly) {
-			this.speed = 0.5;
+		if (this.key.sneak ) {
+			
 			if (!this.fly) {
+				this.speed = 0.5;
+
 				this.controls.getObject().position['y'] += -this.walkSpeed;
 				this.halfHeight = blockSize * 0.6
 			}
@@ -823,7 +870,7 @@ class Player {
 		player.mine();
 		player.placeBlock();
 		player.dropItem();
-		player.checkCollision(delta);
+		player.move(delta);
 		player.updateChunks();
 	}
 
@@ -838,11 +885,18 @@ class Player {
 
 		// Under water
 		var x = Math.floor(player.position.x/blockSize);
-		var y = Math.floor((player.position.y-blockSize*1.6)/blockSize);
+		var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
 		var z = Math.floor(player.position.z/blockSize);
 
-		var voxel = world.getVoxel(x, y, z)
-		this.inWater = voxel == 14;
+		var voxel1 = world.getVoxel(x, y, z)
+
+		var x = Math.floor(player.position.x/blockSize);
+		var y = Math.floor((player.position.y+blockSize*0.2)/blockSize);
+		var z = Math.floor(player.position.z/blockSize);
+
+		var voxel2 = world.getVoxel(x, y, z)
+
+		this.inWater = voxel1 == 14 || voxel2 == 14;
 
 		var x = Math.floor(player.position.x/blockSize);
 		var y = Math.floor((player.position.y)/blockSize);
@@ -855,7 +909,7 @@ class Player {
 		// Head and feet
 
 		var x = Math.floor(player.position.x/blockSize);
-		var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
+		var y = Math.floor((player.position.y-this.halfHeight*2)/blockSize);
 		var z = Math.floor(player.position.z/blockSize);
 
 		if (this.collideVoxel(x, y, z)) return true;
@@ -896,7 +950,7 @@ class Player {
 		for (let i = -1; i < 2; i+=2) {
 			for (let j = -1; j < 2; j+=2) {
 				var x = Math.floor((player.position.x+i*blockSize*0.25)/blockSize);
-				var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
+				var y = Math.floor((player.position.y-this.halfHeight*2)/blockSize);
 				var z = Math.floor((player.position.z+j*blockSize*0.25)/blockSize);
 
 				if (this.collideVoxel(x, y, z)) return true;

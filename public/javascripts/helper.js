@@ -478,19 +478,3 @@ function abbreviateNumber(value) {
     }
     return newValue;
 }
-
-function inScreen(pos, relative, r) {
-	var relative = relative || 1;
-	var pos = Vector.mult(pos, display.zoom);
-	let radius = (r || 0) * display.zoom;
-	var rocketPos = Vector.mult(rocket.pos, display.zoom / relative);
-
-	return pos.x > rocketPos.x - canvas.width/2 - radius && pos.x < rocketPos.x + canvas.width/2 + radius && pos.y > rocketPos.y - canvas.height/2 - radius && pos.y < rocketPos.y + canvas.height/2 + radius;
-}
-
-// Get screen pos
-function getScreenPos(absolutePos, zoom) {
-	return new Vector(
-		absolutePos.x*zoom - rocket.pos.x*zoom + canvas.width/2, 
-		absolutePos.y*zoom - rocket.pos.y*zoom + canvas.height/2);
-}

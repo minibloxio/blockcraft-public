@@ -191,16 +191,6 @@ World.faces = [
   },
 ];
 
-const neighborOffsets = [
-  [ 0,  0,  0], // self
-  [-1,  0,  0], // left
-  [ 1,  0,  0], // right
-  [ 0, -1,  0], // down
-  [ 0,  1,  0], // up
-  [ 0,  0, -1], // back
-  [ 0,  0,  1], // front
-];
-
 let workerIndex = 0;
 const cellIdToMesh = {};
 
@@ -221,22 +211,17 @@ function updateVoxelGeometry(x, y, z) {
 
   let cellData = {};
 
-  for (const offset of neighborOffsets) {
-    const ox = (x + offset[0]);
-    const oy = (y + offset[1]);
-    const oz = (z + offset[2]);
-    const cellId = world.computeCellId(ox, oy, oz);
-    if (!updatedCellIds[cellId]) { // Don't reupdate the cell once updated
-      updatedCellIds[cellId] = true;
+  const cellId = world.computeCellId(x, y, z);
+  if (!updatedCellIds[cellId]) { // Don't reupdate the cell once updated
+    updatedCellIds[cellId] = true;
 
-      const cellX = Math.floor(ox / cellSize);
-      const cellY = Math.floor(oy / cellSize);
-      const cellZ = Math.floor(oz / cellSize);
+    const cellX = Math.floor(x / cellSize);
+    const cellY = Math.floor(y / cellSize);
+    const cellZ = Math.floor(z / cellSize);
 
-      cellData[cellId] = world.cells[cellId];
+    cellData[cellId] = world.cells[cellId];
 
-      cells.push([cellX, cellY, cellZ, cellId]);
-    }
+    cells.push([cellX, cellY, cellZ, cellId]);
   }
 
   voxelWorkers[workerIndex].postMessage([worldData, cellData, cells])

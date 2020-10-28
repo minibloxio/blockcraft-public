@@ -20,16 +20,12 @@ socket.on('init', function (data) {
 	}
 
 	// Add pre-existing entities
-	var newEntities = data.entities;
-	for (let id in newEntities) {
-		let entity = newEntities[id];
-		addEntity(entity);
+	for (let id in data.world.entities) {
+		addEntity(data.world.entities[id]);
 	}
 
-	// Update light
-	if (light) {
-		light.t = data.tick * light.daySpeed;
-	}
+	// Update to server tick
+	tick.value = data.tick;
 
 	initialized = true;
 })
@@ -119,9 +115,7 @@ socket.on('update', function (data) {
 		player.updateClient(serverPlayers[socket.id]);
 	}
 
-	if (light) {
-		light.t = data.tick * light.daySpeed;
-	}
+	tick.value = data.tick;
 })
 
 socket.on('messageAll', function (data) {

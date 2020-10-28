@@ -284,3 +284,13 @@ $(document).bind('mousewheel', function(e) {
         	player.currentSlot = 0;
     }
 });
+
+// Blur & Focus
+
+$(window).blur(function () {
+	inScreen = false;
+})
+
+$(window).focus(function () {
+	inScreen = true;
+})

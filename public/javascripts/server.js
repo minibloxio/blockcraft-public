@@ -11,9 +11,9 @@ function addPlayer(players, id) {
 	let p = players[id];
 
 	// Set position of entity
-	p.pos = Ola({x:0, y:0, z:0}, 50);
-	p.rot = Ola({x:0, y:0, z:0}, 50);
-	p.dir = Ola({x:0, y:0, z:0}, 50);
+	p.pos = Ola({x:0, y:0, z:0});
+	p.rot = Ola({x:0, y:0, z:0});
+	p.dir = Ola({x:0, y:0, z:0});
 
 	// Add head
 	p.head = addMesh(new THREE.BoxGeometry(player.dim.headSize, player.dim.headSize, player.dim.headSize), head.material);
@@ -50,7 +50,7 @@ function addPlayer(players, id) {
 		font: minecraft_font,
 		size: 3,
 		height: 0.5
-	} );
+	});
 	name_geometry.center();
 
 	p.nameTag = new THREE.Mesh(name_geometry, new THREE.MeshBasicMaterial({color: 0xeeeeee}));
@@ -79,6 +79,8 @@ function addPlayer(players, id) {
 }
 
 function updatePlayers(serverPlayers) {
+	let {blockSize} = world;
+	
 	for (let id in players) {
 		let p = players[id];
 		if (p.pos && p.rot && serverPlayers[id]) {

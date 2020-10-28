@@ -483,7 +483,8 @@ function updateHUD() {
 }
 
 setInterval(function () {
-	updateHUD();
+	if (initialized)
+		updateHUD();
 }, 40);
 
 window.onresize = function(event) {

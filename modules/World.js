@@ -13,11 +13,12 @@ module.exports = class World {
     rng1 = new SimplexNoise(this.seed);
     rng2 = new SimplexNoise(this.seed+0.2 > 1 ? this.seed - 0.8 : this.seed+0.2);
 
-    this.waterLevel = 10;
+    this.waterLevel = 40;
 
     // Cell management
   	this.blockSize = 16;
     this.cellSize = options.cellSize;
+    this.buildHeight = options.buildHeight;
     this.tileSize = options.tileSize;
     this.tileTextureWidth = options.tileTextureWidth;
     this.tileTextureHeight = options.tileTextureHeight;
@@ -26,7 +27,6 @@ module.exports = class World {
     this.cells = {};
     this.cellDeltas = {};
 
-    this.buildHeight = cellSize * 7;
 
     // Entities
     this.entities = {};
@@ -232,8 +232,8 @@ module.exports = class World {
          
           // Terrain generation
           let blockID = 0;
-          /*if (yPos > height && yPos <= this.waterLevel)
-              blockID = "water";*/
+          if (yPos > height && yPos <= this.waterLevel)
+              blockID = "water";
 
           if (cave > 0.1) {
             if (yPos == height) {

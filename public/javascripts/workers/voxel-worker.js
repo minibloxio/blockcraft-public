@@ -1,12 +1,3 @@
-const neighborOffsets = [
-	[ 0,  0,  0], // self
-	[-1,  0,  0], // left
-	[ 1,  0,  0], // right
-	[ 0, -1,  0], // down
-	[ 0,  1,  0], // up
-	[ 0,  0, -1], // back
-	[ 0,  0,  1], // front
-];
 let world, cells;
 
 self.addEventListener('message', e => {
@@ -114,7 +105,7 @@ function getCellForVoxel(x, y, z, cellData) {
 function getVoxel(x, y, z, cellData) {
 	const cell = getCellForVoxel(x, y, z, cellData);
 	if (!cell) {
-	  return 0;
+	  return -1;
 	}
 	const voxelOffset = computeVoxelOffset(x, y, z);
 	return cell[voxelOffset];
@@ -160,40 +151,40 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData) {
           const voxelX = startX + x;
           const voxel = getVoxel(voxelX, voxelY, voxelZ, cellData);
 
-          if (voxel) {
-            // voxel 0 is sky (empty) so for UVs we start at 0
-            const uvVoxel = voxel - 1;
-            // There is a voxel here but do we need faces for it?
-            if (voxel != 14) {
-              for (const {dir, corners, uvRow} of faces) {
+          if (!voxel)
+            continue;
 
-                const neighbor = getVoxel(
-                    voxelX + dir[0],
-                    voxelY + dir[1],
-                    voxelZ + dir[2],
-                    cellData);
-                if ((!neighbor || (neighbor == 14))) {
-                  // this voxel has no neighbor in this direction so we need a face.
-                  addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
-                }
+          // voxel 0 is sky (empty) so for UVs we start at 0
+          const uvVoxel = voxel - 1;
+          // There is a voxel here but do we need faces for it?
+          if (voxel != 14) {
+            for (const {dir, corners, uvRow} of faces) {
 
+              const neighbor = getVoxel(
+                  voxelX + dir[0],
+                  voxelY + dir[1],
+                  voxelZ + dir[2],
+                  cellData);
+              if ((neighbor == 0 || neighbor == -1 || neighbor == 14)) {
+                // this voxel has no neighbor in this direction so we need a face.
+                addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
               }
+
             }
+          }
 
-            if (voxel == 14) { // Water
-              for (const {dir, corners, uvRow} of faces) {
+          if (voxel == 14) { // Water
+            for (const {dir, corners, uvRow} of faces) {
 
-                const neighbor = getVoxel(
-                    voxelX + dir[0],
-                    voxelY + dir[1],
-                    voxelZ + dir[2],
-                    cellData);
-                if (neighbor == 0) {
-                  // this voxel has no neighbor in this direction so we need a face.
-                  addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
-                }
+              const neighbor = getVoxel(
+                  voxelX + dir[0],
+                  voxelY + dir[1],
+                  voxelZ + dir[2],
+                  cellData);
+              if (neighbor == 0) {
+                // this voxel has no neighbor in this direction so we need a face.
+                addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
               }
-
             }
               
           }

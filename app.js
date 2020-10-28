@@ -24,7 +24,7 @@ const World = require('./modules/World.js');
 const SimplexNoise = require('simplex-noise'),
     simplex = new SimplexNoise(Math.random)
 
-// Create port
+// Create portf
 const serverPort = process.env.PORT || 3001;
 server.listen(serverPort, function () {
 	console.log('Started an https server on port ' + serverPort);
@@ -57,11 +57,13 @@ const cellSize = 16;
 const tileSize = 16;
 const tileTextureWidth = 256;
 const tileTextureHeight = 64;
+const buildHeight = 128;
 const world = new World({
 	cellSize,
 	tileSize,
 	tileTextureWidth,
 	tileTextureHeight,
+	buildHeight
 });
 
 var updatedBlocks = [];

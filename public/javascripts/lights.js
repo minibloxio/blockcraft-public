@@ -38,14 +38,14 @@ class Light {
 
 	    // Sun
 	    this.sun = loadSprite('./sun.png', 1000);
-		this.sun.castShadow = false;
-		this.t = 1000;
+	    this.moon = loadSprite('./moon.png', 1000);
 		this.dayNightCycle = true;
 		this.daySpeed = 0.001;
 
 		this.sunDist = 5000;
 	    this.offset = new THREE.Vector3(this.sunDist, 0, 0);
 		scene.add(this.sun);
+		scene.add(this.moon);
 
 		// Clouds
 		this.clouds = [];
@@ -79,15 +79,18 @@ class Light {
 	update() {
 		// Update sun position
 		if (this.dayNightCycle) {
-			this.offset.x = Math.cos(this.t)*this.sunDist;
-			this.offset.y = Math.sin(this.t)*this.sunDist;
+			this.offset.x = Math.cos(tick.value*this.daySpeed)*this.sunDist;
+			this.offset.y = Math.sin(tick.value*this.daySpeed)*this.sunDist;
 		}
 
 		var sun = player.position.clone().add(this.offset.clone());
 		this.dir.position.set(sun.x, sun.y, sun.z); // Update directional light
 		this.sun.position.set(sun.x, sun.y, sun.z);
-
 		this.sun.lookAt(this.sun.position)
+
+		var moon = player.position.clone().add(this.offset.clone().multiplyScalar(-1));
+		this.moon.position.set(moon.x, moon.y, moon.z);
+		this.moon.lookAt(this.moon.position)
 
 		// Update hemisphere light based on sun height
 		this.hemi.intensity = (this.offset.y+this.sunDist) / 30000 + 0.2;

@@ -65,23 +65,13 @@ var material = new THREE.MeshLambertMaterial({
 var fontLoader = new THREE.FontLoader();
 let minecraft_font = undefined;
 
-var loaded = 0;
-
 fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
 	minecraft_font = font;
   loaded += 1;
 } );
 
 // Block textures
-var stone = new Texture(['./blocks/stone.png'])
-var bedrock = new Texture(['./blocks/bedrock.png'])
 var dirt = new Texture(['./blocks/dirt.png'])
-var water = new Texture(['./blocks/water.png'])
-var sun = new Texture(['./blocks/sun.png'], false, {
-	metalness: 0,
-	type: "basic"
-})
-
 var grass_side = new Texture(['./blocks/grass-side.png'])
 var grass_top = new Texture(['./blocks/grass-top.png'])
 
