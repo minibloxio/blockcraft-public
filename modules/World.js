@@ -5,13 +5,78 @@ var SimplexNoise = require('simplex-noise'),
 
 function noise1(nx, ny) { return rng1.noise2D(nx, ny)/2 + 0.5; }
 function noise2(nx, ny) { return rng2.noise2D(nx, ny)/2 + 0.5; }
-   
+
+function RLEdecode(array) {
+  var newArray=[],isRip,isRun,ripCount,runCount;
+  for (var i = 0; i < array.length; i++) {
+    isRip=array[i]<0;
+    isRun=array[i]>0;
+    if(isRip){
+      ripCount=Math.abs(array[i]);
+      i+=1;
+
+      newArray=newArray.concat(array.slice(i,i+ripCount));
+      i+=ripCount-1;
+    }
+    if(isRun){
+      runCount=array[i];
+      i+=1;
+      for (var j = 0; j < runCount; j++) {
+        newArray.push(array[i])
+      };
+      
+    }
+    
+  };
+  return newArray;}
+
+function RLEencode(array) {
+  // output an array of values
+  // consisting of alternating "rips" and "runs"
+  // a rip begins with a negative count followed by a 
+  // cooresponding number of non-repeating values
+  // 
+  // a run begins with a positive count, followed by 
+  // the value to be repeated by the count.
+
+  var newArray=[];
+  var rip=[];
+  var lastValue=undefined;
+  var runCount=0;
+
+  for (var i = 1,lastValue=array[0]; i <= array.length; i++) {
+    if(array[i]!==lastValue){
+      if(runCount!==0){
+        newArray.push(runCount+1,lastValue);
+      } else {
+        rip.push(lastValue);
+      }
+      runCount=0;
+    }
+
+    if(array[i]===lastValue || i===array.length){
+      if(rip.length !== 0){
+        if(rip.length){
+          newArray.push(-rip.length);
+          newArray=newArray.concat(rip);
+        }
+        rip=[];
+      }
+      runCount++;
+    }
+    lastValue=array[i];
+  };
+  return newArray;
+}
+
 module.exports = class World {
   constructor(options) {
   	// World seed
   	this.seed = Math.random();
     rng1 = new SimplexNoise(this.seed);
     rng2 = new SimplexNoise(this.seed+0.2 > 1 ? this.seed - 0.8 : this.seed+0.2);
+
+    this.tick = 0;
 
     this.waterLevel = 40;
 
@@ -50,6 +115,47 @@ module.exports = class World {
       "water": 14
     }
   }
+
+  loadSaveFile(data) {
+    this.seed = data.seed;
+    rng1 = new SimplexNoise(this.seed);
+    rng2 = new SimplexNoise(this.seed+0.2 > 1 ? this.seed - 0.8 : this.seed+0.2);
+
+    this.tick = data.tick;
+
+    this.cells = {};
+    for (let cellId in data.deltas) {
+      this.cellDeltas[cellId] = RLEdecode(data.deltas[cellId])
+    }
+  }
+
+  saveToFile(fs, io, filepath) {
+    let deltas = {}
+      for (let cellId in this.cellDeltas) {
+        deltas[cellId] = RLEencode(this.cellDeltas[cellId])
+      }
+
+      let saveObject = {
+        seed: this.seed,
+        tick: this.tick,
+        deltas: deltas
+      }
+      let t = Date.now();
+      console.log("Saving world at", new Date(), "\nSeed:", this.seed)
+
+      let data = JSON.stringify(saveObject);
+
+      fs.writeFile(filepath, data,function (err) {
+          if (err) throw err;  
+          let txt = "Server successfully saved in " + (Date.now()-t) + " ms";
+          console.log(txt)
+          io.emit('messageAll', {
+            text: txt,
+            color: "purple"
+          })
+      });
+  }
+
   static euclideanModulo(a,b){return(a%b+b)%b}
   computeVoxelOffset(x, y, z) {
     const {cellSize, cellSliceSize} = this;
@@ -88,13 +194,19 @@ module.exports = class World {
     }
   }
   addCellForVoxel(x, y, z) {
+    const {cellSize} = this;
+
     const cellId = this.computeCellId(x, y, z);
     let cell = this.cells[cellId];
+    let cellDelta = this.cellDeltas[cellId];
+
     if (!cell) {
-      const {cellSize} = this;
       cell = new Uint8Array(cellSize * cellSize * cellSize);
       this.cells[cellId] = cell;
-      this.cellDeltas[cellId] = new Uint8Array(cellSize * cellSize * cellSize);;
+    }
+
+    if (!cellDelta) {
+      this.cellDeltas[cellId] = new Uint8Array(cellSize * cellSize * cellSize);
     }
     return cell;
   }
@@ -104,7 +216,7 @@ module.exports = class World {
     else
     	return this.cells[this.computeCellId(x, y, z)];
   }
-  setVoxel(x, y, z, v, addCell = true, changeDelta) {
+  setVoxel(x, y, z, v, changeDelta, addCell = true) {
     let cell = this.getCellForVoxel(x, y, z);
     if (!cell) {
       if (!addCell) {
@@ -212,6 +324,8 @@ module.exports = class World {
         const height = this.getHeight(xPos, zPos);
         
         for (let y = 0; y < cellSize; ++y) {
+
+
           // Get cell offset for y
           let yPos = y + cellY * cellSize;
 
@@ -220,15 +334,10 @@ module.exports = class World {
 
           const cave = (rng1.noise3D(xPos*0.05, yPos*caveSparsity, zPos*0.05)+1)/2;
 
-          //noise = new SimplexNoise(this.seed + 0.1);
           const coal = rng1.noise3D(xPos*coalSparsity, yPos*coalSparsity, zPos*coalSparsity);
-          //noise = new SimplexNoise(this.seed + 0.2);
           const iron = rng1.noise3D(xPos*ironSparsity, yPos*ironSparsity, zPos*ironSparsity);
-          //noise = new SimplexNoise(this.seed + 0.3);
           const gold = rng1.noise3D(xPos*goldSparsity, yPos*goldSparsity, zPos*goldSparsity);
-          //noise = new SimplexNoise(this.seed + 0.4);
           const diamond = rng1.noise3D(xPos*diamondSparsity, yPos*diamondSparsity, zPos*diamondSparsity);
-          //noise = new SimplexNoise(this.seed);
          
           // Terrain generation
           let blockID = 0;
@@ -310,7 +419,6 @@ module.exports = class World {
 	    	}
 	    }
     }
-	   
 
     // Adjust to cell deltas
     for (let z = 0; z < cellSize; ++z) {
@@ -323,8 +431,9 @@ module.exports = class World {
 
 	        let v = this.getVoxel(xPos, yPos, zPos, true)-1;
 
-	        if (v >= 0)
+	        if (v >= 0) {
 	        	this.setVoxel(xPos, yPos, zPos, v);
+          }
 	      }
 	    }
 	  }
@@ -348,7 +457,7 @@ module.exports = class World {
   		let entity = this.entities[entity_id];
   		if (entity.type == "item") {
   			// Delete entity if too long
-  			if (Date.now()-entity.t > 5000) {
+  			if (Date.now()-entity.t > 20000) {
   				// Remove the item from world
 					newEntities.push({
 						type: "remove_item",
@@ -382,6 +491,8 @@ module.exports = class World {
 					if (p.pickupDelay < Date.now()) {
 						let dir = {x: (p.pos.x-entity.pos.x), y: (p.pos.y-blockSize-(entity.pos.y)), z: (p.pos.z-entity.pos.z)}
 						let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
+
+            // Add to player if within a block distance
 						if (dist < blockSize) {
 							// Add item to player's inventory
 							let added = false;
@@ -427,9 +538,9 @@ module.exports = class World {
 						if (dist < blockSize*2) { // Pull when 2 blocks away
 							let distSquared = dist * dist / (blockSize*blockSize);
 
-							entity.acc.x = dir.x / distSquared * blockSize;
-							entity.acc.y = dir.y / distSquared * blockSize;
-							entity.acc.z = dir.z / distSquared * blockSize;
+							entity.acc.x = dir.x * 2 * blockSize;
+							entity.acc.y = dir.y * 2 * blockSize;
+							entity.acc.z = dir.z * 2 * blockSize;
 						}
 					}
 				}

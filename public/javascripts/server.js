@@ -80,7 +80,7 @@ function addPlayer(players, id) {
 
 function updatePlayers(serverPlayers) {
 	let {blockSize} = world;
-	
+
 	for (let id in players) {
 		let p = players[id];
 		if (p.pos && p.rot && serverPlayers[id]) {
@@ -180,6 +180,63 @@ function updatePlayer(p) {
 		
 	p.rightShoulder.rotation.x = (-Math.cos(p.punchingT)+1)/2;
 	p.rightShoulder.rotation.z = Math.sin(p.punchingT)/2;
+}
+
+function updatePlayerColor(id, color) {
+	for (let a of players[id].skeleton.children) {
+		if (a.type == "Mesh") {
+			for (let material of a.material) {
+				material.color = color;
+			}
+		} else {
+			for (let material of a.children[0].material) {
+				material.color = color;
+			}
+		}
+	}
+}
+
+// Add entity
+
+function addEntity(entity) {
+	if (entity.type == "item") {
+		let {blockSize} = world;
+
+		let uvVoxel = entity.v-1;
+		var item_geometry = new THREE.BufferGeometry();
+		  const {positions, normals, uvs, indices} = world.generateGeometryDataForItem(uvVoxel);
+		  const positionNumComponents = 3;
+		item_geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
+		const normalNumComponents = 3;
+		item_geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
+		const uvNumComponents = 2;
+		item_geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
+		item_geometry.setIndex(indices);
+		item_geometry.computeBoundingSphere();
+
+		var item_mesh = new THREE.Mesh(item_geometry, material);
+		item_mesh.name = "item"
+		item_mesh.position = new THREE.Vector3(entity.pos.x, entity.pos.y, entity.pos.z);
+		item_mesh.castShadow = true;
+		item_mesh.receiveShadow = true;
+
+		/*var select_box = new THREE.BoxGeometry(blockSize/4+0.1, blockSize/4+0.1, blockSize/4+0.1);
+		var geometry = new THREE.EdgesGeometry(select_box);
+		var material = new THREE.LineBasicMaterial({color: "black", linewidth: 2})
+		var wireframe = new THREE.LineSegments(geometry, material);
+		wireframe.name = "wireframe";
+		item_mesh.add(wireframe)*/
+
+		world.entities[entity.id] = entity;
+		world.entities[entity.id].mesh = item_mesh;
+
+		scene.add(world.entities[entity.id].mesh);
+	} else if (entity.type == "remove_item") {
+		world.entities[entity.id].mesh.geometry.dispose();
+		world.entities[entity.id].mesh.material.dispose();
+		scene.remove(world.entities[entity.id].mesh);
+		delete world.entities[entity.id];
+	}
 }
 
 // Rotate object around a 3D point

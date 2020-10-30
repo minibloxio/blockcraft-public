@@ -47,10 +47,13 @@ const rl = readline.createInterface({
 rl.on('line', (input) => {
   	if (input === 'refresh') { // Refresh all clients
   		io.emit('refresh');
+  	} else if (input === 'save') {
+  		let path =  __dirname + '/saves/test.json';
+  		world.saveToFile(fs, io, path);
   	}
 });
 
-// Setup server
+// Setup world
 var players = {};
 
 const cellSize = 16;
@@ -65,11 +68,24 @@ const world = new World({
 	tileTextureHeight,
 	buildHeight
 });
-
 var updatedBlocks = [];
 var newEntities = [];
 
-var punches = [];
+// Load save file
+let save_path = __dirname + '/saves/test.json';
+fs.readFile(save_path, function (err, data) {
+	if (err) {
+		console.log("Unable to load save file from", save_path)
+		console.log("Creating new world...")
+		return;
+	}
+
+	let saveFile = JSON.parse(data)
+	world.loadSaveFile(saveFile)
+
+  	console.log("Done loading world at", new Date())
+})
+
 
 function pick(obj,props){if(!obj||!props)return;var picked={};props.forEach(function(prop){picked[prop]=obj[prop]});return picked};
 
@@ -98,8 +114,15 @@ io.on('connection', function(socket_) {
 		socket.emit('init', {
 			serverPlayers: players,
 			world: Object.assign({}, world, {cells: {}, cellDeltas: undefined}),
-			tick: tick,
+			tick: world.tick,
 		});
+	})
+
+	// Save world to file
+	socket.on('save', function (data) {
+		let filename = data || 'test.json'
+		let path =  __dirname + '/saves/' + filename;
+  		world.saveToFile(fs, io, path);
 	})
 
 	// Update player info
@@ -142,8 +165,9 @@ io.on('connection', function(socket_) {
 
 	socket.on('punchPlayer', function (data) {
 		if (players[data.id]) {
-			players[data.id].hp -= 0.5;
-			io.to(`${data.id}`).emit('knockback', data.dir)
+			players[data.id].hp -= data.crit ? 1 : 0.5;
+			io.to(`${data.id}`).emit('knockback', data)
+			io.emit('punch', data.id);
 		}
 	})
 
@@ -244,16 +268,26 @@ io.on('connection', function(socket_) {
 });
 
 // Update server function
-var tick = 1000;
 let dt = 50;
 setInterval(function () {
-	tick += 1;
+	if (!world) 
+		return;
+
+	world.tick += 1;
 	// Regeneration
-	if (tick % 100 == 0) {
+	if (world.tick % 100 == 0) {
 		for (let id in players) {
 			if (players[id].hp > 0)
 				players[id].hp = Math.min(players[id].hp+0.5, 10);
 		}
+	}
+
+	// Auto save
+	let autoSaveInterval = 120; // interval in seconds
+	let autoSave = Math.floor(world.tick % (autoSaveInterval*20) == 0)
+	if (autoSave) {
+		let path =  __dirname + '/saves/test.json';
+  		world.saveToFile(fs, io, path);
 	}
 
 	world.update(dt/1000, players, newEntities);
@@ -264,7 +298,7 @@ setInterval(function () {
 		updatedBlocks: updatedBlocks,
 		newEntities: newEntities,
 		entities: world.entities,
-		tick: tick
+		tick: world.tick
 	})
 
 	updatedBlocks = [];

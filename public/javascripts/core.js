@@ -12,6 +12,8 @@ let scene, renderer, world, light, sky, stats, composer, colorShader, inScreen;
 let loaded = 0;
 let tick = new Ola(0)
 
+let sprite = undefined;
+
 // Stats
 var prevTime = performance.now();
 var statistics = [];
@@ -56,7 +58,16 @@ function init() {
 	light = new Light();
 
     // Add statistics to record
-    statistics.push(new Stat("Pos", player.position, false, 2))
+    statistics.push(new Stat("Pos", player.position, false, 2, function (pos) {
+    	return pos.clone().divideScalar(16);
+    }))
+    statistics.push(new Stat("Chunk Pos", player.position, false, 2, function (pos) {
+    	return world.computeCellFromPlayer(pos.x, pos.y, pos.z);
+    }))
+    statistics.push(new Stat("Vel", player.velocity, false, 2))
+    statistics.push(new Stat("Dir", player.direction, false, 2))
+    statistics.push(new Stat("Speed", player, "speed", 2))
+    statistics.push(new Stat("Fly", player, "fly", 2))
 
     // Finalize by adding the renderer
 	renderer = new THREE.WebGLRenderer( { antialias: true, logarithmicDepthBuffer: true } );
@@ -137,6 +148,118 @@ function init() {
 	window.addEventListener( 'resize', onWindowResize, false );
 
 	loaded += 1; // Increase loading stage
+
+
+	// instantiate a loader
+	const loader = new THREE.SVGLoader();
+
+	/*loader.load('./textures/tiger.svg', function (data) {
+		addExtrudedSVG(data, 120, './textures/tiger.svg');
+	})
+
+	loader.load('./textures/rainbow.svg', function (data) {
+		addExtrudedSVG(data, 100, './textures/rainbow.svg');
+	})
+			
+
+	loader.load('./textures/test.svg', function (data) {
+		addExtrudedSVG(data, 140, './textures/test.svg');
+	})
+*/
+
+
+}
+
+function addExtrudedSVG(data, height, name) {
+	console.log(name, data.paths)
+
+	// Group we'll use for all SVG paths
+	const group = new THREE.Group();
+	group.scale.y *= -1;
+
+
+	// Loop through all of the parsed paths
+	data.paths.forEach((path, i) => {
+
+		var color = path.userData.style.fill;
+
+		if (color && color != 'none') {
+
+			var material = new THREE.MeshBasicMaterial( {
+				color: new THREE.Color().setStyle( color ),
+				opacity: path.userData.style.fillOpacity,
+				transparent: path.userData.style.fillOpacity < 1,
+				side: THREE.DoubleSide
+			} );
+
+
+			const shapes = path.toShapes(true);
+
+			// Each path has array of shapes
+			shapes.forEach((shape, j) => {
+				// Finally we can take each shape and extrude it
+				//var geometry = new THREE.ShapeBufferGeometry( shape );
+				const geometry = new THREE.ExtrudeGeometry(shape, {
+					steps: 2,
+		        depth: 20,
+		        bevelEnabled: true
+		      });
+
+				// Create a mesh and add it to the group
+				const mesh = new THREE.Mesh(geometry, material);
+
+				group.add(mesh);
+			});
+
+		}
+
+
+		/*var stroke = path.userData.style.stroke
+		 {
+			var material = new THREE.MeshBasicMaterial( {
+				color: new THREE.Color().setStyle(stroke ),
+				opacity: path.userData.style.strokeOpacity,
+				transparent: path.userData.style.strokeOpacity < 1,
+				side: THREE.DoubleSide
+			} );
+
+			for ( var j = 0, j = path.subPaths.length; j < j; j ++ ) {
+
+				var subPath = path.subPaths[ j ];
+
+				var geometry = SVGLoader.pointsToStroke( subPath.getPoints(), path.userData.style );
+
+				if ( geometry ) {
+
+					var mesh = new THREE.Mesh( geometry, material );
+
+					group.add( mesh );
+
+				}
+
+			}
+		}*/
+
+	});
+
+	/*// Get group's size
+	const box = new THREE.Box3().setFromObject(group);
+	const size = new THREE.Vector3();
+	box.getSize(size);
+
+	const yOffset = size.y / -2;
+	const xOffset = size.x / -2;
+
+	// Offset all of group's elements, to center them
+	group.children.forEach(item => {
+		item.position.x = xOffset;
+		item.position.y = yOffset;
+	});*/
+
+	group.position.set(0, 16*height, 0);
+
+	// Finally we add svg group to the scene
+	scene.add(group);
 }
 
 function animate() {
@@ -164,6 +287,13 @@ function animate() {
 		if (p.entity) {
 			updatePlayer(p);
 		}
+	}
+
+	// Update server entities
+
+	for (let id in world.entities) {
+		let e = world.entities[id]
+		e.mesh.position.lerp(e.pos, delta*10)
 	}
 
 	// Emit events to server

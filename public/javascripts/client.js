@@ -25,14 +25,12 @@ socket.on('init', function (data) {
 	}
 
 	// Update to server tick
-	tick.value = data.tick;
+	tick = new Ola(data.tick);
 
 	initialized = true;
 })
 
 // Update chunk
-
-
 
 socket.on('receiveChunk', function (data) {
 	for (let chunk of data) {
@@ -76,9 +74,21 @@ socket.on('removePlayer', function (id) {
 })
 
 socket.on('knockback', function (data) {
-	player.knockbackVelocity.x = data.x*100;
-	player.knockbackVelocity.y = 200;
-	player.knockbackVelocity.z = data.z*100;
+	let lateralForce = new Vector(data.dir.x, data.dir.z);
+	lateralForce.normalize();
+	lateralForce.mult(data.force);
+	player.knockbackVelocity.x = lateralForce.x;
+	player.knockbackVelocity.y = data.force;
+	player.knockbackVelocity.z = lateralForce.y;
+})
+
+socket.on('punch', function (id) {
+	if (id != socket.id && players[id]) {
+		updatePlayerColor(id, new THREE.Color(1, 0.5, 0.5))
+		setTimeout(function () {
+			updatePlayerColor(id, new THREE.Color(1, 1, 1))
+		}, 500)
+	}
 })
 
 socket.on('update', function (data) {
@@ -106,7 +116,10 @@ socket.on('update', function (data) {
 	for (let id in updatedEntities) {
 		let entity = updatedEntities[id];
 		if (entity.type == "item") {
-			world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
+			world.entities[id].pos = entity.pos
+			if (world.entities[id].mesh.position.length() == 0) {
+				world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z)
+			}
 		}
 	}
 

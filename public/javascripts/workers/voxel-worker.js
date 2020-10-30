@@ -151,7 +151,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData) {
           const voxelX = startX + x;
           const voxel = getVoxel(voxelX, voxelY, voxelZ, cellData);
 
-          if (!voxel)
+          if (voxel <= 0)
             continue;
 
           // voxel 0 is sky (empty) so for UVs we start at 0

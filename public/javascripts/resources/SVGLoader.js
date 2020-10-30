@@ -91,7 +91,7 @@ THREE.SVGLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype
 					break;
 
 				default:
-					console.log( node );
+					break;
 
 			}
 

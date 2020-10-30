@@ -101,7 +101,7 @@ class Player {
 			1,
 			Infinity
 		];
-		this.miningDelayConstant = 750;
+		this.miningDelayConstant = 0;
 		this.placingDelay = 200;
 
 		// Player info
@@ -147,7 +147,7 @@ class Player {
 		this.arm.rotation.set(Math.PI, Math.PI, 0);
 		camera.add(this.arm);
 
-		// Add head
+		/*// Add head
 		this.head = addMesh(new THREE.BoxGeometry(this.dim.headSize, this.dim.headSize, this.dim.headSize), head.material);
 		this.head.position.set(0, blockSize*0.2, 0);
 
@@ -194,7 +194,7 @@ class Player {
 		this.entity.name = this.id;
 		this.entity.add(this.skeleton);
 
-		scene.add(this.entity);
+		scene.add(this.entity);*/
 	}
 
 	vertex(vertexX, vertexY, vertexZ) {
@@ -233,8 +233,8 @@ class Player {
 		var picked = []
 		for (var i = 0; i < intersects.length; i++) {
 			let object = intersects[i].object;
-			let isWater = world.getVoxel(object.position.x/blockSize, object.position.y/blockSize, object.position.z/blockSize) == 14;
-			if (!(object.name == "wireframe" || object.name == "item" || isWater)) {
+			let voxel = world.getVoxel(object.position.x/blockSize, object.position.y/blockSize, object.position.z/blockSize) ;
+			if (!(object.name == "wireframe" || object.name == "item") && voxel != 14) {
 				picked.push(intersects[i])
 			}
 		}
@@ -265,8 +265,10 @@ class Player {
     }
 
     punch() {
+    	// Punch players
+
 		let {blockSize} = world;
-    	this.selectcaster.far = blockSize * 3;
+    	this.selectcaster.far = blockSize * 4;
 
     	let playerBoxes = [];
     	for (let id in players) {
@@ -295,10 +297,28 @@ class Player {
 			while (!playerId.name)
 				playerId = playerId.parent;
 
-			socket.emit("punchPlayer", { // Send to server (IBRAHIM I'M LOOKING AT YOU)
-				id: playerId.name,
-				dir: camera.getWorldDirection()
-			}); 
+			playerId = playerId.name;
+
+			if (!players[playerId].invulnerable) {
+				players[playerId].invulnerable = true;
+
+				// Calculate the knockback force
+				let crit = false;
+				if (this.velocity.y < 0) {
+					crit = true;
+				}
+
+				socket.emit("punchPlayer", { // Send to server (IBRAHIM I'M LOOKING AT YOU)
+					id: playerId,
+					dir: camera.getWorldDirection(),
+					force: crit ? 400 : 200,
+					crit: crit
+				});
+				setTimeout(function () {
+					if (players[playerId])
+						players[playerId].invulnerable = false;
+				}, 400)
+			}
 		}
     }
 
@@ -458,41 +478,70 @@ class Player {
 	updateVelocities(delta) {
 		let {blockSize} = world;
 
-		// Reduce velocity
-		var previousVelocity = this.velocity.clone();
+		this.newMove = new THREE.Vector3();
 
+		// Reduce velocity (friction)
+		var previousVelocity = this.velocity.clone();
 		this.velocity.x -= previousVelocity.x * 10.0 * delta;
 		this.velocity.z -= previousVelocity.z * 10.0 * delta;
-
-		if (this.fly) {
-			this.velocity.y -= previousVelocity.y * 10.0 * delta;
-		} else {
-			if (colorPass.enabled) {
-				this.velocity.y = -50 * 50.0 * delta; // Sinking in water
-			} else {
-				this.velocity.y -= 9.81 * 50.0 * delta; // Falling in air
-			}	
-		}
-
+		// Determine direction vector
 		this.direction.x = this.key.left + this.key.right;
 		this.direction.y = this.key.up + this.key.down;
 		this.direction.z = this.key.forward + this.key.backward;
 		
 		this.direction.normalize(); // this ensures consistent movements in all directions
-		//this.velocity.x = 0;
-		//this.velocity.z = 0;
+
+		if (this.onObject && !this.fly) this.velocity.y = Math.max( 0, this.velocity.y );
+
+		if (this.fly) {
+			this.velocity.y -= previousVelocity.y * 10.0 * delta;
+		} else if (this.inWater && this.direction.z > 0 && this.key.sprint) {
+
+			let dir = this.camera.getWorldDirection();
+			dir.z = dir.z;
+			dir.multiplyScalar(50*delta*this.speed)
+
+			this.previousPosition = this.position.clone();
+			var currentPosition = this.position.clone();
+			
+			currentPosition.add(dir);
+			var move = currentPosition.sub(this.previousPosition)
+			this.newMove.add(move);
+
+			this.velocity.multiplyScalar(0)
+			this.halfHeight = blockSize * 0.4;
+
+		} else {
+			if (this.key.up && this.inWater) {
+				this.velocity.y = 50;
+			} else if(colorPass.enabled) {
+				this.velocity.y = -20;
+			} else {
+				this.velocity.y -= 9.81 * 50.0 * delta; // Falling in air
+			}
+
+			// Jump
+			if (this.key.up && !showChatBar) {
+				if (this.onObject) {
+					this.velocity.y += 150;
+				} else {
+					this.key.up = -1;
+				}
+			}
+
+			// Reset shift position
+
+			if (!this.fly) {
+				this.position.y = this.savedPosition['y'];
+				this.halfHeight = blockSize * 0.8;
+			}
+		}
 
 		if ( this.key.forward || this.key.backward ) this.velocity.z -= this.direction.z * 400.0 * delta;
 		if ( this.key.left || this.key.right ) this.velocity.x -= this.direction.x * 400.0 * delta;
 		if ( (this.key.down || this.key.up) && this.fly) this.velocity.y -= this.direction.y * 400.0 * delta;
-		if ( (this.key.down || this.key.up) && !this.fly && this.inWater) this.velocity.y = -20 * this.direction.y * 400.0 * delta;
 
-		// Reset shift position
-
-		if (!this.fly) {
-			this.controls.getObject().position['y'] = this.savedPosition['y'];
-			this.halfHeight = blockSize * 0.8;
-		}
+		
 	}
 
 	updateMoveAxis(delta) {
@@ -500,7 +549,6 @@ class Player {
 		this.onObject = false;
 
 		var axes = ['y', 'x', 'z']
-		this.newMove = new THREE.Vector3();
 		
 		for (var i = 0; i < axes.length; i++) {
 			var axis = axes[i];
@@ -541,7 +589,7 @@ class Player {
 
 	checkCollision(delta) {
 		let {blockSize} = world;
-		var test_axes = ['y', 'x', 'z', 'xz', 'yz', 'xz', 'xyz']
+		var test_axes = ['y', 'x', 'z', 'xz']
 
 		// Check for collision
 		if (this.clip) {
@@ -554,15 +602,15 @@ class Player {
 
 				if (axes === 'y' && !this.fly) {
 					// Test for y
-					this.controls.getObject().position['y'] += this.newMove['y'];
+					this.position.y += this.newMove['y'];
 					let collision = this.collides();
 					if (!collision)
 						continue;
 
-					if (!this.inWater && this.velocity.y < 0 || this.position.y <= blockSize) {
+					if (!this.inWater && this.velocity.y <= 0 || this.position.y <= blockSize) {
 						let jumpDiff = Math.floor((this.prevHeight - this.position.y)/blockSize)-3;
 
-						if (inScreen && jumpDiff > 0 && jumpDiff < 500) { // Fall damage
+						if (jumpDiff > 0 && jumpDiff < 500) { // Fall damage
 							socket.emit('takeDamage', jumpDiff)
 							camera.rotation.order = "YXZ"
 							camera.rotation.z = Math.PI/16 + Math.PI/64 * Math.min(20, jumpDiff); // Yoink the camera
@@ -580,7 +628,7 @@ class Player {
 						this.newMove['y'] = 0;
 					}
 					// Put back before testing y
-					this.controls.getObject().position['y'] = previousPosition['y'];
+					this.position.y = previousPosition['y'];
 				}
 
 
@@ -603,59 +651,52 @@ class Player {
 				for (let axis of separate_axes) {
 
 					// Test for y during shift mode
-					this.controls.getObject().position['y'] += savedMove['y'];
+					this.position.y += savedMove['y'];
 					if (!this.collides() && this.onObject && this.key.sneak) {
-						this.position[axis] = previousPosition[axis];
 						this.velocity[axis] = 0;
 						this.newMove[axis] = 0;
 					}
 					// Put back before testing y
-					this.controls.getObject().position['y'] = previousPosition['y']
+					this.position.y = previousPosition['y']
 
-					this.controls.getObject().position[axis] = previousPosition[axis];
+					this.position[axis] = previousPosition[axis];
 				}
 			}
 		}
 
 		// Update player position
-		this.controls.getObject().position['x'] += this.newMove['x'];
-		if (!(!this.onObject && this.key.sneak && this.newMove['y'] === 0) && !this.fly) {
-			this.controls.getObject().position['y'] += this.newMove['y'];
+		this.position.x += this.newMove['x'];
+		if (!(!this.onObject && this.newMove['y'] === 0) && !this.fly) {
+			this.position.y += this.newMove['y'];
 		} else {
-			this.controls.getObject().position['y'] += this.newMove['y'];
+			this.position.y += this.newMove['y'];
 		}
-		this.controls.getObject().position['z'] += this.newMove['z'];
+		this.position.z += this.newMove['z'];
 
 		// Stop sprinting if you hit a block
-		this.distanceMoved += this.previousPosition.sub(this.controls.getObject().position).length();
+		this.distanceMoved += this.previousPosition.sub(this.position).length();
 		if (this.distanceMoved < 1.5 && this.onObject === false && !this.fly) {
 			this.speed = 2;
 		}
 
-		if ( this.onObject ) {
-			this.velocity.y = Math.max( 0, this.velocity.y );
-		}
-
-		// Jump
-		if (map[32] && !showChatBar) {
-			if (!this.fly && this.onObject) {
-				this.velocity.y += 150;
-			} else {
-				this.key.up = -1;
-			}
-		}
-
+		// Record last height on ground
 		if (this.onObject || this.fly || this.inWater) {
 			this.prevHeight = this.position.y;
 		}
 
+		// Check if stuck
+
+		if (this.collides() && this.clip) {
+			this.position.y += blockSize*delta*30; // Move up at a rate of 10 blocks per second
+		}
+
 		// Save position
 
-		this.savedPosition = this.controls.getObject().position.clone();
+		this.savedPosition = this.position.clone();
 
 		// Update movement
 
-		this.sprintSpeed = this.inWater ? this.maxWalkSpeed : this.maxSprintSpeed;
+		this.sprintSpeed = this.inWater ? this.maxWalkSpeed*1.5 : this.maxSprintSpeed;
 		if (this.fly) this.sprintSpeed = this.maxSprintSpeed * 2;
 		if (this.key.backward) this.sprintSpeed = this.maxWalkSpeed;
 		this.walkSpeed = this.inWater ? this.maxWalkSpeed/2 : this.maxWalkSpeed;
@@ -673,14 +714,12 @@ class Player {
 			}
 		}
 		this.positionYOffset = 0;
-		if (this.key.sneak ) {
+		if (this.key.sneak && !this.fly && this.onObject) {
 			
-			if (!this.fly) {
-				this.speed = 0.5;
+			this.speed = 0.5;
 
-				this.controls.getObject().position['y'] += -this.walkSpeed;
-				this.halfHeight = blockSize * 0.6
-			}
+			this.position.y += -this.walkSpeed;
+			this.halfHeight = blockSize * 0.6;
 		}
 
 		// Update player arm
@@ -703,7 +742,7 @@ class Player {
 		}
 
 		// Change camera fov when sprinting
-		/*if (this.speed <= 2 || this.distanceMoved < 1.5) {
+		if (this.speed <= 2 || this.distanceMoved < 1.5) {
 			if (camera.fov > 75) {
 				camera.fov -= 0.3;
 			}
@@ -712,7 +751,7 @@ class Player {
 				camera.fov += 0.3;
 			}
 		}
-		camera.updateProjectionMatrix();*/
+		camera.updateProjectionMatrix();
 	}
 
 	updateClient(data) {

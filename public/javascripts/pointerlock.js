@@ -34,11 +34,11 @@
     			$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
     			$("#chat-input").val('');
     			showChatBar = false;
+    			element.requestPointerLock();
 			}
 		};
 
 		var pointerlockerror = function ( event ) {
-
 		};
 
 		// Hook pointer lock state change events

@@ -77,10 +77,11 @@ class Light {
 	}
 
 	update() {
+		let t = tick.value;
 		// Update sun position
 		if (this.dayNightCycle) {
-			this.offset.x = Math.cos(tick.value*this.daySpeed)*this.sunDist;
-			this.offset.y = Math.sin(tick.value*this.daySpeed)*this.sunDist;
+			this.offset.x = Math.cos(t*this.daySpeed)*this.sunDist;
+			this.offset.y = Math.sin(t*this.daySpeed)*this.sunDist;
 		}
 
 		var sun = player.position.clone().add(this.offset.clone());

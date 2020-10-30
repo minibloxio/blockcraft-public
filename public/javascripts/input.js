@@ -165,6 +165,7 @@ var onKeyDown = function ( event ) {
 			break;
 
 		case 32: // space
+			player.key.up = -1;
 			if (player.velocity.y > 0 && player.flyingEnabled) {
 				player.fly = true;
 			}

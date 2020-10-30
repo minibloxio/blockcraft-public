@@ -1,20 +1,34 @@
 class Stat {
-	constructor(name, value, key, round) {
+	constructor(name, value, key, round, func) {
 		this.name = name;
 		this.value = value;
 
 		this.key = key;
 		this.round = round;
+
+		this.func = func;
 	}
 
 	display(index) {
 		let text = this.name + ": ";
 
+		let val = this.value;
+		if (this.func) {
+			val = this.func(this.value);
+		}
+
 		if (this.key) {
-			text += round(this.value[this.key], this.round);
-		} else if (this.value instanceof Object) {
-			text += "x: " + round(this.value.x/16, this.round) + " y: " + round(this.value.y/16, this.round) + " z: " + round(this.value.z/16, this.round);
-		} else if (this.value instanceof Array) {
+			let type = typeof(val[this.key])
+			val = val[this.key];
+			if (type == "boolean")
+				text += val
+			else
+				text += round(val, this.round);
+
+
+		} else if (val instanceof Object) {
+			text += "x: " + round(val.x, this.round) + " y: " + round(val.y, this.round) + " z: " + round(val.z, this.round);
+		} else if (val instanceof Array) {
 			text += round(this.value.reduce((a, b) => a + b, 0)/this.value.length, this.round);
 		}
 

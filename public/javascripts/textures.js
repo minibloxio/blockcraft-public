@@ -56,7 +56,7 @@ texture.minFilter = THREE.NearestFilter;
 
 var material = new THREE.MeshLambertMaterial({
   map: texture,
-  side: THREE.FrontSide,
+  side: THREE.DoubleSide,
   transparent: true,
   depthWrite: true
 });
@@ -160,14 +160,22 @@ var arm_materials = [
 
 var arm = new Texture("arm", arm_materials );
 
+
+
 // Side arm (for client player)
+var arm_frontC = new Texture(['./skin/arm/front.png']);
+var arm_backC = new Texture(['./skin/arm/back.png']);
+var arm_topC = new Texture(['./skin/arm/top.png']);
+var arm_leftC = new Texture(['./skin/arm/left.png']);
+var arm_right_sideC = new Texture(['./skin/arm/rightSide.png']);
+
 var armC_materials = [
-    arm_right_side.material,
-    arm_left.material,
-    arm_top.material,
-    arm_front.material,
-    arm_back.material,
-    arm_front.material
+    arm_right_sideC.material,
+    arm_leftC.material,
+    arm_topC.material,
+    arm_frontC.material,
+    arm_backC.material,
+    arm_frontC.material
 ];
 var armC = new Texture("armC", armC_materials );
 
