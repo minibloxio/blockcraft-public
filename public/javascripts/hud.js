@@ -14,9 +14,6 @@ toolbar.src = "./textures/hotbar.png";
 var toolbar_selector = new Image();
 toolbar_selector.src = "./textures/hotbar-selector.png";
 
-var texture_atlas = new Image();
-texture_atlas.src = "./textures/blocks/texture-atlas.png";
-
 let blockTextures = [];
 
 // Crosshair
@@ -25,6 +22,7 @@ var crosshairWidth = 2
 
 // Chat
 let showChat = true
+let showChatFlag = true;
 let showChatBar = false;
 let hideChatId = undefined;
 let chatMsg = "";
@@ -79,11 +77,19 @@ function updateItem(block, i, type) {
 	} else if (type == "right") { // Right click item
 		if (selectedItem == undefined && block[i] && block[i].c > 0) {
 			// Split item stack
-			selectedItem = {v: block[i].v, c: Math.ceil(block[i].c/2)};
+			selectedItem = {
+				v: block[i].v,
+				c: Math.ceil(block[i].c/2),
+				class: block[i].class
+			};
 			block[i].c -= Math.ceil(block[i].c/2);
 		} else if (selectedItem && selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
 			// Drop 1 item
-			block[i] = {v: selectedItem.v, c: 1};
+			block[i] = {
+				v: selectedItem.v, 
+				c: 1,
+				class: selectedItem.class
+			};
 			selectedItem.c -= 1;
 		} else if (selectedItem && selectedItem.c > 0 && block[i] && block[i].c > 0) {
 			// Switch or combine
@@ -115,7 +121,11 @@ function updateItem(block, i, type) {
 			}
 		}
 
-		selectedItem = {v: block[i].v, c: total}
+		selectedItem = {
+			v: block[i].v, 
+			c: total,
+			class: block[i].class
+		}
 		block[i] = undefined;
 	}
 
@@ -291,16 +301,17 @@ function displayInventory() {
 	}
 }
 
-function drawItem(xPos, yPos, block) {
-	if (!block)
+function drawItem(xPos, yPos, entity) {
+	if (!entity)
 		return;
-	let index = block.v-1;
-	ctx.drawImage(texture_atlas, index*16, 0, 16, 16, 
+	let index = entity.v-1;
+	let atlas = entity.class == "item" ? item_atlas : texture_atlas;
+	ctx.drawImage(atlas, index*16, 0, 16, 16, 
 		xPos, 
 		yPos, 
 		blockWidth, blockWidth
 	);
-	drawText(block.c, 
+	drawText(entity.c, 
 		xPos+blockWidth,
 		yPos+blockWidth, 
 		"15px Minecraft-Regular", "white", "right", "bottom"
@@ -323,17 +334,18 @@ function displayToolbar() {
 
 	let blockWidth = 30;
 	for (let i = 0; i < 9; i++) {
-		let block = player.toolbar[i];
+		let entity = player.toolbar[i];
 		if (showInventory)
-			block = inventory[i];
-		if (block && block.c > 0) {
-			let index = block.v-1;
-			ctx.drawImage(texture_atlas, index*16, 0, 16, 16, 
+			entity = inventory[i];
+		if (entity && entity.c > 0) {
+			let index = entity.v-1;
+			let atlas = entity.class == "item" ? item_atlas : texture_atlas;
+			ctx.drawImage(atlas, index*16, 0, 16, 16, 
 				canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1, 
 				canvas.height-hotboxWidth+(hotboxWidth-blockWidth)/8, 
 				blockWidth, blockWidth
 			);
-			drawText(block.c, 
+			drawText(entity.c, 
 				canvas.width/2-hotboxWidth*4+blockWidth+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1,
 				canvas.height-hotboxWidth+blockWidth+(hotboxWidth-blockWidth)/8, 
 				"15px Minecraft-Regular", "white", "right", "bottom"
@@ -444,14 +456,17 @@ function displayPlayerHealth() {
 				yOffset += 5;
 			}
 
+			let xPos = canvas.width/2-heartSize*5+i*heartSize;
+			let yPos = canvas.height-heartSize-yOffset;
+
 			// Draw hearts based on player hp
 			if (player.hp - i >= 1) {
-				ctx.drawImage(full_heart, canvas.width/2-heartSize*5+i*heartSize, canvas.height-heartSize-yOffset, heartSize, heartSize)
+				ctx.drawImage(full_heart, xPos, yPos, heartSize, heartSize)
 			} else if (player.hp - i > 0) {
-				ctx.drawImage(half_heart, canvas.width/2-heartSize*5+i*heartSize, canvas.height-heartSize-yOffset, heartSize, heartSize)
+				ctx.drawImage(half_heart, xPos, yPos, heartSize, heartSize)
 				isHalf = false;
 			} else {
-				ctx.drawImage(empty_heart, canvas.width/2-heartSize*5+i*heartSize, canvas.height-heartSize-yOffset, heartSize, heartSize)
+				ctx.drawImage(empty_heart, xPos, yPos, heartSize, heartSize)
 			}
 		}
 
@@ -471,6 +486,89 @@ function displayPlayerHealth() {
 	}
 }
 
+function displayPlayerTab() {
+	if (!map[9])
+		return;
+
+	let pad = 20;
+	let top = 50;
+	let heartSize = 20;
+	let width = 550;
+	let height = (Object.keys(players).length+1)*30+2*pad+20;
+
+	let leftX = canvas.width/2-width/2+pad;
+	let rightX = canvas.width/2+heartSize*11;
+	let topY = top+pad;
+
+	// Draw background
+	drawRectangle(canvas.width/2-width/2, top, width, height, "black", {alpha: 0.5});
+
+	// Draw title
+	drawText("Username", leftX, topY, "20px Minecraft-Regular", "yellow", "left", "top")
+	drawText("Health", canvas.width/2, topY, "20px Minecraft-Regular", "yellow", "left", "top")
+	drawText("Ping", rightX, topY, "20px Minecraft-Regular", "yellow", "left", "top")
+
+	let index = 0;
+	for (let id in players) {
+		let p = players[id];
+		let yPos = topY+30*(index+1);
+
+		// Draw player ping
+		let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";
+
+		drawText(ping, rightX, yPos, "20px Minecraft-Regular", "white", "left", "top")
+
+		// Draw name
+		drawText(p.name, leftX, yPos, "20px Minecraft-Regular", "white", "left", "top")
+
+		// Draw player health
+		for (let i = 0; i < 10; i++) {
+			let xPos = canvas.width/2+i*heartSize;
+
+			// Draw hearts based on player hp
+			if (p.hp - i >= 1) {
+				ctx.drawImage(full_heart, xPos, yPos, heartSize, heartSize)
+			} else if (p.hp - i > 0) {
+				ctx.drawImage(half_heart, xPos, yPos, heartSize, heartSize)
+				isHalf = false;
+			} else {
+				ctx.drawImage(empty_heart, xPos, yPos, heartSize, heartSize)
+			}
+		}
+
+		index++;
+	}
+
+	let p = player;
+	// Draw client name
+	let xPos = canvas.width/2-width/2+pad;
+	let yPos = topY+30*(index+1);
+	drawText(p.name, xPos, yPos, "20px Minecraft-Regular", "white", "left", "top")
+
+	// Draw player ping
+	let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";
+	drawText(ping, rightX, yPos, "20px Minecraft-Regular", "white", "left", "top")
+
+	// Draw player health
+	for (let i = 0; i < 10; i++) {
+		let xPos = canvas.width/2+i*heartSize;
+
+		// Draw hearts based on player hp
+		if (p.hp - i >= 1) {
+			ctx.drawImage(full_heart, xPos, yPos, heartSize, heartSize)
+		} else if (p.hp - i > 0) {
+			ctx.drawImage(half_heart, xPos, yPos, heartSize, heartSize)
+			isHalf = false;
+		} else {
+			ctx.drawImage(empty_heart, xPos, yPos, heartSize, heartSize)
+		}
+	}
+}
+
+function drawPlayerTabHealth() {
+
+}
+
 function updateHUD() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	
@@ -480,6 +578,7 @@ function updateHUD() {
 	displayChat();
 	displayStats();
 	displayInventory();
+	displayPlayerTab();
 }
 
 setInterval(function () {

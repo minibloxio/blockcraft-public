@@ -71,10 +71,6 @@ class World {
     return cell[voxelOffset];
   }
 
-  blockToID(blockName) {
-    return this.blockId[blockName]
-  }
-
   generateCell(cellX, cellY, cellZ) {
     if (!this.cells[`${cellX},${cellY},${cellZ}`]) { // Check if chunk already exists
       const {cellSize} = this;
@@ -203,7 +199,9 @@ function updateVoxelGeometry(x, y, z) {
     tileSize: world.tileSize,
     tileTextureWidth: world.tileTextureWidth,
     tileTextureHeight: world.tileTextureHeight,
-    blockSize: world.blockSize
+    blockSize: world.blockSize,
+    blockUVS: world.blockUVS,
+    blockId: world.blockId,
   } 
   const updatedCellIds = {};
 

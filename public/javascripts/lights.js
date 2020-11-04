@@ -1,24 +1,24 @@
 
 class Light {
 	constructor() {
-		// Add light
-	
+
+	    let {blockSize, cellSize} = world;
+
+		// Add hemisphere
 		this.hemi = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 );
 	    this.hemi.position.set( 0, 5000, 0 );
 	    scene.add( this.hemi );
 
-	    this.dir = new THREE.DirectionalLight( "orange", 1 ); // Change this color to the day's color
-	    this.dir.position.set( -1, 0.75, 1 );
-	    this.dir.position.multiplyScalar( 1000);
+	    // Add sun directional light
+	    this.dir = new THREE.DirectionalLight( "orange", 1 );
 	    scene.add( this.dir );
-
 	    this.dir.target = player.controls.getObject();
-
 	    this.dir.castShadow = false; //SHADOW
-	    this.dir.shadow.mapSize.width = this.dir.shadow.mapSize.height = 1024*2;
-
+	    this.dir.enableShadow = false;
+	    
+	    // Add shadow
 		var d = 1000;
-		
+	    this.dir.shadow.mapSize.width = this.dir.shadow.mapSize.height = 1024*2;
 	    this.dir.shadow.camera.left = -d;
 	    this.dir.shadow.camera.right = d;
 	    this.dir.shadow.camera.top = d;
@@ -28,9 +28,11 @@ class Light {
 
 	    this.dir.shadow.camera.far = 10000;
 	    this.dir.shadow.camera.near = 0;
-	    this.dir.shadow.bias = -0.0001;
+	    this.dir.shadow.bias = -0.001;
 
-	    let {blockSize, cellSize} = world;
+	    // Add moon directional light
+	    this.dirM = new THREE.DirectionalLight( "white", 0.5 );
+	    scene.add( this.dirM );
 
 	    // Fog
 	    scene.fog = new THREE.Fog("lightblue", 0, blockSize*cellSize*5)
@@ -49,10 +51,36 @@ class Light {
 
 		// Clouds
 		this.clouds = [];
-		this.generateClouds("add")
+
+		// Add stars
+		var vertices = [];
+
+		for ( var i = 0; i < 500; i ++ ) {
+
+			let radius = 16 * 16 * 16 * 16;
+			var u = Math.random();
+			var v = Math.random();
+			var theta = 2 * Math.PI * u;
+			var phi = Math.acos(2 * v - 1);
+			var x = (radius * Math.sin(phi) * Math.cos(theta));
+			var y = (radius * Math.sin(phi) * Math.sin(theta));
+			var z = (radius * Math.cos(phi));
+
+			vertices.push( x, y, z );
+
+		}
+
+		var geometry = new THREE.BufferGeometry();
+		geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+
+		var starMaterial = new THREE.PointsMaterial( { transparent: true, color: 0xFFFFFF, size: random(16*8, 32*16)} );
+
+		this.stars = new THREE.Points( geometry, starMaterial );
+		scene.add(this.stars);
 	}
 
 	generateClouds(type) {
+		console.log(type)
 		let {blockSize} = world;
 		for (let cloud of this.clouds) {
 			scene.remove(cloud);
@@ -68,7 +96,8 @@ class Light {
 						new THREE.BoxGeometry( Math.random()*200+100, 16, Math.random()*200+100 ),
 						new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.4, transparent: true , overdraw: true} )
 					);
-				cloud.position.set(Math.random()*3000-1500 + player.position.x, Math.random()*200 + blockSize*80, Math.random()*3000-1500 + player.position.z)
+				cloud.name = "cloud";
+				cloud.position.set(Math.random()*3000-1500 + player.position.x, Math.random()*200 + blockSize*100, Math.random()*3000-1500 + player.position.z)
 				scene.add(cloud);
 
 				this.clouds.push(cloud);
@@ -77,24 +106,46 @@ class Light {
 	}
 
 	update() {
-		let t = tick.value;
+		let t = tick.value || 1000;
+
+		// Update stars transparency
+		let opacityOffset = 0.5;
+		let opacity = opacityOffset-Math.pow(Math.sin(t*this.daySpeed)/2+0.5, 5);
+		let clampedOpacity = mapRange(opacity > 0 ? opacity : 0, 0, opacityOffset, 0, 1)
+		this.stars.material.opacity = clampedOpacity;
+
 		// Update sun position
 		if (this.dayNightCycle) {
 			this.offset.x = Math.cos(t*this.daySpeed)*this.sunDist;
 			this.offset.y = Math.sin(t*this.daySpeed)*this.sunDist;
 		}
 
-		var sun = player.position.clone().add(this.offset.clone());
+		var sun = player.position.clone()
+		sun.y = 0;
+		sun.add(this.offset.clone());
 		this.dir.position.set(sun.x, sun.y, sun.z); // Update directional light
 		this.sun.position.set(sun.x, sun.y, sun.z);
 		this.sun.lookAt(this.sun.position)
 
-		var moon = player.position.clone().add(this.offset.clone().multiplyScalar(-1));
+		if (light.dir.enableShadow) {
+			if (this.offset.y < 0) {
+				this.dir.castShadow = false;
+			} else {
+				this.dir.castShadow = true;
+			}
+		}
+
+		var moon = player.position.clone()
+		moon.y = 0;
+		moon.add(this.offset.clone().multiplyScalar(-1));
+		this.dirM.position.set(moon.x, moon.y, moon.z);
 		this.moon.position.set(moon.x, moon.y, moon.z);
 		this.moon.lookAt(this.moon.position)
 
 		// Update hemisphere light based on sun height
-		this.hemi.intensity = (this.offset.y+this.sunDist) / 30000 + 0.2;
+		let intensity = ((this.offset.y/this.sunDist/2)+0.5);
+		let clampedIntensity = mapRange(intensity, 0, 1, 0.3, 0.7)
+		this.hemi.intensity = clampedIntensity;
 
 		for (let cloud of this.clouds) {
 			cloud.position.add(new THREE.Vector3(0.3, 0, 0))

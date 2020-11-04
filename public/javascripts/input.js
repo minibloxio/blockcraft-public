@@ -6,7 +6,7 @@ $('html').mousedown(function(event) {
     switch (event.which) {
         case 1:
             player.key.leftClick = Date.now();
-            player.punching = true;
+            player.punching = Date.now();
             player.punch();
             break;
         case 2:
@@ -107,6 +107,27 @@ onkeydown = onkeyup = function(e){
 }
 
 var onKeyDown = function ( event ) {
+	if (player.controls.enabled && event.keyCode == 13 && showChatFlag) {
+		showChatFlag = false;
+    	showChatBar = !showChatBar;
+    	if (showChatBar) {
+    		//$("#chat-input").show()
+    		$("#chat-input").focus();
+    		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0.3)"});
+    		showChat = true;
+    	} else {
+    		//$("#chat-input").hide();
+    		$("#chat-input").blur();
+    		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
+    		hideChatTimer(5000);
+    	}
+
+    	if (!showChatBar && $("#chat-input").val()) {
+    		socket.emit("message", $("#chat-input").val());
+    		$("#chat-input").val("")
+    	}
+	}
+
 	if (!player.controls.enabled || showChatBar)
 		return;
 	switch ( event.keyCode ) {
@@ -184,34 +205,26 @@ var onKeyDown = function ( event ) {
 			player.place = true;
 			player.key.rightClick = Date.now();
 			break;
+
+		case 88:
+			camera.fov = 30;
+			break;
 	}
 };
 
 var onKeyUp = function ( event ) {
 	let {blockSize} = world;
-	
-	if (player.controls.enabled && event.keyCode == 13) {
-    	showChatBar = !showChatBar;
-    	if (showChatBar) {
-    		//$("#chat-input").show()
-    		$("#chat-input").focus();
-    		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0.3)"});
-    		showChat = true;
-    	} else {
-    		//$("#chat-input").hide();
-    		$("#chat-input").blur();
-    		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
-    		hideChatTimer(5000);
-    	}
 
-    	if (!showChatBar && $("#chat-input").val()) {
-    		socket.emit("message", $("#chat-input").val());
-    		$("#chat-input").val("")
-    	}
-	}
+	if (event.keyCode == 13)
+		showChatFlag = true;
+
 	if (showChatBar)
 		return;
+
 	switch( event.keyCode ) {
+		case 88:
+			camera.fov = 75;
+			break;
 		case 70: // Fly
 			player.fly = !player.fly;
 			break;
@@ -249,6 +262,7 @@ var onKeyUp = function ( event ) {
 
 		case 82:
 			let resetHeight = blockSize*100;
+			player.prevHeight = undefined;
 			player.position.set(0, resetHeight, 0);
 			player.controls.getObject().position['y'] = resetHeight;
 			player.savedPosition['y'] = resetHeight;

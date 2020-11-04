@@ -93,12 +93,14 @@ function updatePlayers(serverPlayers) {
 			p.hp = serverPlayers[id].hp;
 			if (p.hp <= 0 && p.entity.visible) {
 				p.entity.visible = false;
-				addChat({
+				/*addChat({
 					text: p.name + " was slain"
-				})
+				})*/
 			} else if (p.hp > 0) {
 				p.entity.visible = true;
 			}
+
+			p.ping = serverPlayers[id].ping;
 
 			// Update animations
 			p.walking = serverPlayers[id].walking;
@@ -164,22 +166,22 @@ function updatePlayer(p) {
 
 	// Punching animation
 	if (p.punching) {
-		p.punchingT += 0.4;
+		p.punchingT += delta*5;
 
-		if (p.punchingT > 2*Math.PI)
+		if (p.punchingT > 1)
 			p.punchingT = 0
 	} else {
-		if (p.punchingT < 2*Math.PI) {
-			p.punchingT += 0.4;
+		if (p.punchingT < 1) {
+			p.punchingT += delta*5;
 		} else {
-			p.punchingT = 2*Math.PI;
+			p.punchingT = 1;
 		}
 	}
 
 	p.nameTag.quaternion.copy(camera.getWorldQuaternion());
 		
-	p.rightShoulder.rotation.x = (-Math.cos(p.punchingT)+1)/2;
-	p.rightShoulder.rotation.z = Math.sin(p.punchingT)/2;
+	p.rightShoulder.rotation.x = (-Math.cos(p.punchingT*Math.PI*2)+1)/2;
+	p.rightShoulder.rotation.z = Math.sin(p.punchingT*Math.PI*2)/2;
 }
 
 function updatePlayerColor(id, color) {
@@ -202,36 +204,53 @@ function addEntity(entity) {
 	if (entity.type == "item") {
 		let {blockSize} = world;
 
-		let uvVoxel = entity.v-1;
-		var item_geometry = new THREE.BufferGeometry();
-		  const {positions, normals, uvs, indices} = world.generateGeometryDataForItem(uvVoxel);
-		  const positionNumComponents = 3;
-		item_geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
-		const normalNumComponents = 3;
-		item_geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
-		const uvNumComponents = 2;
-		item_geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
-		item_geometry.setIndex(indices);
-		item_geometry.computeBoundingSphere();
+		if (entity.class == "item") {
 
-		var item_mesh = new THREE.Mesh(item_geometry, material);
-		item_mesh.name = "item"
-		item_mesh.position = new THREE.Vector3(entity.pos.x, entity.pos.y, entity.pos.z);
-		item_mesh.castShadow = true;
-		item_mesh.receiveShadow = true;
+			let canvas = document.createElement("canvas");
+			canvas.width = 16;
+			canvas.height = 16;
+			let ctx = canvas.getContext("2d");
+			ctx.drawImage(item_atlas, (entity.v-1)*16, 0, 16, 16, 0, 0, 16, 16);
+			let texture = new THREE.CanvasTexture(canvas);
+			texture.magFilter = THREE.NearestFilter;
+			texture.minFilter = THREE.NearestFilter;
+			let mat = new THREE.MeshLambertMaterial({map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide})
 
-		/*var select_box = new THREE.BoxGeometry(blockSize/4+0.1, blockSize/4+0.1, blockSize/4+0.1);
-		var geometry = new THREE.EdgesGeometry(select_box);
-		var material = new THREE.LineBasicMaterial({color: "black", linewidth: 2})
-		var wireframe = new THREE.LineSegments(geometry, material);
-		wireframe.name = "wireframe";
-		item_mesh.add(wireframe)*/
+			let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(blockSize/4, blockSize/4), mat);
+			item_mesh.renderOrder = 1;
+			item_mesh.name = "item";
+			item_mesh.position.set(entity.pos.x, entity.pos.y+blockSize/8, entity.pos.z);
 
-		world.entities[entity.id] = entity;
-		world.entities[entity.id].mesh = item_mesh;
+			world.entities[entity.id] = entity;
+			world.entities[entity.id].mesh = item_mesh;
 
-		scene.add(world.entities[entity.id].mesh);
+			scene.add(world.entities[entity.id].mesh)
+		} else {
+			let uvVoxel = entity.v-1;
+			let block_geometry = new THREE.BufferGeometry();
+			const {positions, normals, uvs, indices} = world.generateGeometryDataForItem(uvVoxel);
+			const positionNumComponents = 3;
+			block_geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
+			const normalNumComponents = 3;
+			block_geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
+			const uvNumComponents = 2;
+			block_geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
+			block_geometry.setIndex(indices);
+			block_geometry.computeBoundingSphere();
+
+			let block_mesh = new THREE.Mesh(block_geometry, material);
+			block_mesh.name = "item";
+			block_mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
+			block_mesh.castShadow = true;
+			block_mesh.receiveShadow = true;
+
+			world.entities[entity.id] = entity;
+			world.entities[entity.id].mesh = block_mesh;
+
+			scene.add(world.entities[entity.id].mesh);
+		}
 	} else if (entity.type == "remove_item") {
+
 		world.entities[entity.id].mesh.geometry.dispose();
 		world.entities[entity.id].mesh.material.dispose();
 		scene.remove(world.entities[entity.id].mesh);

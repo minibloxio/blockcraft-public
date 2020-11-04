@@ -19,14 +19,17 @@
 				if (showInventory) {
 					showInventory = false;
 				} else {
+					let name = $("#name-input").val();
 					socket.emit('playerInfo', {
-						name: $("#name-input").val()
+						name: name
 					})
 				}
 			} else { // Exit pointer lock
 
 				if (!showInventory) {
 					blocker.style.display = 'block';
+
+					element.requestPointerLock();
 				}
 				player.controls.enabled = false;
 				//$("#chat-input").hide();
@@ -34,7 +37,7 @@
     			$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
     			$("#chat-input").val('');
     			showChatBar = false;
-    			element.requestPointerLock();
+    			
 			}
 		};
 
@@ -52,12 +55,12 @@
 
 		$("#start-button").click(function (event) {
 
-			if (loaded >= 2) {
+			if (loaded >= 3) {
 				// Ask the browser to lock the pointer
 				element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 				element.requestPointerLock();
 
-				if (loaded == 2) {
+				if (loaded == 3) {
 					socket.emit('join')
 					loaded += 1;
 				}
@@ -67,7 +70,10 @@
 		})
 
 		$("body").keydown(function (event) {
-			if (event.keyCode == 69 && !showChatBar && loaded >= 3) {
+			if (event.keyCode == 27)
+				document.exitPointerLock();
+
+			if (event.keyCode == 69 && !showChatBar && loaded >= 4) {
 				if (player.controls.enabled) {
 					showInventory = true;
 					inventory = JSON.parse(JSON.stringify(player.toolbar));
@@ -82,6 +88,9 @@
 					socket.emit('updateInventory', inventory);
 				}
 			}
+
+			if (event.keyCode == 9)
+				event.preventDefault();
 			
 		}).keyup(function (event) {
 			if (event.keyCode == 27 && showInventory) {
@@ -93,21 +102,19 @@
 		})
 
 		// Enter username input
-		/*$("#name-input").keyup(function (event) {
-			if (event.keyCode == 13) {
-				controlsEnabled = true;
-				player.controls.enabled = true;
-				blocker.style.display = 'none';
+		$("#name-input").keyup(function (event) {
+			if (event.keyCode == 13 && loaded >= 3) {
 
-				socket.emit('playerInfo', {
-					name: $("#name-input").val()
-				})
+				if (loaded == 3) {
+					socket.emit('join')
+					loaded += 1;
+				}
 
 				// Ask the browser to lock the pointer
 				element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 				element.requestPointerLock();
 			}
-		})*/
+		})
 	} else {
 		instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 	}

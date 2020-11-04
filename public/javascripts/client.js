@@ -8,6 +8,9 @@ socket.on('init', function (data) {
 	// Receive common world attritutes
 	Object.assign(world, data.world)
 
+	// Initialize recipes
+	initRecipes();
+
 	// Receive current server players
 	let serverPlayers = data.serverPlayers;
 	for (let id in serverPlayers) {
@@ -27,6 +30,9 @@ socket.on('init', function (data) {
 	// Update to server tick
 	tick = new Ola(data.tick);
 
+	// Update lights
+	light.generateClouds("add")
+
 	initialized = true;
 })
 
@@ -41,16 +47,16 @@ socket.on('receiveChunk', function (data) {
 rleWorker.addEventListener('message', e => {
 	let chunk = e.data;
 
-	world.cells[`${chunk.pos.x},${chunk.pos.y},${chunk.pos.z}`] = chunk.cell;
+	let cellId = [`${chunk.pos.x},${chunk.pos.y},${chunk.pos.z}`];
+	world.cells[cellId] = chunk.cell;
 
-  	//updateCellGeometry(chunk.pos.x*cellSize, chunk.pos.y*cellSize, chunk.pos.z*cellSize);
 	player.chunksToLoad.push(chunk.pos)
 })
 
 // Add newcoming players
 socket.on('addPlayer', function (data) {
 	// Add to players
-	if (data.id != socket.id) { // Check if not own player1``
+	if (data.id != socket.id) { // Check if not own player
 		players[data.id] = data;
 
 		addPlayer(players, data.id);
@@ -94,6 +100,9 @@ socket.on('punch', function (id) {
 socket.on('update', function (data) {
 	if (!initialized)
 		return;
+
+	let {blockSize} = world;
+
 	// Update player
 	var serverPlayers = data.serverPlayers
 	updatePlayers(serverPlayers);
@@ -115,8 +124,8 @@ socket.on('update', function (data) {
 	var updatedEntities = data.entities;
 	for (let id in updatedEntities) {
 		let entity = updatedEntities[id];
-		if (entity.type == "item") {
-			world.entities[id].pos = entity.pos
+		if (entity.type == "item" && world.entities[id]) {
+			world.entities[id].pos = entity.pos;
 			if (world.entities[id].mesh.position.length() == 0) {
 				world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z)
 			}
@@ -129,6 +138,8 @@ socket.on('update', function (data) {
 	}
 
 	tick.value = data.tick;
+
+	socket.emit('latency', data.t);
 })
 
 socket.on('messageAll', function (data) {

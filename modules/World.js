@@ -98,24 +98,21 @@ module.exports = class World {
 
     // Block ids
 
-    this.blockId = {
-      "bedrock": 1,
-      "stone": 2,
-      "dirt": 3,
-      "cobblestone": 4,
-      "grass": 5,
-      "wood": 6,
-      "leaves": 7,
-      "coal_ore": 8,
-      "diamond_ore": 9,
-      "iron_ore": 10,
-      "gold_ore": 11,
-      "crafting_table": 12,
-      "planks": 13,
-      "water": 14
+    let blocks = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks"]
+
+    this.blockId = {}
+
+    for (let i = 0; i < blocks.length; i++) {
+      this.blockId[blocks[i]] = i+1;
+    }
+
+    this.itemId = {
+      "stick": 1,
+      "wood_sword": 2,
+      "wood_pickaxe": 3,
+      "wood_axe": 4,
     }
   }
-
   loadSaveFile(data) {
     this.seed = data.seed;
     rng1 = new SimplexNoise(this.seed);
@@ -128,7 +125,6 @@ module.exports = class World {
       this.cellDeltas[cellId] = RLEdecode(data.deltas[cellId])
     }
   }
-
   saveToFile(fs, io, filepath) {
     let deltas = {}
       for (let cellId in this.cellDeltas) {
@@ -155,7 +151,6 @@ module.exports = class World {
           })
       });
   }
-
   static euclideanModulo(a,b){return(a%b+b)%b}
   computeVoxelOffset(x, y, z) {
     const {cellSize, cellSliceSize} = this;
@@ -272,10 +267,6 @@ module.exports = class World {
 		};
 		return newArray;
   }
-  blockToID(blockName) {
-    return this.blockId[blockName]
-  }
-
   getHeight(xPos, zPos) {
     let size = 128
     let heightNoise = 128;
@@ -300,7 +291,6 @@ module.exports = class World {
     
     return Math.floor(e*heightNoise)+30;
   }
-
   generateCell(cellX, cellY, cellZ) {
   	let cell = this.cells[`${cellX},${cellY},${cellZ}`];
   	let cellExists = false;
@@ -364,7 +354,7 @@ module.exports = class World {
             blockID = "bedrock"; // Force bedrock layer
           }
 
-          blockID = this.blockToID(blockID);
+          blockID = this.blockId[blockID];
 
           this.setVoxel(xPos, yPos, zPos, blockID);
         }
@@ -388,7 +378,7 @@ module.exports = class World {
 					// Add trees?
 					if (tree) {
 						for (let y = 1; y < 6; y++) {
-							this.setVoxel(xPos, height+y, zPos, 6, true);
+							this.setVoxel(xPos, height+y, zPos, this.blockId["wood"]);
 						}
 
 						for (let y = 3; y <= 6; y++) {
@@ -396,22 +386,22 @@ module.exports = class World {
 								for (let x = -2; x <= 2; x++) {
 									for (let z = -2; z <= 2; z++) {
 										if (!(x == 0 && z == 0))
-											this.setVoxel(xPos+x, height+y, zPos+z, 7, true);
+											this.setVoxel(xPos+x, height+y, zPos+z, this.blockId["leaves"]);
 									}
 								}
 							} else if (y == 5) {
 								for (let x = -1; x <= 1; x++) {
 									for (let z = -1; z <= 1; z++) {
 										if (!(x == 0 && z == 0))
-											this.setVoxel(xPos+x, height+y, zPos+z, 7, true);
+											this.setVoxel(xPos+x, height+y, zPos+z, this.blockId["leaves"]);
 									}
 								}
 							} else {
 								for (let x = -1; x <= 1; x++) {
-									this.setVoxel(xPos+x, height+y, zPos, 7, true);
+									this.setVoxel(xPos+x, height+y, zPos, this.blockId["leaves"]);
 								}
 								for (let z = -1; z <= 1; z++) {
-									this.setVoxel(xPos, height+y, zPos+z, 7, true);
+									this.setVoxel(xPos, height+y, zPos+z, this.blockId["leaves"]);
 								}
 							}
 						}
@@ -457,20 +447,21 @@ module.exports = class World {
   		let entity = this.entities[entity_id];
   		if (entity.type == "item") {
   			// Delete entity if too long
-  			if (Date.now()-entity.t > 20000) {
+  			if (Date.now()-entity.t > 60000) {
   				// Remove the item from world
 					newEntities.push({
 						type: "remove_item",
 						id: entity.id,
-						v: entity.v
+						v: entity.v,
+            class: entity.class,
 					})
 					delete this.entities[entity_id];
   			}
 
         // Entity gravity
   			var x = Math.floor(entity.pos.x/blockSize);
-				var y = Math.floor((entity.pos.y)/blockSize);
-				var dy = Math.floor((entity.pos.y-2)/blockSize);
+				var y = Math.floor((entity.pos.y-4)/blockSize);
+				var dy = Math.floor((entity.pos.y-6)/blockSize);
 				var z = Math.floor(entity.pos.z/blockSize);
 
 				entity.acc = {x: 0, y: -9.81*blockSize, z: 0};
@@ -493,25 +484,27 @@ module.exports = class World {
 						let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
 
             // Add to player if within a block distance
-						if (dist < blockSize) {
-							// Add item to player's inventory
+						if (dist < blockSize*0.5) {
+							// Add item to player's inventory if item already exists in inventory
 							let added = false;
 							for (let t of p.toolbar) {
                 if (!t)
                   continue;
-								if (t.v == entity.v) {
+								if (t.v == entity.v && t.class == entity.class) {
 									t.c += 1;
 									added = true;
 								}
 							}
 
+              // Add item if item does not exist in inventory
 							if (!added) {
 								let filled = false;
 								for (let i = 0; i < p.toolbar.length; i++) {
 									if (!p.toolbar[i] || p.toolbar[i].c == 0) {
 										p.toolbar[i] = {
 											v: entity.v,
-											c: 1
+											c: 1,
+                      class: entity.class
 										}
 										filled = true;
                     break;
@@ -521,7 +514,8 @@ module.exports = class World {
 								if (!filled) {
 									p.toolbar.push({
 										v: entity.v,
-										c: 1
+										c: 1,
+                    class: entity.class
 									})
 								}
 							}
@@ -530,7 +524,8 @@ module.exports = class World {
 							newEntities.push({
 								type: "remove_item",
 								id: entity.id,
-								v: entity.v
+								v: entity.v,
+                class: entity.class
 							})
 							delete this.entities[entity_id];
 						}

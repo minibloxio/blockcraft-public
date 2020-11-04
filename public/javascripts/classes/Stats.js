@@ -13,8 +13,10 @@ class Stat {
 		let text = this.name + ": ";
 
 		let val = this.value;
-		if (this.func) {
-			val = this.func(this.value);
+		if (this.func && this.key) {
+			val = this.func(this.value[this.key]);
+		} else if (this.func) {
+			val = this.func(this.value)
 		}
 
 		if (this.key) {

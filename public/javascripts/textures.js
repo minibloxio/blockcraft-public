@@ -1,5 +1,5 @@
 
-var loader  = new THREE.TextureLoader();
+let loader  = new THREE.TextureLoader();
 	loader.setPath("textures/");
 
 class Texture {
@@ -48,21 +48,8 @@ class Texture {
 	}
 }
 
-// Initialize the texture atlas
-const texture_loader = new THREE.TextureLoader();
-const texture = texture_loader.load('./textures/blocks/texture-atlas.png');
-texture.magFilter = THREE.NearestFilter;
-texture.minFilter = THREE.NearestFilter;
-
-var material = new THREE.MeshLambertMaterial({
-  map: texture,
-  side: THREE.DoubleSide,
-  transparent: true,
-  depthWrite: true
-});
-
 // Font texture
-var fontLoader = new THREE.FontLoader();
+let fontLoader = new THREE.FontLoader();
 let minecraft_font = undefined;
 
 fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
@@ -70,24 +57,8 @@ fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
   loaded += 1;
 } );
 
-// Block textures
-var dirt = new Texture(['./blocks/dirt.png'])
-var grass_side = new Texture(['./blocks/grass-side.png'])
-var grass_top = new Texture(['./blocks/grass-top.png'])
-
-var grass_materials = [
-    grass_side.material,
-    grass_side.material,
-    grass_top.material,
-   	dirt.material,
-    grass_side.material,
-    grass_side.material
-];
-
-var grass = new Texture("grass", grass_materials );
-
 // Block breaking progress
-var mining_progress = [
+let mining_progress = [
   new Texture(['./progress/0.png']),
   new Texture(['./progress/1.png']),
   new Texture(['./progress/2.png']),
@@ -101,16 +72,163 @@ var mining_progress = [
   new Texture(['./progress/10.png']),
 ];
 
+// Texture Merger
+
+let material;
+loader.setPath("textures/blocks/");
+let block_names = ['water_clear', 'bedrock', 'stone', 'dirt', 'cobblestone', 'grass_side', 'grass_top', 'log_oak', 'log_oak_top', 'leaves_oak', 'coal_ore', 'diamond_ore', 'iron_ore', 'gold_ore', 'crafting_table_front', 'crafting_table_top', 'planks_oak']
+let blockFaces = {}
+let texture_atlas = undefined;
+
+function loadBlockImages() {
+  let loading_index = 0;
+  for (let block of block_names) {
+    let name = block + '.png'
+    blockFaces[block] = loader.load(name, function () {
+      loading_index += 1;
+      if (loading_index == block_names.length) {
+        mergeTextures();
+      }
+    })
+  }
+}
+loadBlockImages();  
+
+let blocks = {
+  "water": "water_clear",
+  "bedrock": "bedrock",
+  "stone": "stone",
+  "dirt": "dirt",
+  "cobblestone": "cobblestone",
+  "grass": ["grass_side", "dirt", "grass_top"],
+  "wood": ["log_oak", "log_oak_top", "log_oak_top"],
+  "leaves": "leaves_oak",
+  "coal_ore": "coal_ore",
+  "diamond_ore": "diamond_ore",
+  "iron_ore": "iron_ore",
+  "gold_ore": "gold_ore",
+  "crafting_table": ["crafting_table_front", "planks_oak", "crafting_table_top"],
+  "planks": "planks_oak"
+}
+
+function drawImageNet(ctx, entities) {
+  let index = 0;
+  for (let entity in entities) {
+    let b = entities[entity];
+    if (b instanceof Array) {
+      for (let i = 0; i < 3; i++) {
+        ctx.drawImage(blockFaces[b[i]].image, index*16, i*16)
+      }
+    } else {
+      ctx.drawImage(blockFaces[b].image, index*16, 0)
+      ctx.drawImage(blockFaces[b].image, index*16, 16)
+      ctx.drawImage(blockFaces[b].image, index*16, 32)
+    }
+    index++;
+  }
+}
+
+function makeCanvasPowerOfTwo(canvas) {
+  let oldWidth = canvas.width;
+  let oldHeight = canvas.height;
+  let newWidth = Math.pow(2, Math.round(Math.log(oldWidth) / Math.log(2)));
+  let newHeight = Math.pow(2, Math.round(Math.log(oldHeight) / Math.log(2)));
+  let newCanvas = document.createElement("canvas");
+  newCanvas.width = newWidth;
+  newCanvas.height = newHeight;
+  newCanvas.getContext("2d").drawImage(canvas, 0, 0, newWidth, newHeight);
+  return newCanvas;
+}
+
+function mergeTextures() {
+  let canvas = document.createElement("canvas");
+  let ctx = canvas.getContext("2d");
+  canvas.width = 256;
+  canvas.height = 64;
+
+  drawImageNet(ctx, blocks);
+
+  canvas = makeCanvasPowerOfTwo(canvas);
+
+  let texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.NearestFilter;
+  texture.magFilter = THREE.NearestFilter;
+
+  ctx.drawImage(texture.image, 500, 500)
+
+  material = new THREE.MeshLambertMaterial({
+    map: texture,
+    side: THREE.FrontSide,
+    transparent: true,
+    depthWrite: true
+  });
+
+  texture_atlas = texture.image;
+
+  console.log("Done stitching textures")
+  loaded += 1;
+}
+
+loader.setPath("textures/items/");
+
+let item_names = ['stick', 'wood_sword', 'wood_pickaxe', 'wood_axe']
+let items = {};
+let item_atlas = undefined;
+
+function loadItemImages() {
+  var loading_index = 0;
+  for (let item of item_names) {
+    let name = item + '.png'
+    items[item] = loader.load(name, function () {
+      loading_index += 1;
+      if (loading_index == item_names.length) {
+        mergeItemTextures();
+      }
+    })
+  }
+}
+
+loadItemImages();
+  
+function mergeItemTextures() {
+  let canvas = document.createElement("canvas");
+  let ctx = canvas.getContext("2d");
+  canvas.width = 256;
+  canvas.height = 64;
+
+  let index = 0;
+  for (let item in items) {
+    let b = items[item];
+    ctx.drawImage(b.image, index*16, 0)
+    index++;
+  }
+
+  canvas = makeCanvasPowerOfTwo(canvas);
+
+  let texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.NearestFilter;
+  texture.magFilter = THREE.NearestFilter;
+  texture.wrapS = undefined;
+  texture.wrapT = undefined;
+  texture.needsUpdate = true;
+
+  item_atlas = texture.image;
+
+  console.log("Done stitching item textures")
+}
+
+loader.setPath("textures/");
+
 // Player Textures
 
 // Head
-var head_front = new Texture(['./skin/head/front.png']);
-var head_top = new Texture(['./skin/head/top.png']);
-var head_right = new Texture(['./skin/head/right.png']);
-var head_left = new Texture(['./skin/head/left.png']);
-var head_back = new Texture(['./skin/head/back.png']);
-var head_bottom = new Texture(['./skin/head/bottom.png']);
-var head_materials = [
+let head_front = new Texture(['./skin/head/front.png']);
+let head_top = new Texture(['./skin/head/top.png']);
+let head_right = new Texture(['./skin/head/right.png']);
+let head_left = new Texture(['./skin/head/left.png']);
+let head_back = new Texture(['./skin/head/back.png']);
+let head_bottom = new Texture(['./skin/head/bottom.png']);
+let head_materials = [
     head_right.material,
     head_left.material,
     head_top.material,
@@ -119,17 +237,17 @@ var head_materials = [
     head_front.material
 ];
 
-var head = new Texture("head", head_materials );
+let head = new Texture("head", head_materials );
 
 // Body
-var body_front = new Texture(['./skin/body/front.png']);
-var body_back = new Texture(['./skin/body/back.png']);
-var body_top = new Texture(['./skin/body/top.png']);
-var body_bottom = new Texture(['./skin/body/bottom.png']);
-var body_right = new Texture(['./skin/body/right.png']);
-var body_left = new Texture(['./skin/body/left.png']);
+let body_front = new Texture(['./skin/body/front.png']);
+let body_back = new Texture(['./skin/body/back.png']);
+let body_top = new Texture(['./skin/body/top.png']);
+let body_bottom = new Texture(['./skin/body/bottom.png']);
+let body_right = new Texture(['./skin/body/right.png']);
+let body_left = new Texture(['./skin/body/left.png']);
 
-var body_materials = [
+let body_materials = [
     body_right.material,
     body_left.material,
     body_top.material,
@@ -138,18 +256,18 @@ var body_materials = [
     body_front.material
 ];
 
-var body = new Texture("body", body_materials );
+let body = new Texture("body", body_materials );
 
 // Arm
-var arm_front = new Texture(['./skin/arm/front.png']);
-var arm_back = new Texture(['./skin/arm/back.png']);
-var arm_top = new Texture(['./skin/arm/top.png']);
-var arm_bottom = new Texture(['./skin/arm/bottom.png']);
-var arm_right = new Texture(['./skin/arm/right.png']);
-var arm_left = new Texture(['./skin/arm/left.png']);
-var arm_right_side = new Texture(['./skin/arm/rightSide.png']);
+let arm_front = new Texture(['./skin/arm/front.png']);
+let arm_back = new Texture(['./skin/arm/back.png']);
+let arm_top = new Texture(['./skin/arm/top.png']);
+let arm_bottom = new Texture(['./skin/arm/bottom.png']);
+let arm_right = new Texture(['./skin/arm/right.png']);
+let arm_left = new Texture(['./skin/arm/left.png']);
+let arm_right_side = new Texture(['./skin/arm/rightSide.png']);
 
-var arm_materials = [
+let arm_materials = [
     arm_right.material,
     arm_left.material,
     arm_top.material,
@@ -158,18 +276,18 @@ var arm_materials = [
     arm_front.material
 ];
 
-var arm = new Texture("arm", arm_materials );
+let arm = new Texture("arm", arm_materials );
 
 
 
 // Side arm (for client player)
-var arm_frontC = new Texture(['./skin/arm/front.png']);
-var arm_backC = new Texture(['./skin/arm/back.png']);
-var arm_topC = new Texture(['./skin/arm/top.png']);
-var arm_leftC = new Texture(['./skin/arm/left.png']);
-var arm_right_sideC = new Texture(['./skin/arm/rightSide.png']);
+let arm_frontC = new Texture(['./skin/arm/front.png']);
+let arm_backC = new Texture(['./skin/arm/back.png']);
+let arm_topC = new Texture(['./skin/arm/top.png']);
+let arm_leftC = new Texture(['./skin/arm/left.png']);
+let arm_right_sideC = new Texture(['./skin/arm/rightSide.png']);
 
-var armC_materials = [
+let armC_materials = [
     arm_right_sideC.material,
     arm_leftC.material,
     arm_topC.material,
@@ -177,17 +295,17 @@ var armC_materials = [
     arm_backC.material,
     arm_frontC.material
 ];
-var armC = new Texture("armC", armC_materials );
+let armC = new Texture("armC", armC_materials );
 
 // Leg
-var leg_front = new Texture(['./skin/leg/front.png']);
-var leg_back = new Texture(['./skin/leg/back.png']);
-var leg_top = new Texture(['./skin/leg/top.png']);
-var leg_bottom = new Texture(['./skin/leg/bottom.png']);
-var leg_right = new Texture(['./skin/leg/right.png']);
-var leg_left = new Texture(['./skin/leg/left.png']);
+let leg_front = new Texture(['./skin/leg/front.png']);
+let leg_back = new Texture(['./skin/leg/back.png']);
+let leg_top = new Texture(['./skin/leg/top.png']);
+let leg_bottom = new Texture(['./skin/leg/bottom.png']);
+let leg_right = new Texture(['./skin/leg/right.png']);
+let leg_left = new Texture(['./skin/leg/left.png']);
 
-var leg_materials = [
+let leg_materials = [
     leg_right.material,
     leg_left.material,
     leg_top.material,
@@ -196,13 +314,13 @@ var leg_materials = [
     leg_front.material
 ];
 
-var leg = new Texture("leg", leg_materials );
+let leg = new Texture("leg", leg_materials );
 
 function loadSprite(path) {
   // Item sprites
-  var map = loader.load( path );
-  var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
-  var sprite = new THREE.Sprite( material );
+  let map = loader.load( path );
+  let material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
+  let sprite = new THREE.Sprite( material );
   sprite.scale.set(400, 400);
   return sprite;
 

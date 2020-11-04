@@ -100,10 +100,12 @@ io.on('connection', function(socket_) {
 		rot: {x: 0,y: 0,z: 0},
 		dir: {x: 0,y: 0,z: 0},
 		hp: 10,
-		toolbar: [],
+		dead: false,
+		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["wood"], c: 64, class: "block"}, {v: world.blockId["stone"], c: 64, class: "block"}],
 		walking: false,
 		punching: false,
-		pickupDelay: Date.now()
+		pickupDelay: Date.now(),
+		ping: [],
 	}
 
 	socket.on('join', function () {
@@ -141,6 +143,7 @@ io.on('connection', function(socket_) {
 		if (!players[socket.id])
 			return;
 
+		// Update player data
 		players[socket.id].pos = data.pos;
 		players[socket.id].vel = data.vel;
 		players[socket.id].onObject = data.onObject;
@@ -148,6 +151,17 @@ io.on('connection', function(socket_) {
 		players[socket.id].dir = data.dir;
 		players[socket.id].walking = data.walking;
 		players[socket.id].punching = data.punching;
+	})
+
+	// Receive latency check
+	socket.on('latency', function (tick) {
+		if (!players[socket.id])
+			return;
+
+		// Update ping
+		players[socket.id].ping.push(Date.now()-tick);
+		if (players[socket.id].ping.length > 30)
+			players[socket.id].ping.shift();
 	})
 
 	socket.on('updateInventory', function (data) {
@@ -159,13 +173,24 @@ io.on('connection', function(socket_) {
 
 	// Player interactivity
 	socket.on('respawn', function (data) {
-		if (players[socket.id])
+		if (players[socket.id]) {
 			players[socket.id].hp = 10;
+			players[socket.id].dead = false;
+		}
 	})
 
 	socket.on('punchPlayer', function (data) {
-		if (players[data.id]) {
-			players[data.id].hp -= data.crit ? 1 : 0.5;
+		if (players[data.id] && players[socket.id] && !players[socket.id].dead) {
+			let dmg = 0.5;
+
+			let entity = data.curr;
+
+			if (entity && entity.class == "item" && world.itemId["wood_sword"]) {
+				dmg = 2;
+			}
+
+			players[data.id].hp -= data.crit ? dmg*1.5 : dmg;
+			players[data.id].dmgType = players[socket.id].name;
 			io.to(`${data.id}`).emit('knockback', data)
 			io.emit('punch', data.id);
 		}
@@ -173,7 +198,8 @@ io.on('connection', function(socket_) {
 
 	socket.on('takeDamage', function (data) {
 		if (players[socket.id]) {
-			players[socket.id].hp -= data*0.5;
+			players[socket.id].hp -= data.dmg;
+			players[socket.id].dmgType = data.type;
 		}
 	})
 
@@ -193,6 +219,7 @@ io.on('connection', function(socket_) {
 				vel: {x: Function.random(2, -2), y: blockSize*2, z: Function.random(2, -2)},
 				acc: {x: 0, y: 0, z: 0},
 				type: "item",
+				class: "block",
 				v: data.v,
 				id: entityId
 			}
@@ -224,6 +251,7 @@ io.on('connection', function(socket_) {
 					vel: {x: data.dir.x*blockSize*3, y: blockSize*2, z: data.dir.z*blockSize*3},
 					acc: {x: 0, y: 0, z: 0},
 					type: "item",
+					class: data.class,
 					v: data.v,
 					id: entityId,
 					t: Date.now()
@@ -269,8 +297,9 @@ io.on('connection', function(socket_) {
 
 // Update server function
 let dt = 50;
+let autoSave = Date.now();
 setInterval(function () {
-	if (!world) 
+	if (!world || Object.keys(players).length == 0) 
 		return;
 
 	world.tick += 1;
@@ -282,10 +311,28 @@ setInterval(function () {
 		}
 	}
 
+	// Update players
+	for (let id in players) {
+		let player = players[id];
+
+		if (player.hp <= 0 && !player.dead) {
+			player.dead = true;
+			let txt = player.name;
+
+			if (player.dmgType == "fall")
+				txt += " fell off a cliff";
+			else
+				txt += " was slain by " + player.dmgType
+
+			io.emit('messageAll', {
+	            text: txt
+          	})
+		}
+	}
+
 	// Auto save
-	let autoSaveInterval = 120; // interval in seconds
-	let autoSave = Math.floor(world.tick % (autoSaveInterval*20) == 0)
-	if (autoSave) {
+	if (Date.now() - autoSave > 1000 * 60 * 5) {
+		autoSave = Date.now();
 		let path =  __dirname + '/saves/test.json';
   		world.saveToFile(fs, io, path);
 	}
@@ -298,7 +345,8 @@ setInterval(function () {
 		updatedBlocks: updatedBlocks,
 		newEntities: newEntities,
 		entities: world.entities,
-		tick: world.tick
+		tick: world.tick,
+		t: Date.now()
 	})
 
 	updatedBlocks = [];

@@ -157,7 +157,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData) {
           // voxel 0 is sky (empty) so for UVs we start at 0
           const uvVoxel = voxel - 1;
           // There is a voxel here but do we need faces for it?
-          if (voxel != 14) {
+          if (voxel != 1) {
             for (const {dir, corners, uvRow} of faces) {
 
               const neighbor = getVoxel(
@@ -165,7 +165,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData) {
                   voxelY + dir[1],
                   voxelZ + dir[2],
                   cellData);
-              if ((neighbor == 0 || neighbor == -1 || neighbor == 14)) {
+              if (neighbor == 0 || neighbor == -1 || neighbor == 1) {
                 // this voxel has no neighbor in this direction so we need a face.
                 addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
               }
@@ -173,7 +173,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData) {
             }
           }
 
-          if (voxel == 14) { // Water
+          if (voxel == 1) { // Water
             for (const {dir, corners, uvRow} of faces) {
 
               const neighbor = getVoxel(

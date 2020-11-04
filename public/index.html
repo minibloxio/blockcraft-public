@@ -164,6 +164,12 @@
 		<script src="javascripts/resources/sizeof.js"></script>
 		<script src="javascripts/resources/jquery.js"></script>
 		<script src="javascripts/resources/rle-encoding.js"></script>
+		<script src="javascripts/resources/GLTFLoader.js"></script>
+		<script src="javascripts/resources/DracoLoader.js"></script>
+		<script src="javascripts/resources/Inflate.min.js"></script>
+		<script src="javascripts/resources/FBXLoader.js"></script>
+		<script src="javascripts/resources/SimplexNoise.js"></script>
+		<script src="javascripts/resources/TextureMerger.js"></script>
 
 		<!-- Load Postprocessing -->
 		<script src="javascripts/postprocessing/EffectComposer.js"></script>
@@ -172,6 +178,8 @@
 		<script src="javascripts/postprocessing/ShaderPass.js"></script>
 		<script src="javascripts/postprocessing/CopyShader.js"></script>
 		<script src="javascripts/postprocessing/UnrealBloomPass.js"></script>
+		<script src="javascripts/postprocessing/SSAOPass.js"></script>
+		<script src="javascripts/postprocessing/SSAOShader.js"></script>
 		<script src="javascripts/postprocessing/LuminosityHighPassShader.js"></script>
 
 		<!-- Load Classes -->
@@ -182,10 +190,10 @@
 
 		<!-- Load Game Files -->
 		<script src="javascripts/pointerlock.js"></script>
-		<script src="javascripts/textures.js"></script>
 		<script src="javascripts/server.js"></script>
 		<script src="javascripts/lights.js"></script>
 		<script src="javascripts/core.js"></script>
+		<script src="javascripts/textures.js"></script>
 		<script src="javascripts/client.js"></script>
 		<script src="javascripts/input.js"></script>
 		<script src="javascripts/helper.js"></script>
@@ -221,6 +229,11 @@
 				<br />
 				<span id="cloudValue" class="slider-text">Clouds: ON</span>
 				<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px">
+				<br />
+				<br />
+				<span id="starsValue" class="slider-text">Stars: ON</span>
+				<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
+				
 
 				<p id="instructions-text">WASD to move. Shift to run. L-Alt to Sneak. R to respawn. E to open inventory. F to fly. Not affliated with Mojang.</p>
 
@@ -309,9 +322,11 @@
 				let shadowEffect = $("#shadowSlider")[0].value;
 				if (shadowEffect == 1) {
 					$("#shadowValue").text("Shadow Effect: ON");
+					light.dir.enableShadow = true;
 					light.dir.castShadow = true;
 				} else {
 					$("#shadowValue").text("Shadow Effect: OFF");
+					light.dir.enableShadow = false;
 					light.dir.castShadow = false;
 				}
 			})
@@ -326,6 +341,19 @@
 				} else {
 					$("#cloudValue").text("Cloud Effect: OFF");
 					light.generateClouds("remove");
+				}
+			})
+
+			// Star Effect
+
+			$("#starsSlider").on("change", function (e) {
+				let starsEffect = $("#starsSlider")[0].value;
+				if (starsEffect == 1) {
+					$("#starsValue").text("Stars: ON");
+					light.stars.visible = true;
+				} else {
+					$("#starsValue").text("Stars: OFF");
+					light.stars.visible = false;
 				}
 			})
 		</script>
