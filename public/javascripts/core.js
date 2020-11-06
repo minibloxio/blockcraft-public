@@ -8,8 +8,10 @@ $(document).ready(function () {
 })
 
 // Three.js
-let scene, renderer, world, light, sky, stats, composer, colorShader, inScreen;
+let scene, renderer, world, chunkManager, light, sky, stats, composer, colorShader, inScreen;
 let loaded = 0;
+let loadedAnimate = new Ola(0);
+let maxLoaded = 24;
 let tick = new Ola(0)
 
 let sprite = undefined;
@@ -30,7 +32,7 @@ var players = {};
 var rleWorker = new Worker('javascripts/workers/rle-worker.js');
 
 let voxelWorkers = [];
-for (let i = 0; i < 8; i++) {
+for (let i = 0; i < 4; i++) {
 	voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
 	voxelWorkers[i].addEventListener('message', e => {
 	  updateVoxelMesh(e);
@@ -50,12 +52,18 @@ function init() {
 	// Add world
 	world = new World();
 
+	// Add chunk manager
+	chunkManager = new ChunkManager();
+
 	// Add player
-	player = new Player(camera, 16);
+	player = new Player(camera);
 	scene.add( player.controls.getObject() );
 
 	// Add light
 	light = new Light();
+
+	// Add settings
+	addVideoControls();
 
     // Add statistics to record
     statistics.push(new Stat("Pos", player.position, false, 2, function (pos) {
@@ -120,6 +128,9 @@ function init() {
 	// Add resize event
 	window.addEventListener( 'resize', onWindowResize, false );
 
+	// Show welcome page
+	document.getElementById("welcome-button").click()
+
 	loaded += 1; // Increase loading stage
 }
 
@@ -133,13 +144,19 @@ function animate() {
 
 	delta = Math.min(delta, 0.1)
 
-	if (loaded == 3)
-		$("#start-button").text("Start")
+	// Animate start menu
+	if (loadedAnimate.value >= maxLoaded && $("#loading-bar").text() != "Start")
+		$("#loading-bar").text("Start")
+	loadedAnimate.value = loaded;
+	$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxLoaded)/maxLoaded)+"%")
 
 	// Player update
 	if (player.hp > 0 && initialized) {
 		player.update(delta, world);
 	}
+
+	// Update chunks
+	chunkManager.update(player);
 
 	// Update server players
 
@@ -167,7 +184,7 @@ function animate() {
 		vel: player.velocity,
 		onObject: player.onObject,
 		rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
-		dir: camera.getWorldDirection(), // Rotation of head
+		dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
 		walking: (new Vector(player.velocity.x, player.velocity.z)).getMag() > 2,
 		punching: player.punchT < 1
 	});

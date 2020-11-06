@@ -49,6 +49,9 @@ let inventory = [];
 let craftingGrid = [undefined, undefined, undefined, undefined];
 let craftingOutput = undefined;
 
+// Player tab
+let showPlayerTab = false;
+
 function withinItemFrame(xPos, yPos) {
 	return mouseX > xPos && mouseX < xPos + boxSize && mouseY > yPos && mouseY < yPos + boxSize;
 }
@@ -355,9 +358,11 @@ function displayToolbar() {
 }
 
 // Stats
-var showStats = true;
+let hud = {
+	showStats: true
+}
 function displayStats() {
-	if (showStats) {
+	if (hud.showStats) {
 		for (var i = 0; i < statistics.length; i++) {
 			let stat = statistics[i];
 			stat.display(i);
@@ -374,11 +379,12 @@ function addChat(options) {
 			text: options.text,
 			color: options.color,
 			name: options.name,
-			t: Date.now() // timestamp
+			t: Date.now(), // timestamp
+			discard: options.discard
 		}
 	)
 	hideChatTimer(options.timer || 5000);
-	if (chat.length > 10) {
+	if (chat.length > 100) {
 		chat.pop();
 	}
 }
@@ -386,8 +392,15 @@ function addChat(options) {
 function hideChatTimer(time) {
 	clearTimeout(hideChatId)
 	hideChatId = setTimeout(function () {
-		if (!showChatBar)
+		if (!showChatBar) {
 			showChat = false;
+
+			for (let i = chat.length-1; i>=0; i--) {
+				if (chat[i].discard) {
+					chat.splice(i, 1);
+				}
+			}
+		}
 	}, time)
 }
 hideChatTimer(5000);
@@ -487,7 +500,7 @@ function displayPlayerHealth() {
 }
 
 function displayPlayerTab() {
-	if (!map[9])
+	if (!showPlayerTab)
 		return;
 
 	let pad = 20;

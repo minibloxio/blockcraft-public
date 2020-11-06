@@ -16,10 +16,9 @@
 			}
 
 			body {
-				background-color: #ffffff;
+				background-color: black;
 				margin: 0;
 				overflow: hidden;
-				font-family: arial;
 
 			}
 
@@ -35,9 +34,8 @@
 				height: 100%;
 
 				text-align: center;
-				/*background-color: black;
-				background-image: url("https://blockcraft.victorwei.com/textures/blocks/dirt.png");
-				background-repeat: repeat;*/
+				background-image: url("https://blockcraft.victorwei.com/textures/dirt.png");
+				background-repeat: repeat;
 				z-index: 3;
 
 				font-family: "Minecraft-Regular";
@@ -92,38 +90,60 @@
 			    cursor: pointer; 
 			}
 
-			#settings {
-				position: absolute;
-				padding: 20px;
-				width: 50%;
-				left: 50vw;
-				top: 20%;
-				margin-left: -25vw;
-				text-align: left;
-				background-color: rgba(0, 0, 0, 0.5);
-			}
-
 			#name-input {
-				width: 20vw;
-				height: 4vw;
-				font-size: 2vw;
-			}
-
-			#name-container {
+				color: white;
+				font-family : inherit;
+				border: none;
+				text-decoration: none;
+				outline: none;
+				left: 10px;
 				width: 100%;
+				height: 10vh;
+				font-size: 40px;
+				box-sizing:border-box;
+				background-color: rgba(0, 0, 0, 0.5);
 				text-align: center;
 			}
 
+			#name-input::placeholder {
+				color: white;
+				text-align: center;
+			}
+
+			#name-input:focus::placeholder {
+			  	color: transparent;
+			}
+
+			#name-container {
+				position: absolute;
+				text-align: center;
+				width: calc(40% + 40px);
+				left: 50vw;
+				top: calc(62vh + 60px);
+				margin-left: -20vw;
+				background-color: rgba(0, 0, 0, 0.5);
+				z-index: 3;
+			}
+
 			#start-button {
-				width: 20vw;
-				height: 5vw;
+				color: white;
+				font-family : inherit;
+				width: 100%;
+				height: 10vh;
 				text-decoration: none;
 				border: none;
 				outline: none;
-				background-color: #d3d3d3;
 				cursor: pointer;
 				font-size: 40px;
-				margin: 0 auto;
+				background-color: rgba(0, 0, 0, 0);
+			}
+
+			#loading-bar {
+				width: 0%;
+				height: 100%;
+				background-color: green;
+				text-align: center;
+				line-height: 10vh;
 			}
 
 			#chat-input {
@@ -145,6 +165,139 @@
 
 			#chat-input::placeholder {
 				color: white;
+			}
+
+			/* Style the buttons that are used to open the tab content */
+			.tablinks {
+				color: white;
+				font-size: 20px;
+				font-family : inherit;
+				background-color: rgba(0, 0, 0, 0.5);
+				float: left;
+				border: none;
+				outline: none;
+				cursor: pointer;
+				height: 100%;
+				width: 33.3333%;
+				transition: 0.3s;
+			}
+
+			/* Change background color of buttons on hover */
+			#blocker button:hover {
+			  background-color: rgba(0, 0, 0, 0.6);
+			}
+
+			/* Create an active/current tablink class */
+			#blocker button.active {
+			  background-color: rgba(0, 0, 0, 0.7);
+			}
+
+			#nav {
+				position: absolute;
+				width: calc(40% + 40px);
+				height: 4vh;
+				left: 50vw;
+				top: 20%;
+				margin-left: -20vw;
+				text-align: left;
+				background-color: rgba(0, 0, 0, 0.5);
+				color: white;
+				font-family: "Minecraft-Regular";
+			}
+
+			/* Style the tab content */
+			.tabcontent {
+				border-top: none;
+				position: absolute;
+				width: 40%;
+				left: 50vw;
+				height: 40vh;
+				top: 24vh;
+				margin-left: -20vw;
+				text-align: left;
+				color: white;
+				background-color: rgba(0, 0, 0, 0.5);
+				padding: 20px;
+			}
+
+			#welcome {
+				padding: 20px;
+			}
+
+			#video-settings {
+				overflow-y: scroll;
+				padding: 20px;
+			}
+
+			#reset-video {
+				margin-top: 20px;
+				text-align: center;
+				line-height: 50px;
+				width: 100%;
+				height: 50px;
+				background-color: rgba(0, 0, 0, 0.5);
+			}
+
+			#reset-video:hover {
+				cursor: pointer;
+				background-color: rgba(0, 0, 0, 0.7);
+			}
+
+			#keyboard-settings {
+				overflow-y: scroll;
+			}
+
+			#reset-keyboard {
+				text-align: center;
+				line-height: 50px;
+				width: 100%;
+				height: 50px;
+				background-color: rgba(0, 0, 0, 0.5);
+			}
+
+			#reset-keyboard:hover {
+				cursor: pointer;
+				background-color: rgba(0, 0, 0, 0.7);
+			}
+
+			::-webkit-scrollbar {
+			  width: 20px;
+			}
+
+			/* Track */
+			::-webkit-scrollbar-track {
+			}
+			 
+			/* Handle */
+			::-webkit-scrollbar-thumb {
+			  background: rgba(0, 0, 0, 0.5);
+			}
+
+			/* Handle on hover */
+			::-webkit-scrollbar-thumb:hover {
+			  background: rgba(0, 0, 0, 0.7);
+			}
+
+			.change-key {
+				outline: none;
+				border: none;
+				text-decoration: none;
+				height: 30px;
+				float: right;
+				width: 150px;
+				background-color: rgba(0, 0, 0, 0.5);
+				font-size: 20px;
+				font-family: inherit;
+				color: white;
+				text-align: center;
+			}
+
+			.change-key::placeholder {
+				color: white;
+			}
+
+			.change-key:focus::placeholder {
+			  	color: transparent;
 			}
 
 		</style>
@@ -184,6 +337,7 @@
 
 		<!-- Load Classes -->
 		<script src="javascripts/classes/World.js"></script>
+		<script src="javascripts/classes/chunkManager.js"></script>
 		<script src="javascripts/classes/Player.js"></script>
 		<script src="javascripts/classes/Stats.js"></script>
 		<script src="javascripts/classes/Recipes.js"></script>
@@ -198,16 +352,30 @@
 		<script src="javascripts/input.js"></script>
 		<script src="javascripts/helper.js"></script>
 		<script src="javascripts/hud.js"></script>
-		<script src="javascripts/svg.js"></script>
+		<script src="javascripts/cookie.js"></script>
 		
 		<canvas id="canvas-hud"></canvas>
 
+
 		<div id="blocker">
 
-			<h1 id="title">BlockCraft</h1>
+			<div id="container">
+				<h1 id="title">BlockCraft</h1>
+				<div id="nav">
+					<button class="tablinks" onclick="changeTab(event, 'welcome')">Welcome</button>
+					<button class="tablinks" onclick="changeTab(event, 'video-settings')" id="welcome-button">Video</button>
+					<button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
+				</div>
+			</div>
 
-			<div id="settings">
-				<span id="sensitivityValue" class="slider-text">Sensitivity: 0.5</span>
+			<div id="welcome" class="tabcontent" style="display: none;">
+				<span>Welcome to BlockCraft!</span><br><br>
+				<span>This is a recreation of multiplayer Minecraft, but on the web.</span><br><br>
+				<span>Feel free to look around!</span><br><br>
+			</div>
+
+			<div id="video-settings" class="tabcontent">
+				<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
 				<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px">
 				<br />
 				<br />
@@ -233,19 +401,25 @@
 				<br />
 				<span id="starsValue" class="slider-text">Stars: ON</span>
 				<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
-				
+				<div id="reset-video">Reset to Default</div>
+			</div>
 
-				<p id="instructions-text">WASD to move. Shift to run. L-Alt to Sneak. R to respawn. E to open inventory. F to fly. Not affliated with Mojang.</p>
+			<div id="keyboard-settings" class="tabcontent" style="display: none;">
+			</div>
 
-				<div id ="name-container">
-					<input id="name-input" type="text" placeholder="Enter Username" maxlength="20">
-					<br />
-					<button id="start-button">Loading...</button>
+			<div id ="name-container">
+				<input autocomplete="off" id="name-input" type="text" placeholder="Enter Username" maxlength="20">
+				<br />
+				<div id="start-button">
+					<div id="loading-bar">
+						Loading...
+					</div>
 				</div>
 			</div>
+
 		</div>
 
-		<input id="chat-input" type="text" placeholder="> Press Enter to Chat" maxlength="100">
+		<input autocomplete="off" id="chat-input" type="text" placeholder="> Press Enter to Chat" maxlength="100">
 
 		<script type="x-shader/x-vertex" id="vertexshader">
 
@@ -278,83 +452,252 @@
 
 		<script>
 
-			// Remove warning
-			var originalWarning = console.warn; // back up the original method
-			console.warn = function(){}; // now warnings do nothing!
+			// Change tab
 
-			// Sensitivity
+			function changeTab(evt, cityName) {
+			  // Declare all variables
+			  var i, tabcontent, tablinks;
 
-			$("#sensitivitySlider").on("change mousemove", function (e) {
-				sens = $("#sensitivitySlider")[0].value/100;
-				$("#sensitivityValue").text("Sensitivity: " + sens);
-			})
+			  // Get all elements with class="tabcontent" and hide them
+			  tabcontent = document.getElementsByClassName("tabcontent");
+			  for (i = 0; i < tabcontent.length; i++) {
+			    tabcontent[i].style.display = "none";
+			  }
 
-			// Render Distance
+			  // Get all elements with class="tablinks" and remove the class "active"
+			  tablinks = document.getElementsByClassName("tablinks");
+			  for (i = 0; i < tablinks.length; i++) {
+			    tablinks[i].className = tablinks[i].className.replace(" active", "");
+			  }
 
-			$("#renderDistanceSlider").on("change mousemove", function (e) {
-				player.renderDistance = $("#renderDistanceSlider")[0].value;
-				$("#renderDistanceValue").text("Render Distance: " + player.renderDistance);
-			})
+			  // Show the current tab, and add an "active" class to the button that opened the tab
+			  document.getElementById(cityName).style.display = "block";
+			  evt.currentTarget.className += " active";
+			}
 
-			// Chunk Loading Rate
+			// Add keys
 
-			$("#chunkLoadingRateSlider").on("change mousemove", function (e) {
-				player.chunkLoadingRate = $("#chunkLoadingRateSlider")[0].value;
-				$("#chunkLoadingRateValue").text("Chunk Loading Rate: " + player.chunkLoadingRate);
-			})
+			let keyorder = [190, 191, 87, 65, 83, 68, 32, 16, 18, 70, 67, 81, 82, 88, 69, 9, 49, 50, 51, 52, 53, 54, 55, 56, 57];
+			let keymap = {
+				190: ["Attack", "."],
+				191: ["Place Block", "/"],
+				87: ["Move Forward", "W"],
+				65: ["Move Left", "A"],
+				83: ["Move Backward", "S"],
+				68: ["Move Right", "D"],
+				32: ["Jump", "SPACE"],
+				16: ["Sprint", "SHIFT"],
+				18: ["Sneak", "ALT"],
+				70: ["Fly", "F"],
+				67: ["Clip", "C"],
+				81: ["Drop Item", "Q"],
+				82: ["Respawn", "R"],
+				88: ["Zoom", "X"],
+				69: ["Open Inventory", "E"],
+				9: ["Player Tab", "TAB"],
+				49: ["Slot 1", "1"],
+				50: ["Slot 2", "2"],
+				51: ["Slot 3", "3"],
+				52: ["Slot 4", "4"],
+				53: ["Slot 5", "5"],
+				54: ["Slot 6", "6"],
+				55: ["Slot 7", "7"],
+				56: ["Slot 8", "8"],
+				57: ["Slot 9", "9"],
+			}
+			let savedKeymap = JSON.stringify(keymap);
+			let savedKeyorder = JSON.stringify(keyorder);
 
-			// Statistics
+			function addKeyControls() {
+				$("#keyboard-settings").empty();
 
-			$("#statsSlider").on("change", function (e) {
-				let stats = $("#statsSlider")[0].value;
-				if (stats == 1) {
-					$("#statsValue").text("Statistics: ON");
-					showStats = true;
-				} else {
-					$("#statsValue").text("Statistics: OFF");
-					showStats = false;
+				keymap = JSON.parse(savedKeymap);
+
+				// Adjust to cookies
+				let adjust = [];
+				for (let i = 0; i < keyorder.length; i++) {
+					let key = keyorder[i];
+					let cookie = getCookie(keymap[key][0]);
+					if (cookie) {
+						cookie = cookie.split(",");
+
+						delete keymap[key];
+
+						adjust.push(cookie);
+
+						keyorder[i] = cookie[0]
+					}
 				}
-			})
 
-			// Shadow Effect
-
-			$("#shadowSlider").on("change", function (e) {
-				let shadowEffect = $("#shadowSlider")[0].value;
-				if (shadowEffect == 1) {
-					$("#shadowValue").text("Shadow Effect: ON");
-					light.dir.enableShadow = true;
-					light.dir.castShadow = true;
-				} else {
-					$("#shadowValue").text("Shadow Effect: OFF");
-					light.dir.enableShadow = false;
-					light.dir.castShadow = false;
+				for (let cookie of adjust) {
+					keymap[cookie[0]] = [cookie[1], cookie[2]]
 				}
-			})
 
-			// Cloud Effect
-
-			$("#cloudSlider").on("change", function (e) {
-				let cloudEffect = $("#cloudSlider")[0].value;
-				if (cloudEffect == 1) {
-					$("#cloudValue").text("Cloud Effect: ON");
-					light.generateClouds("add");
-				} else {
-					$("#cloudValue").text("Cloud Effect: OFF");
-					light.generateClouds("remove");
+				// Add the key binds
+				for (let key of keyorder) {
+					let keyHTML = $('<div class="key"><span>' + keymap[key][0] + '</span><input class="change-key" placeholder="' + keymap[key][1] + '" data-keycode="' + key + '" readonly></div><br>')
+					$("#keyboard-settings").append(keyHTML)
+					keymap[key][2] = keymap[key][2] != undefined ? keymap[key][2] : true; // Enable
+					keymap[key][3] = keyHTML[0]
+					keymap[key][3].children[1].savedKey = key;
 				}
-			})
 
-			// Star Effect
+				$("#keyboard-settings").append('<div id="reset-keyboard">Reset to Default</div>')
 
-			$("#starsSlider").on("change", function (e) {
-				let starsEffect = $("#starsSlider")[0].value;
-				if (starsEffect == 1) {
-					$("#starsValue").text("Stars: ON");
-					light.stars.visible = true;
+				$(".change-key").on('keydown', function (e) {
+					if (e.keyCode == 32 || e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 18)
+						e.preventDefault();
+				})
+
+				$(".change-key").on('keyup', function (e) {
+					let old_key = e.target.getAttribute("data-keycode");
+					e.target.style.color = "white";
+					let action = e.key;
+					if (e.key == " ")
+						action = "SPACE"
+
+					if (e.keyCode == old_key) {
+						keymap[old_key][2] = true;
+						e.target.value = action.toUpperCase();
+						return;
+					}
+					
+					if (action == "Escape") {
+						e.target.value = "NONE";
+						keymap[old_key][2] = false;
+						//console.log("Escape")
+
+						setCookie(keymap[old_key][0], [old_key, keymap[old_key][0], keymap[old_key][1]], 1)
+					} else if (keymap[e.keyCode] && keymap[old_key][2]) {
+						e.target.value = action.toUpperCase();
+						e.target.savedKey = e.keyCode;
+						e.target.style.color = "red";
+						//console.log("Error")
+					} else {
+						keymap[old_key][2] = true;
+						e.target.setAttribute("data-keycode", e.keyCode);
+						Object.defineProperty(keymap, e.keyCode,
+					        Object.getOwnPropertyDescriptor(keymap, old_key));
+					    delete keymap[old_key];
+						e.target.value = action.toUpperCase();
+						e.target.savedKey = e.keyCode;
+						//console.log("Replace")
+
+						for (let i = 0; i < keyorder.length; i++) {
+							if (keyorder[i] == old_key)
+								keyorder[i] = e.keyCode
+						}
+
+						setCookie(keymap[e.keyCode][0], [e.keyCode, keymap[e.keyCode][0], action.toUpperCase()], 1)
+					}
+
+					// Check if key has been cleared up
+					for (let key in keymap) {
+						let currKey = key;
+						let shownKey = keymap[key][3].children[1].savedKey;
+						if (shownKey && currKey != shownKey && keymap[shownKey]) {
+
+							if (keymap[shownKey][3].children[1].style.color == "red" || keymap[shownKey][3].children[1].value == "NONE") {
+								
+								let copy = Object.getOwnPropertyDescriptor(keymap, shownKey);
+								Object.defineProperty(keymap, shownKey,
+							        Object.getOwnPropertyDescriptor(keymap, currKey));
+								Object.defineProperty(keymap, currKey,
+							        copy);
+								keymap[currKey][3].children[1].style.color = "white";
+								keymap[shownKey][3].children[1].style.color = "white";
+
+								keymap[currKey][3].children[1].savedKey = currKey;
+								keymap[shownKey][3].children[1].savedKey = shownKey;
+
+								keymap[currKey][3].children[1].setAttribute("data-keycode", currKey);
+								keymap[shownKey][3].children[1].setAttribute("data-keycode", shownKey);
+
+								setCookie(keymap[currKey][0], [currKey, keymap[currKey][0], keymap[shownKey][1]], 1)
+								setCookie(keymap[shownKey][0], [shownKey, keymap[shownKey][0], keymap[currKey][1]], 1)
+
+								//console.log(currKey, shownKey , "SWITCHABLE")
+							}
+						}
+					}
+				})
+
+				$(".change-key").on('blur', function (e) {
+					if (e.target.value) {
+						e.target.placeholder = e.target.value;
+						e.target.value = "";
+					}
+				})
+
+				$("#reset-keyboard").click(function () {
+					for (let key of keyorder) {
+						deleteCookie(keymap[key][0])
+					}
+
+					keyorder = JSON.parse(savedKeyorder)
+
+					addKeyControls();
+				})
+			}
+			addKeyControls();
+
+			function addSliderControl(name, id, defaultValue, object, key) {
+				// Sensitivity
+				if (getCookie(name)) {
+					object[key] = parseFloat(getCookie(name));
 				} else {
-					$("#starsValue").text("Stars: OFF");
-					light.stars.visible = false;
+					object[key] = defaultValue;
 				}
+				$("#" + id + "Value").text(name + ": " + object[key]);
+				$("#" + id + "Slider")[0].value = object[key]
+				$("#" + id + "Slider").off();
+				$("#" + id + "Slider").on("change mousemove", function (e) {
+					object[key] = $("#" + id + "Slider")[0].value;
+					$("#" + id + "Value").text(name + ": " + object[key]);
+					setCookie(name, object[key], 7);
+				})
+			}
+
+			function addVideoControls() {
+				addSliderControl("Sensitivity", "sensitivity", 50, player, "sens")
+				addSliderControl("Render Distance", "renderDistance", 8, chunkManager, "renderDistance")
+				addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
+
+				addSwitchControl("Statistics", "stats", true, hud, "showStats")
+				addSwitchControl("Shadow Effect", "shadow", false, light.dir, "enableShadow", "castShadow")
+				addSwitchControl("Clouds", "cloud", true, light, "showClouds", "generate")
+				addSwitchControl("Stars", "stars", true, light.stars, "visible")
+			}
+
+			function addSwitchControl(name, id, defaultValue, object, key, key2) {
+				if (getCookie(name)) {
+					object[key] = getCookie(name) == "true" ? true : false;
+					if (key2)
+						object[key2] = object[key];
+				} else {
+					object[key] = defaultValue;
+					if (key2)
+						object[key2] = object[key];
+				}
+				$("#" + id + "Value").text(name + ": " + (object[key] ? "ON" : "OFF"));
+				$("#" + id + "Slider")[0].value = object[key] ? 1 : 0;
+				$("#" + id + "Slider").off();
+				$("#" + id + "Slider").on("change", function (e) {
+					object[key] = $("#" + id + "Slider")[0].value == "1" ? true : false;
+					if (key2)
+						object[key2] = object[key];
+					$("#" + id + "Value").text(name + ": " + (object[key] ? "ON" : "OFF"));
+					setCookie(name, object[key], 7);
+				})
+			}
+
+			$("#reset-video").click(function () {
+				let videoCookies = ["Sensitivity", "Render Distance", "Chunk Loading Rate", "Statistics", "Shadow Effect", "Clouds", "Stars"];
+				for (let cookie of videoCookies) {
+					deleteCookie(cookie)
+				}
+
+				addVideoControls();
 			})
 		</script>
 	</body>

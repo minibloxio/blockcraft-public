@@ -1,18 +1,22 @@
 let world, cells;
 
 self.addEventListener('message', e => {
-  [world, cellData, cells] = e.data;
+  if (e.data.cellSize) {
+    world = e.data;
+  } else {
+    cells = e.data;
 
-  let result = [];
+    let result = [];
 
-  for (let cell of cells) {
-     let [cellX, cellY, cellZ, cellId] = cell;
-     let geometryData = generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData);
+    for (let cell of cells) {
+       let [cellX, cellY, cellZ, cellId] = cell;
+       let geometryData = generateGeometryDataForCell(cellX, cellY, cellZ, world);
 
-     result.push([geometryData, cellX, cellY, cellZ, cellId])
+       result.push([geometryData, cellX, cellY, cellZ, cellId])
+    }
+
+    self.postMessage(result);
   }
-
-	self.postMessage(result);
 });
 
 let faces = [
@@ -98,12 +102,12 @@ function computeCellId(x, y, z) {
 	return `${cellX},${cellY},${cellZ}`;
 	}
 
-function getCellForVoxel(x, y, z, cellData) {
-    return cellData[computeCellId(x, y, z)];
+function getCellForVoxel(x, y, z) {
+    return world.cells[computeCellId(x, y, z)];
 }
 
-function getVoxel(x, y, z, cellData) {
-	const cell = getCellForVoxel(x, y, z, cellData);
+function getVoxel(x, y, z) {
+	const cell = getCellForVoxel(x, y, z);
 	if (!cell) {
 	  return -1;
 	}
@@ -132,7 +136,7 @@ function addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y
     );
   }
 
-function generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData) {
+function generateGeometryDataForCell(cellX, cellY, cellZ, world) {
 
     const {cellSize, tileSize, tileTextureWidth, tileTextureHeight} = world;
     const positions = [];
@@ -149,7 +153,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData) {
         const voxelZ = startZ + z;
         for (let x = 0; x < cellSize; ++x) {
           const voxelX = startX + x;
-          const voxel = getVoxel(voxelX, voxelY, voxelZ, cellData);
+          const voxel = getVoxel(voxelX, voxelY, voxelZ);
 
           if (voxel <= 0)
             continue;
@@ -163,9 +167,8 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData) {
               const neighbor = getVoxel(
                   voxelX + dir[0],
                   voxelY + dir[1],
-                  voxelZ + dir[2],
-                  cellData);
-              if (neighbor == 0 || neighbor == -1 || neighbor == 1) {
+                  voxelZ + dir[2]);
+              if (neighbor <= 1 || neighbor == 255) {
                 // this voxel has no neighbor in this direction so we need a face.
                 addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
               }
@@ -179,8 +182,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, cellData) {
               const neighbor = getVoxel(
                   voxelX + dir[0],
                   voxelY + dir[1],
-                  voxelZ + dir[2],
-                  cellData);
+                  voxelZ + dir[2]);
               if (neighbor == 0) {
                 // this voxel has no neighbor in this direction so we need a face.
                 addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)

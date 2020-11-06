@@ -5,8 +5,6 @@ $('html').mousedown(function(event) {
 		return;
     switch (event.which) {
         case 1:
-            player.key.leftClick = Date.now();
-            player.punching = Date.now();
             player.punch();
             break;
         case 2:
@@ -130,85 +128,82 @@ var onKeyDown = function ( event ) {
 
 	if (!player.controls.enabled || showChatBar)
 		return;
-	switch ( event.keyCode ) {
 
-		case 38: 
+	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
+		switch ( keymap[event.keyCode][0] ) {
+			case "Attack":
+			player.punch();
 			break;
-		case 37: 
-			break;
-		case 40: 
-			break;
-		case 39: 
-			break;
-
-		case 49:
-			player.currentSlot = 0;
-			break;
-		case 50:
-			player.currentSlot = 1;
-			break;
-		case 51:
-			player.currentSlot = 2;
-			break;
-		case 52:
-			player.currentSlot = 3;
-			break;
-		case 53:
-			player.currentSlot = 4;
-			break;
-		case 54:
-			player.currentSlot = 5;
-			break;
-		case 55:
-			player.currentSlot = 6;
-			break;
-		case 56:
-			player.currentSlot = 7;
-			break;
-		case 57:
-			player.currentSlot = 8;
-			break;
-		case 58:
-			player.currentSlot = 9;
-			break;
-
-		case 87: // w
-			player.key.forward = 1;
-			break;
-		case 65: // a
-			player.key.left = 1; 
-			break;
-		case 83: // s
-			player.key.backward = -1;
-			break;
-		case 68: // d
-			player.key.right = -1;
-			break;
-
-		case 32: // space
-			player.key.up = -1;
-			if (player.velocity.y > 0 && player.flyingEnabled) {
-				player.fly = true;
-			}
-			break;
-
-		case 16:
-			player.key.sprint = true;
-			break;
-
-		case 18:
-			player.key.sneak = true;
-			player.key.down = 1;
-			break;
-
-		case 191:
+			case "Place Block":
 			player.place = true;
 			player.key.rightClick = Date.now();
 			break;
-
-		case 88:
-			camera.fov = 30;
+			case "Move Forward":
+			player.key.forward = 1;
 			break;
+			case "Move Left":
+			player.key.left = 1; 
+			break;
+			case "Move Backward":
+			player.key.backward = -1;
+			break;
+			case "Move Right":
+			player.key.right = -1;
+			break;
+			case "Jump":
+			player.key.up = -1;
+			break;
+			case "Sprint":
+			player.key.sprint = true;
+			break;
+			case "Sneak":
+			player.key.sneak = true;
+			player.key.down = 1;
+			break;
+			case "Fly":
+			break;
+			case "Clip":
+			break;
+			case "Drop Item":
+			player.dropItem();
+			break;
+			case "Respawn":
+			break;
+			case "Zoom":
+			camera.zoom = zoomLevel;
+			camera.enableZoom = true;
+			break;
+			case "Player Tab":
+			showPlayerTab = true;
+			break;
+			case "Slot 1":
+			player.currentSlot = 0;
+			break;
+			case "Slot 2":
+			player.currentSlot = 1;
+			break;
+			case "Slot 3":
+			player.currentSlot = 2;
+			break;
+			case "Slot 4":
+			player.currentSlot = 3;
+			break;
+			case "Slot 5":
+			player.currentSlot = 4;
+			break;
+			case "Slot 6":
+			player.currentSlot = 5;
+			break;
+			case "Slot 7":
+			player.currentSlot = 6;
+			break;
+			case "Slot 8":
+			player.currentSlot = 7;
+			break;
+			case "Slot 9":
+			player.currentSlot = 8;
+			break;
+		}
 	}
 };
 
@@ -218,67 +213,62 @@ var onKeyUp = function ( event ) {
 	if (event.keyCode == 13)
 		showChatFlag = true;
 
-	if (showChatBar)
+	if (!player.controls.enabled || showChatBar)
 		return;
 
-	switch( event.keyCode ) {
-		case 88:
-			camera.fov = 75;
+	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
+		switch ( keymap[event.keyCode][0] ) {
+			case "Attack":
 			break;
-		case 70: // Fly
-			player.fly = !player.fly;
-			break;
-		case 38: // up
-		case 87: // w
-			player.key.forward = 0;
-			break;
-
-		case 37: // left
-		case 65: // a
-			player.key.left = 0;
-			break;
-
-		case 40: // down
-		case 83: // s
-			player.key.backward = 0;
-			break;
-
-		case 39: // right
-		case 68: // d
-			player.key.right = 0;
-			break;
-
-		case 32:
-			player.key.up = 0;
-			break;
-		case 16:
-			player.key.sprint = false;
-			break;
-
-		case 18:
-			player.key.sneak = false;
-			player.key.down = 0;
-			break;
-
-		case 82:
-			let resetHeight = blockSize*100;
-			player.prevHeight = undefined;
-			player.position.set(0, resetHeight, 0);
-			player.controls.getObject().position['y'] = resetHeight;
-			player.savedPosition['y'] = resetHeight;
-			player.velocity.y = 0
-			socket.emit('respawn');
-			break;
-
-		case 67:
-			if (player.controls.enabled)
-				player.clip = !player.clip;
-			break;
-
-		case 191:
+			case "Place Block":
 			player.place = false;
 			player.key.rightClick = false;
 			break;
+			case "Move Forward":
+			player.key.forward = 0;
+			break;
+			case "Move Left":
+			player.key.left = 0;
+			break;
+			case "Move Backward":
+			player.key.backward = 0;
+			break;
+			case "Move Right":
+			player.key.right = 0;
+			break;
+			case "Jump":
+			player.key.up = 0;
+			break;
+			case "Sprint":
+			player.key.sprint = false;
+			break;
+			case "Sneak":
+			player.key.sneak = false;
+			player.key.down = 0;
+			break;
+			case "Fly":
+			player.fly = !player.fly;
+			break;
+			case "Clip":
+			if (player.controls.enabled)
+				player.clip = !player.clip;
+			break;
+			case "Drop Item":
+			player.allowDrop = true;
+			break;
+			case "Respawn":
+			player.respawn(world.blockSize);
+			socket.emit('respawn');
+			break;
+			case "Zoom":
+			zoomLevel = 3;
+			camera.enableZoom = false;
+			camera.zoom = 1;
+			break;
+			case "Player Tab":
+			showPlayerTab = false;
+			break;
+		}
 	}
 };
 
@@ -288,16 +278,29 @@ document.addEventListener( 'keyup', onKeyUp, false );
 
 // Scrolling
 var lastScrollTop = 0, delta = 5;
+let zoomLevel = 3
 $(document).bind('mousewheel', function(e) {
-    if(e.originalEvent.wheelDelta / 120 > 0) {
-        player.currentSlot -= 1;
-        if (player.currentSlot < 0)
-        	player.currentSlot = 8;
-    } else {
-        player.currentSlot += 1;
-        if (player.currentSlot > 8)
-        	player.currentSlot = 0;
-    }
+	if (!player.controls.enabled)
+		return;
+
+	if (camera.enableZoom) {
+		if(e.originalEvent.wheelDelta / 120 > 0) {
+			zoomLevel = clamp(zoomLevel+0.2, -10, 10);
+	    } else {
+	        zoomLevel = clamp(zoomLevel-0.2, -10, 10);
+	    }
+	    camera.zoom = zoomLevel;
+	} else {
+		if(e.originalEvent.wheelDelta / 120 > 0) {
+	        player.currentSlot -= 1;
+	        if (player.currentSlot < 0)
+	        	player.currentSlot = 8;
+	    } else {
+	        player.currentSlot += 1;
+	        if (player.currentSlot > 8)
+	        	player.currentSlot = 0;
+	    }
+	} 
 });
 
 // Blur & Focus

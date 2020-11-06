@@ -101,7 +101,7 @@ io.on('connection', function(socket_) {
 		dir: {x: 0,y: 0,z: 0},
 		hp: 10,
 		dead: false,
-		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["wood"], c: 64, class: "block"}, {v: world.blockId["stone"], c: 64, class: "block"}],
+		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["wood"], c: 64, class: "block"}, {v: world.blockId["stone"], c: 64, class: "block"}, {v: world.blockId["water"], c: 64, class: "block"}],
 		walking: false,
 		punching: false,
 		pickupDelay: Date.now(),
@@ -186,7 +186,7 @@ io.on('connection', function(socket_) {
 			let entity = data.curr;
 
 			if (entity && entity.class == "item" && world.itemId["wood_sword"]) {
-				dmg = 2;
+				dmg = 1.5;
 			}
 
 			players[data.id].hp -= data.crit ? dmg*1.5 : dmg;
@@ -242,7 +242,7 @@ io.on('connection', function(socket_) {
 		for (let t of players[socket.id].toolbar) {
 			if (!t)
 				continue;
-			if (t.v == data.v) {
+			if (t.v == data.v && t.class == data.class) {
 				t.c = Math.max(0, t.c-1);
 
 				let entityId = Function.randomString(5);

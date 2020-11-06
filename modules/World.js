@@ -147,7 +147,8 @@ module.exports = class World {
           console.log(txt)
           io.emit('messageAll', {
             text: txt,
-            color: "purple"
+            color: "purple",
+            discard: true
           })
       });
   }

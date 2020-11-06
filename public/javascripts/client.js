@@ -8,6 +8,9 @@ socket.on('init', function (data) {
 	// Receive common world attritutes
 	Object.assign(world, data.world)
 
+	// Initalize player
+	player.init(world.blockSize);
+
 	// Initialize recipes
 	initRecipes();
 
@@ -39,18 +42,38 @@ socket.on('init', function (data) {
 // Update chunk
 
 socket.on('receiveChunk', function (data) {
-	for (let chunk of data) {
-		rleWorker.postMessage(chunk); // Send decoding to the rleWorker
-	}
+	rleWorker.postMessage(data); // Send decoding to the rleWorker
 })
 
 rleWorker.addEventListener('message', e => {
-	let chunk = e.data;
+	let {cellSize} = world;
 
-	let cellId = [`${chunk.pos.x},${chunk.pos.y},${chunk.pos.z}`];
-	world.cells[cellId] = chunk.cell;
+	for (let chunk of e.data) {
+		let cellId = `${chunk.pos.x},${chunk.pos.y},${chunk.pos.z}`;
 
-	player.chunksToLoad.push(chunk.pos)
+		world.cells[cellId] = new Uint8Array(new SharedArrayBuffer(16 * 16 * 16));
+		world.cells[cellId].set(chunk.cell);
+
+		chunk.pos.id = cellId;
+
+		chunkManager.chunksToLoad.push(chunk.pos)
+	}
+
+	let worldData = {
+	    cellSize: world.cellSize,
+	    cellSliceSize: world.cellSliceSize,
+	    tileSize: world.tileSize,
+	    tileTextureWidth: world.tileTextureWidth,
+	    tileTextureHeight: world.tileTextureHeight,
+	    blockSize: world.blockSize,
+	    blockUVS: world.blockUVS,
+	    blockId: world.blockId,
+	    cells: world.cells,
+	} 
+
+	for (let voxelWorker of voxelWorkers) {
+		voxelWorker.postMessage(worldData);
+	}
 })
 
 // Add newcoming players
@@ -84,7 +107,7 @@ socket.on('knockback', function (data) {
 	lateralForce.normalize();
 	lateralForce.mult(data.force);
 	player.knockbackVelocity.x = lateralForce.x;
-	player.knockbackVelocity.y = data.force;
+	player.knockbackVelocity.y = 300;
 	player.knockbackVelocity.z = lateralForce.y;
 })
 
@@ -146,7 +169,8 @@ socket.on('messageAll', function (data) {
 	addChat({
 		text: data.text,
 		color: data.color,
-		name: data.name
+		name: data.name,
+		discard: data.discard
 	})
 })
 

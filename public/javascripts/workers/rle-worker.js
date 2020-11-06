@@ -1,7 +1,10 @@
 self.addEventListener('message', e => {
-	let chunk = e.data;
-	chunk.cell = RLEdecode(chunk.cell);
-	self.postMessage(chunk);
+	let result = [];
+	for (let chunk of e.data) {
+		chunk.cell = RLEdecode(chunk.cell);
+		result.push(chunk);
+	}
+	self.postMessage(result)
 });
 
 

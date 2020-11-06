@@ -1,16 +1,15 @@
 // Classes
 
 class Player {
-	constructor(camera, blockSize) {
+	constructor(camera) {
 		// 3d stuff
-		this.controls = new THREE.PointerLockControls( camera );;
-		this.controls.getObject().position.y += blockSize*75;
+		this.controls = new THREE.PointerLockControls( camera );
 		this.camera = camera;
-		this.cameraHeight = blockSize * 1.75;
+
+		// Sensitivity
+		this.sens = 0.5;
 
 		// Ray casting
-
-		this.raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, blockSize*1.62);; // collision detection
 		this.selectcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ));; // block selecting / breaking / placing
 
 		// Collision helper
@@ -36,7 +35,6 @@ class Player {
 		this.distanceMoved = 0;
 
 		this.fly = false;
-		this.flyingEnabled = false; // Flying is not smooth
 		this.clip = true;
 		
 		this.onObject = false; // Sees if player is on object
@@ -59,7 +57,7 @@ class Player {
 
 		// World interaction
 		this.click = false;
-		this.prevSelect = undefined;
+		this.prevBlock = undefined;
 
 		this.place = false;
 		this.placeType = 2; // Type of block being placed
@@ -68,7 +66,9 @@ class Player {
 		this.drop = false; // Drop item
 
 		this.lastRaycast = Date.now();
+	}
 
+	init(blockSize) {
 		// Player appearance
 
 		this.halfWidth = blockSize * 0.3;
@@ -97,16 +97,6 @@ class Player {
 		// Player info
 		this.hp = 10;
 
-		// Chunk loading
-		this.chunksToRequest = [];
-		this.chunksToLoad = [];
-		this.chunksToUnload = [];
-
-		this.renderDistance = 8;
-		this.chunkLoadingRate = 1;
-		this.chunkTick = Date.now();
-		this.chunkDelay = 100;
-
 		// Hand
 		this.addBody();
 		
@@ -125,6 +115,18 @@ class Player {
 		// Inventory
 		this.currentSlot = 0;
 		this.toolbar = [];
+
+		// Spawn
+		this.respawn(blockSize);
+	}
+
+	respawn(blockSize) {
+		let resetHeight = blockSize*100;
+		player.prevHeight = undefined;
+		player.position.set(0, resetHeight, 0);
+		player.controls.getObject().position['y'] = resetHeight;
+		player.savedPosition['y'] = resetHeight;
+		player.velocity.y = 0
 	}
 
 	getCurrItem() {
@@ -333,6 +335,12 @@ class Player {
 			this.mine_box.position.set(x, y, z);
 			this.select_wireframe.position.set(x, y, z);
 			this.select_wireframe.visible = true;
+
+			if (this.prevBlock && !this.prevBlock.equals(new THREE.Vector3(x, y, z)) && this.key.leftClick) {
+				this.key.leftClick = Date.now();
+				this.prevBlock = new THREE.Vector3(x, y, z);
+				this.mine_box.material = mining_progress[0].material
+			}
 		} else {
 			this.select_wireframe.visible = false;
 		}
@@ -345,12 +353,14 @@ class Player {
 
 		let {blockSize} = world;
     	this.selectcaster.far = blockSize * 4;
+    	this.key.leftClick = Date.now();
+        this.punching = Date.now();
 
     	let playerBoxes = [];
     	for (let id in players) {
     		playerBoxes.push(players[id].skeleton);
     	}
-		var intersects = this.selectcaster.intersectObjects(playerBoxes, true);
+		var intersects = this.selectcaster.intersectObjects(scene.children, true);
 
 		var picked = []
 		for (var i = 0; i < intersects.length; i++) {
@@ -366,12 +376,17 @@ class Player {
 				closest = picked[i]
 			}
 		}
-
 		if (closest.object) {
+
 			// Get id of player
 			let playerId = closest.object.parent;
-			while (!playerId.name)
+			if (!playerId)
+				return;
+			while (!playerId.name) {
 				playerId = playerId.parent;
+				if (playerId == null)
+					return;
+			}
 
 			playerId = playerId.name;
 
@@ -386,7 +401,7 @@ class Player {
 
 				socket.emit("punchPlayer", { // Send to server (IBRAHIM I'M LOOKING AT YOU)
 					id: playerId,
-					dir: camera.getWorldDirection(),
+					dir: camera.getWorldDirection(new THREE.Vector3()),
 					force: crit ? 800 : 400,
 					crit: crit,
 					curr: this.getCurrItem()
@@ -394,7 +409,7 @@ class Player {
 				setTimeout(function () {
 					if (players[playerId])
 						players[playerId].invulnerable = false;
-				}, 300)
+				}, 400)
 			}
 		}
     }
@@ -411,23 +426,23 @@ class Player {
 			let miningDelta = (Date.now() - this.key.leftClick) // How much time passed while mining
 
 			let voxel = world.getVoxel(x, y, z);
-			let minable = voxel != 1 && voxel != world.blockId["water"];
+			if (voxel <= 1)
+				return;
 
+			let minable = voxel != 1 && voxel != world.blockId["water"];
 			if (!minable)
 				return;
 
 			let item = this.getCurrItem();
 
-			let constant = item && item.v == world.itemId["wood_pickaxe"] ? this.miningDelayConstant/3 : this.miningDelayConstant;
+			let constant = item && item.v == world.itemId["wood_pickaxe"] && item.class == "item" ? this.miningDelayConstant/3 : this.miningDelayConstant;
 			let blockDelay = this.miningDelay[Object.keys(world.blockId)[voxel-1]] || 1;
 			let miningDelay = (this.onObject ? blockDelay : blockDelay * 3) * constant;
 
 			// Continous mining of blocks by holding right click
 			if (this.key.leftClick && miningDelta > miningDelay) { // Break block
-				this.key.leftClick = Date.now();
 				this.mine_box.visible = false;
 				this.select_wireframe.visible = false;
-				this.prevSelect = undefined;
 
 				this.closest = {
 					distance: Infinity
@@ -436,7 +451,7 @@ class Player {
 
 				// Remove blocks
 				world.setVoxel(x, y, z, 0);
-			    updateVoxelGeometry(x, y, z);
+			    updateVoxelGeometry(x, y, z, true);
 
 				// Send data to server
 				socket.emit('setBlock', {
@@ -449,23 +464,17 @@ class Player {
 			} else if (this.key.leftClick && this.stoppedPunching) { // Continue punching animation
 				this.punching = Date.now();
 				this.stoppedPunching = false;
-			} else if (this.key.leftClick && miningDelta < miningDelay) { 
-				// Check if player is mining the same block
-				if (this.prevSelect == undefined) {
-					this.prevSelect = new THREE.Vector3(x, y, z);
-				} else if (!this.prevSelect.equals(new THREE.Vector3(x, y, z))) {
-					this.key.leftClick = Date.now();
-					this.prevSelect = new THREE.Vector3(x, y, z);
-					this.mine_box.material = mining_progress[0].material
-				} else {
-					this.prevSelect = new THREE.Vector3(x, y, z);
-				}
-
-				
 			} else { // Stopped mining
 				this.mine_box.material = mining_progress[0].material
 			}
+
 			if (this.key.leftClick) {
+				// Check if player is mining the same block
+				if (this.prevBlock == undefined) {
+					this.prevBlock = new THREE.Vector3(x, y, z);
+					this.key.leftClick = Date.now();
+				}
+
 				// Update mining progress indicator
 
 				let index = Math.floor(miningDelta/miningDelay*mining_progress.length).clamp(0, mining_progress.length-1);
@@ -476,6 +485,8 @@ class Player {
 				}
 					
 			}
+
+				
 		
 		} else {
 			this.mine_box.material = mining_progress[0].material
@@ -507,10 +518,9 @@ class Player {
 
 			    if (this.collides()) {
 			    	world.setVoxel(x, y, z, 0);
-			    	updateVoxelGeometry(x, y, z);
+			    	updateVoxelGeometry(x, y, z, true);
 			    } else {
-
-			    	updateVoxelGeometry(x, y, z);
+			    	updateVoxelGeometry(x, y, z, true);
 			    	// Send data to server
 					socket.emit('setBlock', {
 						x: x,
@@ -527,29 +537,27 @@ class Player {
 	}
 
 	dropItem() {
-		if (!map[81]) {
-			this.allowDrop = true;
-		}
-		if (map[81] && this.allowDrop) {
-			this.allowDrop = false;
-			let item = this.getCurrItem();
-			if (item && item.c > 0) {
-				let dropDir = this.camera.getWorldDirection();
-				dropDir = new Vector(dropDir.x, dropDir.z);
-				dropDir.normalize();
+		if (!this.allowDrop)
+			return;
 
-				socket.emit('dropItem', {
-					type: item.type,
-					v: item.v,
-					x: player.position.x,
-					y: player.position.y-8,
-					z: player.position.z,
-					class: item.class,
-					dir: {x: dropDir.x, z: dropDir.y}
-				});
+		this.allowDrop = false;
+		let item = this.getCurrItem();
+		if (item && item.c > 0) {
+			let dropDir = this.camera.getWorldDirection(new THREE.Vector3());
+			dropDir = new Vector(dropDir.x, dropDir.z);
+			dropDir.normalize();
 
-				this.drop = false;
-			}
+			socket.emit('dropItem', {
+				type: item.type,
+				v: item.v,
+				x: player.position.x,
+				y: player.position.y-8,
+				z: player.position.z,
+				class: item.class,
+				dir: {x: dropDir.x, z: dropDir.y}
+			});
+
+			this.drop = false;
 		}
 	}
 
@@ -582,9 +590,10 @@ class Player {
 			this.velocity.y -= previousVelocity.y * 10.0 * delta;
 		} else if (this.inWater && this.direction.z > 0 && this.key.sprint) {
 
-			let dir = this.camera.getWorldDirection();
+			let dir = this.camera.getWorldDirection(new THREE.Vector3());
 			dir.z = dir.z;
-			dir.multiplyScalar(50*delta*this.speed)
+			dir.multiplyScalar(Math.min(50*delta*this.speed, 50*delta*this.velocity.distanceTo(new THREE.Vector3(0, 0, 0))))
+			this.velocity.divideScalar(Math.max(1+delta*50, 1.01))
 
 			this.previousPosition = this.position.clone();
 			var currentPosition = this.position.clone();
@@ -592,15 +601,13 @@ class Player {
 			currentPosition.add(dir);
 			var move = currentPosition.sub(this.previousPosition)
 			this.newMove.add(move);
-
-			this.velocity.multiplyScalar(0)
 			this.halfHeight = blockSize * 0.4;
 
 		} else {
 			if (this.key.up && this.inWater) {
 				this.velocity.y = 50;
 			} else if(colorPass.enabled) {
-				this.velocity.y = -20;
+				this.velocity.y = Math.min(-20, this.velocity.y * delta * 50);
 			} else {
 				this.velocity.y -= 9.81 * 50.0 * delta; // Falling in air
 			}
@@ -643,7 +650,7 @@ class Player {
 			var originalY = this.velocity[axis] * delta;
 			var currentVel;
 			if (!this.fly) {
-				currentVel = [originalY, original, original];
+				currentVel = [originalY, original/2, original];
 			} else {
 				currentVel = [original, original, original];
 			}
@@ -788,15 +795,16 @@ class Player {
 		if (this.fly) this.sprintSpeed = this.maxSprintSpeed * 2;
 		if (this.key.backward) this.sprintSpeed = this.maxWalkSpeed;
 		this.walkSpeed = this.inWater ? this.maxWalkSpeed/2 : this.maxWalkSpeed;
+		let acc = this.inWater ? 1 : 10;
 		if (this.key.sprint) {
 			if (this.speed < this.sprintSpeed) {
-				this.speed += delta * 10;
+				this.speed += delta * acc;
 			} else {
 				this.speed = this.sprintSpeed;
 			}
 		} else {
 			if (this.speed > this.walkSpeed) {
-				this.speed -= delta * 10;
+				this.speed -= delta * acc;
 			} else {
 				this.speed = this.walkSpeed;
 			}
@@ -804,7 +812,7 @@ class Player {
 		this.positionYOffset = 0;
 		if (this.key.sneak && !this.fly && this.onObject) {
 			
-			this.speed = 0.5;
+			this.speed = 0.75;
 
 			this.position.y += -this.walkSpeed;
 			this.halfHeight = blockSize * 0.6;
@@ -838,141 +846,6 @@ class Player {
 		this.toolbar = data.toolbar;
 	}
 
-	updateChunks() {
-		let {blockSize, cellSize} = world;
-		let t = Date.now();
-		// Update chunks
-
-		let cellPos = world.computeCellFromPlayer(this.position.x, this.position.y, this.position.z);
-
-		// Chunks to unload
-		for (let id in world.cells) {
-			let cell = id.split(",");
-			let dist = Math.sqrt(Math.pow(cellPos.x - parseInt(cell[0]), 2) + Math.pow(cellPos.z - parseInt(cell[2]), 2))
-
-
-			if (dist > this.renderDistance * 0.75) {
-				this.chunksToUnload.push({
-					x: parseInt(cell[0]),
-					y: parseInt(cell[1]),
-					z: parseInt(cell[2]),
-					id: id
-				})
-			}
-		}
-
-		// Chunks to load
-		let step = 1;
-		let x = 0;
-		let z = 0;
-		let distance = 0;
-	    let range = 1;
-	    let direction = 'up';
-
-	    for ( let i = 0; i < this.renderDistance*this.renderDistance; i++ ) {
-	    	// Add chunks to request
-	    	for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
-	    		let cellX = cellPos.x + x;
-				let cellY = y;
-				let cellZ = cellPos.z + z;
-				let cellId = `${cellX},${cellY},${cellZ}`
-				if (!world.cells[cellId]) { // Check if chunk already exists
-					this.chunksToRequest.push({
-						x: cellX,
-						y: cellY,
-						z: cellZ
-					})
-				} else {
-					if (cellIdToMesh[cellId])
-						cellIdToMesh[cellId].visible = true;
-				}
-	    	}
-	       
-	        distance++;
-	        switch ( direction ) {
-	            case 'up':
-	                z += step;
-	                if ( distance >= range ) {
-	                    direction = 'right';
-	                    distance = 0;
-	                }
-	                break;
-	            case 'right':
-	                x += step;
-	                if ( distance >= range ) {
-	                    direction = 'bottom';
-	                    distance = 0;
-	                    range += 1;
-	                }
-	                break;
-	            case 'bottom':
-	                z -= step;
-	                if ( distance >= range ) {
-	                    direction = 'left';
-	                    distance = 0;
-	                }
-	                break;
-	            case 'left':
-	                x -= step;
-	                if ( distance >= range ) {
-	                    direction = 'up';
-	                    distance = 0;
-	                    range += 1;
-	                }
-	                break;
-	            default:
-	                break;
-	        }
-	    }
-
-	    // Request, load, and unload
-		if (Date.now()-this.chunkTick > this.chunkDelay) {
-			this.chunkTick = Date.now();
-			// Request chunks based on loading rate
-			if (this.chunksToLoad.length < 10) {
-				this.chunkDelay = 0
-				let requestedChunks = [];
-				for (var i = 0; i < this.chunkLoadingRate; i++) {
-					let chunk = this.chunksToRequest[i];
-					if (chunk) {
-						world.generateCell(chunk.x, chunk.y, chunk.z)
-						requestedChunks.push(chunk);
-					}
-				}
-				if (requestedChunks.length > 0) {
-					socket.emit('requestChunk', requestedChunks) // Call server to load this chunk
-				}
-			} else {
-				this.chunkDelay = 100;
-			}
-				
-			// Load chunks based on loading rate
-			for (var i = 0; i < this.chunkLoadingRate; i++) {
-				let chunk = this.chunksToLoad[i];
-				if (chunk) {
-					updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize)
-					this.chunksToLoad.splice(i, 1);
-				}
-			}
-
-			/*if (Date.now()-t > 4) {
-				console.log(Date.now()-t);
-			}*/
-			// Unload chunks based on loading rate
-			for (var i = 0; i < this.chunkLoadingRate*2; i++) {
-				let chunk = this.chunksToUnload[i];
-				if (chunk) {
-					world.deleteCell(chunk, false);
-				}
-			}
-
-			this.chunksToRequest = [];
-			this.chunksToUnload = [];
-		}
-
-		
-	}
-
 	update(delta, world) {
 		if (Date.now() - this.lastRaycast > 100) {
 			this.select(true);
@@ -985,12 +858,11 @@ class Player {
 
 		this.updateArm();
 		this.move(delta);
-		this.updateChunks();
 	}
 
 	collideVoxel(x, y, z) {
 		var voxel = world.getVoxel(x, y, z)
-		if (voxel > 1)
+		if (voxel > 1 && voxel != 255)
 			return voxel;
 	}
 

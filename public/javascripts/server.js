@@ -66,12 +66,15 @@ function addPlayer(players, id) {
 	p.skeleton.add(p.rightLeg);
 
 	p.skeleton.add(p.neck);
+	p.skeleton.name = p.id;
 
 	// Entity (combine skeleton and nametag)
 	p.entity = new THREE.Group();
 	p.entity.name = p.id;
 	p.entity.add(p.skeleton);
 	p.entity.add(p.nameTag);
+
+	p.entity.type = "player";
 
 	scene.add(p.entity);
 
@@ -178,7 +181,7 @@ function updatePlayer(p) {
 		}
 	}
 
-	p.nameTag.quaternion.copy(camera.getWorldQuaternion());
+	p.nameTag.quaternion.copy(camera.getWorldQuaternion(new THREE.Quaternion()));
 		
 	p.rightShoulder.rotation.x = (-Math.cos(p.punchingT*Math.PI*2)+1)/2;
 	p.rightShoulder.rotation.z = Math.sin(p.punchingT*Math.PI*2)/2;

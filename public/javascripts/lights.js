@@ -28,7 +28,7 @@ class Light {
 
 	    this.dir.shadow.camera.far = 10000;
 	    this.dir.shadow.camera.near = 0;
-	    this.dir.shadow.bias = -0.001;
+	    this.dir.shadow.bias = -0.00001;
 
 	    // Add moon directional light
 	    this.dirM = new THREE.DirectionalLight( "white", 0.5 );
@@ -36,7 +36,6 @@ class Light {
 
 	    // Fog
 	    scene.fog = new THREE.Fog("lightblue", 0, blockSize*cellSize*5)
-	    scene.background = new THREE.Color("rgba(255, 0, 0, 0)")
 
 	    // Sun
 	    this.sun = loadSprite('./sun.png', 1000);
@@ -80,8 +79,7 @@ class Light {
 	}
 
 	generateClouds(type) {
-		console.log(type)
-		let {blockSize} = world;
+		let {blockSize, cellSize} = world;
 		for (let cloud of this.clouds) {
 			scene.remove(cloud);
 		}
@@ -94,10 +92,11 @@ class Light {
 			for (let i = 0; i < 100; i++) {
 				let cloud = new THREE.Mesh(
 						new THREE.BoxGeometry( Math.random()*200+100, 16, Math.random()*200+100 ),
-						new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.4, transparent: true , overdraw: true} )
+						new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.4, transparent: true} )
 					);
 				cloud.name = "cloud";
-				cloud.position.set(Math.random()*3000-1500 + player.position.x, Math.random()*200 + blockSize*100, Math.random()*3000-1500 + player.position.z)
+				let renderDistance = blockSize*cellSize*chunkManager.renderDistance;
+				cloud.position.set(Math.random()*3000-renderDistance + player.position.x, Math.random()*200 + blockSize*100, Math.random()*3000-renderDistance + player.position.z)
 				scene.add(cloud);
 
 				this.clouds.push(cloud);
@@ -106,6 +105,7 @@ class Light {
 	}
 
 	update() {
+		let {blockSize, cellSize} = world;
 		let t = tick.value || 1000;
 
 		// Update stars transparency
@@ -147,12 +147,31 @@ class Light {
 		let clampedIntensity = mapRange(intensity, 0, 1, 0.3, 0.7)
 		this.hemi.intensity = clampedIntensity;
 
-		for (let cloud of this.clouds) {
-			cloud.position.add(new THREE.Vector3(0.3, 0, 0))
-			if (cloud.position.x > 1500)
-				cloud.position.x = -1500;
+		// Check for cloud generation
+		if (this.generate == this.showClouds) {
+			this.generate = !this.generate;
+			if (this.showClouds)
+				this.generateClouds("add")
+			else
+				this.generateClouds("remove")
 		}
 
+		// Update clouds
+		let renderDistance = blockSize*world.cellSize*chunkManager.renderDistance;
+		for (let cloud of this.clouds) {
+			cloud.position.add(new THREE.Vector3(0.3, 0, 0))
+			if (cloud.position.x > renderDistance + player.position.x)
+				cloud.position.x = -renderDistance + player.position.x;
+			else if (cloud.position.x < -renderDistance + player.position.x)
+				cloud.position.x = renderDistance + player.position.x;
+
+			if (cloud.position.z > renderDistance + player.position.z)
+				cloud.position.z = -renderDistance + player.position.z;
+			else if (cloud.position.z < -renderDistance + player.position.z)
+				cloud.position.z = renderDistance + player.position.z;
+		}
+
+		// Update sky lighting
 		var midnight = new Color("#151B54");
 		var sunrise = new Color("#fd5e53");
 		var noon = new Color("#ADD8E6");
@@ -168,10 +187,8 @@ class Light {
 		scene.background = color;
 		scene.fog.color = color;
 
-		let {blockSize, cellSize} = world;
-
 		// Update fog based on render distance
-		scene.fog.near = (player.renderDistance-3)*blockSize*cellSize;
+		scene.fog.near = (chunkManager.renderDistance-3)*blockSize*cellSize;
 		scene.fog.far = Infinity;
 	}
 }

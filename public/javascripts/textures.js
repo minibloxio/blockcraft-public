@@ -55,7 +55,7 @@ let minecraft_font = undefined;
 fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
 	minecraft_font = font;
   loaded += 1;
-} );
+});
 
 // Block breaking progress
 let mining_progress = [
@@ -86,6 +86,7 @@ function loadBlockImages() {
     let name = block + '.png'
     blockFaces[block] = loader.load(name, function () {
       loading_index += 1;
+      loaded += 1;
       if (loading_index == block_names.length) {
         mergeTextures();
       }
@@ -158,7 +159,7 @@ function mergeTextures() {
 
   material = new THREE.MeshLambertMaterial({
     map: texture,
-    side: THREE.FrontSide,
+    side: THREE.DoubleSide,
     transparent: true,
     depthWrite: true
   });
@@ -181,6 +182,7 @@ function loadItemImages() {
     let name = item + '.png'
     items[item] = loader.load(name, function () {
       loading_index += 1;
+      loaded += 1;
       if (loading_index == item_names.length) {
         mergeItemTextures();
       }

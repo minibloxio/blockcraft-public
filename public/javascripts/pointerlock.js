@@ -2,8 +2,6 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
- var sens = 0.5;
-
  function initPointerLock() {
  	var blocker = document.getElementById('blocker');
 
@@ -15,6 +13,7 @@
 			if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
 				player.controls.enabled = true;
 				blocker.style.display = 'none';
+				$("#blocker").css("background-image", "none")
 
 				if (showInventory) {
 					showInventory = false;
@@ -55,12 +54,12 @@
 
 		$("#start-button").click(function (event) {
 
-			if (loaded >= 3) {
+			if (loadedAnimate.value >= maxLoaded) {
 				// Ask the browser to lock the pointer
 				element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 				element.requestPointerLock();
 
-				if (loaded == 3) {
+				if (loaded == maxLoaded) {
 					socket.emit('join')
 					loaded += 1;
 				}
@@ -70,10 +69,10 @@
 		})
 
 		$("body").keydown(function (event) {
-			if (event.keyCode == 27)
+			if (event.keyCode == 27 && player.controls.enabled)
 				document.exitPointerLock();
 
-			if (event.keyCode == 69 && !showChatBar && loaded >= 4) {
+			if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !showChatBar && loaded >= maxLoaded+1 && (player.controls.enabled || showInventory)) {
 				if (player.controls.enabled) {
 					showInventory = true;
 					inventory = JSON.parse(JSON.stringify(player.toolbar));
@@ -103,9 +102,9 @@
 
 		// Enter username input
 		$("#name-input").keyup(function (event) {
-			if (event.keyCode == 13 && loaded >= 3) {
+			if (event.keyCode == 13 && loadedAnimate.value >= maxLoaded) {
 
-				if (loaded == 3) {
+				if (loaded == maxLoaded) {
 					socket.emit('join')
 					loaded += 1;
 				}
@@ -142,8 +141,8 @@ THREE.PointerLockControls = function ( camera ) {
 		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-		yawObject.rotation.y -= movementX * 0.004 * sens;
-		pitchObject.rotation.x -= movementY * 0.004 * sens;
+		yawObject.rotation.y -= movementX * 0.00004 * player.sens;
+		pitchObject.rotation.x -= movementY * 0.00004 * player.sens;
 
 		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 

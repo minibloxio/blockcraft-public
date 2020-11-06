@@ -35,7 +35,7 @@ class World {
     let cell = this.cells[cellId];
     if (!cell) {
       const {cellSize} = this;
-      cell = new Uint8Array(cellSize * cellSize * cellSize);
+      cell = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
       this.cells[cellId] = cell;
     }
     return cell;
@@ -74,19 +74,24 @@ class World {
   generateCell(cellX, cellY, cellZ) {
     if (!this.cells[`${cellX},${cellY},${cellZ}`]) { // Check if chunk already exists
       const {cellSize} = this;
-      this.cells[`${cellX},${cellY},${cellZ}`] = new Uint8Array(Math.pow(cellSize, 3))
+      this.cells[`${cellX},${cellY},${cellZ}`] = new Uint8Array(Math.pow(cellSize, 3)).fill(255)
     }
   }
 
   deleteCell(chunk, permanently) {
-    delete this.cells[chunk.id];
-    let object = scene.getObjectByName(chunk.id);
-    if (object) {
-      object.visible = false;
-      if (permanently) {
-        object.geometry.dispose();
-        object.material.dispose();
-        scene.remove(object);
+
+    for (let i = 0; i < world.buildHeight/this.cellSize+1; i++) {
+      let id = `${chunk.x},${i},${chunk.z}`
+
+      delete this.cells[id];
+      let object = scene.getObjectByName(id);
+      if (object) {
+        object.visible = false;
+        if (permanently) {
+          object.geometry.dispose();
+          object.material.dispose();
+          scene.remove(object);
+        }
       }
     }
   }
@@ -190,57 +195,60 @@ World.faces = [
 let workerIndex = 0;
 const cellIdToMesh = {};
 
-function updateVoxelGeometry(x, y, z) {
+const neighborOffsets = [
+  [ 0,  0,  0], // self
+  [-1,  0,  0], // left
+  [ 1,  0,  0], // right
+  [ 0, -1,  0], // down
+  [ 0,  1,  0], // up
+  [ 0,  0, -1], // back
+  [ 0,  0,  1], // front
+];
+
+function updateVoxelGeometry(x, y, z, neighbor) {
   let {blockSize, cellSize} = world;
 
-  let worldData = {
-    cellSize: world.cellSize,
-    cellSliceSize: world.cellSliceSize,
-    tileSize: world.tileSize,
-    tileTextureWidth: world.tileTextureWidth,
-    tileTextureHeight: world.tileTextureHeight,
-    blockSize: world.blockSize,
-    blockUVS: world.blockUVS,
-    blockId: world.blockId,
-  } 
-  const updatedCellIds = {};
+  
 
   let cells = [];
+  const updatedCellIds = {};
 
-  let cellData = {};
+  for (let offset of neighborOffsets) {
+    const ox = (x + offset[0]);
+    const oy = (y + offset[1]);
+    const oz = (z + offset[2]);
+    const cellId = world.computeCellId(ox, oy, oz);
 
-  const cellId = world.computeCellId(x, y, z);
-  if (!updatedCellIds[cellId]) { // Don't reupdate the cell once updated
-    updatedCellIds[cellId] = true;
+    if (!updatedCellIds[cellId]) { // Don't reupdate the cell once updated
+      updatedCellIds[cellId] = true;
 
-    const cellX = Math.floor(x / cellSize);
-    const cellY = Math.floor(y / cellSize);
-    const cellZ = Math.floor(z / cellSize);
+      const cellX = Math.floor(ox / cellSize);
+      const cellY = Math.floor(oy / cellSize);
+      const cellZ = Math.floor(oz / cellSize);
 
-    cellData[cellId] = world.cells[cellId];
+      cells.push([cellX, cellY, cellZ, cellId]);
+    }
 
-    cells.push([cellX, cellY, cellZ, cellId]);
+    if (!neighbor)
+      break;
   }
 
-  voxelWorkers[workerIndex].postMessage([worldData, cellData, cells])
+  voxelWorkers[workerIndex].postMessage(cells)
   workerIndex += 1;
   if (workerIndex == voxelWorkers.length) {
     workerIndex = 0;
   }
 }
 
-async function updateVoxelMesh(e) {
+function updateVoxelMesh(e) {
   let cells = e.data;
 
-  for (let cell of cells) {
-    await updateCellMesh({data: cell})
-  }
-
+  chunkManager.chunksToRender = chunkManager.chunksToRender.concat(e.data);
 }
 
-function updateCellMesh(e) {
+function updateCellMesh(data) {
   let {blockSize, cellSize} = world;
-  var [{positions, normals, uvs, indices}, cellX, cellY, cellZ, cellId] = e.data;
+  var [{positions, normals, uvs, indices}, cellX, cellY, cellZ, cellId] = data;
 
   let mesh = cellIdToMesh[cellId];
   const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
@@ -265,8 +273,4 @@ function updateCellMesh(e) {
     mesh.updateMatrix();
     mesh.matrixAutoUpdate = false;
   }
-}
-
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min) + min);
 }
