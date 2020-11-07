@@ -53,12 +53,26 @@ rl.on('line', (input) => {
   	}
 });
 
+
+
+// Get textures
+let blockOrder = ["water", "bedrock", "stone", "cobblestone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "sand", "gravel", "obsidian"];
+
+let textures = {};
+fs.readdir(public + '/textures/blocks', function (err, data) {
+	textures["blocks"] = data;
+})
+fs.readdir(public + '/textures/items', function (err, data) {
+	textures["items"] = data;
+})
+textures.blockOrder = blockOrder;
+
 // Setup world
 var players = {};
 
 const cellSize = 16;
 const tileSize = 16;
-const tileTextureWidth = 256;
+const tileTextureWidth = 512;
 const tileTextureHeight = 64;
 const buildHeight = 128;
 const world = new World({
@@ -66,12 +80,13 @@ const world = new World({
 	tileSize,
 	tileTextureWidth,
 	tileTextureHeight,
-	buildHeight
+	buildHeight,
+	blockOrder,
 });
 var updatedBlocks = [];
 var newEntities = [];
 
-// Load save file
+/*// Load save file
 let save_path = __dirname + '/saves/test.json';
 fs.readFile(save_path, function (err, data) {
 	if (err) {
@@ -84,8 +99,7 @@ fs.readFile(save_path, function (err, data) {
 	world.loadSaveFile(saveFile)
 
   	console.log("Done loading world at", new Date())
-})
-
+})*/
 
 function pick(obj,props){if(!obj||!props)return;var picked={};props.forEach(function(prop){picked[prop]=obj[prop]});return picked};
 
@@ -101,14 +115,17 @@ io.on('connection', function(socket_) {
 		dir: {x: 0,y: 0,z: 0},
 		hp: 10,
 		dead: false,
-		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["wood"], c: 64, class: "block"}, {v: world.blockId["stone"], c: 64, class: "block"}, {v: world.blockId["water"], c: 64, class: "block"}],
+		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["obsidian"], c: 64, class: "block"}, {v: world.blockId["sand"], c: 64, class: "block"}],
 		walking: false,
 		punching: false,
+		currSlot: 0,
 		pickupDelay: Date.now(),
 		ping: [],
 	}
 
-	socket.on('join', function () {
+	socket.on('join', function (data) {
+		// Set name
+
 		io.emit('addPlayer', players[socket.id])
 		console.log(socket.id.substr(0, 5), "has joined at", new Date().toLocaleTimeString())
 
@@ -127,6 +144,9 @@ io.on('connection', function(socket_) {
   		world.saveToFile(fs, io, path);
 	})
 
+	// Transmit texture info to client
+	socket.emit('textureData', textures);
+
 	// Update player info
 	socket.on('playerInfo', function (data) {
 		if (players[socket.id] && data.name != players[socket.id].name && data.name) { // Check for validity
@@ -144,13 +164,7 @@ io.on('connection', function(socket_) {
 			return;
 
 		// Update player data
-		players[socket.id].pos = data.pos;
-		players[socket.id].vel = data.vel;
-		players[socket.id].onObject = data.onObject;
-		players[socket.id].rot = data.rot;
-		players[socket.id].dir = data.dir;
-		players[socket.id].walking = data.walking;
-		players[socket.id].punching = data.punching;
+		Object.assign(players[socket.id], data)
 	})
 
 	// Receive latency check
@@ -187,6 +201,12 @@ io.on('connection', function(socket_) {
 
 			if (entity && entity.class == "item" && world.itemId["wood_sword"]) {
 				dmg = 1.5;
+			}
+
+			// Check if blocking
+			if (players[data.id].blocking) {
+				dmg /= 2;
+				data.force /= 2;
 			}
 
 			players[data.id].hp -= data.crit ? dmg*1.5 : dmg;

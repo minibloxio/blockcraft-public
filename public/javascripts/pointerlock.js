@@ -2,7 +2,61 @@
  * @author mrdoob / http://mrdoob.com/
  */
 
- function initPointerLock() {
+function joinServer() {
+	if (loaded == maxLoaded) {
+		socket.emit('join')
+		loaded += 1;
+	}
+}
+
+function requestPointerLock() {
+	if (loadedAnimate.value >= maxLoaded) {
+		// Ask the browser to lock the pointer
+		var element = document.body;
+		element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+		element.requestPointerLock();
+
+		joinServer();
+		
+	}
+}
+
+function enterPointerLock () {
+	player.controls.enabled = true;
+	blocker.style.display = 'none';
+	$("#blocker").css("background-image", "none")
+
+	if (showInventory) {
+		showInventory = false;
+	} else {
+		let name = $("#name-input").val();
+
+		if (name && getCookie("Name") != name)
+			setCookie("Name", name, 7);
+
+		socket.emit('playerInfo', {
+			name: name
+		})
+	}
+}
+
+function exitPointerLock() {
+	let element = document.body;
+	
+	if (!showInventory) {
+		blocker.style.display = 'block';
+
+		element.requestPointerLock();
+	}
+	player.controls.enabled = false;
+	//$("#chat-input").hide();
+	$("#chat-input").blur();
+	$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
+	$("#chat-input").val('');
+	showChatBar = false;
+}
+
+function initPointerLock() {
  	var blocker = document.getElementById('blocker');
 
 	var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -11,32 +65,9 @@
 
 		var pointerlockchange = function ( event ) {
 			if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
-				player.controls.enabled = true;
-				blocker.style.display = 'none';
-				$("#blocker").css("background-image", "none")
-
-				if (showInventory) {
-					showInventory = false;
-				} else {
-					let name = $("#name-input").val();
-					socket.emit('playerInfo', {
-						name: name
-					})
-				}
+				enterPointerLock();
 			} else { // Exit pointer lock
-
-				if (!showInventory) {
-					blocker.style.display = 'block';
-
-					element.requestPointerLock();
-				}
-				player.controls.enabled = false;
-				//$("#chat-input").hide();
-    			$("#chat-input").blur();
-    			$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
-    			$("#chat-input").val('');
-    			showChatBar = false;
-    			
+				exitPointerLock();
 			}
 		};
 
@@ -53,19 +84,7 @@
 		document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
 
 		$("#start-button").click(function (event) {
-
-			if (loadedAnimate.value >= maxLoaded) {
-				// Ask the browser to lock the pointer
-				element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-				element.requestPointerLock();
-
-				if (loaded == maxLoaded) {
-					socket.emit('join')
-					loaded += 1;
-				}
-				
-			}
-			
+			requestPointerLock();
 		})
 
 		$("body").keydown(function (event) {
@@ -102,20 +121,10 @@
 
 		// Enter username input
 		$("#name-input").keyup(function (event) {
-			if (event.keyCode == 13 && loadedAnimate.value >= maxLoaded) {
-
-				if (loaded == maxLoaded) {
-					socket.emit('join')
-					loaded += 1;
-				}
-
-				// Ask the browser to lock the pointer
-				element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-				element.requestPointerLock();
-			}
+			if (event.keyCode == 13) requestPointerLock();
 		})
 	} else {
-		instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
+		console.error("PointerLock is not supported on this browser")
 	}
  }
 

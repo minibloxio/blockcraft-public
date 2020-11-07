@@ -98,12 +98,12 @@ module.exports = class World {
 
     // Block ids
 
-    let blocks = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks"]
+    this.blockOrder = options.blockOrder;
 
     this.blockId = {}
 
-    for (let i = 0; i < blocks.length; i++) {
-      this.blockId[blocks[i]] = i+1;
+    for (let i = 0; i < this.blockOrder.length; i++) {
+      this.blockId[this.blockOrder[i]] = i+1;
     }
 
     this.itemId = {

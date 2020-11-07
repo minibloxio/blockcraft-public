@@ -39,6 +39,11 @@ socket.on('init', function (data) {
 	initialized = true;
 })
 
+// Load textures
+socket.on('textureData', function (data) {
+	loadTextures(data);
+})
+
 // Update chunk
 
 socket.on('receiveChunk', function (data) {

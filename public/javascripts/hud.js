@@ -330,6 +330,8 @@ function displayCrosshair() {
 
 // Toolbar
 function displayToolbar() {
+	if (!player.toolbar)
+		return;
 	let hotboxWidth = 60;
 	let selectorWidth = 65;
 	drawImageTopLeft(toolbar, canvas.width/2-hotboxWidth*4, canvas.height-hotboxWidth-10, hotboxWidth*8, hotboxWidth);

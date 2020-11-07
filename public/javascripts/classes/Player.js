@@ -10,7 +10,7 @@ class Player {
 		this.sens = 0.5;
 
 		// Ray casting
-		this.selectcaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ));; // block selecting / breaking / placing
+		this.raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ));; // block selecting / breaking / placing
 
 		// Collision helper
 
@@ -30,14 +30,20 @@ class Player {
 		this.speed = 2;
 		this.walkSpeed = 2;
 		this.maxWalkSpeed = 2;
-		this.sprintSpeed = 3.5;
-		this.maxSprintSpeed = 3.5;
+		this.defaultMaxSprintSpeed = 2.9;
+		this.sprintSpeed = this.defaultMaxSprintSpeed;
+		this.maxSprintSpeed = this.defaultMaxSprintSpeed;
 		this.distanceMoved = 0;
 
 		this.fly = false;
 		this.clip = true;
 		
 		this.onObject = false; // Sees if player is on object
+		this.onObjectTime = 0;
+		
+		this.bhopTimeLimit = 0.05; // 50ms to jump before the sprint boost is reset
+		this.bhopMaxSpeed = 4; // Maximum speed that can be reached through bhopping
+		this.bhopRate = 0.05; // How much the speed ramps up after each successful bhop
 
 		// Events
 
@@ -62,19 +68,14 @@ class Player {
 		this.place = false;
 		this.placeType = 2; // Type of block being placed
 
-		this.punching = Date.now() + 5000;
+		this.blockT = 0;
+		this.punching = Date.now();
 		this.drop = false; // Drop item
 
 		this.lastRaycast = Date.now();
-	}
 
-	init(blockSize) {
-		// Player appearance
-
-		this.halfWidth = blockSize * 0.3;
-		this.halfDepth = blockSize * 0.3;
-		this.halfHeight = blockSize * 0.8;
-
+		// Player dimensions
+		let blockSize = 16;
 		this.dim = {
 			torso: 0.5*blockSize,
 			torsoHeight: 0.75*blockSize,
@@ -85,11 +86,20 @@ class Player {
 			headSize: 0.55*blockSize,
 			height: 1.8*blockSize
 		}
+	}
+
+	init(blockSize) {
+		// Player appearance
+
+		this.halfWidth = blockSize * 0.3;
+		this.halfDepth = blockSize * 0.3;
+		this.halfHeight = blockSize * 0.8;
 
 		this.miningDelay = {
 			"water": Infinity,
 			"bedrock": Infinity,
-			"leaves": 0.5
+			"leaves": 0.5,
+			"obsidian": 15,
 		}
 		this.miningDelayConstant = 750;
 		this.placingDelay = 200;
@@ -98,7 +108,7 @@ class Player {
 		this.hp = 10;
 
 		// Hand
-		this.addBody();
+		this.addArm();
 		
 		// Select box wireframe
 		var select_box = new THREE.BoxGeometry(blockSize+0.1, blockSize+0.1, blockSize+0.1);
@@ -122,11 +132,12 @@ class Player {
 
 	respawn(blockSize) {
 		let resetHeight = blockSize*100;
-		player.prevHeight = undefined;
-		player.position.set(0, resetHeight, 0);
-		player.controls.getObject().position['y'] = resetHeight;
-		player.savedPosition['y'] = resetHeight;
-		player.velocity.y = 0
+		this.prevHeight = undefined;
+		this.position.set(0, resetHeight, 0);
+		this.controls.getObject().position['y'] = resetHeight;
+		this.savedPosition['y'] = resetHeight;
+		this.velocity.y = 0
+		this.maxSprintSpeed = this.defaultMaxSprintSpeed;
 	}
 
 	getCurrItem() {
@@ -135,10 +146,10 @@ class Player {
 			return item;
 	}
 
-	updateArm() {
+	updateHand() {
 		let item = this.getCurrItem();
 
-		this.moveArm(item);
+		this.moveHand(item);
 
 		let s = JSON.stringify(item);
 		if (s == this.prevItem) {
@@ -163,7 +174,7 @@ class Player {
 			this.arm = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
 			this.arm.renderOrder = 1;
 			this.arm.position.set(1.5, -1, -2);
-			this.arm.rotation.set(0, -Math.PI/2, Math.PI/4+Math.PI/8)
+			this.arm.rotation.set(Math.PI/6, -Math.PI/2, Math.PI/4+Math.PI/8)
 			camera.add(this.arm)
 		} else if (item && item.c > 0) {
 			// Display block
@@ -193,16 +204,23 @@ class Player {
 		camera.add(this.arm);
 	}
 
-	moveArm(entity) {
+	moveHand(entity) {
+		let hand = this.getCurrItem();
+		let blockingSpeed = 10;
 
-		this.punchT = (Date.now()-this.punching)/100;
+		this.punchT = (Date.now()-this.punching)/120;
+		if (hand) {
+			this.blocking = (this.key.rightClick && hand.class == "item" && hand.v == 2 && hand.c > 0 && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed*delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed*delta);
+		}
+
 		let pos1, pos2, rot1, rot2;
 
 		if (entity && entity.class == "item" && entity.c > 0) {
 			pos1 = new THREE.Vector3(1.5, -1, -2);
-			pos2 = new THREE.Vector3(1.5, -1, -4);
-			rot1 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI/2, Math.PI/4+Math.PI/8));
-			rot2 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI/3, Math.PI/4+Math.PI/3));
+			pos2 = this.blocking ? new THREE.Vector3(1.5, -1, -3) : new THREE.Vector3(1.5, -1, -5);
+			rot1 = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI/6, -Math.PI/2, Math.PI/4+Math.PI/8));
+			let rot2Euler = this.blocking ? new THREE.Euler(-Math.PI/8, 0, Math.PI/4+Math.PI/3) : new THREE.Euler(Math.PI/6, -Math.PI/3, Math.PI/4+Math.PI/2);
+			rot2 = new THREE.Quaternion().setFromEuler(rot2Euler);
 		} else if (entity && entity.c > 0) { // Items
 			pos1 = new THREE.Vector3(3, -7, -8);
 			pos2 = new THREE.Vector3(3, -7, -11);
@@ -215,26 +233,28 @@ class Player {
 			rot2 = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI, Math.PI-Math.PI/8, Math.PI/8));
 		}
 
-		if (this.punchT < 1) { // Forward animation
-			if (this.punchT < 1) {
+		if (this.blockT > 0 && this.punchT > 1) {
+			this.arm.position.lerpVectors(pos1, pos2, Math.min(this.blockT, 1));
+			rot1.slerp(rot2, this.blockT);
+			this.arm.rotation.setFromQuaternion(rot1);
+		} else {
+			if (this.punchT < 1) { // Forward animation
 				this.arm.position.lerpVectors(pos1, pos2, this.punchT);
 				rot1.slerp(rot2, this.punchT);
 				this.arm.rotation.setFromQuaternion(rot1);
+			} else if (this.punchT < 2) { // Reverse animation
+				this.punchT -= 1;
+				this.arm.position.lerpVectors(pos2, pos1, this.punchT);
+				rot2.slerp(rot1, this.punchT);
+				this.arm.rotation.setFromQuaternion(rot2);
 			} else {
-				this.punching = false;
+				this.stoppedPunching = true;
 			}
-
-		} else if (this.punchT < 2) { // Reverse animation
-			this.punchT -= 1;
-			this.arm.position.lerpVectors(pos2, pos1, this.punchT);
-			rot2.slerp(rot1, this.punchT);
-			this.arm.rotation.setFromQuaternion(rot2);
-		} else {
-			this.stoppedPunching = true;
 		}
+		
 	}
 
-	addBody() {
+	addArm() {
 		let {blockSize} = world;
 		// Add client arm
 		
@@ -244,55 +264,6 @@ class Player {
 		this.arm.position.set(2, -2, -2.5);
 		this.arm.rotation.set(Math.PI, Math.PI, 0);
 		camera.add(this.arm);
-
-		/*// Add head
-		this.head = addMesh(new THREE.BoxGeometry(this.dim.headSize, this.dim.headSize, this.dim.headSize), head.material);
-		this.head.position.set(0, blockSize*0.2, 0);
-
-		this.neck = new THREE.Object3D();
-		this.neck.add(this.head);
-
-		// Add body
-		this.body = addMesh(new THREE.BoxGeometry(this.dim.torso, this.dim.torsoHeight, this.dim.legSize), body.material);
-		this.body.position.set(0, -blockSize*0.45, 0);
-
-		// Add arms
-		this.leftArm = addMesh(new THREE.BoxGeometry(this.dim.armSize, this.dim.armHeight, this.dim.armSize), arm.material)
-		this.leftArm.position.set(-this.dim.armSize*3/2, -blockSize*0.45, 0);
-
-		this.rightArm = addMesh(new THREE.BoxGeometry(this.dim.armSize, this.dim.armHeight, this.dim.armSize), arm.material)
-		this.rightArm.position.set(0, -blockSize*0.3, 0);
-
-		// Shoulder joints
-		this.rightShoulder = new THREE.Object3D();
-		this.rightShoulder.position.set(this.dim.armSize*3/2, -blockSize*0.15, 0);
-		this.rightShoulder.add(this.rightArm);
-
-		// Add legs
-		this.leftLeg = addMesh(new THREE.BoxGeometry(this.dim.legSize, this.dim.legHeight, this.dim.legSize), leg.material)
-		this.leftLeg.position.set(-this.dim.legSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
-
-		this.rightLeg = addMesh(new THREE.BoxGeometry(this.dim.legSize, this.dim.legHeight, this.dim.legSize), leg.material)
-		this.rightLeg.position.set(this.dim.armSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
-
-		// Create skeleton of head, body, arms, and legs
-		this.skeleton = new THREE.Group();
-		this.skeleton.add(this.body);
-		this.skeleton.add(this.leftArm);
-
-		this.skeleton.add(this.rightShoulder);
-		this.skeleton.add(this.leftLeg);
-		this.skeleton.add(this.rightLeg);
-
-		this.skeleton.add(this.neck);
-
-		// Entity (combine skeleton and nametag)
-		this.entity = new THREE.Group();
-		this.entity.castShadow = true;
-		this.entity.name = this.id;
-		this.entity.add(this.skeleton);
-
-		scene.add(this.entity);*/
 	}
 
     select(update) {
@@ -302,31 +273,35 @@ class Player {
 		var intersects;
 
 		// update the picking ray with the camera and mouse position
-		this.selectcaster.setFromCamera( mouse, camera );
-		this.selectcaster.far = blockSize * 5;
+		this.raycaster.setFromCamera( mouse, camera );
+		this.raycaster.far = blockSize * 5;
 
 		// calculate blocks intersecting the picking ray
-		intersects = this.selectcaster.intersectObjects( scene.children );
+		intersects = this.raycaster.intersectObjects( scene.children, true );
 
+		// Eliminate wireframes, items, and clouds from being selected
 		var picked = []
 		for (var i = 0; i < intersects.length; i++) {
 			let object = intersects[i].object;
-			let voxel = world.getVoxel(object.position.x/blockSize, object.position.y/blockSize, object.position.z/blockSize) ;
-			if (!(object.name == "wireframe" || object.name == "item" || object.name == "cloud") && voxel != world.blockId["water"]) {
+			if (!(object.name == "wireframe" || object.name == "item" || object.name == "cloud")) {
 				picked.push(intersects[i])
 			}
 		}
 
 		// Get the closest block
-		var closest = {
-			distance: Infinity
-		};
+		var closest = {distance: Infinity};
 		for (var i = 0; i < picked.length; i++) {
-			if (closest.distance > picked[i].distance) {
+			let block = picked[i];
+			let x = Math.floor((block.point.x-block.face.normal.x)/blockSize);
+			let y = Math.floor((block.point.y-block.face.normal.y)/blockSize);
+			let z = Math.floor((block.point.z-block.face.normal.z)/blockSize);
+			let voxel = world.getVoxel(x, y, z);
+			if (closest.distance > picked[i].distance && voxel != world.blockId["water"]) {
 				closest = picked[i]
 			}
 		}
 
+		// Update wireframe
 		if (closest.point && closest.face && update) {
 			let x = Math.floor((closest.point.x-closest.face.normal.x)/blockSize)*blockSize+blockSize*0.5;
 			let y = Math.floor((closest.point.y-closest.face.normal.y)/blockSize)*blockSize+blockSize*0.5;
@@ -348,24 +323,22 @@ class Player {
 		this.closest = closest;
     }
 
-    punch() {	
+    punch() {
+    	if (this.blocking)
+    		return;
     	// Punch players
 
 		let {blockSize} = world;
-    	this.selectcaster.far = blockSize * 4;
+    	this.raycaster.far = blockSize * 4;
     	this.key.leftClick = Date.now();
         this.punching = Date.now();
 
     	let playerBoxes = [];
-    	for (let id in players) {
-    		playerBoxes.push(players[id].skeleton);
-    	}
-		var intersects = this.selectcaster.intersectObjects(scene.children, true);
+    	for (let id in players) playerBoxes.push(players[id].skeleton);
+		var intersects = this.raycaster.intersectObjects(scene.children, true);
 
-		var picked = []
-		for (var i = 0; i < intersects.length; i++) {
-			picked.push(intersects[i])
-		}
+		var picked = [];
+		for (var i = 0; i < intersects.length; i++) picked.push(intersects[i])
 
 		// Get the closest intersection
 		var closest = {
@@ -380,12 +353,10 @@ class Player {
 
 			// Get id of player
 			let playerId = closest.object.parent;
-			if (!playerId)
-				return;
+			if (!playerId) return;
 			while (!playerId.name) {
 				playerId = playerId.parent;
-				if (playerId == null)
-					return;
+				if (playerId == null) return;
 			}
 
 			playerId = playerId.name;
@@ -395,9 +366,7 @@ class Player {
 
 				// Calculate the knockback force
 				let crit = false;
-				if (this.velocity.y < 0) {
-					crit = true;
-				}
+				if (this.velocity.y < 0) crit = true;
 
 				socket.emit("punchPlayer", { // Send to server (IBRAHIM I'M LOOKING AT YOU)
 					id: playerId,
@@ -407,14 +376,16 @@ class Player {
 					curr: this.getCurrItem()
 				});
 				setTimeout(function () {
-					if (players[playerId])
-						players[playerId].invulnerable = false;
+					if (players[playerId]) players[playerId].invulnerable = false;
 				}, 400)
 			}
 		}
     }
 
 	mine() {
+		if (this.blocking)
+    		return;
+
 		let {blockSize} = world;
 
 		// Check if block is mined
@@ -436,7 +407,7 @@ class Player {
 			let item = this.getCurrItem();
 
 			let constant = item && item.v == world.itemId["wood_pickaxe"] && item.class == "item" ? this.miningDelayConstant/3 : this.miningDelayConstant;
-			let blockDelay = this.miningDelay[Object.keys(world.blockId)[voxel-1]] || 1;
+			let blockDelay = this.miningDelay[world.blockOrder[voxel-1]] || 1;
 			let miningDelay = (this.onObject ? blockDelay : blockDelay * 3) * constant;
 
 			// Continous mining of blocks by holding right click
@@ -616,9 +587,16 @@ class Player {
 			if (this.key.up && !showChatBar) {
 				if (this.onObject) {
 					this.velocity.y += 150;
+					if (this.onObjectTime < this.bhopTimeLimit) {
+						this.maxSprintSpeed = Math.min(this.bhopMaxSpeed, this.maxSprintSpeed+this.bhopRate)
+					} else {
+						this.maxSprintSpeed = this.defaultMaxSprintSpeed;
+					}
 				} else {
 					this.key.up = -1;
 				}
+			} else if (this.onObjectTime > this.bhopTimeLimit) {
+				this.maxSprintSpeed = this.defaultMaxSprintSpeed;
 			}
 
 			// Reset shift position
@@ -769,9 +747,10 @@ class Player {
 		this.position.z += this.newMove['z'];
 
 		// Stop sprinting if you hit a block
-		this.distanceMoved += this.previousPosition.sub(this.position).length();
+		this.distanceMoved = this.previousPosition.sub(this.position).length()/delta/blockSize;
 		if (this.distanceMoved < 1.5 && this.onObject === false && !this.fly) {
 			this.speed = 2;
+			this.maxSprintSpeed = this.defaultMaxSprintSpeed;
 		}
 
 		// Record last height on ground
@@ -789,11 +768,18 @@ class Player {
 
 		this.savedPosition = this.position.clone();
 
+		// BHOP
+		if (this.onObject) {
+			this.onObjectTime += delta;
+		} else {
+			this.onObjectTime = 0;
+		}
+
 		// Update movement
 
 		this.sprintSpeed = this.inWater ? this.maxWalkSpeed*1.5 : this.maxSprintSpeed;
 		if (this.fly) this.sprintSpeed = this.maxSprintSpeed * 2;
-		if (this.key.backward) this.sprintSpeed = this.maxWalkSpeed;
+		if (this.key.backward && !this.fly) this.sprintSpeed = this.maxWalkSpeed;
 		this.walkSpeed = this.inWater ? this.maxWalkSpeed/2 : this.maxWalkSpeed;
 		let acc = this.inWater ? 1 : 10;
 		if (this.key.sprint) {
@@ -808,6 +794,7 @@ class Player {
 			} else {
 				this.speed = this.walkSpeed;
 			}
+			this.maxSprintSpeed = this.defaultMaxSprintSpeed;
 		}
 		this.positionYOffset = 0;
 		if (this.key.sneak && !this.fly && this.onObject) {
@@ -817,6 +804,10 @@ class Player {
 			this.position.y += -this.walkSpeed;
 			this.halfHeight = blockSize * 0.6;
 		}
+		if (this.blocking && !this.fly && this.onObject)
+			this.speed = 0.75;
+		if (this.blocking && this.key.sneak && !this.fly && this.onObject)
+			this.speed = 0.3;
 
 		/*// Change camera fov when sprinting
 		if (this.speed <= 2 || this.distanceMoved < 1.5) {
@@ -856,7 +847,7 @@ class Player {
 		this.placeBlock();
 		this.dropItem();
 
-		this.updateArm();
+		this.updateHand();
 		this.move(delta);
 	}
 

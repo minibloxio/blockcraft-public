@@ -126,7 +126,7 @@ var onKeyDown = function ( event ) {
     	}
 	}
 
-	if (!player.controls.enabled || showChatBar)
+	if (!initialized || !player.controls.enabled || showChatBar)
 		return;
 
 	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
@@ -213,7 +213,7 @@ var onKeyUp = function ( event ) {
 	if (event.keyCode == 13)
 		showChatFlag = true;
 
-	if (!player.controls.enabled || showChatBar)
+	if (!initialized || !player.controls.enabled || showChatBar)
 		return;
 
 	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {

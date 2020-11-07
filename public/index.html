@@ -172,13 +172,13 @@
 				color: white;
 				font-size: 20px;
 				font-family : inherit;
-				background-color: rgba(0, 0, 0, 0.5);
+				background-color: rgba(0, 0, 0, 0);
 				float: left;
 				border: none;
 				outline: none;
 				cursor: pointer;
 				height: 100%;
-				width: 33.3333%;
+				width: 24.9%;
 				transition: 0.3s;
 			}
 
@@ -222,6 +222,10 @@
 
 			#welcome {
 				padding: 20px;
+			}
+
+			#versions {
+				overflow-y: scroll;
 			}
 
 			#video-settings {
@@ -330,10 +334,6 @@
 		<script src="javascripts/postprocessing/RenderPass.js"></script>
 		<script src="javascripts/postprocessing/ShaderPass.js"></script>
 		<script src="javascripts/postprocessing/CopyShader.js"></script>
-		<script src="javascripts/postprocessing/UnrealBloomPass.js"></script>
-		<script src="javascripts/postprocessing/SSAOPass.js"></script>
-		<script src="javascripts/postprocessing/SSAOShader.js"></script>
-		<script src="javascripts/postprocessing/LuminosityHighPassShader.js"></script>
 
 		<!-- Load Classes -->
 		<script src="javascripts/classes/World.js"></script>
@@ -362,19 +362,22 @@
 			<div id="container">
 				<h1 id="title">BlockCraft</h1>
 				<div id="nav">
-					<button class="tablinks" onclick="changeTab(event, 'welcome')">Welcome</button>
-					<button class="tablinks" onclick="changeTab(event, 'video-settings')" id="welcome-button">Video</button>
+					<button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
+					<button class="tablinks" onclick="changeTab(event, 'versions')">Versions</button>
+					<button class="tablinks" onclick="changeTab(event, 'video-settings')">Video</button>
 					<button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
 				</div>
 			</div>
 
-			<div id="welcome" class="tabcontent" style="display: none;">
+			<div id="welcome" class="tabcontent">
 				<span>Welcome to BlockCraft!</span><br><br>
 				<span>This is a recreation of multiplayer Minecraft, but on the web.</span><br><br>
 				<span>Feel free to look around!</span><br><br>
 			</div>
 
-			<div id="video-settings" class="tabcontent">
+			<div id="versions" class="tabcontent" style="display: none;"></div>
+
+			<div id="video-settings" class="tabcontent" style="display: none;">
 				<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
 				<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px">
 				<br />
@@ -453,7 +456,6 @@
 		<script>
 
 			// Change tab
-
 			function changeTab(evt, cityName) {
 			  // Declare all variables
 			  var i, tabcontent, tablinks;
@@ -474,6 +476,33 @@
 			  document.getElementById(cityName).style.display = "block";
 			  evt.currentTarget.className += " active";
 			}
+
+			// Add version controls
+
+			var request = new XMLHttpRequest();
+	        request.open('GET','https://api.github.com/repos/victoryqwei/blockcraft/commits' , 
+	        true)
+	        request.onload = function() {
+	            var data = JSON.parse(this.response);
+	           	
+	           	// Add to version
+	           	for (let v of data) {
+	           		let lines = v.commit.message.split("\n");
+
+	           		if (lines && lines[0][0] != "v")
+	           			continue;
+
+	           		for (let line of lines) {
+	           			let message = $("<span>" + line + "</span><br>");
+		           		$("#versions").append(message);
+	           		}
+
+	           		let message = $("<br>");
+		           	$("#versions").append(message);
+		           		
+	           	}
+	        }
+	        request.send();
 
 			// Add keys
 
@@ -567,7 +596,7 @@
 						keymap[old_key][2] = false;
 						//console.log("Escape")
 
-						setCookie(keymap[old_key][0], [old_key, keymap[old_key][0], keymap[old_key][1]], 1)
+						setCookie(keymap[old_key][0], [old_key, keymap[old_key][0], keymap[old_key][1]], 7)
 					} else if (keymap[e.keyCode] && keymap[old_key][2]) {
 						e.target.value = action.toUpperCase();
 						e.target.savedKey = e.keyCode;
@@ -588,7 +617,7 @@
 								keyorder[i] = e.keyCode
 						}
 
-						setCookie(keymap[e.keyCode][0], [e.keyCode, keymap[e.keyCode][0], action.toUpperCase()], 1)
+						setCookie(keymap[e.keyCode][0], [e.keyCode, keymap[e.keyCode][0], action.toUpperCase()], 7)
 					}
 
 					// Check if key has been cleared up
@@ -613,8 +642,8 @@
 								keymap[currKey][3].children[1].setAttribute("data-keycode", currKey);
 								keymap[shownKey][3].children[1].setAttribute("data-keycode", shownKey);
 
-								setCookie(keymap[currKey][0], [currKey, keymap[currKey][0], keymap[shownKey][1]], 1)
-								setCookie(keymap[shownKey][0], [shownKey, keymap[shownKey][0], keymap[currKey][1]], 1)
+								setCookie(keymap[currKey][0], [currKey, keymap[currKey][0], keymap[shownKey][1]], 7)
+								setCookie(keymap[shownKey][0], [shownKey, keymap[shownKey][0], keymap[currKey][1]], 7)
 
 								//console.log(currKey, shownKey , "SWITCHABLE")
 							}
@@ -699,6 +728,14 @@
 
 				addVideoControls();
 			})
+
+			// Get cookie username
+
+			let name = getCookie("Name");
+			if (name)
+				$("#name-input").val(name);
+
+
 		</script>
 	</body>
 </html>

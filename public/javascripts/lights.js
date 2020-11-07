@@ -28,7 +28,7 @@ class Light {
 
 	    this.dir.shadow.camera.far = 10000;
 	    this.dir.shadow.camera.near = 0;
-	    this.dir.shadow.bias = -0.00001;
+	    this.dir.shadow.bias = -0.001;
 
 	    // Add moon directional light
 	    this.dirM = new THREE.DirectionalLight( "white", 0.5 );
@@ -144,6 +144,9 @@ class Light {
 
 		// Update hemisphere light based on sun height
 		let intensity = ((this.offset.y/this.sunDist/2)+0.5);
+		this.dir.intensity = intensity;
+		this.dirM.intensity = 1-intensity;
+
 		let clampedIntensity = mapRange(intensity, 0, 1, 0.3, 0.7)
 		this.hemi.intensity = clampedIntensity;
 

@@ -33,6 +33,15 @@ function addPlayer(players, id) {
 	p.rightArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), arm.material)
 	p.rightArm.position.set(0, -blockSize*0.3, 0);
 
+	// Add hand
+
+	let hand = p.toolbar[p.currSlot];
+	if (p.hand && p.hand.mesh)
+		p.rightArm.remove(p.hand.mesh);
+	if (hand) {
+		updateHand(hand, p);
+	}
+
 	// Shoulder joints
 	p.rightShoulder = new THREE.Object3D();
 	p.rightShoulder.position.set(player.dim.armSize*3/2, -blockSize*0.15, 0);
@@ -96,18 +105,27 @@ function updatePlayers(serverPlayers) {
 			p.hp = serverPlayers[id].hp;
 			if (p.hp <= 0 && p.entity.visible) {
 				p.entity.visible = false;
-				/*addChat({
-					text: p.name + " was slain"
-				})*/
 			} else if (p.hp > 0) {
 				p.entity.visible = true;
 			}
 
-			p.ping = serverPlayers[id].ping;
+			// Transfer data
+			let transferredValues = (({ ping, toolbar, walking, punching, blocking }) => ({ ping, toolbar, walking, punching, blocking }))(serverPlayers[id]);
+			Object.assign(p, transferredValues)
 
-			// Update animations
-			p.walking = serverPlayers[id].walking;
-			p.punching = serverPlayers[id].punching;
+			// Update player hand if necessary
+			if (p.currSlot != serverPlayers[id].currSlot) {
+				p.currSlot = serverPlayers[id].currSlot;
+
+				let hand = p.toolbar[p.currSlot];
+
+				if (p.hand && p.hand.mesh)
+					p.rightArm.remove(p.hand.mesh);
+
+				if (hand) {
+					updateHand(hand, p);
+				}
+			}
 
 			// Update player name if necessary (performance intensive)
 			if (p.name != serverPlayers[id].name) {
@@ -167,6 +185,21 @@ function updatePlayer(p) {
 		rotateAboutPoint(p.leftLeg, new THREE.Vector3(0, -blockSize*0.75, 0), new THREE.Vector3(1, 0, 0), Math.abs(p.leftLeg.rotation.x)*Math.sign(-p.leftLeg.rotation.x))
 	}
 
+	let hand = p.toolbar[p.currSlot];
+	let item_mesh = p.hand.mesh;
+	if (hand) {
+		if (p.blocking) {
+			item_mesh.position.set(-4, -2, -3);
+			item_mesh.rotation.set(0, -Math.PI/8, 0);
+		} else if (hand.class == "item") {
+			item_mesh.position.set(0, -4, -8);
+			item_mesh.rotation.set(-Math.PI/2-Math.PI/6, Math.PI/2, 0);
+		} else {
+			item_mesh.position.set(-3, -player.dim.armHeight/2, -player.dim.armSize);
+			item_mesh.rotation.set(0, Math.PI/4, 0);
+		}
+	}
+		
 	// Punching animation
 	if (p.punching) {
 		p.punchingT += delta*5;
@@ -258,6 +291,62 @@ function addEntity(entity) {
 		world.entities[entity.id].mesh.material.dispose();
 		scene.remove(world.entities[entity.id].mesh);
 		delete world.entities[entity.id];
+	}
+}
+
+// Update player hand
+function updateHand(entity, p) {
+	let {blockSize} = world;
+
+	if (entity.class == "item") {
+		let canvas = document.createElement("canvas");
+		canvas.width = 16;
+		canvas.height = 16;
+		let ctx = canvas.getContext("2d");
+		ctx.drawImage(item_atlas, (entity.v-1)*16, 0, 16, 16, 0, 0, 16, 16);
+		let texture = new THREE.CanvasTexture(canvas);
+		texture.wrapS = THREE.RepeatWrapping;
+		texture.repeat.x = -1;
+		texture.magFilter = THREE.NearestFilter;
+		texture.minFilter = THREE.NearestFilter;
+		let mat = new THREE.MeshLambertMaterial({map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide})
+
+		let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(blockSize, blockSize), mat);
+		item_mesh.renderOrder = 1;
+		item_mesh.name = "item";
+
+		item_mesh.position.set(0, -4, -8);
+		item_mesh.rotation.set(-Math.PI/2-Math.PI/6, Math.PI/2, 0);
+
+		p.hand = entity;
+		p.hand.mesh = item_mesh;
+
+		p.rightArm.add(p.hand.mesh)
+	} else {
+		let uvVoxel = entity.v-1;
+		let block_geometry = new THREE.BufferGeometry();
+		const {positions, normals, uvs, indices} = world.generateGeometryDataForItem(uvVoxel);
+		const positionNumComponents = 3;
+		block_geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
+		const normalNumComponents = 3;
+		block_geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
+		const uvNumComponents = 2;
+		block_geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
+		block_geometry.setIndex(indices);
+		block_geometry.computeBoundingSphere();
+
+		let block_mesh = new THREE.Mesh(block_geometry, material);
+		block_mesh.name = "item";
+		block_mesh.castShadow = true;
+		block_mesh.receiveShadow = true;
+
+		block_mesh.position.set(-3, -player.dim.armHeight/2, -player.dim.armSize);
+		block_mesh.rotation.set(0, Math.PI/4, 0);
+
+		p.hand = entity;
+		p.hand.mesh = block_mesh;
+
+		p.rightArm.add(p.hand.mesh);
 	}
 }
 

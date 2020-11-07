@@ -11,7 +11,7 @@ $(document).ready(function () {
 let scene, renderer, world, chunkManager, light, sky, stats, composer, colorShader, inScreen;
 let loaded = 0;
 let loadedAnimate = new Ola(0);
-let maxLoaded = 24;
+let maxLoaded = 30;
 let tick = new Ola(0)
 
 let sprite = undefined;
@@ -186,7 +186,9 @@ function animate() {
 		rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
 		dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
 		walking: (new Vector(player.velocity.x, player.velocity.z)).getMag() > 2,
-		punching: player.punchT < 1
+		punching: player.punchT < 2,
+		blocking: player.blockT > 0,
+		currSlot: player.currentSlot
 	});
 
 	// Scene update
