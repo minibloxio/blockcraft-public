@@ -79,6 +79,7 @@ module.exports = class World {
     this.tick = 0;
 
     this.waterLevel = 40;
+    this.mountainLevel = 80;
 
     // Cell management
   	this.blockSize = 16;
@@ -336,8 +337,12 @@ module.exports = class World {
               blockID = "water";
 
           if (cave > 0.1) {
-            if (yPos == height) {
+            if (yPos == height && yPos > this.waterLevel) {
               blockID = "grass";
+            } else if (yPos == height && yPos <= this.waterLevel-2) {
+              blockID = "gravel";
+            } else if (yPos == height && yPos <= this.waterLevel) {
+              blockID = "sand";
             } else if (yPos < height && yPos > height-3) {
               blockID = "dirt";
             } else if (yPos <= height-3 && yPos > 0) {
@@ -348,6 +353,14 @@ module.exports = class World {
               blockID = (iron > 0.7 && yPos > 18) ? "iron_ore" : blockID
               blockID = (gold > 0.9 && yPos < 18) ? "gold_ore" : blockID
               blockID = (diamond > 0.9 && yPos < 12) ? "diamond_ore" : blockID
+            }
+
+            if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel+15) {
+              blockID = "snow";
+            } else if (yPos >= height && yPos <= height && yPos >= this.mountainLevel+10) {
+              blockID = "snow";
+            } else if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel) {
+              blockID = "stone";
             }
           }
 
@@ -371,7 +384,7 @@ module.exports = class World {
 	        let zPos = z + cellZ * cellSize;
 	        const height = this.getHeight(xPos, zPos)
 	    		// Add fauna
-	        let tree = rng1.noise3D(xPos/30, height, zPos/30)*rng1.noise2D(xPos, zPos) > 0.5 && height > this.waterLevel;
+	        let tree = rng1.noise3D(xPos/30, height, zPos/30)*rng1.noise2D(xPos, zPos) > 0.5 && height > this.waterLevel && height < this.mountainLevel;
 
 	        if ((rng1.noise3D(xPos*0.05, height*caveSparsity, zPos*0.05)+1)/2 <= 0.1)
 	        	continue;

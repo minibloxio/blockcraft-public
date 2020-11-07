@@ -56,7 +56,7 @@ rl.on('line', (input) => {
 
 
 // Get textures
-let blockOrder = ["water", "bedrock", "stone", "cobblestone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "sand", "gravel", "obsidian"];
+let blockOrder = ["water", "bedrock", "stone", "cobblestone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "clay", "gravel", "obsidian"];
 
 let textures = {};
 fs.readdir(public + '/textures/blocks', function (err, data) {
@@ -115,7 +115,7 @@ io.on('connection', function(socket_) {
 		dir: {x: 0,y: 0,z: 0},
 		hp: 10,
 		dead: false,
-		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["obsidian"], c: 64, class: "block"}, {v: world.blockId["sand"], c: 64, class: "block"}],
+		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["clay"], c: 64, class: "block"}, {v: world.blockId["ice"], c: 64, class: "block"}],
 		walking: false,
 		punching: false,
 		currSlot: 0,

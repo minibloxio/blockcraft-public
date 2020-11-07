@@ -11,7 +11,7 @@ $(document).ready(function () {
 let scene, renderer, world, chunkManager, light, sky, stats, composer, colorShader, inScreen;
 let loaded = 0;
 let loadedAnimate = new Ola(0);
-let maxLoaded = 30;
+let maxLoaded = 34;
 let tick = new Ola(0)
 
 let sprite = undefined;
@@ -145,8 +145,12 @@ function animate() {
 	delta = Math.min(delta, 0.1)
 
 	// Animate start menu
-	if (loadedAnimate.value >= maxLoaded && $("#loading-bar").text() != "Start")
+	if (loadedAnimate.value >= maxLoaded) {
 		$("#loading-bar").text("Start")
+	} else if (loadedAnimate.value < maxLoaded && $("#loading-bar").text() != "Start") {
+		let text = Math.min(100, round(loadedAnimate.value/maxLoaded*100, 0));
+		$("#loading-bar").text("Loading " + text + "%")
+	}
 	loadedAnimate.value = loaded;
 	$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxLoaded)/maxLoaded)+"%")
 

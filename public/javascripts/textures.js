@@ -78,6 +78,7 @@ function loadBlockImages(block_names, blockOrder) {
 let blocks = {
   "water": "water_clear",
   "grass": ["grass_side", "dirt", "grass_top"],
+  "snowy_grass": ["grass_side_snowed", "dirt", "snow"],
   "wood": ["log_oak", "log_oak_top", "log_oak_top"],
   "leaves": "leaves_oak",
   "crafting_table": ["crafting_table_front", "planks_oak", "crafting_table_top"],

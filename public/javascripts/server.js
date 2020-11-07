@@ -314,6 +314,8 @@ function updateHand(entity, p) {
 		let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(blockSize, blockSize), mat);
 		item_mesh.renderOrder = 1;
 		item_mesh.name = "item";
+		item_mesh.castShadow = true;
+		item_mesh.receiveShadow = true;
 
 		item_mesh.position.set(0, -4, -8);
 		item_mesh.rotation.set(-Math.PI/2-Math.PI/6, Math.PI/2, 0);
