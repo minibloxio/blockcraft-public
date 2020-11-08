@@ -53,6 +53,7 @@ let mining_progress = [
 
 function loadTextures(data) {
   loadBlockImages(data.blocks, data.blockOrder)
+  loadItemImages(data.items, data.itemOrder);
 }
 
 // Texture Merger
@@ -61,7 +62,7 @@ let material;
 let blockFaces = {};
 let texture_atlas = undefined;
 
-function loadBlockImages(block_names, blockOrder) {
+function loadBlockImages(block_names, block_order) {
   loader.setPath("textures/blocks/");
   let loading_index = 0;
   for (let name of block_names) {
@@ -69,7 +70,7 @@ function loadBlockImages(block_names, blockOrder) {
       loading_index += 1;
       loaded += 1;
       if (loading_index == block_names.length) {
-        mergeTextures(blockOrder);
+        mergeBlockTextures(block_order);
       }
     })
   }
@@ -85,7 +86,7 @@ let blocks = {
   "planks": "planks_oak"
 }
 
-function mergeTextures(order) {
+function mergeBlockTextures(order) {
   let canvas = document.createElement("canvas");
   let ctx = canvas.getContext("2d");
   canvas.width = 512;
@@ -101,7 +102,7 @@ function mergeTextures(order) {
 
   ctx.drawImage(texture.image, 500, 500)
 
-  material = new THREE.MeshLambertMaterial({
+  material = new THREE.MeshPhongMaterial({
     map: texture,
     side: THREE.DoubleSide,
     transparent: true,
@@ -148,36 +149,31 @@ function makeCanvasPowerOfTwo(canvas) {
 }
 
 
-loader.setPath("textures/items/");
-
-let item_names = ['stick', 'wood_sword', 'wood_pickaxe', 'wood_axe']
 let items = {};
 let item_atlas = undefined;
 
-function loadItemImages() {
+function loadItemImages(item_names, item_order) {
+  loader.setPath("textures/items/");
   var loading_index = 0;
-  for (let item of item_names) {
-    let name = item + '.png'
-    items[item] = loader.load(name, function () {
+  for (let name of item_names) {
+    items[name.slice(0, -4)] = loader.load(name, function () {
       loading_index += 1;
       loaded += 1;
       if (loading_index == item_names.length) {
-        mergeItemTextures();
+        mergeItemTextures(item_order);
       }
     })
   }
 }
-
-loadItemImages();
   
-function mergeItemTextures() {
+function mergeItemTextures(order) {
   let canvas = document.createElement("canvas");
   let ctx = canvas.getContext("2d");
   canvas.width = 256;
   canvas.height = 64;
 
   let index = 0;
-  for (let item in items) {
+  for (let item of order) {
     let b = items[item];
     ctx.drawImage(b.image, index*16, 0)
     index++;
@@ -194,6 +190,7 @@ function mergeItemTextures() {
 
   item_atlas = texture.image;
 
+  loaded += 1;
   console.log("Done stitching item textures")
 }
 

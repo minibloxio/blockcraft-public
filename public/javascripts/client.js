@@ -33,9 +33,6 @@ socket.on('init', function (data) {
 	// Update to server tick
 	tick = new Ola(data.tick);
 
-	// Update lights
-	light.generateClouds("add")
-
 	initialized = true;
 })
 

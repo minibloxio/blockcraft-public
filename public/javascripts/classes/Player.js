@@ -18,6 +18,9 @@ class Player {
 			distance: Infinity
 		};
 
+		// Mode
+		this.mode = "creative";
+
 		// Movement
 
 		this.position = this.controls.getObject().position;
@@ -273,11 +276,11 @@ class Player {
 		var intersects;
 
 		// update the picking ray with the camera and mouse position
-		this.raycaster.setFromCamera( mouse, camera );
+		this.raycaster.setFromCamera( new THREE.Vector3(0, 0, 0), camera );
 		this.raycaster.far = blockSize * 5;
 
 		// calculate blocks intersecting the picking ray
-		intersects = this.raycaster.intersectObjects( scene.children, true );
+		intersects = this.raycaster.intersectObjects( scene.children );
 
 		// Eliminate wireframes, items, and clouds from being selected
 		var picked = []
@@ -324,7 +327,7 @@ class Player {
     }
 
     punch() {
-    	if (this.blocking)
+    	if (this.blocking || !this.raycaster.camera || this.click)
     		return;
     	// Punch players
 
@@ -338,8 +341,13 @@ class Player {
 		var intersects = this.raycaster.intersectObjects(scene.children, true);
 
 		var picked = [];
-		for (var i = 0; i < intersects.length; i++) picked.push(intersects[i])
-
+		for (var i = 0; i < intersects.length; i++) {
+			let object = intersects[i].object;
+			if (!(object.name == "wireframe" || object.name == "item" || object.name == "cloud")) {
+				picked.push(intersects[i])
+			}
+		}
+			
 		// Get the closest intersection
 		var closest = {
 			distance: Infinity
@@ -487,6 +495,15 @@ class Player {
 			if (item && item.v > 0 && item.c > 0 && item.class == "block") { // Place a block, not air or water
 				world.setVoxel(x, y, z, item.v);
 
+				/*if (world.blockId["glowstone"] == item.v) {
+					let pointLight = new THREE.PointLight("orange", 1, 100);
+					pointLight.position.set(x+0.5, y+0.5, z+0.5);
+					pointLight.position.multiplyScalar(blockSize);
+					stage.torches.push(pointLight);
+					scene.add(pointLight)
+					console.log("ADD LIGHT")
+				}*/
+
 			    if (this.collides()) {
 			    	world.setVoxel(x, y, z, 0);
 			    	updateVoxelGeometry(x, y, z, true);
@@ -543,6 +560,10 @@ class Player {
 		let {blockSize} = world;
 
 		this.newMove = new THREE.Vector3();
+
+		// Reset fly if in survival mode
+		this.fly = this.mode == "survival" ? false : this.fly;
+		this.clip = this.mode == "survival" ? true : this.clip;
 
 		// Reduce velocity (friction)
 		var previousVelocity = this.velocity.clone();
@@ -679,7 +700,7 @@ class Player {
 					if (!this.inWater && this.velocity.y <= 0 || this.position.y <= blockSize) {
 						let jumpDiff = Math.floor((this.prevHeight - this.position.y)/blockSize)-3;
 
-						if (jumpDiff > 0 && jumpDiff < 500) { // Fall damage
+						if (jumpDiff > 0 && jumpDiff < 500 && this.mode == "survival") { // Fall damage
 							socket.emit('takeDamage', {
 								dmg: jumpDiff*0.5,
 								type: 'fall'

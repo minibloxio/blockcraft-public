@@ -296,6 +296,9 @@ function addEntity(entity) {
 
 // Update player hand
 function updateHand(entity, p) {
+	if (!item_atlas)
+		return;
+
 	let {blockSize} = world;
 
 	if (entity.class == "item") {

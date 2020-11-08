@@ -1,5 +1,5 @@
 
-class Light {
+class Stage {
 	constructor() {
 
 	    let {blockSize, cellSize} = world;
@@ -33,6 +33,9 @@ class Light {
 	    // Add moon directional light
 	    this.dirM = new THREE.DirectionalLight( "white", 0.5 );
 	    scene.add( this.dirM );
+
+	    // Torches
+	    this.torches = [];
 
 	    // Fog
 	    scene.fog = new THREE.Fog("lightblue", 0, blockSize*cellSize*5)
@@ -127,7 +130,7 @@ class Light {
 		this.sun.position.set(sun.x, sun.y, sun.z);
 		this.sun.lookAt(this.sun.position)
 
-		if (light.dir.enableShadow) {
+		if (this.dir.enableShadow) {
 			if (this.offset.y < 0) {
 				this.dir.castShadow = false;
 			} else {
@@ -145,7 +148,7 @@ class Light {
 		// Update hemisphere light based on sun height
 		let intensity = ((this.offset.y/this.sunDist/2)+0.5);
 		this.dir.intensity = intensity;
-		this.dirM.intensity = 1-intensity;
+		this.dirM.intensity = 0.5-intensity/2;
 
 		let clampedIntensity = mapRange(intensity, 0, 1, 0.3, 0.7)
 		this.hemi.intensity = clampedIntensity;

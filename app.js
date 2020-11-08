@@ -56,7 +56,9 @@ rl.on('line', (input) => {
 
 
 // Get textures
-let blockOrder = ["water", "bedrock", "stone", "cobblestone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "clay", "gravel", "obsidian"];
+let blockOrder = ["water", "bedrock", "stone", "cobblestone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "clay", "gravel", "obsidian", "glowstone", "glass"];
+
+let itemOrder = ["stick", "wood_sword", "wood_pickaxe", "wood_axe", "wood_shovel"];
 
 let textures = {};
 fs.readdir(public + '/textures/blocks', function (err, data) {
@@ -66,6 +68,7 @@ fs.readdir(public + '/textures/items', function (err, data) {
 	textures["items"] = data;
 })
 textures.blockOrder = blockOrder;
+textures.itemOrder = itemOrder;
 
 // Setup world
 var players = {};
@@ -82,6 +85,7 @@ const world = new World({
 	tileTextureHeight,
 	buildHeight,
 	blockOrder,
+	itemOrder,
 });
 var updatedBlocks = [];
 var newEntities = [];
@@ -115,7 +119,7 @@ io.on('connection', function(socket_) {
 		dir: {x: 0,y: 0,z: 0},
 		hp: 10,
 		dead: false,
-		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["clay"], c: 64, class: "block"}, {v: world.blockId["ice"], c: 64, class: "block"}],
+		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 5, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["glowstone"], c: 64, class: "block"}, {v: world.blockId["glass"], c: 64, class: "block"}, {v: world.blockId["cobblestone"], c: 64, class: "block"}, {v: world.blockId["obsidian"], c: 64, class: "block"}, {v: world.blockId["water"], c: 64, class: "block"}],
 		walking: false,
 		punching: false,
 		currSlot: 0,
@@ -194,7 +198,7 @@ io.on('connection', function(socket_) {
 	})
 
 	socket.on('punchPlayer', function (data) {
-		if (players[data.id] && players[socket.id] && !players[socket.id].dead) {
+		if (players[data.id] && players[socket.id] && !players[socket.id].dead && players[data.id].mode == "survival") {
 			let dmg = 0.5;
 
 			let entity = data.curr;
@@ -217,7 +221,7 @@ io.on('connection', function(socket_) {
 	})
 
 	socket.on('takeDamage', function (data) {
-		if (players[socket.id]) {
+		if (players[socket.id] && players[socket.id].mode == "survival") {
 			players[socket.id].hp -= data.dmg;
 			players[socket.id].dmgType = data.type;
 		}

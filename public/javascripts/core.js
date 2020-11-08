@@ -8,10 +8,10 @@ $(document).ready(function () {
 })
 
 // Three.js
-let scene, renderer, world, chunkManager, light, sky, stats, composer, colorShader, inScreen;
+let scene, renderer, world, chunkManager, stage, sky, stats, composer, colorShader, inScreen;
 let loaded = 0;
 let loadedAnimate = new Ola(0);
-let maxLoaded = 34;
+let maxLoaded = 38;
 let tick = new Ola(0)
 
 let sprite = undefined;
@@ -25,7 +25,7 @@ var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHe
 var player;
 
 // Mouse
-var mouse = new THREE.Vector2();
+var mouse = new Ola({x: 0, y: 0}, 10);
 
 var players = {};
 
@@ -60,12 +60,13 @@ function init() {
 	scene.add( player.controls.getObject() );
 
 	// Add light
-	light = new Light();
+	stage = new Stage();
 
 	// Add settings
 	addVideoControls();
 
     // Add statistics to record
+    statistics.push(new Stat("Gamemode", player, "mode", 2))
     statistics.push(new Stat("Pos", player.position, false, 2, function (pos) {
     	return pos.clone().divideScalar(16);
     }))
@@ -192,12 +193,13 @@ function animate() {
 		walking: (new Vector(player.velocity.x, player.velocity.z)).getMag() > 2,
 		punching: player.punchT < 2,
 		blocking: player.blockT > 0,
-		currSlot: player.currentSlot
+		currSlot: player.currentSlot,
+		mode: player.mode,
 	});
 
 	// Scene update
 
-	light.update();
+	stage.update();
 	stats.update();
 
 	prevTime = time;

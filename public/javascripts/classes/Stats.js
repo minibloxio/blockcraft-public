@@ -24,6 +24,8 @@ class Stat {
 			val = val[this.key];
 			if (type == "boolean")
 				text += val
+			else if (type == "string")
+				text += val
 			else
 				text += round(val, this.round);
 

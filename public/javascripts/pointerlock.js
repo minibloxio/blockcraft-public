@@ -10,7 +10,7 @@ function joinServer() {
 }
 
 function requestPointerLock() {
-	if (loadedAnimate.value >= maxLoaded) {
+	if (loaded >= maxLoaded) {
 		// Ask the browser to lock the pointer
 		var element = document.body;
 		element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;

@@ -340,7 +340,8 @@
 
 		<!-- Load Classes -->
 		<script src="javascripts/classes/World.js"></script>
-		<script src="javascripts/classes/chunkManager.js"></script>
+		<script src="javascripts/classes/Stage.js"></script>
+		<script src="javascripts/classes/ChunkManager.js"></script>
 		<script src="javascripts/classes/Player.js"></script>
 		<script src="javascripts/classes/Stats.js"></script>
 		<script src="javascripts/classes/Recipes.js"></script>
@@ -348,7 +349,6 @@
 		<!-- Load Game Files -->
 		<script src="javascripts/pointerlock.js"></script>
 		<script src="javascripts/server.js"></script>
-		<script src="javascripts/lights.js"></script>
 		<script src="javascripts/core.js"></script>
 		<script src="javascripts/textures.js"></script>
 		<script src="javascripts/client.js"></script>
@@ -509,10 +509,10 @@
 
 			// Add keys
 
-			let keyorder = [190, 191, 87, 65, 83, 68, 32, 16, 18, 70, 67, 81, 82, 88, 69, 9, 49, 50, 51, 52, 53, 54, 55, 56, 57];
+			let keyorder = [188, 190, 87, 65, 83, 68, 32, 16, 18, 70, 67, 81, 82, 88, 69, 9, 49, 50, 51, 52, 53, 54, 55, 56, 57];
 			let keymap = {
-				190: ["Attack", "."],
-				191: ["Place Block", "/"],
+				188: ["Attack", ","],
+				190: ["Place Block", "."],
 				87: ["Move Forward", "W"],
 				65: ["Move Left", "A"],
 				83: ["Move Backward", "S"],
@@ -696,9 +696,9 @@
 				addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
 
 				addSwitchControl("Statistics", "stats", true, hud, "showStats")
-				addSwitchControl("Shadow Effect", "shadow", false, light.dir, "enableShadow", "castShadow")
-				addSwitchControl("Clouds", "cloud", true, light, "showClouds", "generate")
-				addSwitchControl("Stars", "stars", true, light.stars, "visible")
+				addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow")
+				addSwitchControl("Clouds", "cloud", true, stage, "showClouds", "generate")
+				addSwitchControl("Stars", "stars", true, stage.stars, "visible")
 			}
 
 			function addSwitchControl(name, id, defaultValue, object, key, key2) {

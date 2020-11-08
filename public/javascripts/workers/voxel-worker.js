@@ -168,7 +168,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world) {
                   voxelX + dir[0],
                   voxelY + dir[1],
                   voxelZ + dir[2]);
-              if (neighbor <= 1 || neighbor == 255) {
+              if (neighbor <= 1 || neighbor == 255 || ((neighbor == world.blockId["ice"] || neighbor == world.blockId["glass"]) && voxel != neighbor)) {
                 // this voxel has no neighbor in this direction so we need a face.
                 addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
               }
@@ -176,7 +176,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world) {
             }
           }
 
-          if (voxel == 1) { // Water
+          if (voxel == 1 || voxel == world.blockId["ice"] || voxel == world.blockId["glass"]) { // Water
             for (const {dir, corners, uvRow} of faces) {
 
               const neighbor = getVoxel(

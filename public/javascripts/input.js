@@ -19,6 +19,8 @@ $('html').mousedown(function(event) {
     }
 })
 $('html').mouseup(function(event) {
+	if (!initialized)
+		return;
     switch (event.which) {
         case 1:
             player.click = false;
@@ -51,8 +53,8 @@ $(window).keydown(function(event) {
 });
 
 $("body").mousemove(function (e) {
-	mouseX = e.offsetX;
-	mouseY = e.offsetY;
+	mouse.x = e.offsetX;
+	mouse.y = e.offsetY;
 })
 
 let mouseLeft, mouseRight = false;
@@ -105,24 +107,81 @@ onkeydown = onkeyup = function(e){
 }
 
 var onKeyDown = function ( event ) {
-	if (player.controls.enabled && event.keyCode == 13 && showChatFlag) {
+	if (player.controls.enabled && ([13, 191].indexOf(event.keyCode) > -1) && showChatFlag) {
 		showChatFlag = false;
     	showChatBar = !showChatBar;
     	if (showChatBar) {
-    		//$("#chat-input").show()
     		$("#chat-input").focus();
     		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0.3)"});
     		showChat = true;
     	} else {
-    		//$("#chat-input").hide();
     		$("#chat-input").blur();
     		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
     		hideChatTimer(5000);
     	}
 
-    	if (!showChatBar && $("#chat-input").val()) {
-    		socket.emit("message", $("#chat-input").val());
-    		$("#chat-input").val("")
+    	let msg = $("#chat-input").val()
+    	if (!showChatBar && msg) {
+    		if (msg[0] != "/") { // Send message to everyone
+    			socket.emit("message", $("#chat-input").val());
+	    		$("#chat-input").val("")
+    		} else { // Do minecraft command
+	    		$("#chat-input").val("")
+    			/*
+					MINECRAFT COMMANDS	
+    			*/
+
+    			msg = msg.slice(1).split(" ");
+
+    			if (msg[0] == "gamemode") {
+    				if (["survival", "s"].indexOf(msg[1]) > -1) {
+    					addChat({
+							text: "Gamemode changed to survival"
+						});
+						player.mode = "survival";
+    				} else if (["creative", "c"].indexOf(msg[1]) > -1) {
+    					addChat({
+							text: "Gamemode changed to creative"
+						});
+						player.mode = "creative";
+    				} else {
+    					addChat({
+							text: "Error: Unrecognized gamemode",
+							color: "red"
+						});
+    				}
+    			} else if (msg[0] == "tp") {
+    				let exists = false;
+    				for (let id in players) {
+    					let p = players[id];
+    					if (p.name = msg[1]) {
+    						exists = true; 
+    						addChat({
+								text: "Teleported " + player.name + " to " + p.name
+							});
+							player.position.copy(p.pos)
+
+    						break;
+    					}
+    				}
+    				if (!exists) {
+    					addChat({
+							text: 'Error: No player found with name "' + msg[1] + '" to teleport to',
+							color: "red"
+						});
+    				} else {
+
+    				}
+	    				
+    			} else {
+    				addChat({
+						text: 'Error: Unable to recognize command "' + msg[0] + '"',
+						color: "red"
+					});
+    			}
+
+
+    		}
     	}
 	}
 
@@ -210,7 +269,7 @@ var onKeyDown = function ( event ) {
 var onKeyUp = function ( event ) {
 	let {blockSize} = world;
 
-	if (event.keyCode == 13)
+	if ([13, 191].indexOf(event.keyCode) > -1)
 		showChatFlag = true;
 
 	if (!initialized || !player.controls.enabled || showChatBar)
@@ -219,6 +278,8 @@ var onKeyUp = function ( event ) {
 	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
 		switch ( keymap[event.keyCode][0] ) {
 			case "Attack":
+			player.click = false;
+            player.key.leftClick = false;
 			break;
 			case "Place Block":
 			player.place = false;

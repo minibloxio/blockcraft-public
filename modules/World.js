@@ -100,18 +100,17 @@ module.exports = class World {
     // Block ids
 
     this.blockOrder = options.blockOrder;
-
-    this.blockId = {}
+    this.blockId = {};
 
     for (let i = 0; i < this.blockOrder.length; i++) {
       this.blockId[this.blockOrder[i]] = i+1;
     }
 
-    this.itemId = {
-      "stick": 1,
-      "wood_sword": 2,
-      "wood_pickaxe": 3,
-      "wood_axe": 4,
+    this.itemOrder = options.itemOrder;
+    this.itemId = {};
+
+    for (let i = 0; i < this.itemOrder.length; i++) {
+      this.itemId[this.itemOrder[i]] = i+1;
     }
   }
   loadSaveFile(data) {

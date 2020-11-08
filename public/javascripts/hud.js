@@ -53,87 +53,141 @@ let craftingOutput = undefined;
 let showPlayerTab = false;
 
 function withinItemFrame(xPos, yPos) {
-	return mouseX > xPos && mouseX < xPos + boxSize && mouseY > yPos && mouseY < yPos + boxSize;
+	return mouse.x > xPos && mouse.x < xPos + boxSize && mouse.y > yPos && mouse.y < yPos + boxSize;
 }
 
 function updateItem(block, i, type) {
-	if (type == "left") { // Left click item
-		if (selectedItem == undefined && block[i] && block[i].c > 0) {
-			// Pick up item
-			selectedItem = JSON.parse(JSON.stringify(block[i]));
-			block[i] = undefined;
-		} else if (selectedItem && selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
-			// Drop item
-			block[i] = JSON.parse(JSON.stringify(selectedItem));
-			selectedItem = undefined;
-		} else if (selectedItem && selectedItem.c > 0 && block[i] && block[i].c > 0 ) {
-			// Switch or combine
-			if (block[i].v == selectedItem.v) {
-				block[i].c += selectedItem.c;
-				selectedItem = undefined;
-			} else {
-				let prevBlock = JSON.parse(JSON.stringify(block[i]));
-				block[i] = JSON.parse(JSON.stringify(selectedItem));
-				selectedItem = prevBlock;
+	if (block == "creative") {
+		if (type == "left") { // Left click item
+			let entity = {}
+			if (i < world.blockOrder.length) {
+				entity.class = "block";
+				entity.c = map[16] ? 64 : 1;
+				entity.v = i+1;
+			} else if (i < world.blockOrder.length+world.itemOrder.length) {
+				entity.class = "item";
+				entity.c = map[16] ? 64 : 1;
+				entity.v = i-world.blockOrder.length+1;
 			}
-		}
-	} else if (type == "right") { // Right click item
-		if (selectedItem == undefined && block[i] && block[i].c > 0) {
-			// Split item stack
-			selectedItem = {
-				v: block[i].v,
-				c: Math.ceil(block[i].c/2),
-				class: block[i].class
-			};
-			block[i].c -= Math.ceil(block[i].c/2);
-		} else if (selectedItem && selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
-			// Drop 1 item
-			block[i] = {
-				v: selectedItem.v, 
-				c: 1,
-				class: selectedItem.class
-			};
-			selectedItem.c -= 1;
-		} else if (selectedItem && selectedItem.c > 0 && block[i] && block[i].c > 0) {
-			// Switch or combine
-			if (block[i].v == selectedItem.v) {
-				block[i].c += 1;
+			if (selectedItem == undefined ) {
+				// Pick up item
+				selectedItem = JSON.parse(JSON.stringify(entity));
+			} else if (selectedItem && selectedItem.c > 0) {
+				// Switch or combine
+				if (selectedItem.v == entity.v) {
+					selectedItem.c += 1;
+				} else {
+					selectedItem = undefined;
+				}
+			}
+		} else if (type == "right") { // Right click item
+			if (selectedItem == undefined && block[i] && block[i].c > 0) {
+				// Split item stack
+				selectedItem = {
+					v: block[i].v,
+					c: Math.ceil(block[i].c/2),
+					class: block[i].class
+				};
+				block[i].c -= Math.ceil(block[i].c/2);
+			} else if (selectedItem && selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
+				// Drop 1 item
+				block[i] = {
+					v: selectedItem.v, 
+					c: 1,
+					class: selectedItem.class
+				};
 				selectedItem.c -= 1;
-			} else {
-				let prevBlock = JSON.parse(JSON.stringify(block[i]));
+			} else if (selectedItem && selectedItem.c > 0 && block[i] && block[i].c > 0) {
+				// Switch or combine
+				if (block[i].v == selectedItem.v) {
+					block[i].c += 1;
+					selectedItem.c -= 1;
+				} else {
+					let prevBlock = JSON.parse(JSON.stringify(block[i]));
+					block[i] = JSON.parse(JSON.stringify(selectedItem));
+					selectedItem = prevBlock;
+				}
+			}
+		}
+	} else {
+		if (type == "left") { // Left click item
+			if (selectedItem == undefined && block[i] && block[i].c > 0) {
+				// Pick up item
+				selectedItem = JSON.parse(JSON.stringify(block[i]));
+				block[i] = undefined;
+			} else if (selectedItem && selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
+				// Drop item
 				block[i] = JSON.parse(JSON.stringify(selectedItem));
-				selectedItem = prevBlock;
+				selectedItem = undefined;
+			} else if (selectedItem && selectedItem.c > 0 && block[i] && block[i].c > 0 ) {
+				// Switch or combine
+				if (block[i].v == selectedItem.v) {
+					block[i].c += selectedItem.c;
+					selectedItem = undefined;
+				} else {
+					let prevBlock = JSON.parse(JSON.stringify(block[i]));
+					block[i] = JSON.parse(JSON.stringify(selectedItem));
+					selectedItem = prevBlock;
+				}
 			}
-		}
-	} else if (type == "double") { // Double click item
-		if (!block[i])
-			return;
-
-		// Collect same item type
-		let total = block[i].c;
-		for (let j = 0; j < block.length; j++) {
-			if (block[j] && block[j].v == block[i].v && i != j) {
-				total += block[j].c;
-				block[j] = undefined;
+		} else if (type == "right") { // Right click item
+			if (selectedItem == undefined && block[i] && block[i].c > 0) {
+				// Split item stack
+				selectedItem = {
+					v: block[i].v,
+					c: Math.ceil(block[i].c/2),
+					class: block[i].class
+				};
+				block[i].c -= Math.ceil(block[i].c/2);
+			} else if (selectedItem && selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
+				// Drop 1 item
+				block[i] = {
+					v: selectedItem.v, 
+					c: 1,
+					class: selectedItem.class
+				};
+				selectedItem.c -= 1;
+			} else if (selectedItem && selectedItem.c > 0 && block[i] && block[i].c > 0) {
+				// Switch or combine
+				if (block[i].v == selectedItem.v) {
+					block[i].c += 1;
+					selectedItem.c -= 1;
+				} else {
+					let prevBlock = JSON.parse(JSON.stringify(block[i]));
+					block[i] = JSON.parse(JSON.stringify(selectedItem));
+					selectedItem = prevBlock;
+				}
 			}
-		}
-		for (let j = 0; j < craftingGrid.length; j++) {
-			if (craftingGrid[j] && craftingGrid[j].v == block[i].v && i != j) {
-				total += craftingGrid[j].c;
-				craftingGrid[j] = undefined;
+		} else if (type == "double") { // Double click item
+			if (!block[i])
+				return;
+
+			// Collect same item type
+			let total = block[i].c;
+			for (let j = 0; j < block.length; j++) {
+				if (block[j] && block[j].v == block[i].v && i != j) {
+					total += block[j].c;
+					block[j] = undefined;
+				}
 			}
+			for (let j = 0; j < craftingGrid.length; j++) {
+				if (craftingGrid[j] && craftingGrid[j].v == block[i].v && i != j) {
+					total += craftingGrid[j].c;
+					craftingGrid[j] = undefined;
+				}
+			}
+
+			selectedItem = {
+				v: block[i].v, 
+				c: total,
+				class: block[i].class
+			}
+			block[i] = undefined;
 		}
 
-		selectedItem = {
-			v: block[i].v, 
-			c: total,
-			class: block[i].class
+		if (selectedItem && selectedItem.c == 0) {
+			selectedItem = undefined;
 		}
-		block[i] = undefined;
-	}
-
-	if (selectedItem && selectedItem.c == 0) {
-		selectedItem = undefined;
 	}
 }
 
@@ -152,35 +206,49 @@ function selectInventory(type) {
 			updateItem(inventory, i, type);
 	}
 
-	for (let j = 0; j < 2; j++) {
-		for (let i = 0; i < 2; i++) {
-			let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1+hotboxWidth*2;
-			let yPos = canvas.height/2+height/2-boxSize*10-1*hotboxWidth+(j)*hotboxWidth;
+	if (player.mode == "survival") {
+		for (let j = 0; j < 2; j++) {
+			for (let i = 0; i < 2; i++) {
+				let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1+hotboxWidth*2;
+				let yPos = canvas.height/2+height/2-boxSize*10-1*hotboxWidth+(j)*hotboxWidth;
 
-			if (withinItemFrame(xPos, yPos))
-				updateItem(craftingGrid, i+j*2, type);
+				if (withinItemFrame(xPos, yPos))
+					updateItem(craftingGrid, i+j*2, type);
+			}
 		}
-	}
 
-	let block = craftingOutput;
-	let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+hotboxWidth*5;
-	let yPos = canvas.height/2+height/2-boxSize*10-hotboxWidth*0.5;
+		let block = craftingOutput;
+		let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+hotboxWidth*5;
+		let yPos = canvas.height/2+height/2-boxSize*10-hotboxWidth*0.5;
 
-	if (mouseX > xPos && mouseX < xPos + boxSize && mouseY > yPos && mouseY < yPos + boxSize) {
-		if (selectedItem == undefined && block && block.c > 0) {
-			selectedItem = JSON.parse(JSON.stringify(block));
-			craftingOutput = undefined;
-			updateCraftingOutput(true);
-		} else if (selectedItem && selectedItem.c > 0 && block && block.c > 0) {
-			// Switch or combine
-			if (block.v == selectedItem.v) {
-				selectedItem.c += block.c;
+		if (withinItemFrame(xPos, yPos)) {
+			if (selectedItem == undefined && block && block.c > 0) {
+				selectedItem = JSON.parse(JSON.stringify(block));
+				craftingOutput = undefined;
 				updateCraftingOutput(true);
+			} else if (selectedItem && selectedItem.c > 0 && block && block.c > 0) {
+				// Switch or combine
+				if (block.v == selectedItem.v) {
+					selectedItem.c += block.c;
+					updateCraftingOutput(true);
+				}
+			}
+		}
+
+		updateCraftingOutput();
+	} else if (player.mode == "creative") {
+		// Add background boxes
+		for (let j = 0; j < 4; j++) {
+			for (let i = 0; i < 9; i++) {
+				let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1;
+				let yPos = canvas.height/2-boxSize-(j)*hotboxWidth;
+
+				if (withinItemFrame(xPos, yPos)) {
+					updateItem("creative", i+(3-j)*9, type);
+				}
 			}
 		}
 	}
-
-	updateCraftingOutput();
 }
 
 function updateCraftingOutput(remove) {
@@ -216,48 +284,92 @@ function displayInventoryBackground() {
 
 	drawRectangle(0, 0, canvas.width, canvas.height, "rgba(0, 0, 0, 0.5)")
 	drawRect(canvas.width/2, canvas.height/2, width, height, 0, "lightgrey")
-	drawText("Crafting", canvas.width/2, canvas.height/2-height/2+padding, "25px Minecraft-Regular", "grey", "center", "top")
-	
+	let title = player.mode == "survival" ? "Crafting" : player.mode == "creative" ? "Block selection" : "Adventure Mode"
+	drawText(title, canvas.width/2, canvas.height/2-height/2+padding, "25px Minecraft-Regular", "grey", "center", "top")
+
 	// Add background boxes
 	for (let j = 0; j < 4; j++) {
 		for (let i = 0; i < 9; i++) {
 			let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1;
 			let yPos = canvas.height/2+height/2-boxSize-(j)*hotboxWidth;
 
-			drawRectangle(
-				xPos-5,
-				yPos-5,
-				boxSize,
-				boxSize,
-				"grey"
-			)
+			drawRectangle(xPos-5,yPos-5,boxSize,boxSize,"grey")
 		}
 	}
-	for (let j = 0; j < 2; j++) {
-		for (let i = 0; i < 2; i++) {
-			let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1+hotboxWidth*2;
-			let yPos = canvas.height/2+height/2-boxSize*10-(j)*hotboxWidth;
+	
+	if (player.mode == "survival") { // SURVIVAL MODE
+		// Add background boxes
+		for (let j = 0; j < 4; j++) {
+			for (let i = 0; i < 9; i++) {
+				let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1;
+				let yPos = canvas.height/2+height/2-boxSize-(j)*hotboxWidth;
 
-			drawRectangle(
-				xPos-5,
-				yPos-5,
-				boxSize,
-				boxSize,
-				"grey"
-			)
+				drawRectangle(xPos-5,yPos-5,boxSize,boxSize,"grey")
+			}
+		}
+		for (let j = 0; j < 2; j++) {
+			for (let i = 0; i < 2; i++) {
+				let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1+hotboxWidth*2;
+				let yPos = canvas.height/2+height/2-boxSize*10-(j)*hotboxWidth;
+
+				drawRectangle(xPos-5,yPos-5,boxSize,boxSize,"grey")
+			}
+		}
+
+		let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+hotboxWidth*5;
+		let yPos = canvas.height/2+height/2-boxSize*10-hotboxWidth*0.5;
+
+		drawRectangle(
+			xPos-5,
+			yPos-5,
+			boxSize,
+			boxSize,
+			"grey"
+		)
+		drawItem(xPos, yPos, craftingOutput);
+	} else if (player.mode == "creative") { // CREATIVE MODE
+		// Add background boxes
+		for (let j = 0; j < 4; j++) {
+			for (let i = 0; i < 9; i++) {
+				let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1;
+				let yPos = canvas.height/2-boxSize-(j)*hotboxWidth;
+
+				drawRectangle(xPos-5,yPos-5,boxSize,boxSize,"grey")
+
+				// Draw items in inventory
+				let index = 0;
+				for (let block of world.blockOrder) {
+					let voxel = world.blockId[block];
+					if (voxel) {
+						let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(index%9)*hotboxWidth*8/9.1;
+						let yPos = canvas.height/2-boxSize*4+hotboxWidth*Math.floor((index-9)/9);
+
+						drawItem(xPos, yPos, {
+							v: voxel,
+							c: "∞",
+							class: "block"
+						});
+					}
+					index++;
+				}
+
+				for (let item of world.itemOrder) {
+					let voxel = world.itemId[item];
+					if (voxel) {
+						let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(index%9)*hotboxWidth*8/9.1;
+						let yPos = canvas.height/2-boxSize*4+hotboxWidth*Math.floor((index-9)/9);
+
+						drawItem(xPos, yPos, {
+							v: voxel,
+							c: "∞",
+							class: "item"
+						});
+					}
+					index++;
+				}
+			}
 		}
 	}
-	let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+hotboxWidth*5;
-	let yPos = canvas.height/2+height/2-boxSize*10-hotboxWidth*0.5;
-
-	drawRectangle(
-		xPos-5,
-		yPos-5,
-		boxSize,
-		boxSize,
-		"grey"
-	)
-	drawItem(xPos, yPos, craftingOutput);
 }
 
 function displayInventory() {
@@ -298,7 +410,7 @@ function displayInventory() {
 
 		// Draw selected item
 		if (selectedItem && selectedItem.c > 0) {
-			drawItem(mouseX, mouseY, selectedItem)
+			drawItem(mouse.x, mouse.y, selectedItem)
 		}
 		
 	}
