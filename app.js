@@ -255,6 +255,7 @@ io.on('connection', function(socket_) {
 			vel: {x: data.dir.x*force, y: data.dir.y*force, z: data.dir.z*force},
 			acc: {x: 0, y: 0, z: 0},
 			force: data.force,
+			lethal: true,
 			type: "item",
 			v: world.itemId["arrow"],
 			class: "item",

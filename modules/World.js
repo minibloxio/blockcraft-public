@@ -693,7 +693,7 @@ module.exports = class World {
 
             // Add to player if within a block distance
 						if (dist < blockSize*1.5) {
-              if (entity.v == this.itemId["arrow"] && entity.class == "item" && !entity.onObject && !players[id].blocking) { // Arrow hit
+              if (entity.v == this.itemId["arrow"] && entity.class == "item" && entity.lethal && !entity.onObject && !players[id].blocking) { // Arrow hit
 
                 players[id].hp -= entity.force;
                 if (players[entity.playerId])
