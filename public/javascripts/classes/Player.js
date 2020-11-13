@@ -19,7 +19,7 @@ class Player {
 		};
 
 		// Mode
-		this.mode = "creative";
+		this.mode = "survival";
 
 		// Movement
 
@@ -61,7 +61,8 @@ class Player {
 			sprint: false,
 			shift: false,
 			leftClick: false,
-			rightClick: false
+			rightClick: false,
+			lastRightClick: false,
 		}
 
 		// World interaction
@@ -155,11 +156,14 @@ class Player {
 		this.moveHand(item);
 
 		let s = JSON.stringify(item);
-		if (s == this.prevItem) {
+		if (s == this.prevItem && this.state == this.prevState) {
 			return;
+		} else if (this.state == this.prevState) {
+			this.state = 0;
 		}
 
 		this.prevItem = s;
+		this.prevState = this.state;
 		camera.remove(this.arm);
 
 		if (item && item.class == "item" && item.c > 0) {
@@ -168,7 +172,7 @@ class Player {
 			canvas.width = 16;
 			canvas.height = 16;
 			let ctx = canvas.getContext("2d");
-			ctx.drawImage(item_atlas, (item.v-1)*16, 0, 16, 16, 0, 0, 16, 16);
+			ctx.drawImage(item_atlas, (item.v-1)*16, (this.state ? this.state : 0)*16, 16, 16, 0, 0, 16, 16);
 			let texture = new THREE.CanvasTexture(canvas);
 			texture.magFilter = THREE.NearestFilter;
 			texture.minFilter = THREE.NearestFilter;
@@ -208,16 +212,67 @@ class Player {
 	}
 
 	moveHand(entity) {
+		this.punchT = (Date.now()-this.punching)/120; // Punching
+
+		
 		let hand = this.getCurrItem();
 		let blockingSpeed = 10;
+		if (hand && hand.class == "item" && hand.c > 0) {
+			// Blocking
+			if (hand.v == 2) {
+				this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed*delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed*delta);
+			} else {
+				this.key.rightClick = false;
+				this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed*delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed*delta);
+			}
 
-		this.punchT = (Date.now()-this.punching)/120;
-		if (hand) {
-			this.blocking = (this.key.rightClick && hand.class == "item" && hand.v == 2 && hand.c > 0 && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed*delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed*delta);
+			// Drawing a bow
+			if (hand.v == world.itemId["bow"]) {
+				if (this.key.lastRightClick) {
+					if (this.state == undefined)
+						this.state = 0;
+					let diff = (Date.now()-this.key.lastRightClick);
+
+					let arrowExists = false;
+					for (let t of this.toolbar) {
+						if (t && t.v == world.itemId["arrow"] && t.c > 0) {
+							arrowExists = true;
+							break;
+						}
+					}
+
+					if (diff > 300 && arrowExists) {
+						this.state = Math.min(Math.floor((diff - 300)/300), 2) + 1
+					}
+				} else {
+					if (this.state > 0) { // Release bow
+						let vel = new THREE.Vector3();
+						let mag = this.velocity.distanceTo(vel);
+						camera.getWorldDirection(vel)
+						let playerVel = this.velocity.clone();
+						playerVel.normalize();
+						playerVel.multiplyScalar(mag/400000);
+						vel.add(playerVel)
+
+						socket.emit('fireArrow', {
+							x: this.position.x,
+							y: this.position.y,
+							z: this.position.z,
+							id: socket.id,
+							dir: vel,
+							force: this.state
+						})
+					}
+					this.state = 0;
+				}
+			}
 		}
+			
 
+			
+
+		// Move hand
 		let pos1, pos2, rot1, rot2;
-
 		if (entity && entity.class == "item" && entity.c > 0) {
 			pos1 = new THREE.Vector3(1.5, -1, -2);
 			pos2 = this.blocking ? new THREE.Vector3(1.5, -1, -3) : new THREE.Vector3(1.5, -1, -5);
@@ -394,6 +449,8 @@ class Player {
 		if (this.blocking)
     		return;
 
+    	this.miningDelayConstant = this.mode == "survival" ? 750 : 0;
+
 		let {blockSize} = world;
 
 		// Check if block is mined
@@ -405,18 +462,18 @@ class Player {
 			let miningDelta = (Date.now() - this.key.leftClick) // How much time passed while mining
 
 			let voxel = world.getVoxel(x, y, z);
-			if (voxel <= 1)
+			if (voxel <= 0)
 				return;
 
-			let minable = voxel != 1 && voxel != world.blockId["water"];
-			if (!minable)
+			let unbreakable = voxel == world.blockId["water"];
+			if (unbreakable)
 				return;
 
 			let item = this.getCurrItem();
 
 			let constant = item && item.v == world.itemId["wood_pickaxe"] && item.class == "item" ? this.miningDelayConstant/3 : this.miningDelayConstant;
 			let blockDelay = this.miningDelay[world.blockOrder[voxel-1]] || 1;
-			let miningDelay = (this.onObject ? blockDelay : blockDelay * 3) * constant;
+			let miningDelay = constant == 0 ? 0 : (this.onObject ? blockDelay : blockDelay * 3) * constant;
 
 			// Continous mining of blocks by holding right click
 			if (this.key.leftClick && miningDelta > miningDelay) { // Break block
@@ -476,6 +533,7 @@ class Player {
 	placeBlock() {
 		let {blockSize} = world;
 		// Continous placing of blocks by holding right click
+		this.placingDelay = this.mode == "survival" ? 200 : 0;
 		if (this.key.rightClick && Date.now() - this.key.rightClick > this.placingDelay) {
 			this.key.rightClick = Date.now();
 			this.place = true;
@@ -492,7 +550,8 @@ class Player {
 				return;
 
 			let item = this.getCurrItem();
-			if (item && item.v > 0 && item.c > 0 && item.class == "block") { // Place a block, not air or water
+			let voxel = world.getVoxel(x, y, z);;
+			if (item && item.v > 0 && item.c > 0 && item.class == "block" && voxel <= 1) { // Place a block, not air or water
 				world.setVoxel(x, y, z, item.v);
 
 				/*if (world.blockId["glowstone"] == item.v) {
@@ -538,9 +597,9 @@ class Player {
 			socket.emit('dropItem', {
 				type: item.type,
 				v: item.v,
-				x: player.position.x,
-				y: player.position.y-8,
-				z: player.position.z,
+				x: this.position.x,
+				y: this.position.y-8,
+				z: this.position.z,
 				class: item.class,
 				dir: {x: dropDir.x, z: dropDir.y}
 			});
@@ -717,9 +776,10 @@ class Player {
 
 					} else if (this.inWater || this.onObject) {
 						this.newMove['y'] = 0;
-					} else {
+					} else { // Head hit
 						this.velocity.y = 0;
 						this.newMove['y'] = 0;
+						this.maxSprintSpeed = Math.min(this.bhopMaxSpeed, this.maxSprintSpeed+this.bhopRate*10)
 					}
 					// Put back before testing y
 					this.position.y = previousPosition['y'];
@@ -882,23 +942,23 @@ class Player {
 		let {blockSize} = world;
 
 		// Under water
-		var x = Math.floor(player.position.x/blockSize);
-		var y = Math.floor((player.position.y-blockSize*1.62)/blockSize);
-		var z = Math.floor(player.position.z/blockSize);
+		var x = Math.floor(this.position.x/blockSize);
+		var y = Math.floor((this.position.y-blockSize*1.62)/blockSize);
+		var z = Math.floor(this.position.z/blockSize);
 
 		var voxel1 = world.getVoxel(x, y, z)
 
-		var x = Math.floor(player.position.x/blockSize);
-		var y = Math.floor((player.position.y+blockSize*0.2)/blockSize);
-		var z = Math.floor(player.position.z/blockSize);
+		var x = Math.floor(this.position.x/blockSize);
+		var y = Math.floor((this.position.y+blockSize*0.2)/blockSize);
+		var z = Math.floor(this.position.z/blockSize);
 
 		var voxel2 = world.getVoxel(x, y, z)
 
 		this.inWater = voxel1 == world.blockId["water"] || voxel2 == world.blockId["water"];
 
-		var x = Math.floor(player.position.x/blockSize);
-		var y = Math.floor((player.position.y)/blockSize);
-		var z = Math.floor(player.position.z/blockSize);
+		var x = Math.floor(this.position.x/blockSize);
+		var y = Math.floor((this.position.y)/blockSize);
+		var z = Math.floor(this.position.z/blockSize);
 
 		var voxel = world.getVoxel(x, y, z)
 		colorPass.enabled = voxel == world.blockId["water"];
@@ -906,15 +966,15 @@ class Player {
 
 		// Head and feet
 
-		var x = Math.floor(player.position.x/blockSize);
-		var y = Math.floor((player.position.y-this.halfHeight*2)/blockSize);
-		var z = Math.floor(player.position.z/blockSize);
+		var x = Math.floor(this.position.x/blockSize);
+		var y = Math.floor((this.position.y-this.halfHeight*2)/blockSize);
+		var z = Math.floor(this.position.z/blockSize);
 
 		if (this.collideVoxel(x, y, z)) return true;
 
-		var x = Math.floor(player.position.x/blockSize);
-		var y = Math.floor((player.position.y+blockSize*0.2)/blockSize);
-		var z = Math.floor(player.position.z/blockSize);
+		var x = Math.floor(this.position.x/blockSize);
+		var y = Math.floor((this.position.y+blockSize*0.2)/blockSize);
+		var z = Math.floor(this.position.z/blockSize);
 
 		if (this.collideVoxel(x, y, z)) return true;
 
@@ -922,9 +982,9 @@ class Player {
 
 		for (let i = -1; i < 2; i+=2) {
 			for (let j = -1; j < 2; j+=2) {
-				var x = Math.floor((player.position.x+i*blockSize*0.25)/blockSize);
-				var y = Math.floor((player.position.y)/blockSize);
-				var z = Math.floor((player.position.z+i*blockSize*0.25)/blockSize);
+				var x = Math.floor((this.position.x+i*blockSize*0.25)/blockSize);
+				var y = Math.floor((this.position.y)/blockSize);
+				var z = Math.floor((this.position.z+i*blockSize*0.25)/blockSize);
 
 				if (this.collideVoxel(x, y, z)) return true;
 			}
@@ -934,9 +994,9 @@ class Player {
 
 		for (let i = -1; i < 2; i+=2) {
 			for (let j = -1; j < 2; j+=2) {
-				var x = Math.floor((player.position.x+i*blockSize*0.25)/blockSize);
-				var y = Math.floor((player.position.y-blockSize*0.8)/blockSize);
-				var z = Math.floor((player.position.z+j*blockSize*0.25)/blockSize);
+				var x = Math.floor((this.position.x+i*blockSize*0.25)/blockSize);
+				var y = Math.floor((this.position.y-blockSize*0.8)/blockSize);
+				var z = Math.floor((this.position.z+j*blockSize*0.25)/blockSize);
 
 				if (this.collideVoxel(x, y, z)) return true;
 			}
@@ -947,9 +1007,9 @@ class Player {
 
 		for (let i = -1; i < 2; i+=2) {
 			for (let j = -1; j < 2; j+=2) {
-				var x = Math.floor((player.position.x+i*blockSize*0.25)/blockSize);
-				var y = Math.floor((player.position.y-this.halfHeight*2)/blockSize);
-				var z = Math.floor((player.position.z+j*blockSize*0.25)/blockSize);
+				var x = Math.floor((this.position.x+i*blockSize*0.25)/blockSize);
+				var y = Math.floor((this.position.y-this.halfHeight*2)/blockSize);
+				var z = Math.floor((this.position.z+j*blockSize*0.25)/blockSize);
 
 				if (this.collideVoxel(x, y, z)) return true;
 			}

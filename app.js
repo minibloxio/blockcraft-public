@@ -24,6 +24,8 @@ const World = require('./modules/World.js');
 const SimplexNoise = require('simplex-noise'),
     simplex = new SimplexNoise(Math.random)
 
+const colors = require('colors');
+
 // Create portf
 const serverPort = process.env.PORT || 3001;
 server.listen(serverPort, function () {
@@ -50,15 +52,20 @@ rl.on('line', (input) => {
   	} else if (input === 'save') {
   		let path =  __dirname + '/saves/test.json';
   		world.saveToFile(fs, io, path);
+  	} else if (input) {
+  		io.emit('messageAll', {
+			text: "[Server] " + input,
+			color: "cyan"
+		});
   	}
 });
 
 
 
 // Get textures
-let blockOrder = ["water", "bedrock", "stone", "cobblestone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "clay", "gravel", "obsidian", "glowstone", "glass"];
+let blockOrder = ["water", "bedrock", "stone", "cobblestone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "glass"];
 
-let itemOrder = ["stick", "wood_sword", "wood_pickaxe", "wood_axe", "wood_shovel"];
+let itemOrder = ["stick", "wood_sword", "wood_pickaxe", "wood_axe", "wood_shovel", "bow", "arrow", "diamond"];
 
 let textures = {};
 fs.readdir(public + '/textures/blocks', function (err, data) {
@@ -90,7 +97,7 @@ const world = new World({
 var updatedBlocks = [];
 var newEntities = [];
 
-/*// Load save file
+// Load save file
 let save_path = __dirname + '/saves/test.json';
 fs.readFile(save_path, function (err, data) {
 	if (err) {
@@ -103,7 +110,7 @@ fs.readFile(save_path, function (err, data) {
 	world.loadSaveFile(saveFile)
 
   	console.log("Done loading world at", new Date())
-})*/
+})
 
 function pick(obj,props){if(!obj||!props)return;var picked={};props.forEach(function(prop){picked[prop]=obj[prop]});return picked};
 
@@ -119,7 +126,7 @@ io.on('connection', function(socket_) {
 		dir: {x: 0,y: 0,z: 0},
 		hp: 10,
 		dead: false,
-		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 5, c: 1, class: "item"}, {v: 1, c: 64, class: "item"}, {v: world.blockId["glowstone"], c: 64, class: "block"}, {v: world.blockId["glass"], c: 64, class: "block"}, {v: world.blockId["cobblestone"], c: 64, class: "block"}, {v: world.blockId["obsidian"], c: 64, class: "block"}, {v: world.blockId["water"], c: 64, class: "block"}],
+		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 5, c: 1, class: "item"}, {v: 6, c: 1, class: "item"}, {v: 7, c: 64, class: "item"}],
 		walking: false,
 		punching: false,
 		currSlot: 0,
@@ -131,7 +138,8 @@ io.on('connection', function(socket_) {
 		// Set name
 
 		io.emit('addPlayer', players[socket.id])
-		console.log(socket.id.substr(0, 5), "has joined at", new Date().toLocaleTimeString())
+		let text = players[socket.id].name + " has joined at " + new Date().toLocaleTimeString();
+		console.log(text.yellow)
 
 		// Send initialization data to client (world data, online players)
 		socket.emit('init', {
@@ -154,8 +162,10 @@ io.on('connection', function(socket_) {
 	// Update player info
 	socket.on('playerInfo', function (data) {
 		if (players[socket.id] && data.name != players[socket.id].name && data.name) { // Check for validity
+			let text = players[socket.id].name + " changed their name to " + data.name
+			console.log(text.yellow)
 			io.emit('messageAll', {
-				text: players[socket.id].name + " changed their name to " + data.name,
+				text: text,
 				color: "yellow"
 			});
 			players[socket.id].name = data.name;
@@ -227,6 +237,36 @@ io.on('connection', function(socket_) {
 		}
 	})
 
+	socket.on('fireArrow', function (data) {
+		let {blockSize} = world;
+		players[socket.id].pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
+
+		for (let t of players[socket.id].toolbar) {
+			if (t && t.v == world.itemId["arrow"] && t.c > 0) {
+				t.c = Math.max(0, t.c-1);
+				break;
+			}
+		}
+
+		let entityId = Function.randomString(5);
+		let force = blockSize*10*data.force;
+		let entity = {
+			pos: {x: data.x, y: data.y, z: data.z},
+			vel: {x: data.dir.x*force, y: data.dir.y*force, z: data.dir.z*force},
+			acc: {x: 0, y: 0, z: 0},
+			force: data.force,
+			type: "item",
+			v: world.itemId["arrow"],
+			class: "item",
+			id: entityId,
+			playerId: data.id,
+			t: Date.now(),
+			onObject: false
+		}
+		world.entities[entityId] = entity;
+		newEntities.push(entity)
+	})
+
 	// World functionality
 	socket.on('setBlock', function (data) {
 		let {blockSize} = world;
@@ -288,6 +328,7 @@ io.on('connection', function(socket_) {
 		}
 	})
 
+	// Request chunk
 	socket.on('requestChunk', function (data) {
 		let receivedChunks = [];
 		for (let chunk of data) {
@@ -305,6 +346,7 @@ io.on('connection', function(socket_) {
 	// Chat
 	socket.on('message', function (data) {
 		if (players[socket.id]) {
+			console.log("<"+players[socket.id].name+"> " + data)
 			io.emit('messageAll', {
 				name: players[socket.id].name,
 				text: data
@@ -312,8 +354,16 @@ io.on('connection', function(socket_) {
 		}
 	})
 
+	// Commands
+	socket.on('settime', function (data) {
+		let text = "Time has been set to " + data;
+		console.log(text.green)
+		world.tick = data;
+	})
+
 	socket.on('disconnect', function () {
-		console.log(socket.id.substr(0, 5), "has left at", new Date().toLocaleTimeString())
+		let text = players[socket.id].name + " has left at " + new Date().toLocaleTimeString();
+		console.log(text.yellow)
 		io.emit('removePlayer', socket.id);
 		delete players[socket.id];
 	});
@@ -348,6 +398,8 @@ setInterval(function () {
 			else
 				txt += " was slain by " + player.dmgType
 
+			console.log(txt);
+
 			io.emit('messageAll', {
 	            text: txt
           	})
@@ -361,7 +413,7 @@ setInterval(function () {
   		world.saveToFile(fs, io, path);
 	}
 
-	world.update(dt/1000, players, newEntities);
+	world.update(dt/1000, players, newEntities, io);
 
 	// Send updated data to client
 	io.emit('update', {

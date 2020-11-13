@@ -11,7 +11,7 @@ $(document).ready(function () {
 let scene, renderer, world, chunkManager, stage, sky, stats, composer, colorShader, inScreen;
 let loaded = 0;
 let loadedAnimate = new Ola(0);
-let maxLoaded = 38;
+let maxLoaded = 6;
 let tick = new Ola(0)
 
 let sprite = undefined;

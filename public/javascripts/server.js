@@ -185,20 +185,23 @@ function updatePlayer(p) {
 		rotateAboutPoint(p.leftLeg, new THREE.Vector3(0, -blockSize*0.75, 0), new THREE.Vector3(1, 0, 0), Math.abs(p.leftLeg.rotation.x)*Math.sign(-p.leftLeg.rotation.x))
 	}
 
-	let hand = p.toolbar[p.currSlot];
-	let item_mesh = p.hand.mesh;
-	if (hand) {
-		if (p.blocking) {
-			item_mesh.position.set(-4, -2, -3);
-			item_mesh.rotation.set(0, -Math.PI/8, 0);
-		} else if (hand.class == "item") {
-			item_mesh.position.set(0, -4, -8);
-			item_mesh.rotation.set(-Math.PI/2-Math.PI/6, Math.PI/2, 0);
-		} else {
-			item_mesh.position.set(-3, -player.dim.armHeight/2, -player.dim.armSize);
-			item_mesh.rotation.set(0, Math.PI/4, 0);
+	if (p.hand) {
+		let hand = p.toolbar[p.currSlot];
+		let item_mesh = p.hand.mesh;
+		if (hand) {
+			if (p.blocking) {
+				item_mesh.position.set(-4, -2, -3);
+				item_mesh.rotation.set(0, -Math.PI/8, 0);
+			} else if (hand.class == "item") {
+				item_mesh.position.set(0, -4, -8);
+				item_mesh.rotation.set(-Math.PI/2-Math.PI/6, Math.PI/2, 0);
+			} else {
+				item_mesh.position.set(-3, -player.dim.armHeight/2, -player.dim.armSize);
+				item_mesh.rotation.set(0, Math.PI/4, 0);
+			}
 		}
 	}
+		
 		
 	// Punching animation
 	if (p.punching) {
@@ -285,7 +288,7 @@ function addEntity(entity) {
 
 			scene.add(world.entities[entity.id].mesh);
 		}
-	} else if (entity.type == "remove_item") {
+	} else if (entity.type == "remove_item" && world.entities[entity.id]) {
 
 		world.entities[entity.id].mesh.geometry.dispose();
 		world.entities[entity.id].mesh.material.dispose();

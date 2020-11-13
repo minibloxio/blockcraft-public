@@ -268,9 +268,8 @@ module.exports = class World {
 		};
 		return newArray;
   }
-  getHeight(xPos, zPos) {
-    let size = 128
-    let heightNoise = 128;
+  getColumnInfo(xPos, zPos) {
+    let size = 256
     let exponent = 3;
 
     var nx = xPos/size - 0.5, ny = zPos/size - 0.5;
@@ -290,7 +289,36 @@ module.exports = class World {
            + 0.50 * noise2(32 * nx, 32 * ny));
     m /= (1.00+0.75+0.33+0.33+0.33+0.50);
     
-    return Math.floor(e*heightNoise)+30;
+    return [e, m, this.biome(e, m)];
+  }
+  biome(e, m) {      
+    if (e < 0.1) return "OCEAN";
+    if (e < 0.12) return "BEACH";
+    
+    if (e > 0.6) {
+      if (m < 0.4) return "SCORCHED";
+      if (m < 0.6) return "BARE";
+      if (m < 0.8) return "TUNDRA";
+      return "SNOW";
+    }
+
+    if (e > 0.4) {
+      if (m < 0.33) return "TEMPERATE_DESERT";
+      if (m < 0.66) return "SHRUBLAND";
+      return "TAIGA";
+    }
+
+    if (e > 0.3) {
+      if (m < 0.16) return "TEMPERATE_DESERT";
+      if (m < 0.50) return "GRASSLAND";
+      if (m < 0.83) return "TEMPERATE_DECIDUOUS_FOREST";
+      return "TEMPERATE_RAIN_FOREST";
+    }
+
+    if (m < 0.16) return "SUBTROPICAL_DESERT";
+    if (m < 0.33) return "GRASSLAND";
+    if (m < 0.66) return "TROPICAL_SEASONAL_FOREST";
+    return "TROPICAL_RAIN_FOREST";
   }
   generateCell(cellX, cellY, cellZ) {
   	let cell = this.cells[`${cellX},${cellY},${cellZ}`];
@@ -312,16 +340,180 @@ module.exports = class World {
         let xPos = x + cellX * cellSize;
         let zPos = z + cellZ * cellSize;
 
-        const height = this.getHeight(xPos, zPos);
+        let height, moisture, biome;
+        [height, moisture, biome] = this.getColumnInfo(xPos, zPos);
+        let heightNoise = 128;
+        height = Math.floor(height*heightNoise)+30
+        let waterLevel = Math.floor(0.1*heightNoise)+30
         
         for (let y = 0; y < cellSize; ++y) {
-
-
-          // Get cell offset for y
           let yPos = y + cellY * cellSize;
 
-          if (this.getVoxel(xPos, yPos, zPos) > 0)
-          	continue;
+          if (this.getVoxel(xPos, yPos, zPos) > 0) // Block already exists here
+            continue;
+
+          let blockId = 0;
+
+          // Waterlands
+          if (biome == "OCEAN" && yPos <= waterLevel) {
+            if (yPos >= height)
+              blockId = "water";
+            else if (yPos > height-3 && moisture < 0.33)
+              blockId = "sand"
+             else if (yPos > height-3 && moisture < 0.4)
+              blockId = "clay"
+            else if (yPos > height-3)
+              blockId = "gravel"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "BEACH" && yPos <= height) {
+            if (yPos > height-1)
+              blockId = "sand";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          // Mountains
+          if (biome == "SCORCHED" && yPos <= height) {
+            if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "BARE" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "dirt";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "TUNDRA" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "snowy_grass";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "SNOW" && yPos <= height) {
+            if (yPos > height-1)
+              blockId = "snow";
+            else if (yPos > height-2)
+              blockId = "snowy_grass"
+            else if (yPos > height-4)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          // Highlands
+          if (biome == "TEMPERATE_DESERT" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "sand";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "SHRUBLAND" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "grass";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "TAIGA" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "snowy_grass";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          // Midlands
+          if (biome == "GRASSLAND" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "grass";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "TEMPERATE_DECIDUOUS_FOREST" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "grass";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "TEMPERATE_RAIN_FOREST" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "grass";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          // Lowlands
+
+          if (biome == "SUBTROPICAL_DESERT" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "sand";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "TROPICAL_SEASONAL_FOREST" && yPos <= height) {
+            if (yPos >= height)
+              blockId = "grass";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          if (biome == "TROPICAL_RAIN_FOREST" && yPos <= height) {
+            if (yPos == height)
+              blockId = "cobblestone";
+            else if (yPos > height-3)
+              blockId = "dirt"
+            else if (yPos > 0)
+              blockId = "stone"
+          }
+
+          const coal = rng1.noise3D(xPos*coalSparsity, yPos*coalSparsity, zPos*coalSparsity);
+          const iron = rng1.noise3D(xPos*ironSparsity, yPos*ironSparsity, zPos*ironSparsity);
+          const gold = rng1.noise3D(xPos*goldSparsity, yPos*goldSparsity, zPos*goldSparsity);
+          const diamond = rng1.noise3D(xPos*diamondSparsity, yPos*diamondSparsity, zPos*diamondSparsity);
+
+          if (yPos <= height-3 && yPos > 0) {
+            blockId = "stone";
+            // Ore generation
+
+            blockId = (coal > 0.6 && yPos > 24) ? "coal_ore" : blockId
+            blockId = (iron > 0.7 && yPos > 18) ? "iron_ore" : blockId
+            blockId = (gold > 0.9 && yPos < 18) ? "gold_ore" : blockId
+            blockId = (diamond > 0.9 && yPos < 12) ? "diamond_ore" : blockId
+          }
+
+          /*// Get cell offset for y
+          
 
           const cave = (rng1.noise3D(xPos*0.05, yPos*caveSparsity, zPos*0.05)+1)/2;
 
@@ -331,45 +523,49 @@ module.exports = class World {
           const diamond = rng1.noise3D(xPos*diamondSparsity, yPos*diamondSparsity, zPos*diamondSparsity);
          
           // Terrain generation
-          let blockID = 0;
+          let blockId = 0;
           if (yPos > height && yPos <= this.waterLevel)
-              blockID = "water";
+              blockId = "water";
 
           if (cave > 0.1) {
-            if (yPos == height && yPos > this.waterLevel) {
-              blockID = "grass";
+            if (yPos == height && yPos > this.waterLevel+1) {
+              blockId = "grass";
             } else if (yPos == height && yPos <= this.waterLevel-2) {
-              blockID = "gravel";
-            } else if (yPos == height && yPos <= this.waterLevel) {
-              blockID = "sand";
+              blockId = "gravel";
+            } else if (yPos == height && yPos <= this.waterLevel+1) {
+              blockId = "sand";
             } else if (yPos < height && yPos > height-3) {
-              blockID = "dirt";
+              blockId = "dirt";
             } else if (yPos <= height-3 && yPos > 0) {
-              blockID = "stone";
+              blockId = "stone";
               // Ore generation
 
-              blockID = (coal > 0.6 && yPos > 24) ? "coal_ore" : blockID
-              blockID = (iron > 0.7 && yPos > 18) ? "iron_ore" : blockID
-              blockID = (gold > 0.9 && yPos < 18) ? "gold_ore" : blockID
-              blockID = (diamond > 0.9 && yPos < 12) ? "diamond_ore" : blockID
+              blockId = (coal > 0.6 && yPos > 24) ? "coal_ore" : blockId
+              blockId = (iron > 0.7 && yPos > 18) ? "iron_ore" : blockId
+              blockId = (gold > 0.9 && yPos < 18) ? "gold_ore" : blockId
+              blockId = (diamond > 0.9 && yPos < 12) ? "diamond_ore" : blockId
             }
 
-            if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel+15) {
-              blockID = "snow";
-            } else if (yPos >= height && yPos <= height && yPos >= this.mountainLevel+10) {
-              blockID = "snow";
+            if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel+15 && moisture > 0.5) {
+              blockId = "snow";
+            } else if (yPos >= height && yPos <= height && yPos >= this.mountainLevel+10 && moisture > 0.5) {
+              blockId = "snow";
+            } else if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel && moisture > 0.6) {
+              blockId = "snowy_grass";
+            } else if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel && moisture > 0.4) {
+              blockId = "dirt";
             } else if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel) {
-              blockID = "stone";
+              blockId = "stone";
             }
-          }
+          }*/
 
           if (yPos == 0) {
-            blockID = "bedrock"; // Force bedrock layer
+            blockId = "bedrock"; // Force bedrock layer
           }
 
-          blockID = this.blockId[blockID];
+          blockId = this.blockId[blockId];
 
-          this.setVoxel(xPos, yPos, zPos, blockID);
+          this.setVoxel(xPos, yPos, zPos, blockId);
         }
       }
     }
@@ -381,9 +577,17 @@ module.exports = class World {
 	    		// Get cell offset
 	        let xPos = x + cellX * cellSize;
 	        let zPos = z + cellZ * cellSize;
-	        const height = this.getHeight(xPos, zPos)
-	    		// Add fauna
-	        let tree = rng1.noise3D(xPos/30, height, zPos/30)*rng1.noise2D(xPos, zPos) > 0.5 && height > this.waterLevel && height < this.mountainLevel;
+	        let height, moisture, biome;
+          [height, moisture, biome] = this.getColumnInfo(xPos, zPos);
+          let heightNoise = 128;
+          height = Math.floor(height*heightNoise)+30
+          let waterLevel = Math.floor(0.1*heightNoise)+30
+
+          // Add fauna
+          let tree = rng1.noise3D(xPos/30, height, zPos/30)*rng1.noise2D(xPos, zPos) > moisture && height > waterLevel && height < this.mountainLevel;
+
+          let ungrowable = ["OCEAN", "BEACH", "SCORCHED", "BARE", "SNOW"]
+          if (ungrowable.indexOf(biome) > -1) tree = false;
 
 	        if ((rng1.noise3D(xPos*0.05, height*caveSparsity, zPos*0.05)+1)/2 <= 0.1)
 	        	continue;
@@ -453,12 +657,12 @@ module.exports = class World {
     }
   }
 
-  update(dt, players, newEntities) {
+  update(dt, players, newEntities, io) {
   	const {blockSize} =  this;
   	// Update entities
   	for (let entity_id in this.entities) {
   		let entity = this.entities[entity_id];
-  		if (entity.type == "item") {
+  		if (entity.type == "item" || entity.type == "arrow") {
   			// Delete entity if too long
   			if (Date.now()-entity.t > 60000) {
   				// Remove the item from world
@@ -479,71 +683,82 @@ module.exports = class World {
 
 				entity.acc = {x: 0, y: -9.81*blockSize, z: 0};
 
-				if (this.getVoxel(x, dy, z) > 0) {
-					entity.acc = {x: 0, y: 0, z: 0}
-					entity.vel = {x: 0, y: 0, z: 0}
-				}
-				if (this.getVoxel(x, y, z) > 0) {
-					entity.acc = {x: 0, y: 9.81*blockSize, z: 0}
-					entity.vel = {x: 0, y: 0, z: 0}
-				}
-
 				// Gravitate towards players
 				for (let id in players) {
 					let p = players[id];
 
-					if (p.pickupDelay < Date.now()) {
+					if (p.pickupDelay < Date.now()) { // Pick up item
 						let dir = {x: (p.pos.x-entity.pos.x), y: (p.pos.y-blockSize-(entity.pos.y)), z: (p.pos.z-entity.pos.z)}
 						let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
 
             // Add to player if within a block distance
-						if (dist < blockSize*0.5) {
-							// Add item to player's inventory if item already exists in inventory
-							let added = false;
-							for (let t of p.toolbar) {
-                if (!t)
-                  continue;
-								if (t.v == entity.v && t.class == entity.class) {
-									t.c += 1;
-									added = true;
-								}
-							}
+						if (dist < blockSize*1.5) {
+              if (entity.v == this.itemId["arrow"] && entity.class == "item" && !entity.onObject && !players[id].blocking) { // Arrow hit
 
-              // Add item if item does not exist in inventory
-							if (!added) {
-								let filled = false;
-								for (let i = 0; i < p.toolbar.length; i++) {
-									if (!p.toolbar[i] || p.toolbar[i].c == 0) {
-										p.toolbar[i] = {
-											v: entity.v,
-											c: 1,
+                players[id].hp -= entity.force;
+                if (players[entity.playerId])
+                  players[id].dmgType = players[entity.playerId].name;
+                entity.force *= 300
+                entity.dir = entity.vel;
+                io.to(`${id}`).emit('knockback', entity)
+                io.emit('punch', id);
+
+                // Remove the item from world
+                newEntities.push({
+                  type: "remove_item",
+                  id: entity.id,
+                  v: entity.v,
+                  class: entity.class
+                })
+                delete this.entities[entity_id];
+              } else {
+                // Add item to player's inventory if item already exists in inventory
+                let added = false;
+                for (let t of p.toolbar) {
+                  if (!t)
+                    continue;
+                  if (t.v == entity.v && t.class == entity.class) {
+                    t.c += 1;
+                    added = true;
+                  }
+                }
+
+                // Add item if item does not exist in inventory
+                if (!added) {
+                  let filled = false;
+                  for (let i = 0; i < p.toolbar.length; i++) {
+                    if (!p.toolbar[i] || p.toolbar[i].c == 0) {
+                      p.toolbar[i] = {
+                        v: entity.v,
+                        c: 1,
+                        class: entity.class
+                      }
+                      filled = true;
+                      break;
+                    }
+                  }
+
+                  if (!filled) {
+                    p.toolbar.push({
+                      v: entity.v,
+                      c: 1,
                       class: entity.class
-										}
-										filled = true;
-                    break;
-									}
-								}
+                    })
+                  }
+                }
 
-								if (!filled) {
-									p.toolbar.push({
-										v: entity.v,
-										c: 1,
-                    class: entity.class
-									})
-								}
-							}
-
-							// Remove the item from world
-							newEntities.push({
-								type: "remove_item",
-								id: entity.id,
-								v: entity.v,
-                class: entity.class
-							})
-							delete this.entities[entity_id];
+                // Remove the item from world
+                newEntities.push({
+                  type: "remove_item",
+                  id: entity.id,
+                  v: entity.v,
+                  class: entity.class
+                })
+                delete this.entities[entity_id];
+              }
 						}
 
-						if (dist < blockSize*2) { // Pull when 2 blocks away
+						if (dist < blockSize*2 && (entity.v != this.itemId["arrow"] || entity.onObject)) { // Pull when 2 blocks away
 							let distSquared = dist * dist / (blockSize*blockSize);
 
 							entity.acc.x = dir.x * 2 * blockSize;
@@ -552,6 +767,16 @@ module.exports = class World {
 						}
 					}
 				}
+
+        if (this.getVoxel(x, dy, z) > 0) {
+          entity.acc = {x: 0, y: 0, z: 0}
+          entity.vel = {x: 0, y: 0, z: 0}
+        }
+        if (this.getVoxel(x, y, z) > 0) {
+          entity.acc = {x: 0, y: 9.81*blockSize, z: 0}
+          entity.vel = {x: 0, y: 0, z: 0}
+          entity.onObject = true;
+        }
 
 				// Update velocity and acceleration
   			entity.vel.x += entity.acc.x*dt;

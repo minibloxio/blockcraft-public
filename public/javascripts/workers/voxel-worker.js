@@ -161,7 +161,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world) {
           // voxel 0 is sky (empty) so for UVs we start at 0
           const uvVoxel = voxel - 1;
           // There is a voxel here but do we need faces for it?
-          if (voxel != 1) {
+          if (voxel != 1 && voxel != world.blockId["ice"] && voxel != world.blockId["glass"]) {
             for (const {dir, corners, uvRow} of faces) {
 
               const neighbor = getVoxel(

@@ -62,20 +62,6 @@ let material;
 let blockFaces = {};
 let texture_atlas = undefined;
 
-function loadBlockImages(block_names, block_order) {
-  loader.setPath("textures/blocks/");
-  let loading_index = 0;
-  for (let name of block_names) {
-    blockFaces[name.slice(0, -4)] = loader.load(name, function () {
-      loading_index += 1;
-      loaded += 1;
-      if (loading_index == block_names.length) {
-        mergeBlockTextures(block_order);
-      }
-    })
-  }
-}
-
 let blocks = {
   "water": "water_clear",
   "grass": ["grass_side", "dirt", "grass_top"],
@@ -83,7 +69,23 @@ let blocks = {
   "wood": ["log_oak", "log_oak_top", "log_oak_top"],
   "leaves": "leaves_oak",
   "crafting_table": ["crafting_table_front", "planks_oak", "crafting_table_top"],
-  "planks": "planks_oak"
+  "planks": "planks_oak",
+  "sandstone": ["sandstone_normal", "sandstone_bottom", "sandstone_top"],
+}
+
+function loadBlockImages(block_names, block_order) {
+  loader.setPath("textures/blocks/");
+  let loading_index = 0;
+  for (let name of block_names) {
+    blockFaces[name.slice(0, -4)] = loader.load(name, function () {
+      loading_index += 1;
+      
+      if (loading_index == block_names.length) {
+        loaded += 1;
+        mergeBlockTextures(block_order);
+      }
+    })
+  }
 }
 
 function mergeBlockTextures(order) {
@@ -136,30 +138,20 @@ function drawImageNet(ctx, order, entities) {
   }
 }
 
-function makeCanvasPowerOfTwo(canvas) {
-  let oldWidth = canvas.width;
-  let oldHeight = canvas.height;
-  let newWidth = Math.pow(2, Math.round(Math.log(oldWidth) / Math.log(2)));
-  let newHeight = Math.pow(2, Math.round(Math.log(oldHeight) / Math.log(2)));
-  let newCanvas = document.createElement("canvas");
-  newCanvas.width = newWidth;
-  newCanvas.height = newHeight;
-  newCanvas.getContext("2d").drawImage(canvas, 0, 0, newWidth, newHeight);
-  return newCanvas;
+let items = {
+  "bow": ["bow_standby", "bow_pulling_0", "bow_pulling_1", "bow_pulling_2"]
 }
-
-
-let items = {};
+let itemFaces = {};
 let item_atlas = undefined;
 
 function loadItemImages(item_names, item_order) {
   loader.setPath("textures/items/");
   var loading_index = 0;
   for (let name of item_names) {
-    items[name.slice(0, -4)] = loader.load(name, function () {
+    itemFaces[name.slice(0, -4)] = loader.load(name, function () {
       loading_index += 1;
-      loaded += 1;
       if (loading_index == item_names.length) {
+        loaded += 1;
         mergeItemTextures(item_order);
       }
     })
@@ -175,7 +167,13 @@ function mergeItemTextures(order) {
   let index = 0;
   for (let item of order) {
     let b = items[item];
-    ctx.drawImage(b.image, index*16, 0)
+    if (b instanceof Array) {
+      for (let i = 0; i < b.length; i++) {
+        ctx.drawImage(itemFaces[b[i]].image, index*16, i*16)
+      }
+    } else {
+      ctx.drawImage(itemFaces[item].image, index*16, 0)
+    }
     index++;
   }
 
@@ -194,11 +192,23 @@ function mergeItemTextures(order) {
   console.log("Done stitching item textures")
 }
 
-loader.setPath("textures/");
+function makeCanvasPowerOfTwo(canvas) {
+  let oldWidth = canvas.width;
+  let oldHeight = canvas.height;
+  let newWidth = Math.pow(2, Math.round(Math.log(oldWidth) / Math.log(2)));
+  let newHeight = Math.pow(2, Math.round(Math.log(oldHeight) / Math.log(2)));
+  let newCanvas = document.createElement("canvas");
+  newCanvas.width = newWidth;
+  newCanvas.height = newHeight;
+  newCanvas.getContext("2d").drawImage(canvas, 0, 0, newWidth, newHeight);
+  return newCanvas;
+}
 
 // Player Textures
+loader.setPath("textures/");
 
 // Head
+
 let head_front = new Texture('./skin/head/front.png');
 let head_top = new Texture('./skin/head/top.png');
 let head_right = new Texture('./skin/head/right.png');

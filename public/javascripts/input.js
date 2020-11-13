@@ -13,6 +13,8 @@ $('html').mousedown(function(event) {
         case 3:
             player.place = true;
             player.key.rightClick = Date.now();
+            if (!player.key.lastRightClick)
+            	player.key.lastRightClick = Date.now();
             break;
         default:
             //alert('You have a strange Mouse!');
@@ -32,6 +34,7 @@ $('html').mouseup(function(event) {
         case 3:
             player.place = false;
             player.key.rightClick = false;
+            player.key.lastRightClick = false;
             break;
         default:
             //alert('You have a strange Mouse!');
@@ -107,7 +110,7 @@ onkeydown = onkeyup = function(e){
 }
 
 var onKeyDown = function ( event ) {
-	if (player.controls.enabled && ([13, 191].indexOf(event.keyCode) > -1) && showChatFlag) {
+	if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && showChatFlag) {
 		showChatFlag = false;
     	showChatBar = !showChatBar;
     	if (showChatBar) {
@@ -173,6 +176,10 @@ var onKeyDown = function ( event ) {
 
     				}
 	    				
+    			} else if (msg[0] == "time") {
+    				if (typeof(parseInt(msg[1])) == "number")
+    					socket.emit('settime', parseInt(msg[1]))
+	    				
     			} else {
     				addChat({
 						text: 'Error: Unable to recognize command "' + msg[0] + '"',
@@ -220,13 +227,26 @@ var onKeyDown = function ( event ) {
 			player.key.down = 1;
 			break;
 			case "Fly":
+			if (player.controls.enabled && player.allowFly) {
+				player.fly = !player.fly;
+				player.allowFly = false;
+			}
 			break;
 			case "Clip":
+			if (player.controls.enabled && player.allowClip) {
+				player.clip = !player.clip;
+				player.allowClip = false;
+			}
 			break;
 			case "Drop Item":
 			player.dropItem();
 			break;
 			case "Respawn":
+			if (player.controls.enabled && player.allowRespawn) {
+				player.respawn(world.blockSize);
+				socket.emit('respawn');
+				player.allowRespawn = false;
+			}
 			break;
 			case "Zoom":
 			camera.zoom = zoomLevel;
@@ -269,8 +289,11 @@ var onKeyDown = function ( event ) {
 var onKeyUp = function ( event ) {
 	let {blockSize} = world;
 
-	if ([13, 191].indexOf(event.keyCode) > -1)
+	if ([13].indexOf(event.keyCode) > -1) {
+
 		showChatFlag = true;
+		return;
+	}
 
 	if (!initialized || !player.controls.enabled || showChatBar)
 		return;
@@ -308,18 +331,16 @@ var onKeyUp = function ( event ) {
 			player.key.down = 0;
 			break;
 			case "Fly":
-			player.fly = !player.fly;
+			player.allowFly = true;
 			break;
 			case "Clip":
-			if (player.controls.enabled)
-				player.clip = !player.clip;
+			player.allowClip = true;
 			break;
 			case "Drop Item":
 			player.allowDrop = true;
 			break;
 			case "Respawn":
-			player.respawn(world.blockSize);
-			socket.emit('respawn');
+			player.allowRespawn = true;
 			break;
 			case "Zoom":
 			zoomLevel = 3;

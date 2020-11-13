@@ -576,6 +576,9 @@ function getLines(ctx, text, maxWidth, color) {
 }
 
 function displayPlayerHealth() {
+	if (player.mode == "creative")
+		return;
+
 	if (player && player.hp > 0) {
 		for (let i = 0; i < 10; i++) {
 			let yOffset = 80;
