@@ -34,6 +34,11 @@ server.listen(serverPort, function () {
 	console.log('Started an https server on port ' + serverPort);
 })
 const public = __dirname + '/public/';
+app.use(function(req, res, next) {
+	res.header("Cross-Origin-Embedder-Policy", "require-corp");
+	res.header("Cross-Origin-Opener-Policy", "same-origin");
+	next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/*', function (req, res, next) {
 	res.redirect('/')
