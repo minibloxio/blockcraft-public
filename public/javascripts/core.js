@@ -3,8 +3,11 @@
 var socket = io();
 
 $(document).ready(function () {
-	init();
-	animate();
+	socket.on('connect', function () {
+		console.log("Connected to Socket.IO!");
+		init();
+		animate();
+	})
 })
 
 // Three.js

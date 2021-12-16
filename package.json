@@ -4,17 +4,17 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
-    "body-parser": "^1.18.3",
+    "body-parser": "^1.19.1",
     "cluster": "^0.7.7",
     "colors": "^1.4.0",
-    "express": "^4.16.4",
+    "express": "^4.17.1",
     "minecraft-skin": "^0.1.2",
-    "morgan": "^1.9.1",
-    "ola": "^1.1.0",
-    "os": "^0.1.1",
+    "morgan": "^1.10.0",
+    "ola": "^1.2.1",
+    "os": "^0.1.2",
     "serve-favicon": "^2.5.0",
-    "simplex-noise": "^2.4.0",
-    "socket.io": "^2.2.0"
+    "simplex-noise": "^3.0.0",
+    "socket.io": "^4.4.0"
   },
   "devDependencies": {},
   "scripts": {

@@ -13,9 +13,10 @@ const options = {
 const server = https.createServer(options, app);
 const path = require('path');
 const readline = require('readline'); // Command line input
-const io = require('socket.io')(server);
-const cluster = require('cluster');
+const { Server } = require("socket.io");
+const io = new Server(server, {});
 
+const cluster = require('cluster');
 
 const numCPUs = require('os').cpus().length;
 
@@ -123,6 +124,7 @@ function pick(obj,props){if(!obj||!props)return;var picked={};props.forEach(func
 
 // Server-client connection architecture
 io.on('connection', function(socket_) {
+	console.log("bruh");
 	let socket = socket_;
 	players[socket.id] = {
 		id: socket.id,
