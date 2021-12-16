@@ -361,7 +361,7 @@ document.addEventListener( 'keyup', onKeyUp, false );
 // Scrolling
 var lastScrollTop = 0, delta = 5;
 let zoomLevel = 3
-$(document).bind('mousewheel', function(e) {
+$(document).bind('wheel', function(e) {
 	if (!player.controls.enabled)
 		return;
 
