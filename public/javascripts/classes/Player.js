@@ -449,7 +449,7 @@ class Player {
 		if (this.blocking)
     		return;
 
-    	this.miningDelayConstant = this.mode == "survival" ? 750 : 0;
+    	this.miningDelayConstant = this.mode == "survival" ? 750 : 200;
 
 		let {blockSize} = world;
 
@@ -533,7 +533,7 @@ class Player {
 	placeBlock() {
 		let {blockSize} = world;
 		// Continous placing of blocks by holding right click
-		this.placingDelay = this.mode == "survival" ? 200 : 0;
+		this.placingDelay = this.mode == "survival" ? 200 : 200;
 		if (this.key.rightClick && Date.now() - this.key.rightClick > this.placingDelay) {
 			this.key.rightClick = Date.now();
 			this.place = true;

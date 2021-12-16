@@ -15,6 +15,8 @@ const path = require('path');
 const readline = require('readline'); // Command line input
 const io = require('socket.io')(server);
 const cluster = require('cluster');
+
+
 const numCPUs = require('os').cpus().length;
 
 const Vector = require('./modules/Vector.js');
@@ -286,7 +288,8 @@ io.on('connection', function(socket_) {
 				type: "item",
 				class: "block",
 				v: data.v,
-				id: entityId
+				id: entityId,
+				t: Date.now()
 			}
 			world.entities[entityId] = entity;
 			newEntities.push(entity)
