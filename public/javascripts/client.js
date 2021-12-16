@@ -51,7 +51,7 @@ rleWorker.addEventListener('message', e => {
 	let {cellSize} = world;
 
 	for (let chunk of e.data) {
-		let cellId = `${chunk.pos.x},${chunk.pos.y},${chunk.pos.z}`;
+		let cellId = chunk.pos.x + "," + chunk.pos.y + "," + chunk.pos.z;
 
 		world.cells[cellId] = new Uint8Array(new SharedArrayBuffer(16 * 16 * 16));
 		world.cells[cellId].set(chunk.cell);

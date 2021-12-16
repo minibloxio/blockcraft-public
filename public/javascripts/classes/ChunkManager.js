@@ -56,7 +56,7 @@ class ChunkManager {
 	    		let cellX = this.cellPos.x + x;
 				let cellY = y;
 				let cellZ = this.cellPos.z + z;
-				let cellId = `${cellX},${cellY},${cellZ}`
+				let cellId = cellX + "," + cellY + "," + cellZ;
 				if (!(cellId in world.cells)) { // Check if chunk already exists
 					this.chunksToRequest.push({
 						x: cellX,

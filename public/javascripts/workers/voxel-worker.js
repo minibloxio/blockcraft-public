@@ -99,7 +99,7 @@ function computeCellId(x, y, z) {
 	const cellX = Math.floor(x / cellSize);
 	const cellY = Math.floor(y / cellSize);
 	const cellZ = Math.floor(z / cellSize);
-	return `${cellX},${cellY},${cellZ}`;
+	return cellX + "," + cellY + "," + cellZ;
 	}
 
 function getCellForVoxel(x, y, z) {
