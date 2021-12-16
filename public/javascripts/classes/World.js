@@ -41,6 +41,7 @@ class World {
     return cell;
   }
   getCellForVoxel(x, y, z) {
+    if (!this.cells) return;
     return this.cells[this.computeCellId(x, y, z)];
   }
   getCellPosFromId(id) {

@@ -46,7 +46,7 @@ function exitPointerLock() {
 	if (!showInventory) {
 		blocker.style.display = 'block';
 
-		element.requestPointerLock();
+		//element.requestPointerLock();
 	}
 	player.controls.enabled = false;
 	//$("#chat-input").hide();
