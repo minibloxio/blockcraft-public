@@ -374,7 +374,7 @@ class Player {
 				this.prevBlock = new THREE.Vector3(x, y, z);
 				this.mine_box.material = mining_progress[0].material
 			}
-		} else {
+		} else if (this.select_wireframe) {
 			this.select_wireframe.visible = false;
 		}
 
@@ -524,7 +524,7 @@ class Player {
 
 				
 		
-		} else {
+		} else if (this.mine_box) {
 			this.mine_box.material = mining_progress[0].material
 			this.mine_box.visible = false;
 		}

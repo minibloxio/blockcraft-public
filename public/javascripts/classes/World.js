@@ -241,8 +241,6 @@ function updateVoxelGeometry(x, y, z, neighbor) {
 }
 
 function updateVoxelMesh(e) {
-  let cells = e.data;
-
   chunkManager.chunksToRender = chunkManager.chunksToRender.concat(e.data);
 }
 

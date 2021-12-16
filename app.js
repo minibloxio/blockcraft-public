@@ -124,7 +124,6 @@ function pick(obj,props){if(!obj||!props)return;var picked={};props.forEach(func
 
 // Server-client connection architecture
 io.on('connection', function(socket_) {
-	console.log("bruh");
 	let socket = socket_;
 	players[socket.id] = {
 		id: socket.id,
