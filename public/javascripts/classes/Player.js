@@ -13,7 +13,6 @@ class Player {
 		this.raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ));; // block selecting / breaking / placing
 
 		// Collision helper
-
 		this.closest = {
 			distance: Infinity
 		};
@@ -92,13 +91,14 @@ class Player {
 		}
 	}
 
-	init(blockSize) {
+	init(blockSize, startPos) {
 		// Player appearance
 
 		this.halfWidth = blockSize * 0.3;
 		this.halfDepth = blockSize * 0.3;
 		this.halfHeight = blockSize * 0.8;
 
+		// Player constants
 		this.miningDelay = {
 			"water": Infinity,
 			"bedrock": Infinity,
@@ -107,6 +107,9 @@ class Player {
 		}
 		this.miningDelayConstant = 750;
 		this.placingDelay = 200;
+		this.respawnDelay = 1000;
+		this.respawnTimer = Date.now();
+		this.allowRespawn = true;
 
 		// Player info
 		this.hp = 10;
@@ -131,17 +134,50 @@ class Player {
 		this.toolbar = [];
 
 		// Spawn
-		this.respawn(blockSize);
+		this.respawn(blockSize, startPos);
 	}
 
-	respawn(blockSize) {
-		let resetHeight = blockSize*100;
+	respawn(blockSize, pos) {
+		// Check if respawn is possible
+		if (!pos && Date.now()-this.respawnTimer < this.respawnDelay) return;
+
+		// Respawn at given location
+		
+		if (pos) {
+			// Set player position
+			this.position.set(pos.x, pos.y, pos.z);
+			this.controls.getObject().position['y'] = pos.y;
+			this.savedPosition['y'] = pos.y;
+		} else {
+			// Respawn in new location
+			let maxSpawnDistance = 32; // Maximum distance from spawn
+			let randomX = random(-maxSpawnDistance, maxSpawnDistance);
+			let randomZ = random(-maxSpawnDistance, maxSpawnDistance);
+
+			let resetHeight = world.buildHeight*blockSize;
+			// Determine ground level
+			if (world.buildHeight) {
+				for (let i = world.buildHeight; i > 0; i--) {
+					if (world.getVoxel(randomX, i, randomZ) > 0) { // Non-air block, can spawn here
+						resetHeight = i*blockSize+this.dim.height; // Account for player height
+						break;
+					}
+				}
+			}
+			// Set player position
+			this.position.set(randomX*blockSize, resetHeight, randomZ*blockSize);
+			this.controls.getObject().position['y'] = resetHeight;
+			this.savedPosition['y'] = resetHeight;
+		}
+
+		
+		// Reset player properties
 		this.prevHeight = undefined;
-		this.position.set(0, resetHeight, 0);
-		this.controls.getObject().position['y'] = resetHeight;
-		this.savedPosition['y'] = resetHeight;
 		this.velocity.y = 0
 		this.maxSprintSpeed = this.defaultMaxSprintSpeed;
+
+		// Reset respawn timer
+		this.respawnTimer = Date.now();
 	}
 
 	getCurrItem() {

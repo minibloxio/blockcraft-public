@@ -1,4 +1,4 @@
-// Initialize server
+// Initialize client
 let initialized = false;
 socket.on('init', function (data) {
 	// Check if already initialized
@@ -9,7 +9,7 @@ socket.on('init', function (data) {
 	Object.assign(world, data.world)
 
 	// Initalize player
-	player.init(world.blockSize);
+	player.init(world.blockSize, data.startPos);
 
 	// Initialize recipes
 	initRecipes();
@@ -194,6 +194,6 @@ socket.on('refresh', function () {
 })
 
 // Handle disconnection
-window.onbeforeunload = function () {
-    socket.emit('disconnect')
-};
+// window.onbeforeunload = function () {
+//     socket.emit('disconnect')
+// };

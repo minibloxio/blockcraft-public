@@ -147,16 +147,38 @@ io.on('connection', function(socket_) {
 		if (data.name) {
 			players[socket.id].name = data.name;
 		}
-
+		
+		// Send update to everyone
 		io.emit('addPlayer', players[socket.id])
 		let text = players[socket.id].name + " has joined at " + new Date().toLocaleTimeString();
 		console.log(text.yellow)
+
+		// Determine spawn position
+		let maxSpawnDistance = 32; // Maximum distance from spawn
+		let randomX = Function.random(-maxSpawnDistance, maxSpawnDistance);
+		let randomZ = Function.random(-maxSpawnDistance, maxSpawnDistance);
+
+		let groundHeight = world.buildHeight*world.blockSize; // Set high so the first player can load the chunks underneath
+		// Determine ground level
+		if (world.buildHeight) {
+			for (let i = world.buildHeight; i > 0; i--) {
+				if (world.getVoxel(randomX, i, randomZ) > 0) { // Non-air block, can spawn here
+					groundHeight = i*world.blockSize+1.8; // Account for player height
+					break;
+				}
+			}
+		}
 
 		// Send initialization data to client (world data, online players)
 		socket.emit('init', {
 			serverPlayers: players,
 			world: Object.assign({}, world, {cells: {}, cellDeltas: undefined}),
 			tick: world.tick,
+			startPos: {
+				x: randomX*world.blockSize,
+				y: groundHeight,
+				z: randomZ*world.blockSize
+			}
 		});
 	})
 
