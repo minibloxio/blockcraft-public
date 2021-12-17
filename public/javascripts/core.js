@@ -39,8 +39,8 @@ for (let i = 0; i < 4; i++) {
 	voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
 	voxelWorkers[i].addEventListener('message', e => {
 	  // Update Voxel Mesh
-	  for (let chunk of e.data) {
-		  chunkManager.chunksToRender.push(chunk);
+	  for (let i = 0; i < e.data.length; i++) {
+		  chunkManager.chunksToRender.push(e.data[i]);
 	  }
 	})
 }

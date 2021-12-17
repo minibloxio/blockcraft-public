@@ -58,7 +58,7 @@ function loadTextures(data) {
 
 // Texture Merger
 
-let material;
+let material, materialTransparent;
 let blockFaces = {};
 let texture_atlas = undefined;
 
@@ -89,6 +89,7 @@ function loadBlockImages(block_names, block_order) {
 }
 
 function mergeBlockTextures(order) {
+
   let canvas = document.createElement("canvas");
   let ctx = canvas.getContext("2d");
   canvas.width = 512;
@@ -106,14 +107,21 @@ function mergeBlockTextures(order) {
 
   material = new THREE.MeshPhongMaterial({
     map: texture,
-    side: THREE.DoubleSide,
+    side: THREE.FrontSide,
+    transparent: false,
+    depthWrite: true
+  });
+
+  materialTransparent = new THREE.MeshPhongMaterial({
+    map: texture,
+    side: THREE.FrontSide,
     transparent: true,
     depthWrite: true
   });
 
   texture_atlas = texture.image;
 
-  console.log("Done stitching textures")
+  console.log("Done stitching textures!")
   loaded += 1;
 }
 

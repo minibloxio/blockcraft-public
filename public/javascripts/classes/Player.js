@@ -166,8 +166,7 @@ class Player {
 		this.prevState = this.state;
 		camera.remove(this.arm);
 
-		if (item && item.class == "item" && item.c > 0) {
-			// Display item
+		if (item && item.class == "item" && item.c > 0) { // Display item
 			let canvas = document.createElement("canvas");
 			canvas.width = 16;
 			canvas.height = 16;
@@ -183,8 +182,7 @@ class Player {
 			this.arm.position.set(1.5, -1, -2);
 			this.arm.rotation.set(Math.PI/6, -Math.PI/2, Math.PI/4+Math.PI/8)
 			camera.add(this.arm)
-		} else if (item && item.c > 0) {
-			// Display block
+		} else if (item && item.c > 0) { // Display block
 			let uvVoxel = item.v-1;
 			var item_geometry = new THREE.BufferGeometry();
 			const {positions, normals, uvs, indices} = world.generateGeometryDataForItem(uvVoxel);
@@ -197,7 +195,7 @@ class Player {
 			item_geometry.setIndex(indices);
 			item_geometry.computeBoundingSphere();
 
-			this.arm = new THREE.Mesh(item_geometry, material);
+			this.arm = new THREE.Mesh(item_geometry, materialTransparent);
 			this.arm.position.set(3, -7, -8);
 		} else {
 			// Display hand if empty
@@ -290,6 +288,8 @@ class Player {
 			rot1 = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI, Math.PI, 0));
 			rot2 = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI, Math.PI-Math.PI/8, Math.PI/8));
 		}
+
+		if (!this.arm) return;
 
 		if (this.blockT > 0 && this.punchT > 1) {
 			this.arm.position.lerpVectors(pos1, pos2, Math.min(this.blockT, 1));

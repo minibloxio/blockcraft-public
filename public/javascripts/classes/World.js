@@ -87,11 +87,18 @@ class World {
       delete this.cells[id];
       let object = scene.getObjectByName(id);
       if (object) {
-        object.visible = false;
+        cellIdToMesh[id][0].visible = false;
+        cellIdToMesh[id][1].visible = false;
+
+        // Delete cell permanently
         if (permanently) {
-          object.geometry.dispose();
-          object.material.dispose();
-          scene.remove(object);
+          cellIdToMesh[id][0].geometry.dispose();
+          cellIdToMesh[id][0].material.dispose();
+          scene.remove(cellIdToMesh[id][0]);
+
+          cellIdToMesh[id][1].geometry.dispose();
+          cellIdToMesh[id][1].material.dispose();
+          scene.remove(cellIdToMesh[id][1]);
         }
       }
     }
@@ -209,8 +216,6 @@ const neighborOffsets = [
 function updateVoxelGeometry(x, y, z, neighbor) {
   let {blockSize, cellSize} = world;
 
-  
-
   let cells = [];
   const updatedCellIds = {};
 
@@ -243,29 +248,65 @@ function updateVoxelGeometry(x, y, z, neighbor) {
 
 function updateCellMesh(data) {
   let {blockSize, cellSize} = world;
-  var [{positions, normals, uvs, indices}, cellX, cellY, cellZ, cellId] = data;
+  var [opaqueGeometry, cellX, cellY, cellZ, cellId, transparentGeometry] = data;
+  let mesh, meshT;
 
-  let mesh = cellIdToMesh[cellId];
-  const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
+  if (cellIdToMesh[cellId]) {
+    mesh = cellIdToMesh[cellId][0];
+    meshT = cellIdToMesh[cellId][1];
+  } else {
+    cellIdToMesh[cellId] = [];
+  }
 
-  const positionNumComponents = 3;
-  geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
-  const normalNumComponents = 3;
-  geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
-  const uvNumComponents = 2;
-  geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
-  geometry.setIndex(indices);
-  geometry.computeBoundingSphere();
+  // OPAQUE TEXTURES
+  if (data) {
+    const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
 
-  if (!mesh) {
-    mesh = new THREE.Mesh(geometry, material);
-    mesh.name = cellId;
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    cellIdToMesh[cellId] = mesh;
-    scene.add(mesh);
-    mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
-    mesh.updateMatrix();
-    mesh.matrixAutoUpdate = false;
+    const positionNumComponents = 3;
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(opaqueGeometry.positions), positionNumComponents));
+    const normalNumComponents = 3;
+    geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(opaqueGeometry.normals), normalNumComponents));
+    const uvNumComponents = 2;
+    geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(opaqueGeometry.uvs), uvNumComponents));
+    geometry.setIndex(opaqueGeometry.indices);
+    geometry.computeBoundingSphere();
+
+    if (!mesh) {
+      mesh = new THREE.Mesh(geometry, material);
+      mesh.name = cellId;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      cellIdToMesh[cellId][0] = mesh;
+      scene.add(mesh);
+      mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
+      mesh.updateMatrix();
+      mesh.matrixAutoUpdate = false;
+    }
+  }
+
+  // TRANSPARENT TEXTURES
+  if (data) {
+    const geometry = meshT ? meshT.geometry : new THREE.BufferGeometry();
+
+    const positionNumComponents = 3;
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(transparentGeometry.positions), positionNumComponents));
+    const normalNumComponents = 3;
+    geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(transparentGeometry.normals), normalNumComponents));
+    const uvNumComponents = 2;
+    geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(transparentGeometry.uvs), uvNumComponents));
+    geometry.setIndex(transparentGeometry.indices);
+    geometry.computeBoundingSphere();
+
+    if (!meshT) {
+      meshT = new THREE.Mesh(geometry, materialTransparent);
+      meshT.name = cellId;
+      meshT.castShadow = true;
+      meshT.receiveShadow = true;
+      cellIdToMesh[cellId][1] = meshT;
+      scene.add(meshT);
+      meshT.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
+      meshT.updateMatrix();
+      meshT.matrixAutoUpdate = false;
+    }
   }
 }
