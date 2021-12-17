@@ -144,7 +144,7 @@ io.on('connection', function(socket_) {
 
 	socket.on('join', function (data) {
 		// Set name
-		if (data.name) {
+		if (data && data.name) {
 			players[socket.id].name = data.name;
 		}
 		
