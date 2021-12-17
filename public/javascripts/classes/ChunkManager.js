@@ -48,7 +48,7 @@ class ChunkManager {
 	    let range = 1;
 	    let direction = 'up';
 
-	    let maxChunkRequests = 5;
+	    let maxChunkRequests = 1;
 	    let requests = 0;
 	    for ( let i = 0; i < this.renderDistance*this.renderDistance; i++ ) {
 	    	// Add chunks to request
