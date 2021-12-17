@@ -1,10 +1,17 @@
-/**
- * @author mrdoob / http://mrdoob.com/
- */
+/*
+
+Provides pointer lock functionality and the ability to connect to the game server
+
+*/
 
 function joinServer() {
 	if (loaded == maxLoaded) {
-		socket.emit('join')
+		let name = $("#name-input").val() || "";
+
+		let joinInfo = {
+			name: name,
+		}
+		socket.emit('join', joinInfo)
 		loaded += 1;
 	}
 }

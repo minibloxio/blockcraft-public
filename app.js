@@ -144,6 +144,9 @@ io.on('connection', function(socket_) {
 
 	socket.on('join', function (data) {
 		// Set name
+		if (data.name) {
+			players[socket.id].name = data.name;
+		}
 
 		io.emit('addPlayer', players[socket.id])
 		let text = players[socket.id].name + " has joined at " + new Date().toLocaleTimeString();
@@ -215,6 +218,7 @@ io.on('connection', function(socket_) {
 		}
 	})
 
+	// Receive player punch event
 	socket.on('punchPlayer', function (data) {
 		if (players[data.id] && players[socket.id] && !players[socket.id].dead && players[data.id].mode == "survival") {
 			let dmg = 0.5;
@@ -238,6 +242,7 @@ io.on('connection', function(socket_) {
 		}
 	})
 
+	// Take player damage if in survival mode
 	socket.on('takeDamage', function (data) {
 		if (players[socket.id] && players[socket.id].mode == "survival") {
 			players[socket.id].hp -= data.dmg;
@@ -245,6 +250,7 @@ io.on('connection', function(socket_) {
 		}
 	})
 
+	// Fire server-side arrow
 	socket.on('fireArrow', function (data) {
 		let {blockSize} = world;
 		players[socket.id].pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items

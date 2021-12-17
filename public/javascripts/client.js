@@ -65,8 +65,6 @@ socket.on('receiveChunk', function (data) {
 })
 
 rleWorker.addEventListener('message', e => {
-	let {cellSize} = world;
-
 	let newCells = {};
 
 	for (let i = 0; i < e.data.length; i++) {
