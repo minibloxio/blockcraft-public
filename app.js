@@ -16,30 +16,31 @@ const readline = require('readline'); // Command line input
 const { Server } = require("socket.io");
 const io = new Server(server, {});
 
+// Cluster (used for multiple Node.js servers)
 const cluster = require('cluster');
-
 const numCPUs = require('os').cpus().length;
 
-const Vector = require('./modules/Vector.js');
+// Modules
 const Function = require('./modules/Function.js');
 const World = require('./modules/World.js');
-
 const SimplexNoise = require('simplex-noise'),
     simplex = new SimplexNoise(Math.random)
 
-const colors = require('colors');
-
-// Create portf
+// Listen to server port
 const serverPort = process.env.PORT || 3001;
 server.listen(serverPort, function () {
-	console.log('Started an https server on port ' + serverPort);
+	logger.info('Started an https server on port ' + serverPort);
 })
-const public = __dirname + '/public/';
+
+// Send CORS header
 app.use(function(req, res, next) {
 	res.header("Cross-Origin-Embedder-Policy", "require-corp");
 	res.header("Cross-Origin-Opener-Policy", "same-origin");
 	next();
 });
+
+// Serve static files
+const public = __dirname + '/public/';
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/*', function (req, res, next) {
 	res.redirect('/')
@@ -47,13 +48,12 @@ app.use('/*', function (req, res, next) {
 })
 
 // Server input commands
-
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
-// Commmand line input
+// Command line input
 rl.on('line', (input) => {
   	if (input === 'refresh') { // Refresh all clients
   		io.emit('refresh');
@@ -68,7 +68,45 @@ rl.on('line', (input) => {
   	}
 });
 
+// Server logging
+const { createLogger, format, transports } = require('winston');
+const { combine, timestamp, printf, colorize, align } = format;
 
+const myFormat = printf(({ level, message, timestamp }) => {
+  return `[${timestamp}] ${level}: ${message}`;
+});
+
+const logger = createLogger({
+	transports: [
+		new transports.Console({
+			format: combine(
+				timestamp({format:'MM-DD-YYYY HH:mm:ss'}),
+				align(),
+				colorize(),
+				myFormat,
+			),
+			level: "silly",
+		}),
+		new transports.File({ 
+			filename: 'logs/server.log',
+			format: combine(
+				timestamp({format:'MM-DD-YYYY HH:mm:ss'}),
+				align(),
+				myFormat,
+			),
+			level: "verbose",
+		}),
+		new transports.File({ 
+			filename: 'logs/error.log',
+			format: combine(
+				timestamp({format:'MM-DD-YYYY HH:mm:ss'}),
+				align(),
+				myFormat,
+			),
+			level: "error",
+		})
+	]
+});
 
 // Get textures
 let blockOrder = ["water", "bedrock", "stone", "cobblestone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "glass"];
@@ -109,18 +147,20 @@ var newEntities = [];
 let save_path = __dirname + '/saves/test.json';
 fs.readFile(save_path, function (err, data) {
 	if (err) {
-		console.log("Unable to load save file from", save_path)
-		console.log("Creating new world...")
+		logger.warn("Unable to load save file from", save_path)
+		logger.warn("Creating new world...")
 		return;
 	}
+
+	let t = Date.now();
+
+	logger.info("Loading world...")
 
 	let saveFile = JSON.parse(data)
 	world.loadSaveFile(saveFile)
 
-  	console.log("Done loading world at", new Date())
+  	logger.info("World successfully loaded in " + (Date.now()-t) + "ms");
 })
-
-function pick(obj,props){if(!obj||!props)return;var picked={};props.forEach(function(prop){picked[prop]=obj[prop]});return picked};
 
 // Server-client connection architecture
 io.on('connection', function(socket_) {
@@ -150,8 +190,8 @@ io.on('connection', function(socket_) {
 		
 		// Send update to everyone
 		io.emit('addPlayer', players[socket.id])
-		let text = players[socket.id].name + " has joined at " + new Date().toLocaleTimeString();
-		console.log(text.yellow)
+		let text = players[socket.id].name + " has joined the server";
+		logger.info(text)
 
 		// Determine spawn position
 		let maxSpawnDistance = 32; // Maximum distance from spawn
@@ -195,8 +235,8 @@ io.on('connection', function(socket_) {
 	// Update player info
 	socket.on('playerInfo', function (data) {
 		if (players[socket.id] && data.name != players[socket.id].name && data.name) { // Check for validity
-			let text = players[socket.id].name + " changed their name to " + data.name
-			console.log(text.yellow)
+			let text = players[socket.id].name + " changed their name to " + data.name;
+			logger.info(text);
 			io.emit('messageAll', {
 				text: text,
 				color: "yellow"
@@ -225,6 +265,7 @@ io.on('connection', function(socket_) {
 			players[socket.id].ping.shift();
 	})
 
+	// Update player inventory
 	socket.on('updateInventory', function (data) {
 		if (!players[socket.id])
 			return;
@@ -384,7 +425,7 @@ io.on('connection', function(socket_) {
 	// Chat
 	socket.on('message', function (data) {
 		if (players[socket.id]) {
-			console.log("<"+players[socket.id].name+"> " + data)
+			logger.verbose("<"+players[socket.id].name+"> " + data)
 			io.emit('messageAll', {
 				name: players[socket.id].name,
 				text: data
@@ -394,14 +435,14 @@ io.on('connection', function(socket_) {
 
 	// Commands
 	socket.on('settime', function (data) {
-		let text = "Time has been set to " + data;
-		console.log(text.green)
+		let text = "<"+players[socket.id].name+"> set the time to " + data;
+		logger.info(text)
 		world.tick = data;
 	})
 
 	socket.on('disconnect', function () {
-		let text = players[socket.id].name + " has left at " + new Date().toLocaleTimeString();
-		console.log(text.yellow)
+		let text = players[socket.id].name + " has left the server";
+		logger.info(text)
 		io.emit('removePlayer', socket.id);
 		delete players[socket.id];
 	});
@@ -409,7 +450,7 @@ io.on('connection', function(socket_) {
 
 // Update server function
 let dt = 50;
-let autoSave = Date.now();
+let autosaveTimer = Date.now();
 setInterval(function () {
 	if (!world || Object.keys(players).length == 0) 
 		return;
@@ -436,7 +477,7 @@ setInterval(function () {
 			else
 				txt += " was slain by " + player.dmgType
 
-			console.log(txt);
+			logger.info(txt);
 
 			io.emit('messageAll', {
 	            text: txt
@@ -445,10 +486,15 @@ setInterval(function () {
 	}
 
 	// Auto save
-	if (Date.now() - autoSave > 1000 * 60 * 5) {
-		autoSave = Date.now();
+	let autosaveInterval = 1000 * 60 * 5; // 5 Minutes
+	if (Date.now() - autosaveTimer > autosaveInterval) {
+		autosaveTimer = Date.now();
 		let path =  __dirname + '/saves/test.json';
+		logger.info("Saving world..." + path);
+		let t = Date.now();
   		world.saveToFile(fs, io, path);
+		let msg = "Successfully saved world in " + (Date.now()-t) + "ms";
+		logger.info(msg);
 	}
 
 	world.update(dt/1000, players, newEntities, io);

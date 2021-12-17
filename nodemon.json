@@ -1,3 +1,4 @@
 {   
-    "ignore": ["saves/*"] 
+	"verbose": false,
+    "ignore": ["saves/*", "logs/*", "nodemon.json"]
 }

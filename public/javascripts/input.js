@@ -242,7 +242,7 @@ var onKeyDown = function ( event ) {
 			player.dropItem();
 			break;
 			case "Respawn":
-			if (player.allowRespawn) {
+			if (player.controls.enabled && player.allowRespawn) {
 				player.respawn(world.blockSize);
 				socket.emit('respawn');
 				player.allowRespawn = false;

@@ -13,313 +13,7 @@
 		<meta name="keywords" content="HTML, CSS, JavaScript, Three.js">
 		<meta name="author" content="Victor Wei">
 
-		<style>
-			html, body {
-				width: 100%;
-				height: 100%;
-				margin: 0;
-				padding: 0;
-
-				user-select: none;
-			}
-
-			body {
-				background-color: black;
-				margin: 0;
-				overflow: hidden;
-
-			}
-
-			@font-face {
-			    font-family: 'Minecraft-Regular';
-			    src: url('Minecraft-Regular.otf');
-			}
-
-			#blocker {
-				position: absolute;
-
-				width: 100%;
-				height: 100%;
-
-				text-align: center;
-				background-image: url("/textures/dirt.png");
-				background-repeat: repeat;
-				z-index: 3;
-
-				font-family: "Minecraft-Regular";
-				font-size: 20px;
-			}
-
-			#canvas-hud {
-				position: absolute;
-				z-index: 0;
-				padding: 0;
-				margin: 0;
-			}
-
-			#text {
-				position: absolute;
-				z-index: 2;
-				color: limegreen;
-			}
-
-			#title {
-				font-family: "Minecraft-Regular";
-				font-size: 100px;
-				color: white;
-			}
-
-			#instructions-text {
-				color: white;
-			}
-
-			.slider-text {
-				color: white;
-			}
-
-			.slider {
-			    -webkit-appearance: none;
-			    appearance: none;
-			    width: 100%; 
-			    height: 15px;
-			    background: #d3d3d3; 
-			    outline: none;
-			    opacity: 1;
-			    -webkit-transition: .2s;
-			    transition: opacity .2s;
-			}
-
-			.slider::-webkit-slider-thumb {
-			    -webkit-appearance: none; 
-			    appearance: none;
-			    width: 20px; 
-			    height: 20px; 
-			    background: green; 
-			    cursor: pointer; 
-			}
-
-			#name-input {
-				color: white;
-				font-family : inherit;
-				border: none;
-				text-decoration: none;
-				outline: none;
-				left: 10px;
-				width: 100%;
-				height: 10vh;
-				font-size: 40px;
-				box-sizing:border-box;
-				background-color: rgba(0, 0, 0, 0.5);
-				text-align: center;
-			}
-
-			#name-input::placeholder {
-				color: white;
-				text-align: center;
-			}
-
-			#name-input:focus::placeholder {
-			  	color: transparent;
-			}
-
-			#name-container {
-				position: absolute;
-				text-align: center;
-				width: calc(40% + 40px);
-				left: 50vw;
-				top: calc(62vh + 60px);
-				margin-left: -20vw;
-				background-color: rgba(0, 0, 0, 0.5);
-				z-index: 3;
-			}
-
-			#start-button {
-				color: white;
-				font-family : inherit;
-				width: 100%;
-				height: 10vh;
-				text-decoration: none;
-				border: none;
-				outline: none;
-				cursor: pointer;
-				font-size: 40px;
-				background-color: rgba(0, 0, 0, 0);
-				overflow: visible;
-			}
-
-			#loading-bar {
-				width: 0%;
-				height: 100%;
-				background-color: green;
-				text-align: center;
-				line-height: 10vh;
-				overflow: visible;
-				white-space: nowrap
-			}
-
-			#chat-input {
-				position: absolute;
-				left: 5px;
-				bottom: 5px;
-				height: 35px;
-				width: calc(100% - 10px);
-				z-index: 2;
-				border: none;
-				font-family: "Minecraft-Regular";
-				font-size: 25px;
-				padding-left: 5px;
-				text-decoration: none;
-				outline: none;
-				background-color: rgba(0, 0, 0, 0);
-				color: white;
-			}
-
-			#chat-input::placeholder {
-				color: white;
-			}
-
-			/* Style the buttons that are used to open the tab content */
-			.tablinks {
-				color: white;
-				font-size: 20px;
-				font-family : inherit;
-				background-color: rgba(0, 0, 0, 0);
-				float: left;
-				border: none;
-				outline: none;
-				cursor: pointer;
-				height: 100%;
-				width: 24.9%;
-				transition: 0.3s;
-			}
-
-			/* Change background color of buttons on hover */
-			#blocker button:hover {
-			  background-color: rgba(0, 0, 0, 0.6);
-			}
-
-			/* Create an active/current tablink class */
-			#blocker button.active {
-			  background-color: rgba(0, 0, 0, 0.7);
-			}
-
-			#nav {
-				position: absolute;
-				width: calc(40% + 40px);
-				height: 4vh;
-				left: 50vw;
-				top: 20%;
-				margin-left: -20vw;
-				text-align: left;
-				background-color: rgba(0, 0, 0, 0.5);
-				color: white;
-				font-family: "Minecraft-Regular";
-			}
-
-			/* Style the tab content */
-			.tabcontent {
-				border-top: none;
-				position: absolute;
-				width: 40%;
-				left: 50vw;
-				height: 40vh;
-				top: 24vh;
-				margin-left: -20vw;
-				text-align: left;
-				color: white;
-				background-color: rgba(0, 0, 0, 0.5);
-				padding: 20px;
-			}
-
-			#welcome {
-				padding: 20px;
-			}
-
-			#versions {
-				overflow-y: scroll;
-			}
-
-			#video-settings {
-				overflow-y: scroll;
-				padding: 20px;
-			}
-
-			#reset-video {
-				margin-top: 20px;
-				text-align: center;
-				line-height: 50px;
-				width: 100%;
-				height: 50px;
-				background-color: rgba(0, 0, 0, 0.5);
-			}
-
-			#reset-video:hover {
-				cursor: pointer;
-				background-color: rgba(0, 0, 0, 0.7);
-			}
-
-			#keyboard-settings {
-				overflow-y: scroll;
-			}
-
-			#reset-keyboard {
-				text-align: center;
-				line-height: 50px;
-				width: 100%;
-				height: 50px;
-				background-color: rgba(0, 0, 0, 0.5);
-			}
-			
-			#reset-keyboard:hover {
-				cursor: pointer;
-				background-color: rgba(0, 0, 0, 0.7);
-			}
-
-			::-webkit-scrollbar {
-			  width: 20px;
-			}
-
-			/* Track */
-			::-webkit-scrollbar-track {
-			}
-			 
-			/* Handle */
-			::-webkit-scrollbar-thumb {
-			  background: rgba(0, 0, 0, 0.5);
-			}
-
-			/* Handle on hover */
-			::-webkit-scrollbar-thumb:hover {
-			  background: rgba(0, 0, 0, 0.7);
-			}
-
-			.change-key {
-				outline: none;
-				border: none;
-				text-decoration: none;
-				height: 30px;
-				float: right;
-				width: 150px;
-				background-color: rgba(0, 0, 0, 0.5);
-				font-size: 20px;
-				font-family: inherit;
-				color: white;
-				text-align: center;
-			}
-
-			.change-key::placeholder {
-				color: white;
-			}
-
-			.change-key:focus::placeholder {
-			  	color: transparent;
-			}
-
-			a {
-				color: white;
-			}
-
-		</style>
+		<link rel="stylesheet" href="style.css">
 		<link rel="shortcut icon" type="image/png" href="./favicon.png"/>
 	</head>
 	<body>
@@ -370,12 +64,13 @@
 		
 
 		<div id="blocker">
+			<div id="background-image"></div>
 
 			<div id="container">
 				<h1 id="title">BlockCraft</h1>
 				<div id="nav">
 					<button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
-					<button class="tablinks" onclick="changeTab(event, 'versions')">Versions</button>
+					<button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
 					<button class="tablinks" onclick="changeTab(event, 'video-settings')">Video</button>
 					<button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
 				</div>
@@ -389,7 +84,7 @@
 				<span>You can view my other projects at: <a href="https://victorwei.com" target="_blank">victorwei.com</a></span><br><br>
 			</div>
 
-			<div id="versions" class="tabcontent" style="display: none;"></div>
+			<div id="changelog" class="tabcontent" style="display: none;"></div>
 
 			<div id="video-settings" class="tabcontent" style="display: none;">
 				<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
@@ -493,30 +188,71 @@
 
 			// Add version controls
 
-			var request = new XMLHttpRequest();
-	        request.open('GET','https://api.github.com/repos/victoryqwei/blockcraft/commits' , 
-	        true)
-	        request.onload = function() {
-	            var data = JSON.parse(this.response);
-	           	
-	           	// Add to version
-	           	for (let v of data) {
-	           		let lines = v.commit.message.split("\n");
+			let changelog = [
+				{
+					"date": "Dec 17, 2021",
+					"version": "0.25.0",
+					"changes": "Players now spawn on the ground if possible| Added CORS support| Fixed crosshair jerk due to a Chrome bug| Fixed z-fighting issue with transparent blocks/items| Fixed players join with a default name| Optimized chunk loading by reducing the latency of web workers"
+				},
+				{
+					"date": "Nov 8, 2020",
+					"version": "0.24.0",
+					"changes": "Added creative mode| Added commands such as /tp and /gamemode"
+				},
+				{
+					"date": "Nov 7, 2020",
+					"version": "0.23.0",
+					"changes": "Added multiple new blocks| Improved terrain generation| Simplified texture loading process"
+				},
+				{
+					"date": "Nov 6, 2020",
+					"version": "0.22.0",
+					"changes": "Added a versions tab to the start menu to see previous versions| Added multiplayer hand models| Added blocking functionality to the sword to reduce incoming damage and knockback| Added bunny hopping| Fixed blocks being able to be placed on water| Added cobblestone, sand, gravel, and obsidian blocks"
+				},
+				{
+					"date": "Nov 5, 2020",
+					"version": "0.21.0",
+					"changes": "Fixed players being able to punch through walls| Improved start menu UI| Added start menu loading bar| World save messages no longer clog up the chat| Added the ability to reassign controls| Added cookies so video and keyboard settings can be saved"
+				},
+				{
+					"date": "Nov 3, 2020",
+					"version": "0.20.0",
+					"changes": "Added stars| Improved night time lighting| Optimized texture atlas generation| Player arm now switches to the selected block| Added a sword| Added a tab so players are able to see who is online"
+				},
+				{
+					"date": "Oct 29, 2020",
+					"version": "0.19.0",
+					"changes": "Improved swimming mechanics| Items now snap to player instead of gravitate| Worlds are able to be saved now"
+				},
+				{
+					"date": "Oct 28, 2020",
+					"version": "0.18.0",
+					"changes": "Breaking blocks and placing blocks on chunk boundaries only update those chunks which are affected| Added the moon| Smoothed out day-night transition| Fixed diagonal collision resolution| Fixed crouch building"
+				},
+				{
+					"date": "Oct 27, 2020",
+					"version": "0.17.0",
+					"changes": "Players can take fall damage| Optimized chunk loading using web workers"
+				},
+			]
+				
 
-	           		if (lines && lines[0][0] != "v")
-	           			continue;
+			for (let change of changelog) {
+				let date = change.date;
+				let version = change.version;
+				let changes = change.changes.split("|");
 
-	           		for (let line of lines) {
-	           			let message = $("<span>" + line + "</span><br>");
-		           		$("#versions").append(message);
-	           		}
+				let message = $("<span>v" + version + " | " + date + "</span><br><br>");
+				$("#changelog").append(message);
 
-	           		let message = $("<br>");
-		           	$("#versions").append(message);
-		           		
-	           	}
-	        }
-	        request.send();
+				for (let comment of changes) {
+					
+					let message = $("<span>- " + comment + "</span><br>");
+					$("#changelog").append(message);
+				}
+
+		        $("#changelog").append($("<br>"));
+			}
 
 			// Add keys
 

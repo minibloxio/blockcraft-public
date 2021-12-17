@@ -1,0 +1,28 @@
+v24
+
+Add creative mode
+Add commands such as /tp and /gamemode
+
+v23
+
+Add multiple new blocks
+Improve terrain generation
+Simplify texture loading process
+
+v22
+
+Add a versions tab to the start menu to see previous versions
+Add multiplayer hand models
+Add blocking functionality to the sword to reduce incoming damage and knockback
+Add bunny hopping
+Fix blocks being able to be placed on water
+Add cobblestone, sand, gravel, and obsidian blocks
+
+v21
+
+Fixed players being able to punch through walls
+Improved start menu UI
+Added start menu loading bar
+World save messages no longer clog up the chat
+Added the ability to reassign controls
+Added cookies so video and keyboard settings can be saved

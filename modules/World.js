@@ -137,14 +137,12 @@ module.exports = class World {
         deltas: deltas
       }
       let t = Date.now();
-      console.log("Saving world at", new Date(), "\nSeed:", this.seed)
 
       let data = JSON.stringify(saveObject);
 
       fs.writeFile(filepath, data,function (err) {
           if (err) throw err;  
           let txt = "Server successfully saved in " + (Date.now()-t) + " ms";
-          console.log(txt)
           io.emit('messageAll', {
             text: txt,
             color: "purple",

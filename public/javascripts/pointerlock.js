@@ -31,7 +31,7 @@ function requestPointerLock() {
 function enterPointerLock () {
 	player.controls.enabled = true;
 	blocker.style.display = 'none';
-	$("#blocker").css("background-image", "none")
+	$("#background-image").hide();
 
 	if (showInventory) {
 		showInventory = false;
