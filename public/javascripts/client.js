@@ -30,6 +30,23 @@ socket.on('init', function (data) {
 		addEntity(data.world.entities[id]);
 	}
 
+	// Init voxel workers
+	let worldData = {
+	    cellSize: world.cellSize,
+	    cellSliceSize: world.cellSliceSize,
+	    tileSize: world.tileSize,
+	    tileTextureWidth: world.tileTextureWidth,
+	    tileTextureHeight: world.tileTextureHeight,
+	    blockSize: world.blockSize,
+	    blockUVS: world.blockUVS,
+	    blockId: world.blockId,
+	    cells: world.cells,
+	};
+
+	for (let voxelWorker of voxelWorkers) {
+		voxelWorker.postMessage(worldData);
+	}
+
 	// Update to server tick
 	tick = new Ola(data.tick);
 
@@ -50,28 +67,25 @@ socket.on('receiveChunk', function (data) {
 rleWorker.addEventListener('message', e => {
 	let {cellSize} = world;
 
+	let newCells = {};
+
 	for (let chunk of e.data) {
 		let cellId = chunk.pos.x + "," + chunk.pos.y + "," + chunk.pos.z;
 
 		world.cells[cellId] = new Uint8Array(new SharedArrayBuffer(16 * 16 * 16));
 		world.cells[cellId].set(chunk.cell);
 
+		newCells[cellId] = world.cells[cellId];
+
 		chunk.pos.id = cellId;
 
 		chunkManager.chunksToLoad.push(chunk.pos)
 	}
 
+	// Update information to each voxel worker
 	let worldData = {
-	    cellSize: world.cellSize,
-	    cellSliceSize: world.cellSliceSize,
-	    tileSize: world.tileSize,
-	    tileTextureWidth: world.tileTextureWidth,
-	    tileTextureHeight: world.tileTextureHeight,
-	    blockSize: world.blockSize,
-	    blockUVS: world.blockUVS,
-	    blockId: world.blockId,
-	    cells: world.cells,
-	} 
+	    cells: newCells,
+	}
 
 	for (let voxelWorker of voxelWorkers) {
 		voxelWorker.postMessage(worldData);

@@ -3,6 +3,10 @@ let world, cells;
 self.addEventListener('message', e => {
   if (e.data.cellSize) {
     world = e.data;
+  } else if (!e.data.cellSize && e.data.cells) {
+    for (let cellId in e.data.cells) {
+      world.cells[cellId] = e.data.cells[cellId];
+    }
   } else {
     cells = e.data;
 

@@ -236,7 +236,7 @@ module.exports = class World {
     const voxelOffset = this.computeVoxelOffset(x, y, z);
     return cell[voxelOffset];
   }
-  encodeCell(cellX, cellY, cellZ) {
+  encodeCell(cellX, cellY, cellZ) { // RLE Encoding
   	let array = this.getCellForVoxel(cellX, cellY, cellZ)
 
 		var newArray=[];

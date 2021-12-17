@@ -241,10 +241,6 @@ function updateVoxelGeometry(x, y, z, neighbor) {
   }
 }
 
-function updateVoxelMesh(e) {
-  chunkManager.chunksToRender = chunkManager.chunksToRender.concat(e.data);
-}
-
 function updateCellMesh(data) {
   let {blockSize, cellSize} = world;
   var [{positions, normals, uvs, indices}, cellX, cellY, cellZ, cellId] = data;

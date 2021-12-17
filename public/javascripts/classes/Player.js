@@ -954,6 +954,8 @@ class Player {
 
 		var voxel2 = world.getVoxel(x, y, z)
 
+		if (!world.blockId) return;
+
 		this.inWater = voxel1 == world.blockId["water"] || voxel2 == world.blockId["water"];
 
 		var x = Math.floor(this.position.x/blockSize);
