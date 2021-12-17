@@ -104,7 +104,7 @@ function computeCellId(x, y, z) {
 	const cellY = Math.floor(y / cellSize);
 	const cellZ = Math.floor(z / cellSize);
 	return cellX + "," + cellY + "," + cellZ;
-	}
+}
 
 function getCellForVoxel(x, y, z) {
     return world.cells[computeCellId(x, y, z)];
