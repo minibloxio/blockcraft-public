@@ -18,7 +18,8 @@ class Stage {
 	    
 	    // Add shadow
 		var d = 1000;
-	    this.dir.shadow.mapSize.width = this.dir.shadow.mapSize.height = 1024*2;
+	    this.dir.shadow.mapSize.width = 1024*8;
+		this.dir.shadow.mapSize.height = 1024*8;
 	    this.dir.shadow.camera.left = -d;
 	    this.dir.shadow.camera.right = d;
 	    this.dir.shadow.camera.top = d;
@@ -44,13 +45,13 @@ class Stage {
 	    this.sun = loadSprite('./sun.png', 1000);
 	    this.moon = loadSprite('./moon.png', 1000);
 		this.dayNightCycle = true;
-		this.daySpeed = 0.001;
+		this.daySpeed = 0.001; // Default: 0.001
 
-		this.sunDist = 5000;
+		this.sunDist = 50000; // Default: 50000
 	    this.offset = new THREE.Vector3(this.sunDist, 0, 0);
 		scene.add(this.sun);
 		scene.add(this.moon);
-
+		
 		// Clouds
 		this.clouds = [];
 

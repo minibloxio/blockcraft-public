@@ -107,7 +107,7 @@ function mergeBlockTextures(order) {
 
   material = new THREE.MeshLambertMaterial({
     map: texture,
-    side: THREE.FrontSide,
+    side: THREE.DoubleSide, // Default: FrontSide
     transparent: false,
     depthWrite: true
   });

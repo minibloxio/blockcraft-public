@@ -59,7 +59,10 @@ rl.on('line', (input) => {
   		io.emit('refresh');
   	} else if (input === 'save') {
   		let path =  __dirname + '/saves/test.json';
+		let t = Date.now();
   		world.saveToFile(fs, io, path);
+		let msg = "Successfully saved world in " + (Date.now()-t) + "ms";
+		logger.info(msg);
   	} else if (input) {
   		io.emit('messageAll', {
 			text: "[Server] " + input,
