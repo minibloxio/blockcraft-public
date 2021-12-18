@@ -42,8 +42,8 @@ class Stage {
 	    scene.fog = new THREE.Fog("lightblue", 0, blockSize*cellSize*5)
 
 	    // Sun
-	    this.sun = loadSprite('./sun.png', 1000);
-	    this.moon = loadSprite('./moon.png', 1000);
+	    this.sun = loadSprite('./sun.png', 100000);
+	    this.moon = loadSprite('./moon.png', 100000);
 		this.dayNightCycle = true;
 		this.daySpeed = 0.001; // Default: 0.001
 
