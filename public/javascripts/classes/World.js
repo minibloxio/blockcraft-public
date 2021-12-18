@@ -277,16 +277,17 @@ function updateCellMesh(data) {
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       cellIdToMesh[cellId][0] = mesh;
-      scene.add(mesh);
       mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
-      mesh.updateMatrix();
       mesh.matrixAutoUpdate = false;
+
+      if (opaqueGeometry.positions.length > 0) {
+        scene.add(mesh);
+        mesh.updateMatrix();
+      }
     }
   }
 
   // TRANSPARENT TEXTURES
-  //cellIdToMesh[cellId][1] = {};
-  
   if (data) {
     const geometry = meshT ? meshT.geometry : new THREE.BufferGeometry();
 
@@ -305,10 +306,13 @@ function updateCellMesh(data) {
       meshT.castShadow = true;
       meshT.receiveShadow = true;
       cellIdToMesh[cellId][1] = meshT;
-      scene.add(meshT);
       meshT.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
-      meshT.updateMatrix();
       meshT.matrixAutoUpdate = false;
+
+      if (transparentGeometry.positions.length > 0) {
+        scene.add(meshT);
+        meshT.updateMatrix();
+      }
     }
   }
 }

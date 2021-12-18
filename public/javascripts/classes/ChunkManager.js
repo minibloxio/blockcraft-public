@@ -144,9 +144,22 @@ class ChunkManager {
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToLoad[i];
 			if (chunk) {
-				this.currCells[`${chunk.x},${chunk.z}`] = 1;
-				updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
-				this.chunksToLoad.splice(i, 1);
+				
+				let canBeLoaded = true;
+				// let dir = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+				// for (let d of dir) {
+				// 	let cellId = (chunk.x+d[0]) + "," + (chunk.y) + "," + (chunk.z+d[1]);
+				// 	if (!world.cells[cellId]) { 
+				// 		canBeLoaded = false;
+				// 		break;
+				// 	}
+				// }
+				
+				if (canBeLoaded) {
+					this.currCells[`${chunk.x},${chunk.z}`] = 1;
+					updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
+					this.chunksToLoad.splice(i, 1);
+				}
 			}
 		}
 
