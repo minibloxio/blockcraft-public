@@ -105,14 +105,14 @@ function mergeBlockTextures(order) {
 
   ctx.drawImage(texture.image, 500, 500)
 
-  material = new THREE.MeshPhongMaterial({
+  material = new THREE.MeshLambertMaterial({
     map: texture,
     side: THREE.FrontSide,
     transparent: false,
     depthWrite: true
   });
 
-  materialTransparent = new THREE.MeshPhongMaterial({
+  materialTransparent = new THREE.MeshLambertMaterial({
     map: texture,
     side: THREE.FrontSide,
     transparent: true,

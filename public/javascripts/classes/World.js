@@ -285,6 +285,8 @@ function updateCellMesh(data) {
   }
 
   // TRANSPARENT TEXTURES
+  //cellIdToMesh[cellId][1] = {};
+  
   if (data) {
     const geometry = meshT ? meshT.geometry : new THREE.BufferGeometry();
 

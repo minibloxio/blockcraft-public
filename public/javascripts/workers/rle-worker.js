@@ -20,7 +20,7 @@ function RLEdecode(array) {
 			for (let a of array.slice(i, i+ripCount)) {
 				newArray.push(a);
 			}
-			// console.log("rip",ripCount,array.slice(i,i+ripCount));
+
 			i+=ripCount-1;
 		}
 		if(isRun){
