@@ -35,6 +35,7 @@ var players = {};
 var rleWorker = new Worker('javascripts/workers/rle-worker.js');
 
 let voxelWorkers = [];
+let voxelWorkerIndex = 0;
 for (let i = 0; i < 4; i++) {
 	voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
 	voxelWorkers[i].addEventListener('message', e => {
@@ -86,7 +87,7 @@ function init() {
     statistics.push(new Stat("Clip", player, "clip", 2))
 
     // Finalize by adding the renderer
-	renderer = new THREE.WebGLRenderer( { antialias: true, logarithmicDepthBuffer: true } );
+	renderer = new THREE.WebGLRenderer( { antialias: false, logarithmicDepthBuffer: false } );
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	renderer.shadowMap.enabled = true;

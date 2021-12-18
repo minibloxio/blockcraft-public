@@ -200,7 +200,6 @@ World.faces = [
   },
 ];
 
-let workerIndex = 0;
 const cellIdToMesh = {};
 
 const neighborOffsets = [
@@ -239,10 +238,10 @@ function updateVoxelGeometry(x, y, z, neighbor) {
       break;
   }
 
-  voxelWorkers[workerIndex].postMessage(cells)
-  workerIndex += 1;
-  if (workerIndex == voxelWorkers.length) {
-    workerIndex = 0;
+  voxelWorkers[voxelWorkerIndex].postMessage(cells)
+  voxelWorkerIndex += 1;
+  if (voxelWorkerIndex == voxelWorkers.length) {
+    voxelWorkerIndex = 0;
   }
 }
 
@@ -279,10 +278,10 @@ function updateCellMesh(data) {
       cellIdToMesh[cellId][0] = mesh;
       mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
       mesh.matrixAutoUpdate = false;
+      mesh.updateMatrix();
+      scene.add(mesh);
 
       if (opaqueGeometry.positions.length > 0) {
-        scene.add(mesh);
-        mesh.updateMatrix();
       }
     }
   }
@@ -308,10 +307,10 @@ function updateCellMesh(data) {
       cellIdToMesh[cellId][1] = meshT;
       meshT.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
       meshT.matrixAutoUpdate = false;
+      meshT.updateMatrix();
+      scene.add(meshT);
 
       if (transparentGeometry.positions.length > 0) {
-        scene.add(meshT);
-        meshT.updateMatrix();
       }
     }
   }

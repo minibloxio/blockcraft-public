@@ -26,9 +26,9 @@ class Stage {
 	    this.dir.updateMatrix();
 	    this.dir.updateMatrixWorld();
 
-	    this.dir.shadow.camera.far = 10000;
+	    this.dir.shadow.camera.far = 1000000;
 	    this.dir.shadow.camera.near = 0;
-	    this.dir.shadow.bias = -0.001;
+	    this.dir.shadow.bias = -0.0001;
 
 	    // Add moon directional light
 	    this.dirM = new THREE.DirectionalLight( "white", 0.5 );

@@ -61,6 +61,7 @@ socket.on('textureData', function (data) {
 // Update chunk
 
 socket.on('receiveChunk', function (data) {
+	
 	rleWorker.postMessage(data); // Send decoding to the rleWorker
 })
 
@@ -71,7 +72,7 @@ rleWorker.addEventListener('message', e => {
 		let chunk = e.data[i];
 		let cellId = chunk.pos.x + "," + chunk.pos.y + "," + chunk.pos.z;
 
-		world.cells[cellId] = new Uint8Array(new SharedArrayBuffer(16 * 16 * 16));
+		world.cells[cellId] = new Uint8Array(new SharedArrayBuffer(16 * 16 * 16)); // Maybe store this object in rleWorker?
 		world.cells[cellId].set(chunk.cell);
 
 		newCells[cellId] = world.cells[cellId];
