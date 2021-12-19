@@ -58,7 +58,7 @@ class ChunkManager {
 				let cellZ = this.cellPos.z + z;
 				let cellId = cellX + "," + cellY + "," + cellZ;
 
-				if (!world.cells.hasOwnProperty(cellId)) { // Check if chunk already exists
+				if (!world.cells[cellId]) { // Check if chunk already exists
 					this.chunksToRequest.push({
 						x: cellX,
 						y: cellY,
@@ -66,7 +66,7 @@ class ChunkManager {
 					})
 					requests++;
 				} else {
-					if (cellIdToMesh.hasOwnProperty(cellId)) {
+					if (cellIdToMesh[cellId]) {
 						cellIdToMesh[cellId][0].visible = true;
 						cellIdToMesh[cellId][1].visible = true;
 					}
