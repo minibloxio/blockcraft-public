@@ -150,7 +150,7 @@ class Player {
 			this.savedPosition['y'] = pos.y;
 		} else {
 			// Respawn in new location
-			let maxSpawnDistance = 32; // Maximum distance from spawn
+			let maxSpawnDistance = 16; // Maximum distance from spawn
 			let randomX = random(-maxSpawnDistance, maxSpawnDistance);
 			let randomZ = random(-maxSpawnDistance, maxSpawnDistance);
 
