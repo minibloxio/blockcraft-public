@@ -11,10 +11,16 @@ const options = {
 
 // Create HTTPS server
 const server = https.createServer(options, app);
+const cors = require('cors');
 const path = require('path');
 const readline = require('readline'); // Command line input
 const { Server } = require("socket.io");
-const io = new Server(server, {});
+const io = new Server(server, {
+	cors: {
+	  origin: "*",
+	  methods: ["GET", "POST"]
+	}
+});
 
 // Cluster (used for multiple Node.js servers)
 const cluster = require('cluster');
