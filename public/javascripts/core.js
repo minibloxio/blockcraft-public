@@ -1,54 +1,30 @@
-// Setup
-
-var socket = io();
-
-$(document).ready(function () {
-	socket.on('connect', function () {
-		console.log("Connected to Socket.IO!");
-		init();
-		animate();
-	})
-})
-
 // Three.js
-let scene, renderer, world, chunkManager, stage, sky, stats, composer, colorShader, inScreen;
+let scene, renderer, world, chunkManager, stage, sky, stats, composer, colorShader, player, players;
 let loaded = 0;
 let loadedAnimate = new Ola(0);
 let maxLoaded = 6;
-let tick = new Ola(0)
-
-let sprite = undefined;
+let tick = new Ola(0);
 
 // Stats
-var prevTime = performance.now();
-var statistics = [];
+let prevTime = performance.now();
+let statistics = [];
 
 // Camera
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000000);
-var player;
+let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000000);
 
 // Mouse
-var mouse = new Ola({x: 0, y: 0}, 10);
+let mouse = new Ola({x: 0, y: 0}, 10);
 
-var players = {};
-
-var rleWorker = new Worker('javascripts/workers/rle-worker.js');
-
+// Web workers
+let rleWorker;
 let voxelWorkers = [];
-let voxelWorkerIndex = 0;
-for (let i = 0; i < 4; i++) {
-	voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
-	voxelWorkers[i].addEventListener('message', e => {
-	  // Update Voxel Mesh
-	  for (let i = 0; i < e.data.length; i++) {
-		  chunkManager.chunksToRender.push(e.data[i]);
-	  }
-	})
-}
+voxelWorkerIndex = 0;
 
+// Initialize game
 function init() {
 	console.log('Initalizing BlockCraft...')
 	console.log('Socket ID:', socket.id)
+
 	// Initialize pointer lock
 	initPointerLock();
 
@@ -56,24 +32,54 @@ function init() {
 	scene = new THREE.Scene();
 	scene.background = new THREE.Color( 0xffffff );
 
-	// Add world
-	world = new World();
+	world = new World(); // Ihit world
+	
+	chunkManager = new ChunkManager(); // Add chunk manager
+	
+	player = new Player(camera); // Add player
+	
+	stage = new Stage(); // Initialize the stage (light, sun, moon, stars, etc.)
 
-	// Add chunk manager
-	chunkManager = new ChunkManager();
+	addVideoControls(); // Add video settings
 
-	// Add player
-	player = new Player(camera);
-	scene.add( player.controls.getObject() );
+	initWorkers(); // Initialize web workers
+    
+    initStatistics(); // Add statistics to record
+    
+	initRenderer(); // Finalize by adding the renderer
+	
+	window.addEventListener( 'resize', onWindowResize, false ); // Add resize event
 
-	// Add light
-	stage = new Stage();
+	document.getElementById("welcome-button").click() // Show welcome page
 
-	// Add settings
-	addVideoControls();
+	loaded += 1; // Increase loading stage
+	
+	animate(); // Animate
+}
 
-    // Add statistics to record
-    statistics.push(new Stat("Gamemode", player, "mode", 2))
+// Initialize web workers
+function initWorkers() {
+	rleWorker = new Worker('javascripts/workers/rle-worker.js'); // Run length encoding worker
+	
+	rleWorker.addEventListener('message', e => {
+		chunkManager.processChunks(e);
+	})
+
+	// Voxel geometry workers
+	for (let i = 0; i < 4; i++) { 
+		voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
+		voxelWorkers[i].addEventListener('message', e => {
+			// Update Voxel Mesh
+			for (let i = 0; i < e.data.length; i++) {
+				chunkManager.chunksToRender.push(e.data[i]);
+			}
+		})
+	}
+}
+
+// Initialize statistics
+function initStatistics() {
+	statistics.push(new Stat("Gamemode", player, "mode", 2))
     statistics.push(new Stat("Pos", player.position, false, 2, function (pos) {
     	return pos.clone().divideScalar(16);
     }))
@@ -85,8 +91,10 @@ function init() {
     statistics.push(new Stat("Speed", player, "speed", 2))
     statistics.push(new Stat("Fly", player, "fly", 2))
     statistics.push(new Stat("Clip", player, "clip", 2))
+}
 
-    // Finalize by adding the renderer
+// Initalize the renderer
+function initRenderer() {
 	renderer = new THREE.WebGLRenderer( { antialias: false, logarithmicDepthBuffer: false } );
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize( window.innerWidth, window.innerHeight );
@@ -103,6 +111,7 @@ function init() {
 
 	document.body.appendChild( renderer.domElement );
 
+	// Under water color shader
 	colorShader = {
 		uniforms: {
 		  tDiffuse: { value: null },
@@ -132,16 +141,9 @@ function init() {
 	colorPass.renderToScreen = true;
 	colorPass.enabled = false;
 	composer.addPass(colorPass);
-
-	// Add resize event
-	window.addEventListener( 'resize', onWindowResize, false );
-
-	// Show welcome page
-	document.getElementById("welcome-button").click()
-
-	loaded += 1; // Increase loading stage
 }
 
+// Game loop
 function animate() {
 	requestAnimationFrame( animate );
 
@@ -171,7 +173,6 @@ function animate() {
 	chunkManager.update(player);
 
 	// Update server players
-
 	for (let id in players) {
 		let p = players[id];
 		if (p.entity) {
@@ -180,7 +181,6 @@ function animate() {
 	}
 
 	// Update server entities
-
 	for (let id in world.entities) {
 		let e = world.entities[id]
 		e.mesh.position.lerp(e.pos, delta*10)
@@ -190,7 +190,6 @@ function animate() {
 	}
 
 	// Emit events to server
-
 	socket.emit('packet', {
 		pos: player.position,
 		vel: player.velocity,
@@ -205,7 +204,6 @@ function animate() {
 	});
 
 	// Scene update
-
 	stage.update();
 	stats.update();
 
@@ -214,17 +212,17 @@ function animate() {
 	composer.render( scene, camera );
 }
 
+// Window resize
 function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 
-	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.setSize( window.innerWidth, window.innerHeight);
 
-	var crosshairSize = 50
+	var crosshairSize = 50;
 
-	var width = $("html").innerWidth()
-	$("#crosshair").css("left", width/2 - crosshairSize/2)
-	var height = $("html").innerHeight()
-	$("#crosshair").css("top", height/2 - crosshairSize/2)
-
+	var width = $("html").innerWidth();
+	$("#crosshair").css("left", width/2 - crosshairSize/2);
+	var height = $("html").innerHeight();
+	$("#crosshair").css("top", height/2 - crosshairSize/2);
 }

@@ -15,6 +15,7 @@ socket.on('init', function (data) {
 	initRecipes();
 
 	// Receive current server players
+	players = {};
 	let serverPlayers = data.serverPlayers;
 	for (let id in serverPlayers) {
 		if (id != socket.id) {
@@ -59,37 +60,8 @@ socket.on('textureData', function (data) {
 })
 
 // Update chunk
-
 socket.on('receiveChunk', function (data) {
-	
 	rleWorker.postMessage(data); // Send decoding to the rleWorker
-})
-
-rleWorker.addEventListener('message', e => {
-	let newCells = {};
-
-	for (let i = 0; i < e.data.length; i++) {
-		let chunk = e.data[i];
-		let cellId = chunk.pos.x + "," + chunk.pos.y + "," + chunk.pos.z;
-
-		world.cells[cellId] = new Uint8Array(new SharedArrayBuffer(16 * 16 * 16)); // Maybe store this object in rleWorker?
-		world.cells[cellId].set(chunk.cell);
-
-		newCells[cellId] = world.cells[cellId];
-
-		chunk.pos.id = cellId;
-
-		chunkManager.chunksToLoad.push(chunk.pos)
-	}
-
-	// Update information to each voxel worker
-	let worldData = {
-	    cells: newCells,
-	}
-
-	for (let voxelWorker of voxelWorkers) {
-		voxelWorker.postMessage(worldData);
-	}
 })
 
 // Add newcoming players
@@ -193,8 +165,3 @@ socket.on('messageAll', function (data) {
 socket.on('refresh', function () {
 	location.reload(true);
 })
-
-// Handle disconnection
-// window.onbeforeunload = function () {
-//     socket.emit('disconnect')
-// };

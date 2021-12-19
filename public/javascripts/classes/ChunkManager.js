@@ -116,6 +116,33 @@ class ChunkManager {
 	    }
 	}
 
+	processChunks(e) {
+		let newCells = {};
+
+		for (let i = 0; i < e.data.length; i++) {
+			let chunk = e.data[i];
+			let cellId = chunk.pos.x + "," + chunk.pos.y + "," + chunk.pos.z;
+
+			world.cells[cellId] = new Uint8Array(new SharedArrayBuffer(16 * 16 * 16)); // Maybe store this object in rleWorker?
+			world.cells[cellId].set(chunk.cell);
+
+			newCells[cellId] = world.cells[cellId];
+
+			chunk.pos.id = cellId;
+
+			chunkManager.chunksToLoad.push(chunk.pos)
+		}
+
+		// Update information to each voxel worker
+		let worldData = {
+			cells: newCells,
+		}
+
+		for (let voxelWorker of voxelWorkers) {
+			voxelWorker.postMessage(worldData);
+		}
+	}
+
 	update(player) {
 		if (Date.now()-this.chunkTick < this.chunkDelay)
 			return;

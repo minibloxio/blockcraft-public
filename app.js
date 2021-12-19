@@ -189,13 +189,27 @@ io.on('connection', function(socket_) {
 		currSlot: 0,
 		pickupDelay: Date.now(),
 		ping: [],
+		connected: false,
 	}
 
+	// Server info request
+	socket.on('serverInfoRequest', function (data) {
+		let info = {
+			ts: data,
+			numPlayers: Object.keys(players).length,
+			region: "na", // Change this to the actual region
+		}
+		socket.emit('serverInfoResponse', info);
+	})
+
+	// Join request from the client
 	socket.on('join', function (data) {
 		// Set name
 		if (data && data.name) {
 			players[socket.id].name = data.name;
 		}
+
+		players[socket.id].connected = true;
 		
 		// Send update to everyone
 		io.emit('addPlayer', players[socket.id])
@@ -450,8 +464,10 @@ io.on('connection', function(socket_) {
 	})
 
 	socket.on('disconnect', function () {
-		let text = players[socket.id].name + " has left the server";
-		logger.info(text)
+		if (players[socket.id].connected) {
+			let text = players[socket.id].name + " has left the server";
+			logger.info(text)
+		}
 		io.emit('removePlayer', socket.id);
 		delete players[socket.id];
 	});
@@ -460,6 +476,7 @@ io.on('connection', function(socket_) {
 // Update server function
 let dt = 50;
 let autosaveTimer = Date.now();
+let autosaveWarningFlag = true;
 setInterval(function () {
 	if (!world || Object.keys(players).length == 0) 
 		return;
@@ -496,8 +513,20 @@ setInterval(function () {
 
 	// Auto save
 	let autosaveInterval = 1000 * 60 * 5; // 5 Minutes
+	let autosaveWarning = 1000 * 10; // 10 seconds
+	if (Date.now() - autosaveTimer > autosaveInterval - 1000 * 10 && autosaveWarningFlag) {
+		autosaveWarningFlag = false;
+		let txt = "Server will auto save in " + parseInt(autosaveWarning/1000) + " s";
+          io.emit('messageAll', {
+            text: txt,
+            color: "purple",
+            discard: true
+        })
+	}
 	if (Date.now() - autosaveTimer > autosaveInterval) {
 		autosaveTimer = Date.now();
+		autosaveWarningFlag = true;
+
 		let path =  __dirname + '/saves/test.json';
 		logger.info("Saving world..." + path);
 		let t = Date.now();

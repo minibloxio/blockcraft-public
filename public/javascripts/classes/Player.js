@@ -135,6 +135,9 @@ class Player {
 
 		// Spawn
 		this.respawn(blockSize, startPos);
+
+		// Add to scene
+		scene.add( player.controls.getObject() );
 	}
 
 	respawn(blockSize, pos) {
