@@ -54,6 +54,7 @@ class World {
   }
   setVoxel(x, y, z, v, addCell = true) {
     let cell = this.getCellForVoxel(x, y, z);
+    console.log(cell);
     if (!cell) {
       if (!addCell) {
         return;
@@ -80,11 +81,10 @@ class World {
   }
 
   deleteCell(chunk, permanently) {
-
     for (let i = 0; i < world.buildHeight/this.cellSize+1; i++) {
       let id = `${chunk.x},${i},${chunk.z}`
 
-      delete this.cells[id];
+      //delete this.cells[id];
       let object = scene.getObjectByName(id);
       if (object) {
         cellIdToMesh[id][0].visible = false;
@@ -213,7 +213,7 @@ const neighborOffsets = [
 ];
 
 function updateVoxelGeometry(x, y, z, neighbor) {
-  let {blockSize, cellSize} = world;
+  let {cellSize} = world;
 
   let cells = [];
   const updatedCellIds = {};
@@ -246,6 +246,7 @@ function updateVoxelGeometry(x, y, z, neighbor) {
 }
 
 function updateCellMesh(data) {
+  console.log(data);
   let {blockSize, cellSize} = world;
   var [opaqueGeometry, cellX, cellY, cellZ, cellId, transparentGeometry] = data;
   let mesh, meshT;

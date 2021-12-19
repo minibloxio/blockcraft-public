@@ -150,7 +150,8 @@ socket.on('update', function (data) {
 	var updatedBlocks = data.updatedBlocks;
 	for (let block of updatedBlocks) {
 		world.setVoxel(block.x, block.y, block.z, block.t);
-		updateVoxelGeometry(block.x, block.y, block.z);
+		console.log("Updated", block.x, block.y, block.z);
+		updateVoxelGeometry(block.x, block.y, block.z, true); // Update if in different chunk?
 	}
 
 	// Add new entities
