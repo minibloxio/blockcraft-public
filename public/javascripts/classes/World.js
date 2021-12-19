@@ -54,7 +54,6 @@ class World {
   }
   setVoxel(x, y, z, v, addCell = true) {
     let cell = this.getCellForVoxel(x, y, z);
-    console.log(cell);
     if (!cell) {
       if (!addCell) {
         return;
