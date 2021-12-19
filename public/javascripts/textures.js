@@ -114,7 +114,7 @@ function mergeBlockTextures(order) {
 
   materialTransparent = new THREE.MeshLambertMaterial({
     map: texture,
-    side: THREE.FrontSide,
+    side: THREE.DoubleSide,
     transparent: true,
     depthWrite: true
   });

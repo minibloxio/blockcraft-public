@@ -84,8 +84,9 @@ class World {
       let id = `${chunk.x},${i},${chunk.z}`
 
       //delete this.cells[id];
-      let object = scene.getObjectByName(id);
-      if (object) {
+      //let object = scene.getObjectByName(id);
+      //if (object) {
+      if (cellIdToMesh[id]) {
         cellIdToMesh[id][0].visible = false;
         cellIdToMesh[id][1].visible = false;
 
@@ -100,6 +101,8 @@ class World {
           scene.remove(cellIdToMesh[id][1]);
         }
       }
+      
+      //}
     }
   }
 

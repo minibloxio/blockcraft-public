@@ -284,8 +284,10 @@ class Player {
 						let mag = this.velocity.distanceTo(vel);
 						camera.getWorldDirection(vel)
 						let playerVel = this.velocity.clone();
+						let playerVelY = playerVel.y;
 						playerVel.normalize();
-						playerVel.multiplyScalar(mag/400000);
+						playerVel.y = playerVelY;
+						playerVel.multiplyScalar(mag/400000); // Default
 						vel.add(playerVel)
 
 						socket.emit('fireArrow', {
@@ -666,10 +668,15 @@ class Player {
 		this.velocity.z -= previousVelocity.z * 10.0 * delta;
 		// Determine direction vector
 		this.direction.x = this.key.left + this.key.right;
-		this.direction.y = this.key.up + this.key.down;
 		this.direction.z = this.key.forward + this.key.backward;
 		
-		this.direction.normalize(); // this ensures consistent movements in all directions
+		let mag = Math.pow((this.direction.x+this.direction.z), 2);
+		if (mag > 0) {
+			this.direction.x = (this.direction.x)/mag;
+			this.direction.z = (this.direction.z)/mag;
+		}
+
+		this.direction.y = this.key.up + this.key.down;
 
 		if (this.onObject && !this.fly) this.velocity.y = Math.max( 0, this.velocity.y );
 
@@ -746,7 +753,7 @@ class Player {
 			if (!this.fly) {
 				currentVel = [originalY, original/2, original];
 			} else {
-				currentVel = [original, original, original];
+				currentVel = [original*2, original*2, original*2];
 			}
 			
 			this.previousPosition = this.position.clone();

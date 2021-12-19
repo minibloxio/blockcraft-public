@@ -67,6 +67,8 @@ class ChunkManager {
 					requests++;
 				} else {
 					if (cellIdToMesh[cellId]) {
+						this.currCells[`${cellX},${cellZ}`] = 1;
+						
 						cellIdToMesh[cellId][0].visible = true;
 						cellIdToMesh[cellId][1].visible = true;
 					}
