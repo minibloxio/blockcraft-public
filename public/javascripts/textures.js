@@ -107,7 +107,7 @@ function mergeBlockTextures(order) {
 
   material = new THREE.MeshLambertMaterial({
     map: texture,
-    side: THREE.DoubleSide, // Default: FrontSide
+    side: THREE.FrontSide, // Default: FrontSide
     transparent: false,
     depthWrite: true
   });
@@ -320,4 +320,3 @@ function loadSprite(path) {
   return sprite;
 
 }
-

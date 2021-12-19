@@ -18,8 +18,8 @@ class Stage {
 	    
 	    // Add shadow
 		var d = 1000;
-	    this.dir.shadow.mapSize.width = 1024*8;
-		this.dir.shadow.mapSize.height = 1024*8;
+	    this.dir.shadow.mapSize.width = 1024*4;
+		this.dir.shadow.mapSize.height = 1024*4;
 	    this.dir.shadow.camera.left = -d;
 	    this.dir.shadow.camera.right = d;
 	    this.dir.shadow.camera.top = d;
