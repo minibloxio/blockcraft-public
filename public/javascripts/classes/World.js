@@ -246,7 +246,6 @@ function updateVoxelGeometry(x, y, z, neighbor) {
 }
 
 function updateCellMesh(data) {
-  console.log(data);
   let {blockSize, cellSize} = world;
   var [opaqueGeometry, cellX, cellY, cellZ, cellId, transparentGeometry] = data;
   let mesh, meshT;
