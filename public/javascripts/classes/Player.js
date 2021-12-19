@@ -670,13 +670,14 @@ class Player {
 		this.direction.x = this.key.left + this.key.right;
 		this.direction.z = this.key.forward + this.key.backward;
 		
-		let mag = Math.pow((this.direction.x+this.direction.z), 2);
+		let mag = Math.sqrt((Math.abs(this.direction.x)+Math.abs(this.direction.z)));
 		if (mag > 0) {
-			this.direction.x = (this.direction.x)/mag;
-			this.direction.z = (this.direction.z)/mag;
+			this.direction.x = this.direction.x/mag;
+			this.direction.z = this.direction.z/mag;
 		}
 
 		this.direction.y = this.key.up + this.key.down;
+		//this.direction.normalize();
 
 		if (this.onObject && !this.fly) this.velocity.y = Math.max( 0, this.velocity.y );
 
