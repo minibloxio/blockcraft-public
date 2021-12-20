@@ -156,8 +156,8 @@ function animate() {
 
 	// Animate start menu
 	if (loadedAnimate.value >= maxLoaded) {
-		$("#loading-bar").text("Start")
-	} else if (loadedAnimate.value < maxLoaded && $("#loading-bar").text() != "Start") {
+		$("#loading-bar").text("Join")
+	} else if (loadedAnimate.value < maxLoaded && $("#loading-bar").text() != "Join") {
 		let text = Math.min(100, round(loadedAnimate.value/maxLoaded*100, 0));
 		$("#loading-bar").text("Loading " + text + "%")
 	}

@@ -181,6 +181,7 @@ a {
 /* SERVER LIST */
 
 .server {
+    overflow-y: scroll;
     margin-bottom: 20px;
     padding: 20px;
     background-color: rgba(0, 0, 0, 0.5);
@@ -199,6 +200,7 @@ a {
 }
 
 #refresh-servers {
+    margin-bottom: 20px;
     text-align: center;
     line-height: 50px;
     width: 100%;

@@ -3,6 +3,8 @@ document.addEventListener('contextmenu', event => event.preventDefault());
 
 // Key event handling
 $('html').mousedown(function(event) {
+	if (!initialized)
+		return;
 	if (!player.controls.enabled || showInventory)
 		return;
     switch (event.which) {
@@ -64,6 +66,8 @@ $("body").mousemove(function (e) {
 
 let mouseLeft, mouseRight = false;
 $("body").mousedown(function (e) {
+	if (!initialized)
+		return;
 	if (!showInventory)
 		return;
 	switch (event.which) {
@@ -82,6 +86,8 @@ $("body").mousedown(function (e) {
             //alert('You have a strange Mouse!');
     }
 }).mouseup(function (e) {
+	if (!initialized)
+		return;
 	if (!showInventory)
 		return;
 	switch (event.which) {
@@ -100,6 +106,8 @@ $("body").mousedown(function (e) {
 })
 
 $("body").dblclick(function () {
+	if (!initialized)
+		return;
 	selectInventory("double")
 })
 

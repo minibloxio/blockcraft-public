@@ -186,6 +186,7 @@ io.on('connection', function(socket_) {
 			numPlayers: Object.keys(players).length,
 			region: config.region,
 			uptime: Date.now() - startTime,
+			link: config.link,
 		}
 		socket.emit('serverInfoResponse', info);
 	})
