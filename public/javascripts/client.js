@@ -1,3 +1,14 @@
+// Connection to server successful
+socket.on('connect', function () {
+	console.log("Connected to Socket.IO!");
+	init();
+})
+
+// Disconnected from server
+socket.on('disconnect', function (reason) {
+	console.log("Disconnected from server due to:", reason);
+})
+
 // Initialize client
 let initialized = false;
 socket.on('init', function (data) {
@@ -52,6 +63,7 @@ socket.on('init', function (data) {
 	tick = new Ola(data.tick);
 
 	initialized = true;
+	console.log("Succesfully joined the server!");
 })
 
 // Load textures

@@ -62,68 +62,96 @@
 		<script src="javascripts/input.js"></script>
 		<script src="javascripts/helper.js"></script>
 		<script src="javascripts/hud.js"></script>
+
+		<!-- Load JSON files -->
+		<script type="text/javascript" src="changelog.json"></script>
+		<script type="text/javascript" src="keymap.json"></script>
 		
 
 		<div id="blocker">
 			<div id="background-image"></div>
 
-			<div id="container">
-				<h1 id="title">BlockCraft</h1>
-				<div id="nav">
-					<button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
-					<button class="tablinks" onclick="changeTab(event, 'server-list')">Servers</button>
-					<button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
-					<button class="tablinks" onclick="changeTab(event, 'video-settings')">Video</button>
-					<button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
+			
+			<h1 id="title">BlockCraft</h1>
+
+			<div class="container">
+				<!-- Menu -->
+				<div id="menu">
+					<div id="nav">
+						<button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
+						<button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
+					</div>
+
+					<div id="welcome" class="tabcontent">
+						<span>BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has  This project originally spawned as a Minecraft Classic clone but has expanded to include multiplayer PvP, crafting, shaders and much more!</span><br><br>
+						<span>BlockCraft is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way.</span><br><br>
+						<span>You can view my development journey <a href="https://victorwei.com/blog/blockcraft.pdf">here</a></span><br><br>
+						<span>This project is open source and the source code can be accessed through <a href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank">Github</a></span><br><br>
+						<span>You can view my other projects <a href="https://victorwei.com" target="_blank">here</a></span><br><br>
+					</div>
+
+					<div id="changelog" class="tabcontent" style="display: none;"></div>
 				</div>
 
-				<div id="welcome" class="tabcontent">
-					<span>BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has  This project originally spawned as a Minecraft Classic clone but has expanded to include multiplayer PvP, crafting, shaders and much more!</span><br><br>
-					<span>BlockCraft is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way.</span><br><br>
-					<span>You can view my development journey <a href="https://victorwei.com/blog/blockcraft.pdf">here</a></span><br><br>
-					<span>This project is open source and the source code can be accessed through <a href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank">Github</a></span><br><br>
-					<span>You can view my other projects <a href="https://victorwei.com" target="_blank">here</a></span><br><br>
+				<!-- Server select -->
+				<div id="server-select" style="display:none">
+					<div id="nav">
+						<button class="tablinks" style="width: 100%;" onclick="changeTab(event, 'server-list')" id="server-button">Servers</button>
+					</div>
+	
+					<div id="server-list" class="tabcontent">
+						<div id="refresh-servers">Refresh</div>
+						
+						<div id="server-container"></div>
+					</div>
+	
+					<div id="changelog" class="tabcontent" style="display: none;"></div>
 				</div>
 
-				<div id="server-list" class="tabcontent" style="display: none;">
-					<div id="refresh-servers">Refresh</div>
-					
-					<div id="server-container"></div>
+				<!-- Settings -->
+				<div id="settings" style="display:none">
+					<div id="nav">
+						<button class="tablinks" onclick="changeTab(event, 'video-settings')" id="video-button">Video</button>
+						<button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
+					</div>
+
+					<div id="video-settings" class="tabcontent" style="display: none;">
+						<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
+						<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
+						<span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
+						<input type="range" min="1" max="12" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
+						<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
+						<input type="range" min="0" max="10" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
+						<span id="statsValue" class="slider-text">Statistics: OFF</span>
+						<input type="range" min="0" max="1" value="0" class="slider" id="statsSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
+						<span id="shadowValue" class="slider-text">Shadow Effect: OFF</span>
+						<input type="range" min="0" max="1" value="0" class="slider" id="shadowSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
+						<span id="cloudValue" class="slider-text">Clouds: ON</span>
+						<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
+						<span id="starsValue" class="slider-text">Stars: ON</span>
+						<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
+						<div id="reset-video">Reset to Default</div>
+					</div>
+
+					<div id="keyboard-settings" class="tabcontent" style="display: none;">
+					</div>
 				</div>
-
-				<div id="changelog" class="tabcontent" style="display: none;"></div>
-
-				<div id="video-settings" class="tabcontent" style="display: none;">
-					<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
-					<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-					<span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
-					<input type="range" min="1" max="12" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-					<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
-					<input type="range" min="0" max="10" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-					<span id="statsValue" class="slider-text">Statistics: ON</span>
-					<input type="range" min="0" max="1" value="1" class="slider" id="statsSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-					<span id="shadowValue" class="slider-text">Shadow Effect: OFF</span>
-					<input type="range" min="0" max="1" value="0" class="slider" id="shadowSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-					<span id="cloudValue" class="slider-text">Clouds: ON</span>
-					<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-					<span id="starsValue" class="slider-text">Stars: ON</span>
-					<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
-					<div id="reset-video">Reset to Default</div>
-				</div>
-
-				<div id="keyboard-settings" class="tabcontent" style="display: none;">
-				</div>
-
+				
+				<!-- User Input and Start Button -->
 				<div id ="name-container">
-					<input autocomplete="off" id="name-input" type="text" placeholder="Enter Username" maxlength="20">
+					<input autocomplete="off" id="name-input" class="input" type="text" placeholder="Enter Username" maxlength="20">
+					<input autocomplete="off" id="direct-connect-input" class="input" type="text" placeholder="Direct Connect (optional)" maxlength="50" style="display: none;">
 					<br />
 					<div id="start-button">
-						<div id="loading-bar">
-							Loading 0%
+						<div id="continue-bar" class="bar">Continue</div>
+						<div id="loading-bar" class="bar" style="display: none;">
+							Connecting to server...
 						</div>
 					</div>
 				</div>
 			</div>
+
+			
 		</div>
 
 		<input autocomplete="off" id="chat-input" type="text" placeholder="> Press Enter to Chat" maxlength="100">
@@ -131,6 +159,8 @@
 
 		<script>
 
+			$("#welcome-button")[0].click()
+			
 			// Change tab
 			function changeTab(evt, cityName) {
 			  // Declare all variables
@@ -153,57 +183,7 @@
 			  evt.currentTarget.className += " active";
 			}
 
-			// Add version controls
-
-			let changelog = [
-				{
-					"date": "Dec 17, 2021",
-					"version": "0.25.0",
-					"changes": "Players now spawn on the ground if possible| Added CORS support| Fixed crosshair jerk due to a Chrome bug| Fixed z-fighting issue with transparent blocks/items| Fixed players join with a default name| Optimized chunk loading by reducing the latency of web workers"
-				},
-				{
-					"date": "Nov 8, 2020",
-					"version": "0.24.0",
-					"changes": "Added creative mode| Added commands such as /tp and /gamemode"
-				},
-				{
-					"date": "Nov 7, 2020",
-					"version": "0.23.0",
-					"changes": "Added multiple new blocks| Improved terrain generation| Simplified texture loading process"
-				},
-				{
-					"date": "Nov 6, 2020",
-					"version": "0.22.0",
-					"changes": "Added a versions tab to the start menu to see previous versions| Added multiplayer hand models| Added blocking functionality to the sword to reduce incoming damage and knockback| Added bunny hopping| Fixed blocks being able to be placed on water| Added cobblestone, sand, gravel, and obsidian blocks"
-				},
-				{
-					"date": "Nov 5, 2020",
-					"version": "0.21.0",
-					"changes": "Fixed players being able to punch through walls| Improved start menu UI| Added start menu loading bar| World save messages no longer clog up the chat| Added the ability to reassign controls| Added cookies so video and keyboard settings can be saved"
-				},
-				{
-					"date": "Nov 3, 2020",
-					"version": "0.20.0",
-					"changes": "Added stars| Improved night time lighting| Optimized texture atlas generation| Player arm now switches to the selected block| Added a sword| Added a tab so players are able to see who is online"
-				},
-				{
-					"date": "Oct 29, 2020",
-					"version": "0.19.0",
-					"changes": "Improved swimming mechanics| Items now snap to player instead of gravitate| Worlds are able to be saved now"
-				},
-				{
-					"date": "Oct 28, 2020",
-					"version": "0.18.0",
-					"changes": "Breaking blocks and placing blocks on chunk boundaries only update those chunks which are affected| Added the moon| Smoothed out day-night transition| Fixed diagonal collision resolution| Fixed crouch building"
-				},
-				{
-					"date": "Oct 27, 2020",
-					"version": "0.17.0",
-					"changes": "Players can take fall damage| Optimized chunk loading using web workers"
-				},
-			]
-				
-
+			// Load the changelog
 			for (let change of changelog) {
 				let date = change.date;
 				let version = change.version;
@@ -222,35 +202,6 @@
 			}
 
 			// Add keys
-
-			let keyorder = [188, 190, 87, 65, 83, 68, 32, 16, 18, 70, 67, 81, 82, 88, 69, 9, 49, 50, 51, 52, 53, 54, 55, 56, 57];
-			let keymap = {
-				188: ["Attack", ","],
-				190: ["Place Block", "."],
-				87: ["Move Forward", "W"],
-				65: ["Move Left", "A"],
-				83: ["Move Backward", "S"],
-				68: ["Move Right", "D"],
-				32: ["Jump", "SPACE"],
-				16: ["Sprint", "SHIFT"],
-				18: ["Sneak", "ALT"],
-				70: ["Fly", "F"],
-				67: ["Clip", "C"],
-				81: ["Drop Item", "Q"],
-				82: ["Respawn", "R"],
-				88: ["Zoom", "X"],
-				69: ["Open Inventory", "E"],
-				9: ["Player Tab", "TAB"],
-				49: ["Slot 1", "1"],
-				50: ["Slot 2", "2"],
-				51: ["Slot 3", "3"],
-				52: ["Slot 4", "4"],
-				53: ["Slot 5", "5"],
-				54: ["Slot 6", "6"],
-				55: ["Slot 7", "7"],
-				56: ["Slot 8", "8"],
-				57: ["Slot 9", "9"],
-			}
 			let savedKeymap = JSON.stringify(keymap);
 			let savedKeyorder = JSON.stringify(keyorder);
 
@@ -409,7 +360,7 @@
 				addSliderControl("Render Distance", "renderDistance", 8, chunkManager, "renderDistance")
 				addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
 
-				addSwitchControl("Statistics", "stats", true, hud, "showStats")
+				addSwitchControl("Statistics", "stats", false, hud, "showStats")
 				addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow")
 				addSwitchControl("Clouds", "cloud", true, stage, "showClouds", "generate")
 				addSwitchControl("Stars", "stars", true, stage.stars, "visible")

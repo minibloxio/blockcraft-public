@@ -1,4 +1,4 @@
-
+// Texture Loader
 let loader  = new THREE.TextureLoader();
 	loader.setPath("textures/");
 
@@ -28,13 +28,9 @@ class Texture {
 }
 
 // Font texture
+let t;
 let fontLoader = new THREE.FontLoader();
 let minecraft_font = undefined;
-
-fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
-	minecraft_font = font;
-  loaded += 1;
-});
 
 // Block breaking progress
 let mining_progress = [
@@ -52,8 +48,15 @@ let mining_progress = [
 ];
 
 function loadTextures(data) {
+  t = Date.now();
+  console.log("Loading textures...");
   loadBlockImages(data.blocks, data.blockOrder)
   loadItemImages(data.items, data.itemOrder);
+  fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
+    minecraft_font = font;
+    loaded += 1;
+    console.log("Done loading font in " + (Date.now() - t) + "ms");
+  });
 }
 
 // Texture Merger
@@ -121,8 +124,8 @@ function mergeBlockTextures(order) {
 
   texture_atlas = texture.image;
 
-  console.log("Done stitching textures!")
   loaded += 1;
+  console.log("Done stitching block textures in " + (Date.now() - t) + "ms");
 }
 
 function drawImageNet(ctx, order, entities) {
@@ -197,7 +200,7 @@ function mergeItemTextures(order) {
   item_atlas = texture.image;
 
   loaded += 1;
-  console.log("Done stitching item textures")
+  console.log("Done stitching item textures in " + (Date.now() - t) + "ms");
 }
 
 function makeCanvasPowerOfTwo(canvas) {

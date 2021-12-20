@@ -13,6 +13,7 @@ function joinServer() {
 		}
 		socket.emit('join', joinInfo)
 		loaded += 1;
+		console.log("Joining server...")
 	}
 }
 
@@ -22,9 +23,6 @@ function requestPointerLock() {
 		var element = document.body;
 		element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 		element.requestPointerLock();
-
-		joinServer();
-		
 	}
 }
 
@@ -90,10 +88,6 @@ function initPointerLock() {
 		document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
 		document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
 
-		$("#start-button").click(function (event) {
-			requestPointerLock();
-		})
-
 		$("body").keydown(function (event) {
 			if (event.keyCode == 27 && player.controls.enabled)
 				document.exitPointerLock();
@@ -124,11 +118,6 @@ function initPointerLock() {
 				element.requestPointerLock();
 				socket.emit('updateInventory', inventory);
 			}
-		})
-
-		// Enter username input
-		$("#name-input").keyup(function (event) {
-			if (event.keyCode == 13) requestPointerLock();
 		})
 	} else {
 		console.error("PointerLock is not supported on this browser")

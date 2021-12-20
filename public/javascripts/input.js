@@ -46,8 +46,8 @@ $('html').mouseup(function(event) {
 })
 
 $(window).keydown(function(event) {
-	if (!player.controls.enabled)
-		return;
+	if (!initialized) return;
+	if (!player.controls.enabled) return;
 	if(event.keyCode == 18) { 
 		event.preventDefault(); 
 	}
@@ -119,6 +119,8 @@ onkeydown = onkeyup = function(e){
 }
 
 var onKeyDown = function ( event ) {
+	if (!initialized) return;
+
 	if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && showChatFlag) {
 		showChatFlag = false;
     	showChatBar = !showChatBar;
@@ -181,10 +183,7 @@ var onKeyDown = function ( event ) {
 							text: 'Error: No player found with name "' + msg[1] + '" to teleport to',
 							color: "red"
 						});
-    				} else {
-
     				}
-	    				
     			} else if (msg[0] == "time") {
     				if (typeof(parseInt(msg[1])) == "number")
     					socket.emit('settime', parseInt(msg[1]))
@@ -195,8 +194,6 @@ var onKeyDown = function ( event ) {
 						color: "red"
 					});
     			}
-
-
     		}
     	}
 	}
@@ -296,8 +293,6 @@ var onKeyDown = function ( event ) {
 };
 
 var onKeyUp = function ( event ) {
-	let {blockSize} = world;
-
 	if ([13].indexOf(event.keyCode) > -1) {
 
 		showChatFlag = true;
@@ -371,8 +366,8 @@ document.addEventListener( 'keyup', onKeyUp, false );
 var lastScrollTop = 0, delta = 5;
 let zoomLevel = 3
 $(document).bind('wheel', function(e) {
-	if (!player.controls.enabled)
-		return;
+	if (!initialized) return;
+	if (!player.controls.enabled) return;
 
 	if (camera.enableZoom) {
 		if(e.originalEvent.wheelDelta / 120 > 0) {

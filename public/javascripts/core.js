@@ -22,37 +22,26 @@ voxelWorkerIndex = 0;
 
 // Initialize game
 function init() {
-	console.log('Initalizing BlockCraft...')
+	let t = Date.now();
+	console.log('Initalizing game...')
 	console.log('Socket ID:', socket.id)
 
-	// Initialize pointer lock
-	initPointerLock();
-
-	// Add scene
-	scene = new THREE.Scene();
-	scene.background = new THREE.Color( 0xffffff );
-
-	world = new World(); // Ihit world
-	
+	scene = new THREE.Scene(); // Add scene
+	world = new World(); // Init world
 	chunkManager = new ChunkManager(); // Add chunk manager
-	
 	player = new Player(camera); // Add player
-	
 	stage = new Stage(); // Initialize the stage (light, sun, moon, stars, etc.)
 
 	addVideoControls(); // Add video settings
-
 	initWorkers(); // Initialize web workers
-    
     initStatistics(); // Add statistics to record
-    
 	initRenderer(); // Finalize by adding the renderer
+	initPointerLock(); // Initialize pointer lock
 	
 	window.addEventListener( 'resize', onWindowResize, false ); // Add resize event
 
-	document.getElementById("welcome-button").click() // Show welcome page
-
 	loaded += 1; // Increase loading stage
+	console.log('Game initialized in ' + (Date.now() - t) + 'ms')
 	
 	animate(); // Animate
 }
@@ -155,9 +144,12 @@ function animate() {
 	delta = Math.min(delta, 0.1)
 
 	// Animate start menu
-	if (loadedAnimate.value >= maxLoaded) {
-		$("#loading-bar").text("Join")
-	} else if (loadedAnimate.value < maxLoaded && $("#loading-bar").text() != "Join") {
+	if (initialized && state == 3) {
+		$("#loading-bar").text("Return to game");
+	} else if (loadedAnimate.value >= maxLoaded) {
+		joinServer();
+		$("#loading-bar").text(`Spawn`)
+	} else if (loadedAnimate.value < maxLoaded && !$("#loading-bar").text().includes("Spawn")) {
 		let text = Math.min(100, round(loadedAnimate.value/maxLoaded*100, 0));
 		$("#loading-bar").text("Loading " + text + "%")
 	}
