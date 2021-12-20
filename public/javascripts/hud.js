@@ -442,6 +442,7 @@ function displayCrosshair() {
 
 // Toolbar
 function displayToolbar() {
+	if (!initialized) return;
 	if (!player.toolbar)
 		return;
 	let hotboxWidth = 60;
@@ -576,8 +577,8 @@ function getLines(ctx, text, maxWidth, color) {
 }
 
 function displayPlayerHealth() {
-	if (player.mode == "creative")
-		return;
+	if (!initialized) return;
+	if (player.mode == "creative") return;
 
 	if (player && player.hp > 0) {
 		for (let i = 0; i < 10; i++) {
@@ -670,6 +671,8 @@ function displayPlayerTab() {
 	}
 
 	let p = player;
+	if (!p.ping) return;
+
 	// Draw client name
 	let xPos = canvas.width/2-width/2+pad;
 	let yPos = topY+30*(index+1);

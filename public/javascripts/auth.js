@@ -64,39 +64,70 @@ function refreshServers() {
 
         // Received server info
         server.socket.on('serverInfoResponse', function (data) {
-            // Check if it's the first server
-            if (!currentServer) {
-                currentServer = data;
-
-                if (state == 1) {
-                    $("#continue-bar").text(`Join server (${currentServer.region})`);
-                    $("#continue-bar").css({"background-color": "green"});
-                }
-                //connect(data.link);
-            }
-
             // Update server info
             servers[data.link].info = data;
 
             // Update server list
             let latency = Date.now()-data.ping;
             let serverHTML = $(`
-                <div class='server'>
+                <div class='server' data-link='${data.link}' onClick='clickServer(event)'>
                     <p>Region: ${data.region}</p>
-                    <p>Players: ${data.numPlayers}</p>
+                    <p>Players: ${data.numPlayers}/20</p>
                     <p>Latency: ${latency}ms</p>
                     <p style="margin-bottom: 0;">Uptime: ${msToTime(data.uptime)} </p>
                 </div>
             `)
+
+            // Check if it's the first server
+            if (!currentServer) {
+                currentServer = data;
+
+                setJoinButton(data);
+                //connect(data.link); // Auto connect to first server
+
+                serverHTML.css({
+                    "background-color": "rgba(0,0,0,0.7)",
+                    "outline": "2px solid white",
+                });
+            }
+            
             $("#server-container").append(serverHTML);
         })
     }
 }
 
+// Set join button
+function setJoinButton(server) {
+    if (state == 1) {
+        $("#continue-bar").text(`Join server (${server.region})`);
+        $("#continue-bar").css({"background-color": "green"});
+    }
+}
+
+// Clicked on a server
+function clickServer(event) {
+    let server = $(event.target).closest(".server");
+    let url = server.data("link");
+    if (url in servers) {
+        currentServer = servers[url];
+    }
+    setJoinButton(currentServer.info);
+
+    $("#server-container").children().css({
+        "background-color": "rgba(0,0,0,0.5)",
+        "outline": "none",
+    });
+
+    server.css({
+        "background-color": "rgba(0,0,0,0.7)",
+        "outline": "2px solid white",
+    });
+}
+
 // Connect to server
 function connect(url) {
     if (url in servers) {
-        currentServer = servers[url]
+        currentServer = servers[url];
     }
 
     socket.io.uri = url;
