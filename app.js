@@ -182,7 +182,7 @@ io.on('connection', function(socket_) {
 	// Server info request
 	socket.on('serverInfoRequest', function (data) {
 		let info = {
-			ping: Date.now()-data,
+			ping: data,
 			numPlayers: Object.keys(players).length,
 			region: config.region,
 			uptime: Date.now() - startTime,

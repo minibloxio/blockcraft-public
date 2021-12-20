@@ -141,6 +141,7 @@ a {
 #container {
     position: absolute;
     width: 60%;
+    height: 40vh;
     min-width: 600px;
     margin-left: -30%;
     left: 50vw;
