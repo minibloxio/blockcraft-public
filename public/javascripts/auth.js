@@ -7,7 +7,7 @@
 
 
 // Setup
-let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Choose Server, 2: Loading Game, 3: In Game)
+let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Choose Server, 2: Loading Game, 3: Loading Chunks, 4: In Game)
 let socket = io({
 	autoConnect: false,
 	forceNew: true,
@@ -124,7 +124,7 @@ function clickServer(event) {
     });
 }
 
-// Connect to server
+// Initialize server connection
 function connect(url) {
     if (url in servers) {
         currentServer = servers[url];
@@ -134,58 +134,26 @@ function connect(url) {
     socket.connect();
 }
 
+// Join server
+function joinServer() {
+	if (loaded == maxLoaded) {
+		let name = $("#name-input").val() || "";
+
+		let joinInfo = {
+			name: name,
+		}
+		socket.emit('join', joinInfo)
+		loaded += 1;
+		console.log("Joining server...")
+	}
+}
+
 // Menu Progression Logic
 $(document).ready(function () {
     // Refresh servers
     $("#refresh-servers").click(function () {
         refreshServers()
     })
-
-    function nextState() {
-        
-        if (state == 0) {
-            refreshServers();
-            
-            $("#name-input").hide();
-            $("#direct-connect-input").show();
-            if ($("#direct-connect-input").val()) $("#direct-connect-input").focus();
-
-            $("#continue-bar").text("Finding Server...");
-            $("#continue-bar").css({"background-color": "orange"});
-
-            $("#menu").hide();
-            $("#server-select").show();
-            $("#server-button")[0].click();
-
-            state += 1;
-        } else if (state == 1 && currentServer) {
-            // Direct connection
-            let directConnect = $("#direct-connect-input").val();
-            if (directConnect) {  
-                connect(directConnect);
-            } else {
-                connect(currentServer.link);
-            }
-
-            $("#loading-bar").show();
-            $("#continue-bar").hide();
-
-            $("#name-input").show();
-            $("#direct-connect-input").hide();
-
-            $("#server-select").hide();
-            $("#settings").show();
-            $("#video-button")[0].click();
-
-            state += 1;
-        } else if (state == 2 && loaded >= maxLoaded) {
-            requestPointerLock();
-            state += 1;
-        } else if (state == 3) {
-            requestPointerLock();
-        }
-        
-    }
 
     // Menu progression (0: Start Menu, 1: Choose Server, 2: Loading Game, 3: In Game)
     $("#start-button").click(function (event) {
@@ -195,7 +163,6 @@ $(document).ready(function () {
     // Enter username input
     $("#name-input").keyup(function (event) {
         if (event.keyCode == 13) nextState();
-        
     })
 
     // Enter direct connect input
@@ -203,3 +170,55 @@ $(document).ready(function () {
         if (event.keyCode == 13) nextState();
     })
 })
+
+// Next menu state
+function nextState() {
+        
+    if (state == 0) { // Start Menu -> Choose Server
+        refreshServers();
+        
+        $("#name-input").hide();
+        $("#direct-connect-input").show();
+        if ($("#direct-connect-input").val()) $("#direct-connect-input").focus();
+
+        $("#continue-bar").text("Finding Server...");
+        $("#continue-bar").css({"background-color": "orange"});
+
+        $("#menu").hide();
+        $("#server-select").show();
+        $("#server-button")[0].click();
+
+        state += 1;
+    } else if (state == 1 && currentServer) { // Choose Server -> Loading Game
+        // Direct connection
+        let directConnect = $("#direct-connect-input").val();
+        if (directConnect) {  
+            connect(directConnect);
+        } else {
+            connect(currentServer.link);
+        }
+
+        $("#loading-bar").show();
+        $("#continue-bar").hide();
+
+        $("#name-input").show();
+        $("#direct-connect-input").hide();
+
+        $("#server-select").hide();
+        $("#settings").show();
+        $("#video-button")[0].click();
+
+        state += 1;
+    } else if (state == 2 && loaded > maxLoaded) { // Loading Game -> Loading Chunks
+        console.log("Loading chunks...")
+        loadedAnimate = new Ola(Object.keys(chunkManager.currCells).length);
+        state += 1;
+    } else if (state == 3 && Object.keys(chunkManager.currCells).length >= maxChunks) { // Loading Chunks -> In Game
+        console.log("Requesting pointer lock");
+        requestPointerLock();
+        state += 1;
+    } else if (state == 4) { // In Game
+        requestPointerLock();
+    }
+    
+}

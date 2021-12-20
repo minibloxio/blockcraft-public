@@ -4,19 +4,6 @@ Provides pointer lock functionality and the ability to connect to the game serve
 
 */
 
-function joinServer() {
-	if (loaded == maxLoaded) {
-		let name = $("#name-input").val() || "";
-
-		let joinInfo = {
-			name: name,
-		}
-		socket.emit('join', joinInfo)
-		loaded += 1;
-		console.log("Joining server...")
-	}
-}
-
 function requestPointerLock() {
 	if (loaded >= maxLoaded) {
 		// Ask the browser to lock the pointer

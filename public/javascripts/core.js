@@ -3,6 +3,7 @@ let scene, renderer, world, chunkManager, stage, sky, stats, composer, colorShad
 let loaded = 0;
 let loadedAnimate = new Ola(0);
 let maxLoaded = 6;
+let maxChunks = 25; // Chunks need to be loaded before pointerlock can be enabled
 let tick = new Ola(0);
 
 // Stats
@@ -144,20 +145,34 @@ function animate() {
 	delta = Math.min(delta, 0.1)
 
 	// Animate start menu
-	if (initialized && state == 3) {
+	if (initialized && state == 4) {
 		$("#loading-bar").text("Return to game");
+		$("#loading-bar").width(100+"%");
 	} else if (loadedAnimate.value >= maxLoaded) {
 		joinServer();
-		$("#loading-bar").text(`Spawn`)
+		$("#loading-bar").text("Spawn")
 	} else if (loadedAnimate.value < maxLoaded && !$("#loading-bar").text().includes("Spawn")) {
 		let text = Math.min(100, round(loadedAnimate.value/maxLoaded*100, 0));
 		$("#loading-bar").text("Loading " + text + "%")
 	}
-	loadedAnimate.value = loaded;
-	$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxLoaded)/maxLoaded)+"%")
+	
+	if (state == 2) { // Loading game...
+		loadedAnimate.value = loaded;
+		$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxLoaded)/maxLoaded)+"%")
+	} else if (state == 3) { // Loading chunks...
+		let chunksLoaded = Object.keys(chunkManager.currCells).length;
+		loadedAnimate.value = chunksLoaded;
+		$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxChunks)/maxChunks)+"%");
+		$("#loading-bar").text("Chunks Loaded (" + chunksLoaded + "/" + maxChunks + ")");
+
+		if (chunksLoaded >= maxChunks) {
+			nextState();
+		}
+	}
+	
 
 	// Player update
-	if (player.hp > 0 && initialized) {
+	if (player.hp > 0 && initialized && state == 4) {
 		player.update(delta, world);
 	}
 
@@ -207,7 +222,7 @@ function animate() {
 // Window resize
 function onWindowResize() {
 	if (!initialized) return;
-	
+
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 
