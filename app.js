@@ -1,6 +1,6 @@
 // Server config
-const serverPort = process.env.PORT || 3001;
-
+var config = require('./config.json');
+const serverPort = process.env.PORT || config.port || 3001;
 
 // Initialize server variables
 const express = require('express');
@@ -184,7 +184,7 @@ io.on('connection', function(socket_) {
 		let info = {
 			ping: Date.now()-data,
 			numPlayers: Object.keys(players).length,
-			region: "na", // Change this to the actual region,
+			region: config.region,
 			uptime: Date.now() - startTime,
 		}
 		socket.emit('serverInfoResponse', info);

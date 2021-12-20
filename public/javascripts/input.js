@@ -1,5 +1,7 @@
-// Key event handling
+// Prevent right-click
+document.addEventListener('contextmenu', event => event.preventDefault());
 
+// Key event handling
 $('html').mousedown(function(event) {
 	if (!player.controls.enabled || showInventory)
 		return;
@@ -101,7 +103,6 @@ $("body").dblclick(function () {
 	selectInventory("double")
 })
 
-document.addEventListener('contextmenu', event => event.preventDefault());
 
 var map = {};
 onkeydown = onkeyup = function(e){

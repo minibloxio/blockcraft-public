@@ -26,23 +26,47 @@ $(document).ready(function () {
 let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com"] // Request this from the auth server
 let servers = [];
 
-for (let server of serverList) {
-    servers.push(io(server));
+function refreshServers() {
+    // Disconnect servers
+    for (let server of servers) {
+        server.disconnect();
+    }
+    
+    // Connect to servers
+    servers = [];
+    $("#server-container").empty();
+    for (let server of serverList) {
+        servers.push(io(server));
 
-    servers[servers.length-1].emit('serverInfoRequest', Date.now());
+        servers[servers.length-1].on('connect', function () {
+            servers[servers.length-1].emit('serverInfoRequest', Date.now())
+        });
 
-    servers[servers.length-1].on('serverInfoResponse', function (data) {
-        let serverHTML = $(`
-            <div class='server'>
-                <p>Region: ${data.region}</p>
-                <p>Players: ${data.numPlayers}</p>
-                <p>Ping: ${data.ping}ms</p>
-                <p style="margin-bottom: 0;">Uptime: ${msToTime(data.uptime)} </p>
+        servers[servers.length-1].on('serverInfoResponse', function (data) {
+            let ping = Date.now()-data.ping;
+            let serverHTML = $(`
+                <div class='server'>
+                    <p>Region: ${data.region}</p>
+                    <p>Players: ${data.numPlayers}</p>
+                    <p>Ping: ${ping}ms</p>
+                    <p style="margin-bottom: 0;">Uptime: ${msToTime(data.uptime)} </p>
 
-                <button id="joinServer">Join</button>
-            </div>
-        `)
-        $("#server-list").append(serverHTML);
+                    <button id="joinServer">Join</button>
+                </div>
+            `)
+            $("#server-container").append(serverHTML);
 
-    })
+        })
+    }
+
 }
+
+
+// Refresh server
+refreshServers();
+$(document).ready(function () {
+    $("#refresh-servers").click(function () {
+        refreshServers()
+    })
+})
+    
