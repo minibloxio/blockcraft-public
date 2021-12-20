@@ -480,3 +480,22 @@ function abbreviateNumber(value) {
 }
 
 const mapRange = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
+
+
+function msToTime(s) {
+    let ms = s % 1000;
+    s = (s - ms) / 1000;
+    let secs = s % 60;
+    s = (s - secs) / 60;
+    let mins = s % 60;
+	s = (s - mins) / 60;
+    let hrs = s % 24;
+	let days = (s - hrs) / 24;
+  
+    return (
+		(days > 0 ? days + 'd ' : '') + 
+		(hrs > 0 ? hrs + 'h ' : '') + 
+		(mins > 0 ? mins + 'm ' : '') + 
+		secs + 's'
+	);
+}

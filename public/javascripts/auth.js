@@ -32,9 +32,17 @@ for (let server of serverList) {
     servers[servers.length-1].emit('serverInfoRequest', Date.now());
 
     servers[servers.length-1].on('serverInfoResponse', function (data) {
-        let serverHTML = $("<div class='server'>" + data.name + "</div>")
+        let serverHTML = $(`
+            <div class='server'>
+                <p>Region: ${data.region}</p>
+                <p>Players: ${data.numPlayers}</p>
+                <p>Ping: ${data.ping}ms</p>
+                <p style="margin-bottom: 0;">Uptime: ${msToTime(data.uptime)} </p>
+
+                <button id="joinServer">Join</button>
+            </div>
+        `)
         $("#server-list").append(serverHTML);
 
     })
 }
-
