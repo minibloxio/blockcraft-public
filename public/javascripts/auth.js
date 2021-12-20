@@ -126,6 +126,7 @@ function clickServer(event) {
 
 // Initialize server connection
 function connect(url) {
+    console.log("Connecting to server with url: " + url);
     if (url in servers) {
         currentServer = servers[url];
     }

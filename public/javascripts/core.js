@@ -3,7 +3,7 @@ let scene, renderer, world, chunkManager, stage, sky, stats, composer, colorShad
 let loaded = 0;
 let loadedAnimate = new Ola(0);
 let maxLoaded = 6;
-let maxChunks = 25; // Chunks need to be loaded before pointerlock can be enabled
+let maxChunks = 10; // Chunks need to be loaded before pointerlock can be enabled
 let tick = new Ola(0);
 
 // Stats

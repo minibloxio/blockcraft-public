@@ -1,6 +1,6 @@
 // Connection to server successful
 socket.on('connect', function () {
-	console.log("Connected to Socket.IO!");
+	console.log("Connected successfully!");
 	init();
 })
 

@@ -435,6 +435,8 @@ function drawItem(xPos, yPos, entity) {
 
 // Crosshair
 function displayCrosshair() {
+	if (player.mode == "camera") return;
+
 	// Draw crosshair
 	ctx.fillRect(canvas.width/2-crosshairWidth/2, canvas.height/2-crosshairSize/2, crosshairWidth, crosshairSize)
 	ctx.fillRect(canvas.width/2-crosshairSize/2, canvas.height/2-crosshairWidth/2, crosshairSize, crosshairWidth)
@@ -443,8 +445,9 @@ function displayCrosshair() {
 // Toolbar
 function displayToolbar() {
 	if (!initialized) return;
-	if (!player.toolbar)
-		return;
+	if (!player.toolbar) return;
+	if (player.mode == "spectator" || player.mode == "camera") return;
+
 	let hotboxWidth = 60;
 	let selectorWidth = 65;
 	drawImageTopLeft(toolbar, canvas.width/2-hotboxWidth*4, canvas.height-hotboxWidth-10, hotboxWidth*8, hotboxWidth);
@@ -482,6 +485,10 @@ function displayStats() {
 			let stat = statistics[i];
 			stat.display(i);
 		}
+		
+		stats.showPanel(0);
+	} else {
+		stats.showPanel();
 	}
 }
 
@@ -521,6 +528,13 @@ function hideChatTimer(time) {
 hideChatTimer(5000);
 
 function displayChat() {
+	if (player.mode == "camera") {
+		$("#chat-input").attr('placeholder', '');
+		return;
+	} else {
+		$("#chat-input").attr('placeholder', '> Press Enter to Chat')
+	}
+
 	let msgHeight = 35;
 	let fontSize = msgHeight - 10;
 	let yOffset = 100;
@@ -578,7 +592,7 @@ function getLines(ctx, text, maxWidth, color) {
 
 function displayPlayerHealth() {
 	if (!initialized) return;
-	if (player.mode == "creative") return;
+	if (player.mode != "survival") return;
 
 	if (player && player.hp > 0) {
 		for (let i = 0; i < 10; i++) {

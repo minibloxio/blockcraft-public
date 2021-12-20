@@ -150,14 +150,24 @@ var onKeyDown = function ( event ) {
     			if (msg[0] == "gamemode") {
     				if (["survival", "s"].indexOf(msg[1]) > -1) {
     					addChat({
-							text: "Gamemode changed to survival"
+							text: "Gamemode changed to survival mode"
 						});
 						player.mode = "survival";
     				} else if (["creative", "c"].indexOf(msg[1]) > -1) {
     					addChat({
-							text: "Gamemode changed to creative"
+							text: "Gamemode changed to creative mode"
 						});
 						player.mode = "creative";
+    				} else if (["spectator", "sp"].indexOf(msg[1]) > -1) {
+    					addChat({
+							text: "Gamemode changed to spectator mode"
+						});
+						player.mode = "spectator";
+    				} else if (["camera", "ca"].indexOf(msg[1]) > -1) {
+    					addChat({
+							text: "Gamemode changed to camera mode"
+						});
+						player.mode = "camera";
     				} else {
     					addChat({
 							text: "Error: Unrecognized gamemode",

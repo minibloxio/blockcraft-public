@@ -189,8 +189,9 @@ class Player {
 			return item;
 	}
 
-	updateHand() {
-		let item = this.getCurrItem();
+	updateHand(item) {
+		item = item || this.getCurrItem();
+		this.arm.visible = !(this.mode == "spectator" || this.mode == "camera");
 
 		this.moveHand(item);
 
@@ -487,7 +488,7 @@ class Player {
     }
 
 	mine() {
-		if (this.blocking)
+		if (this.blocking || this.mode == "spectator" || this.mode == "camera")
     		return;
 
     	this.miningDelayConstant = this.mode == "survival" ? 750 : 200;
@@ -663,7 +664,11 @@ class Player {
 
 		// Reset fly if in survival mode
 		this.fly = this.mode == "survival" ? false : this.fly;
-		this.clip = this.mode == "survival" ? true : this.clip;
+		this.clip = (this.mode == "survival" || this.mode == "creative") ? true : this.clip;
+		if (this.mode == "spectator") {
+			this.fly = true;
+			this.clip = false;
+		}
 
 		// Reduce velocity (friction)
 		var previousVelocity = this.velocity.clone();
