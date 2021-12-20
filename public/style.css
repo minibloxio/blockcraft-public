@@ -112,12 +112,8 @@ body {
 }
 
 #name-container {
-    position: absolute;
     text-align: center;
-    width: calc(40% + 40px);
-    left: 50vw;
     top: calc(62vh + 60px);
-    margin-left: -20vw;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 3;
 }
@@ -178,7 +174,7 @@ body {
     outline: none;
     cursor: pointer;
     height: 100%;
-    width: 24.9%;
+    width: 19.9%;
     transition: 0.3s;
 }
 
@@ -192,13 +188,17 @@ body {
   background-color: rgba(0, 0, 0, 0.7);
 }
 
-#nav {
+#container {
     position: absolute;
-    width: calc(40% + 40px);
-    height: 4vh;
+    width: 60%;
+    height: 80%;
+    min-width: 600px;
+    margin-left: -30%;
     left: 50vw;
-    top: 20%;
-    margin-left: -20vw;
+}
+
+#nav {
+    height: 4vh;
     text-align: left;
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
@@ -208,13 +208,8 @@ body {
 /* Style the tab content */
 .tabcontent {
     border-top: none;
-    position: absolute;
-    width: 40%;
-    left: 50vw;
-    height: 40vh;
-    top: 24vh;
-    margin-left: -20vw;
     text-align: left;
+    height: 40vh;
     color: white;
     background-color: rgba(0, 0, 0, 0.5);
     padding: 20px;

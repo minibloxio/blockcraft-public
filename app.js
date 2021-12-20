@@ -1,3 +1,7 @@
+// Server config
+const serverPort = process.env.PORT || 3001;
+
+
 // Initialize server variables
 const express = require('express');
 const app = express();
@@ -33,7 +37,6 @@ const SimplexNoise = require('simplex-noise'),
     simplex = new SimplexNoise(Math.random)
 
 // Listen to server port
-const serverPort = process.env.PORT || 3001;
 server.listen(serverPort, function () {
 	logger.info('Started an https server on port ' + serverPort);
 })
@@ -149,6 +152,7 @@ const world = new World({
 	blockOrder,
 	itemOrder,
 });
+const startTime = Date.now();
 var updatedBlocks = [];
 var newEntities = [];
 
@@ -174,36 +178,39 @@ fs.readFile(save_path, function (err, data) {
 // Server-client connection architecture
 io.on('connection', function(socket_) {
 	let socket = socket_;
-	players[socket.id] = {
-		id: socket.id,
-		name: "Player"+Math.floor(Math.random()*9999),
-		pos: {x: 0,y: 0,z: 0},
-		vel: {x: 0,y: 0,z: 0},
-		rot: {x: 0,y: 0,z: 0},
-		dir: {x: 0,y: 0,z: 0},
-		hp: 10,
-		dead: false,
-		toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 5, c: 1, class: "item"}, {v: 6, c: 1, class: "item"}, {v: 7, c: 64, class: "item"}],
-		walking: false,
-		punching: false,
-		currSlot: 0,
-		pickupDelay: Date.now(),
-		ping: [],
-		connected: false,
-	}
 
 	// Server info request
 	socket.on('serverInfoRequest', function (data) {
 		let info = {
 			ts: data,
 			numPlayers: Object.keys(players).length,
-			region: "na", // Change this to the actual region
+			region: "na", // Change this to the actual region,
+			uptime: Date.now() - startTime,
 		}
 		socket.emit('serverInfoResponse', info);
 	})
 
 	// Join request from the client
 	socket.on('join', function (data) {
+		// Set player object
+		players[socket.id] = {
+			id: socket.id,
+			name: "Player"+Math.floor(Math.random()*9999),
+			pos: {x: 0,y: 0,z: 0},
+			vel: {x: 0,y: 0,z: 0},
+			rot: {x: 0,y: 0,z: 0},
+			dir: {x: 0,y: 0,z: 0},
+			hp: 10,
+			dead: false,
+			toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 5, c: 1, class: "item"}, {v: 6, c: 1, class: "item"}, {v: 7, c: 64, class: "item"}],
+			walking: false,
+			punching: false,
+			currSlot: 0,
+			pickupDelay: Date.now(),
+			ping: [],
+			connected: false,
+		}
+
 		// Set name
 		if (data && data.name) {
 			players[socket.id].name = data.name;
@@ -464,7 +471,7 @@ io.on('connection', function(socket_) {
 	})
 
 	socket.on('disconnect', function () {
-		if (players[socket.id].connected) {
+		if (players[socket.id] && players[socket.id].connected) {
 			let text = players[socket.id].name + " has left the server";
 			logger.info(text)
 		}

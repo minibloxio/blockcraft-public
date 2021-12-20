@@ -71,97 +71,59 @@
 				<h1 id="title">BlockCraft</h1>
 				<div id="nav">
 					<button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
+					<button class="tablinks" onclick="changeTab(event, 'server-list')">Servers</button>
 					<button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
 					<button class="tablinks" onclick="changeTab(event, 'video-settings')">Video</button>
 					<button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
 				</div>
-			</div>
 
-			<div id="welcome" class="tabcontent">
-				<span>BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has  This project originally spawned as a Minecraft Classic clone but has expanded to include multiplayer PvP, crafting, shaders and much more!</span><br><br>
-				<span>BlockCraft is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way.</span><br><br>
-				<span>You can view my development journey <a href="https://victorwei.com/blog/blockcraft.pdf">here</a></span><br><br>
-				<span>This project is open source and the source code can be accessed through <a href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank">Github</a></span><br><br>
-				<span>You can view my other projects at: <a href="https://victorwei.com" target="_blank">victorwei.com</a></span><br><br>
-			</div>
+				<div id="welcome" class="tabcontent">
+					<span>BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has  This project originally spawned as a Minecraft Classic clone but has expanded to include multiplayer PvP, crafting, shaders and much more!</span><br><br>
+					<span>BlockCraft is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way.</span><br><br>
+					<span>You can view my development journey <a href="https://victorwei.com/blog/blockcraft.pdf">here</a></span><br><br>
+					<span>This project is open source and the source code can be accessed through <a href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank">Github</a></span><br><br>
+					<span>You can view my other projects at: <a href="https://victorwei.com" target="_blank">victorwei.com</a></span><br><br>
+				</div>
 
-			<div id="changelog" class="tabcontent" style="display: none;"></div>
+				<div id="server-list" class="tabcontent"></div>
 
-			<div id="video-settings" class="tabcontent" style="display: none;">
-				<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
-				<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px">
-				<br />
-				<br />
-				<span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
-				<input type="range" min="1" max="12" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px">
-				<br />
-				<br />
-				<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
-				<input type="range" min="0" max="10" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px">
-				<br />
-				<br />
-				<span id="statsValue" class="slider-text">Statistics: ON</span>
-				<input type="range" min="0" max="1" value="1" class="slider" id="statsSlider" style="position: relative; float: right; width: 40px; height: 20px">
-				<br />
-				<br />
-				<span id="shadowValue" class="slider-text">Shadow Effect: OFF</span>
-				<input type="range" min="0" max="1" value="0" class="slider" id="shadowSlider" style="position: relative; float: right; width: 40px; height: 20px">
-				<br />
-				<br />
-				<span id="cloudValue" class="slider-text">Clouds: ON</span>
-				<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px">
-				<br />
-				<br />
-				<span id="starsValue" class="slider-text">Stars: ON</span>
-				<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
-				<div id="reset-video">Reset to Default</div>
-			</div>
+				<div id="changelog" class="tabcontent" style="display: none;"></div>
 
-			<div id="keyboard-settings" class="tabcontent" style="display: none;">
-			</div>
+				<div id="video-settings" class="tabcontent" style="display: none;">
+					<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
+					<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
+					<span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
+					<input type="range" min="1" max="12" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
+					<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
+					<input type="range" min="0" max="10" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
+					<span id="statsValue" class="slider-text">Statistics: ON</span>
+					<input type="range" min="0" max="1" value="1" class="slider" id="statsSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
+					<span id="shadowValue" class="slider-text">Shadow Effect: OFF</span>
+					<input type="range" min="0" max="1" value="0" class="slider" id="shadowSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
+					<span id="cloudValue" class="slider-text">Clouds: ON</span>
+					<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
+					<span id="starsValue" class="slider-text">Stars: ON</span>
+					<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
+					<div id="reset-video">Reset to Default</div>
+				</div>
 
-			<div id ="name-container">
-				<input autocomplete="off" id="name-input" type="text" placeholder="Enter Username" maxlength="20">
-				<br />
-				<div id="start-button">
-					<div id="loading-bar">
-						Loading 0%
+				<div id="keyboard-settings" class="tabcontent" style="display: none;">
+				</div>
+
+				<div id ="name-container">
+					<input autocomplete="off" id="name-input" type="text" placeholder="Enter Username" maxlength="20">
+					<br />
+					<div id="start-button">
+						<div id="loading-bar">
+							Loading 0%
+						</div>
 					</div>
 				</div>
 			</div>
-
 		</div>
 
 		<input autocomplete="off" id="chat-input" type="text" placeholder="> Press Enter to Chat" maxlength="100">
 
-		<script type="x-shader/x-vertex" id="vertexshader">
-
-			varying vec2 vUv;
-
-			void main() {
-
-				vUv = uv;
-
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
-			}
-
-		</script>
-
-		<script type="x-shader/x-fragment" id="fragmentshader">
-
-			uniform sampler2D baseTexture;
-			uniform sampler2D bloomTexture;
-
-			varying vec2 vUv;
-
-			void main() {
-
-				gl_FragColor = ( texture2D( baseTexture, vUv ) + vec4( 1.0 ) * texture2D( bloomTexture, vUv ) );
-
-			}
-
-		</script>
 
 		<script>
 
@@ -485,7 +447,6 @@
 			let name = getCookie("Name");
 			if (name)
 				$("#name-input").val(name);
-
 
 		</script>
 	</body>

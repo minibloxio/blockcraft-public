@@ -32,7 +32,9 @@ for (let server of serverList) {
     servers[servers.length-1].emit('serverInfoRequest', Date.now());
 
     servers[servers.length-1].on('serverInfoResponse', function (data) {
-        console.log(data);
+        let serverHTML = $("<div class='server'>" + data.name + "</div>")
+        $("#server-list").append(serverHTML);
+
     })
 }
 
