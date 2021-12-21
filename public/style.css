@@ -181,11 +181,24 @@ a {
     text-align: center;
     line-height: 70px;
     overflow: visible;
-    white-space: nowrap
+    white-space: nowrap;
 }
 
 #continue-bar {
     width: 100%;
+}
+#ingame-bar {
+    overflow: hidden;
+}
+#disconnect-bar {
+    width: 30%;
+    background-color: red;
+    float:left;
+}
+#return-bar {
+    width: 70%;
+    
+    overflow: hidden;
 }
 
 /* WELCOME PAGE */

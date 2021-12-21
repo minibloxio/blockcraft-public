@@ -14,7 +14,7 @@ class ChunkManager {
 		this.chunkDelay = 0;
 	}
 
-	unloadChunks() { // OPTIMIZE
+	unloadChunks(all) { // OPTIMIZE
 		for (let id in this.currCells) {
 			let cell = id.split(",");
 			let cx = parseInt(cell[0]);
@@ -27,7 +27,7 @@ class ChunkManager {
 
 			let renderDist = this.renderDistance * 0.75;
 
-			if (distSquared > renderDist * renderDist) {
+			if (distSquared > renderDist * renderDist || all) { // Within unload distance or all
 				this.chunksToUnload.push({
 					x: cx,
 					z: cz,
@@ -39,6 +39,8 @@ class ChunkManager {
 	}
 
 	requestChunks() { // OPTIMIZE
+		if (!joined) return;
+
 		// Chunks to request
 		let {blockSize, cellSize} = world;
 		let step = 1;

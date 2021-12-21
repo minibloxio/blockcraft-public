@@ -1,12 +1,16 @@
 // Connection to server successful
 socket.on('connect', function () {
-	console.log("Connected successfully!");
-	init();
+	console.log("Connected successfully with id: " + socket.id);
 })
 
-socket.on('connect_error', function () {
-	console.error("Error connecting to server!");
+socket.io.on('reconnect_attempt', function () {
+	console.log("Attempting to reconnect...");
+})
+
+socket.io.on('reconnect_failed', function () {
+	console.log("Reconnection failed!");
 	socket.disconnect();
+	connectError();
 })
 
 // Disconnected from server
@@ -73,7 +77,7 @@ socket.on('init', function (data) {
 
 // Load textures
 socket.on('textureData', function (data) {
-	loadTextures(data);
+	if (loaded < maxLoaded) loadTextures(data);
 })
 
 // Update chunk

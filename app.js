@@ -178,6 +178,7 @@ fs.readFile(save_path, function (err, data) {
 // Server-client connection architecture
 io.on('connection', function(socket_) {
 	let socket = socket_;
+	console.log("connection");
 
 	// Server info request
 	socket.on('serverInfoRequest', function (data) {
@@ -298,14 +299,15 @@ io.on('connection', function(socket_) {
 
 	// Update player inventory
 	socket.on('updateInventory', function (data) {
-		if (!players[socket.id])
-			return;
+		if (!players[socket.id]) return;
 
 		players[socket.id].toolbar = data;
 	})
 
 	// Player interactivity
-	socket.on('respawn', function (data) {
+	socket.on('respawn', function () {
+		if (!players[socket.id]) return;
+
 		if (players[socket.id]) {
 			players[socket.id].hp = 10;
 			players[socket.id].dead = false;
@@ -314,6 +316,8 @@ io.on('connection', function(socket_) {
 
 	// Receive player punch event
 	socket.on('punchPlayer', function (data) {
+		if (!players[socket.id]) return;
+
 		if (players[data.id] && players[socket.id] && !players[socket.id].dead && players[data.id].mode == "survival") {
 			let dmg = 0.5;
 
@@ -338,7 +342,9 @@ io.on('connection', function(socket_) {
 
 	// Take player damage if in survival mode
 	socket.on('takeDamage', function (data) {
-		if (players[socket.id] && players[socket.id].mode == "survival") {
+		if (!players[socket.id]) return;
+
+		if (players[socket.id].mode == "survival") {
 			players[socket.id].hp -= data.dmg;
 			players[socket.id].dmgType = data.type;
 		}
@@ -346,6 +352,8 @@ io.on('connection', function(socket_) {
 
 	// Fire server-side arrow
 	socket.on('fireArrow', function (data) {
+		if (!players[socket.id]) return;
+
 		let {blockSize} = world;
 		players[socket.id].pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
 
@@ -378,6 +386,8 @@ io.on('connection', function(socket_) {
 
 	// World functionality
 	socket.on('setBlock', function (data) {
+		if (!players[socket.id]) return;
+
 		let {blockSize} = world;
 		// Update server world
 		players[socket.id].punching = true;
@@ -411,6 +421,8 @@ io.on('connection', function(socket_) {
 	})
 
 	socket.on('dropItem', function (data) {
+		if (!players[socket.id]) return;
+
 		let {blockSize} = world;
 		players[socket.id].pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
 		for (let t of players[socket.id].toolbar) {
