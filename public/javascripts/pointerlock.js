@@ -132,8 +132,12 @@ THREE.PointerLockControls = function ( camera ) {
 
 		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
 		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-		if (Math.abs(movementX) > 300) return;
-		if (Math.abs(movementY) > 300) return;
+
+		console.log(movementX, movementY)
+
+		// if (Math.abs(movementX) > 300) return;
+		// if (Math.abs(movementY) > 300) return;
+		
 
 		yawObject.rotation.y -= movementX * 0.00004 * player.sens;
 		pitchObject.rotation.x -= movementY * 0.00004 * player.sens;

@@ -67,6 +67,8 @@ a {
     transform: translateY(-50%);
 
     margin: 0 auto;
+
+    width: 80%;
     min-width: 600px;
     max-width: 1000px;
 }
@@ -123,7 +125,7 @@ a {
 }
 
 /* INPUT */
-#name-container {
+#input-container {
     text-align: center;
     top: calc(62vh + 60px);
     background-color: rgba(0, 0, 0, 0.5);
@@ -284,6 +286,15 @@ a {
     background: green; 
     cursor: pointer; 
 }
+
+.slider::-moz-range-thumb { 
+    -webkit-appearance: none; 
+    appearance: none;
+    width: 20px; 
+    height: 20px; 
+    background: green; 
+    cursor: pointer; 
+  }
 
 /* KEYBOARD SETTINGS */
 
