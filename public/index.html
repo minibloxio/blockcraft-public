@@ -71,72 +71,73 @@
 		<div id="blocker">
 			<div id="background-image"></div>
 
-			
-			<h1 id="title">BlockCraft</h1>
+			<div class="outer-container">
+				<div class="container">
+					<!-- Menu -->
+					<div id="menu" class="tab-container">
+						<div id="nav">
+							<button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
+							<button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
+						</div>
 
-			<div class="container">
-				<!-- Menu -->
-				<div id="menu">
-					<div id="nav">
-						<button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
-						<button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
+						<div id="welcome" class="tabcontent">
+							<!-- <h1 id="title">BlockCraft</h1> -->
+							<span>BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has  This project originally spawned as a Minecraft Classic clone but has expanded to include multiplayer PvP, crafting, shaders and much more!</span><br><br>
+							<span>BlockCraft is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way.</span><br><br>
+							<span>You can view my development journey <a href="https://victorwei.com/blog/blockcraft.pdf">here</a></span><br><br>
+							<span>This project is open source and the source code can be accessed through <a href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank">Github</a></span><br><br>
+							<span>You can view my other projects <a href="https://victorwei.com" target="_blank">here</a></span><br><br>
+						</div>
+
+						<div id="changelog" class="tabcontent" style="display: none;"></div>
 					</div>
 
-					<div id="welcome" class="tabcontent">
-						<span>BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has  This project originally spawned as a Minecraft Classic clone but has expanded to include multiplayer PvP, crafting, shaders and much more!</span><br><br>
-						<span>BlockCraft is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way.</span><br><br>
-						<span>You can view my development journey <a href="https://victorwei.com/blog/blockcraft.pdf">here</a></span><br><br>
-						<span>This project is open source and the source code can be accessed through <a href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank">Github</a></span><br><br>
-						<span>You can view my other projects <a href="https://victorwei.com" target="_blank">here</a></span><br><br>
+					<!-- Server select -->
+					<div id="server-select" class="tab-container"style="display:none">
+						<div id="nav">
+							<button class="tablinks" style="width: 100%;" onclick="changeTab(event, 'server-list')" id="server-button">Servers</button>
+						</div>
+		
+						<div id="server-list" class="tabcontent">
+							<div id="refresh-servers">Refresh</div>
+							
+							<div id="server-container"></div>
+						</div>
+		
+						<div id="changelog" class="tabcontent" style="display: none;"></div>
 					</div>
 
-					<div id="changelog" class="tabcontent" style="display: none;"></div>
+					<!-- Settings -->
+					<div id="settings" class="tab-container" style="display:none">
+						<div id="nav">
+							<button class="tablinks" onclick="changeTab(event, 'video-settings')" id="video-button">Video</button>
+							<button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
+						</div>
+
+						<div id="video-settings" class="tabcontent" style="display: none;">
+							<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
+							<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
+							<span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
+							<input type="range" min="1" max="12" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
+							<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
+							<input type="range" min="0" max="10" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
+							<span id="statsValue" class="slider-text">Statistics: OFF</span>
+							<input type="range" min="0" max="1" value="0" class="slider" id="statsSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
+							<span id="shadowValue" class="slider-text">Shadow Effect: OFF</span>
+							<input type="range" min="0" max="1" value="0" class="slider" id="shadowSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
+							<span id="cloudValue" class="slider-text">Clouds: ON</span>
+							<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
+							<span id="starsValue" class="slider-text">Stars: ON</span>
+							<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
+							<div id="reset-video">Reset to Default</div>
+						</div>
+
+						<div id="keyboard-settings" class="tabcontent" style="display: none;">
+						</div>
+					</div>
+					
+					
 				</div>
-
-				<!-- Server select -->
-				<div id="server-select" style="display:none">
-					<div id="nav">
-						<button class="tablinks" style="width: 100%;" onclick="changeTab(event, 'server-list')" id="server-button">Servers</button>
-					</div>
-	
-					<div id="server-list" class="tabcontent">
-						<div id="refresh-servers">Refresh</div>
-						
-						<div id="server-container"></div>
-					</div>
-	
-					<div id="changelog" class="tabcontent" style="display: none;"></div>
-				</div>
-
-				<!-- Settings -->
-				<div id="settings" style="display:none">
-					<div id="nav">
-						<button class="tablinks" onclick="changeTab(event, 'video-settings')" id="video-button">Video</button>
-						<button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
-					</div>
-
-					<div id="video-settings" class="tabcontent" style="display: none;">
-						<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
-						<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-						<span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
-						<input type="range" min="1" max="12" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-						<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
-						<input type="range" min="0" max="10" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-						<span id="statsValue" class="slider-text">Statistics: OFF</span>
-						<input type="range" min="0" max="1" value="0" class="slider" id="statsSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-						<span id="shadowValue" class="slider-text">Shadow Effect: OFF</span>
-						<input type="range" min="0" max="1" value="0" class="slider" id="shadowSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-						<span id="cloudValue" class="slider-text">Clouds: ON</span>
-						<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-						<span id="starsValue" class="slider-text">Stars: ON</span>
-						<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
-						<div id="reset-video">Reset to Default</div>
-					</div>
-
-					<div id="keyboard-settings" class="tabcontent" style="display: none;">
-					</div>
-				</div>
-				
 				<!-- User Input and Start Button -->
 				<div id ="name-container">
 					<input autocomplete="off" id="name-input" class="input" type="text" placeholder="Enter Username" maxlength="20">

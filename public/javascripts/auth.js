@@ -70,7 +70,7 @@ function refreshServers() {
             // Update server list
             let latency = Date.now()-data.ping;
             let serverHTML = $(`
-                <div class='server' data-link='${data.link}' onClick='clickServer(event)'>
+                <div class='server' data-link='${data.link}' onClick='clickServer(event)'  ondblclick='clickServer(event, true)'>
                     <p>Region: ${data.region}</p>
                     <p>Players: ${data.numPlayers}/20</p>
                     <p>Latency: ${latency}ms</p>
@@ -105,7 +105,7 @@ function setJoinButton(server) {
 }
 
 // Clicked on a server
-function clickServer(event) {
+function clickServer(event, doubleClick) {
     let server = $(event.target).closest(".server");
     let url = server.data("link");
     if (url in servers) {
@@ -122,6 +122,10 @@ function clickServer(event) {
         "background-color": "rgba(0,0,0,0.7)",
         "outline": "2px solid white",
     });
+
+    if (doubleClick) {
+        $("#start-button").click();
+    }
 }
 
 // Initialize server connection
@@ -168,6 +172,7 @@ $(document).ready(function () {
 
     // Enter direct connect input
     $("#direct-connect-input").keyup(function (event) {
+        console.log($("#direct-connect-input").val())
         if (event.keyCode == 13) nextState();
     })
 })
@@ -222,4 +227,8 @@ function nextState() {
         requestPointerLock();
     }
     
+}
+
+function prevState() {
+
 }

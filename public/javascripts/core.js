@@ -38,6 +38,7 @@ function init() {
     initStatistics(); // Add statistics to record
 	initRenderer(); // Finalize by adding the renderer
 	initPointerLock(); // Initialize pointer lock
+	initHUD(); // Initialize the HUD
 	
 	window.addEventListener( 'resize', onWindowResize, false ); // Add resize event
 

@@ -4,6 +4,11 @@ socket.on('connect', function () {
 	init();
 })
 
+socket.on('connect_error', function () {
+	console.error("Error connecting to server!");
+	socket.disconnect();
+})
+
 // Disconnected from server
 socket.on('disconnect', function (reason) {
 	console.log("Disconnected from server due to:", reason);

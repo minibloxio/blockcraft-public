@@ -1,9 +1,12 @@
+/* Document */
+
 html, body {
     width: 100%;
     height: 100%;
     margin: 0;
     padding: 0;
     user-select: none;
+    -webkit-user-select: none;
 }
 
 body {
@@ -12,20 +15,23 @@ body {
     overflow: hidden;
 }
 
+a {
+    color: white;
+}
+
+/* Fonts */
 @font-face {
     font-family: 'Minecraft-Regular';
     src: url('Minecraft-Regular.otf');
 }
 
-a {
-    color: white;
-}
 
 /* BlockCraft title */
 #title {
     font-family: "Minecraft-Regular";
     font-size: 100px;
     color: white;
+    margin: 0;
     margin-bottom: 20px;
 }
 
@@ -46,17 +52,74 @@ a {
     width: 100%;
     height: 100%;
     text-align: center;
+    vertical-align: middle;
     z-index: 3;
     font-family: "Minecraft-Regular";
     font-size: 20px;
 }
 
-/* Canvas HUD */
-#canvas-hud {
-    position: absolute;
-    z-index: 0;
-    padding: 0;
-    margin: 0;
+/* TAB CONTAINER */
+
+.outer-container {
+    
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+
+    margin: 0 auto;
+    min-width: 600px;
+    max-width: 1000px;
+}
+
+.container {
+    height: 100%;
+}
+
+.tab-container {
+    height: 60vh;
+    overflow-y: hidden;
+}
+
+/* NAV BAR */
+#nav {
+    height: 60px;
+    text-align: left;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-family: "Minecraft-Regular";
+}
+
+#blocker button:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+  
+#blocker button.active {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* NAVBAR CONTENT */
+
+.tabcontent {
+    height: 100%;
+    border-top: none;
+    text-align: left;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 40px;
+}
+
+.tablinks {
+    color: white;
+    font-size: 25px;
+    font-family : inherit;
+    background-color: rgba(0, 0, 0, 0);
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    height: 100%;
+    width: 49.9%;
+    transition: 0.3s;
 }
 
 /* INPUT */
@@ -75,7 +138,7 @@ a {
     outline: none;
     left: 10px;
     width: 100%;
-    height: 80px;
+    height: 70px;
     font-size: 30px;
     box-sizing:border-box;
     background-color: rgba(0, 0, 0, 0.5);
@@ -99,7 +162,7 @@ a {
     color: white;
     font-family : inherit;
     width: 100%;
-    height: 80px;
+    height: 70px;
     text-decoration: none;
     border: none;
     outline: none;
@@ -114,7 +177,7 @@ a {
     height: 100%;
     background-color: green;
     text-align: center;
-    line-height: 80px;
+    line-height: 70px;
     overflow: visible;
     white-space: nowrap
 }
@@ -123,66 +186,20 @@ a {
     width: 100%;
 }
 
-/* NAV BAR */
-
-#nav {
-    height: 60px;
-    text-align: left;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    font-family: "Minecraft-Regular";
-}
-
-#blocker button:hover {
-    background-color: rgba(0, 0, 0, 0.6);
-}
-  
-#blocker button.active {
-    background-color: rgba(0, 0, 0, 0.7);
-}
-
-/* NAVBAR CONTENT */
-
-.tabcontent {
-    border-top: none;
-    text-align: left;
-    height: 35vh;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 40px;
-}
-
-.tablinks {
-    color: white;
-    font-size: 25px;
-    font-family : inherit;
-    background-color: rgba(0, 0, 0, 0);
-    float: left;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    height: 100%;
-    width: 49.9%;
-    transition: 0.3s;
-}
-
-/* TAB CONTAINER */
-
-.container {
-    position: absolute;
-    width: 60%;
-    height: 40vh;
-    min-width: 600px;
-    max-width: 1000px;
-    margin-left: -30%;
-    left: 50vw;
-}
-
 /* WELCOME PAGE */
 
-/* #welcome {
-    padding: 20px;
-} */
+#welcome {
+    overflow-y: scroll;
+    height: 100%;
+}
+
+
+/* CHANGELOG */
+
+#changelog {
+    overflow-y: scroll;
+    height: 100%;
+}
 
 /* SERVER LIST */
 
@@ -221,11 +238,7 @@ a {
     background-color: rgba(0, 0, 0, 0.7);
 }
 
-/* CHANGELOG */
 
-#changelog {
-    overflow-y: scroll;
-}
 
 /* VIDEO SETTINGS */
 
@@ -347,4 +360,12 @@ a {
 
 #chat-input::placeholder {
     color: white;
+}
+
+/* Canvas HUD */
+#canvas-hud {
+    position: absolute;
+    z-index: 0;
+    padding: 0;
+    margin: 0;
 }

@@ -126,9 +126,6 @@ THREE.PointerLockControls = function ( camera ) {
 
 	var PI_2 = Math.PI / 2;
 
-	var prevMouseX = 0;
-	var prevMouseY = 0;
-
 	var onMouseMove = function ( event ) {
 
 		if ( scope.enabled === false ) return;
@@ -144,6 +141,10 @@ THREE.PointerLockControls = function ( camera ) {
 		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 
 	};
+
+	// setInterval(function () {
+	// 	yawObject.rotation.y -= 0.005;
+	// }, 16);
 
 	this.dispose = function () {
 

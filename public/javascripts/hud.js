@@ -435,7 +435,7 @@ function drawItem(xPos, yPos, entity) {
 
 // Crosshair
 function displayCrosshair() {
-	if (player.mode == "camera") return;
+	if (!initialized || player.mode == "camera") return;
 
 	// Draw crosshair
 	ctx.fillRect(canvas.width/2-crosshairWidth/2, canvas.height/2-crosshairSize/2, crosshairWidth, crosshairSize)
@@ -712,12 +712,9 @@ function displayPlayerTab() {
 	}
 }
 
-function drawPlayerTabHealth() {
-
-}
-
 function updateHUD() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	if (!initialized) return;
 	
 	displayCrosshair();
 	displayPlayerHealth();
@@ -728,10 +725,14 @@ function updateHUD() {
 	displayPlayerTab();
 }
 
-setInterval(function () {
-	if (initialized)
-		updateHUD();
-}, 40);
+let hudInterval; // Used to clear the HUD interval
+function initHUD() {
+	hudInterval = setInterval(updateHUD, 1000/60);
+}
+
+function stopHUD() {
+	clearInterval(hudInterval);
+}
 
 window.onresize = function(event) {
     resize();
