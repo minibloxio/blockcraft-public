@@ -1,9 +1,5 @@
 // Three.js
 let scene, renderer, world, chunkManager, stage, sky, stats, composer, colorShader, player, players;
-let loaded = 0;
-let loadedAnimate = new Ola(0);
-let maxLoaded = 5;
-let maxChunks = 5; // Chunks need to be loaded before pointerlock can be enabled
 let tick = new Ola(0);
 
 // Stats
@@ -146,7 +142,7 @@ function animate() {
 	updateMenu(); // Update the menu
 
 	// Player update
-	if (player.hp > 0 && initialized && joined) {
+	if (player.hp > 0 && initialized && joined && isState("inGame")) {
 		player.update(delta, world);
 	}
 

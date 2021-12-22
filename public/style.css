@@ -197,8 +197,10 @@ a {
 }
 #return-bar {
     width: 70%;
-    
     overflow: hidden;
+}
+#disconnecting-bar {
+    background-color: orange;
 }
 
 /* WELCOME PAGE */

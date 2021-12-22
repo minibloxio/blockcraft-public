@@ -83,9 +83,6 @@ class World {
     for (let i = 0; i < world.buildHeight/this.cellSize+1; i++) {
       let id = `${chunk.x},${i},${chunk.z}`
 
-      //delete this.cells[id];
-      //let object = scene.getObjectByName(id);
-      //if (object) {
       if (cellIdToMesh[id]) {
         cellIdToMesh[id][0].visible = false;
         cellIdToMesh[id][1].visible = false;
@@ -99,10 +96,10 @@ class World {
           cellIdToMesh[id][1].geometry.dispose();
           cellIdToMesh[id][1].material.dispose();
           scene.remove(cellIdToMesh[id][1]);
+
+          delete cellIdToMesh[id];
         }
       }
-      
-      //}
     }
   }
 

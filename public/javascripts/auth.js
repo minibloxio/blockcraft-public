@@ -5,9 +5,8 @@
 
 */
 
-
 // Setup
-let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Server Select, 2: Connecting to Server, 3: Loading Game, 4: Loading Chunks, 5: In Game)
+let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Server Select, 2: Connecting to Server, 3: Loading Game, 4: Loading Chunks, 5: In Game, 6: Disconnecting)
 let states = {
     "start": 0,
     "serverSelect": 1,
@@ -15,6 +14,7 @@ let states = {
     "loading": 3,
     "loadingChunks": 4,
     "inGame": 5,
+    "disconnecting": 6,
 };
 function isState(check) {return state == states[check];}
 
@@ -24,10 +24,18 @@ let socket = io({
     reconnectionAttempts: 2
 });
 
+let loaded = 0;
+let loadedAnimate = new Ola(0);
+let maxLoaded = 5;
+let maxChunks = 10; // Chunks need to be loaded before pointerlock can be enabled
+
 let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com"] // Request this from the auth server
 let servers = {};
 let currentServer = undefined;
 let joined = false;
+let disconnected = 0; // Disconnection progress
+let disconnectedAnimate = new Ola(0); // Disconnection progress
+let maxDisconnected = 5;
 
 function refreshServers() {
     // Disconnect servers
@@ -123,19 +131,24 @@ function clickServer(event, doubleClick) {
         currentServer = servers[url];
     }
 
+    // Outline selected server
     $("#server-container").children().css({
         "background-color": "rgba(0,0,0,0.5)",
         "outline": "none",
     });
-
     server.css({
         "background-color": "rgba(0,0,0,0.7)",
         "outline": "2px solid white",
     });
 
+    // Remove direct connect cookie
     $("#direct-connect-input").val('');
     deleteCookie('directConnect');
+    
+    // Set join button
+    setJoinButton(currentServer.info);
 
+    // Auto join server
     if (doubleClick) {
         $("#start-button").click();
     }
@@ -185,17 +198,18 @@ function joinServer() {
 
 // Disconnect server
 function disconnectServer() {
-    if (state != 5) return;
+    if (!isState("inGame")) return;
 
     joined = false;
-
-    console.log("Disconnecting from server...");
     currentServer = undefined;
-    prevState();
+    maxDisconnected = Object.keys(chunkManager.currChunks).length;
+    disconnectedAnimate = new Ola(0);
     socket.disconnect();
     
-    // Unload all chunks
-    chunkManager.unloadChunks(true);
+    console.log("Disconnecting from server... (Cells to unload: " + maxDisconnected + ")");
+
+    // Remove all chunks
+    world.cells = {};
 
     // Remove all players
     for (let id in players) {
@@ -213,6 +227,8 @@ function disconnectServer() {
 
     // Reset chat
 	chat = JSON.parse(chatInit);
+
+    //prevState(); // Go back to server select
 }
 
 
@@ -278,13 +294,13 @@ function nextState(e) {
         state += 1;
     } else if (isState("loading") && loaded > maxLoaded) { // Loading Game -> Loading Chunks
         console.log("Loading chunks...")
-        loadedAnimate = new Ola(Object.keys(chunkManager.currCells).length);
+        loadedAnimate = new Ola(Object.keys(chunkManager.currChunks).length);
         state += 1;
-    } else if (isState("loadingChunks") && Object.keys(chunkManager.currCells).length >= maxChunks) { // Loading Chunks -> In Game
+    } else if (isState("loadingChunks") && Object.keys(chunkManager.currChunks).length >= maxChunks) { // Loading Chunks -> In Game
         console.log("Requesting pointer lock");
         requestPointerLock();
 
-        $(".menu-button").hide()
+        $(".menu-button").hide();
         $("#ingame-bar").show();
         state += 1;
     } else if (isState("inGame")) { // In Game
@@ -296,10 +312,16 @@ function nextState(e) {
 
             if (disconnectButton) { // Disconnect from server
                 disconnectServer();
+                $(".menu-button").hide();
+                $("#disconnecting-bar").show();
+
+                state += 1;
             } else { // Return to game
                 requestPointerLock();
             }
         }
+    } else if (isState("disconnecting")) { // Disconnecting from server
+        console.log("Bruh");
     }
     
 }
@@ -309,11 +331,11 @@ function prevState() {
         showServerSelect();
 
         state -= 1; 
-    } else if (isState("inGame")) { // Go back to server select menu
+    } else if (isState("disconnecting")) { // Go back to server select menu
         showServerSelect();
         
         loaded -= 1;
-        state -= 4; 
+        state -= 5; 
         initialized = false;
     }
 }
@@ -363,19 +385,10 @@ function showSettings() {
 function updateMenu() {
     
     // Animate menu
-	if (initialized && isState("inGame")) { // In game
-		$("#loading-bar").text("Return to game");
-		$("#loading-bar").width(100+"%");
-	} else if (isState("loadingChunks")) { // Loading chunks
-		let chunksLoaded = Object.keys(chunkManager.currCells).length;
-		loadedAnimate.value = chunksLoaded;
-		$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxChunks)/maxChunks)+"%");
-		$("#loading-bar").text("Chunks Loaded (" + chunksLoaded + "/" + maxChunks + ")");
+    if (isState("serverSelect")) { // Server select
 
-		if (chunksLoaded >= maxChunks) {
-			nextState();
-		}
-	} else if (isState("loading")) { // Loading game
+    } else if (isState("loading")) { // Loading game
+
         // Update loading progress
         if (loadedAnimate.value >= maxLoaded) {
             $("#loading-bar").text("Spawn")
@@ -392,7 +405,31 @@ function updateMenu() {
         // Set loading progress
 		loadedAnimate.value = loaded;
 		$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxLoaded)/maxLoaded)+"%")
-    } else if (isState("serverSelect")) { // Server select
 
+    } else if (isState("loadingChunks")) { // Loading chunks
+
+		let chunksLoaded = Object.keys(chunkManager.currChunks).length;
+		loadedAnimate.value = chunksLoaded;
+		$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxChunks)/maxChunks)+"%");
+		$("#loading-bar").text("Chunks Loaded (" + chunksLoaded + "/" + maxChunks + ")");
+
+		if (chunksLoaded >= maxChunks) {
+			nextState();
+		}
+	} else if (initialized && isState("inGame")) { // In game
+
+		$("#loading-bar").text("Return to game");
+		$("#loading-bar").width(100+"%");
+
+	} else if (isState("disconnecting")) { // Disconnecting
+
+        disconnectedAnimate.value = maxDisconnected - chunkManager.chunksToUnload.length;
+        let text = Math.min(100, round(disconnectedAnimate.value/maxDisconnected*100, 0));
+        $("#disconnecting-bar").text("Disconnecting " + text + "%");
+        $("#disconnecting-bar").width(100*(Math.min(disconnectedAnimate.value, maxDisconnected)/maxDisconnected)+"%");
+        
+        if (disconnectedAnimate.value >= maxDisconnected) {
+            prevState();
+        }
     }
 }

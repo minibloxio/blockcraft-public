@@ -1,7 +1,7 @@
 class ChunkManager {
 	constructor () {
 		// Chunk loading
-		this.currCells = {};
+		this.currChunks = {};
 
 		this.chunksToRequest = [];
 		this.chunksToLoad = [];
@@ -14,35 +14,11 @@ class ChunkManager {
 		this.chunkDelay = 0;
 	}
 
-	unloadChunks(all) { // OPTIMIZE
-		for (let id in this.currCells) {
-			let cell = id.split(",");
-			let cx = parseInt(cell[0]);
-			let cz = parseInt(cell[1]);
-
-			let xDist = this.cellPos.x - cx;
-			let zDist = this.cellPos.z - cz;
-
-			let distSquared = xDist * xDist + zDist * zDist
-
-			let renderDist = this.renderDistance * 0.75;
-
-			if (distSquared > renderDist * renderDist || all) { // Within unload distance or all
-				this.chunksToUnload.push({
-					x: cx,
-					z: cz,
-				})
-
-				delete this.currCells[id];
-			}
-		}
-	}
-
 	requestChunks() { // OPTIMIZE
-		if (!joined) return;
+		if (!joined || isState("disconnecting")) return;
 
 		// Chunks to request
-		let {blockSize, cellSize} = world;
+		let {cellSize} = world;
 		let step = 1;
 		let x = 0;
 		let z = 0;
@@ -69,7 +45,7 @@ class ChunkManager {
 					requests++;
 				} else {
 					if (cellIdToMesh[cellId]) {
-						this.currCells[`${cellX},${cellZ}`] = 1;
+						this.currChunks[`${cellX},${cellZ}`] = 1;
 						
 						cellIdToMesh[cellId][0].visible = true;
 						cellIdToMesh[cellId][1].visible = true;
@@ -116,9 +92,24 @@ class ChunkManager {
 	                break;
 	        }
 	    }
+
+		// Request chunks based on loading rate
+		let requestedChunks = [];
+		for (let chunk of this.chunksToRequest) {
+			if (chunk) {
+				world.generateCell(chunk.x, chunk.y, chunk.z)
+				requestedChunks.push(chunk);
+			}
+		}
+
+		if (requestedChunks.length > 0) {
+			socket.emit('requestChunk', requestedChunks) // Call server to load this chunk
+		}
 	}
 
 	processChunks(e) {
+		if (!joined || isState("disconnecting")) return;
+
 		let newCells = {};
 
 		for (let i = 0; i < e.data.length; i++) {
@@ -145,32 +136,9 @@ class ChunkManager {
 		}
 	}
 
-	update(player) {
-		if (Date.now()-this.chunkTick < this.chunkDelay)
-			return;
-
+	loadChunks() {
 		let {cellSize} = world;
 
-		// Update chunks
-		this.cellPos = world.computeCellFromPlayer(player.position.x, player.position.y, player.position.z);
-		this.chunkTick = Date.now();
-
-		// Find chunks to request
-		this.requestChunks();
-
-		// Request chunks based on loading rate
-		let requestedChunks = [];
-		for (let chunk of this.chunksToRequest) {
-			if (chunk) {
-				world.generateCell(chunk.x, chunk.y, chunk.z)
-				requestedChunks.push(chunk);
-			}
-		}
-
-		if (requestedChunks.length > 0) {
-			socket.emit('requestChunk', requestedChunks) // Call server to load this chunk
-		}
-			
 		// Load chunks based on loading rate
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToLoad[i];
@@ -187,13 +155,15 @@ class ChunkManager {
 				// }
 				
 				if (canBeLoaded) {
-					this.currCells[`${chunk.x},${chunk.z}`] = 1;
+					this.currChunks[`${chunk.x},${chunk.z}`] = 1;
 					updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
 					this.chunksToLoad.splice(i, 1);
 				}
 			}
 		}
+	}
 
+	renderChunks() {
 		// Render chunks based on render rate
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToRender[i];
@@ -202,17 +172,63 @@ class ChunkManager {
 				this.chunksToRender.splice(i, 1);
 			}	
 		}
+	}
 
-		// Chunks to unload
-		this.unloadChunks();
+	unloadChunks(all) { // OPTIMIZE
+		if (all) { // Completely unload all chunks
+			this.chunksToRequest = [];
+			this.chunksToLoad = [];
+			this.chunksToRender = [];
+		}
+
+		// Loop through current cells to determine which chunks to unload
+		for (let id in this.currChunks) {
+			let cell = id.split(",");
+			let cx = parseInt(cell[0]);
+			let cz = parseInt(cell[1]);
+
+			let xDist = this.cellPos.x - cx;
+			let zDist = this.cellPos.z - cz;
+
+			let distSquared = xDist * xDist + zDist * zDist
+
+			let renderDist = this.renderDistance * 0.75;
+
+			if (distSquared > renderDist * renderDist || all) { // Within unload distance or all
+				this.chunksToUnload.push({
+					x: cx,
+					z: cz,
+				})
+
+				delete this.currChunks[id];
+			}
+		}
 
 		// Unload chunks based on loading rate
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToUnload[i];
 			if (chunk) {
-				world.deleteCell(chunk, false);
+				world.deleteCell(chunk, all);
 				this.chunksToUnload.splice(i, 1);
 			}
+		}
+	}
+
+	update(player) {
+		if (Date.now()-this.chunkTick < this.chunkDelay)
+			return;
+
+		// Update chunks
+		this.cellPos = world.computeCellFromPlayer(player.position.x, player.position.y, player.position.z);
+		this.chunkTick = Date.now();
+
+		if (!isState("disconnecting")) {
+			this.requestChunks(); // Request chunks
+			this.loadChunks(); // Load chunks
+			this.renderChunks(); // Render chunks
+			this.unloadChunks(); // Unload chunks
+		} else {
+			this.unloadChunks(true);
 		}
 
 		this.chunksToRequest = [];
