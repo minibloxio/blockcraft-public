@@ -2,7 +2,7 @@
 let scene, renderer, world, chunkManager, stage, sky, stats, composer, colorShader, player, players;
 let loaded = 0;
 let loadedAnimate = new Ola(0);
-let maxLoaded = 6;
+let maxLoaded = 5;
 let maxChunks = 5; // Chunks need to be loaded before pointerlock can be enabled
 let tick = new Ola(0);
 
@@ -41,7 +41,6 @@ function init() {
 	
 	window.addEventListener( 'resize', onWindowResize, false ); // Add resize event
 
-	loaded += 1; // Increase loading stage
 	console.log('Game initialized in ' + (Date.now() - t) + 'ms')
 	
 	animate(); // Animate
@@ -147,7 +146,7 @@ function animate() {
 	updateMenu(); // Update the menu
 
 	// Player update
-	if (player.hp > 0 && initialized && state == 4) {
+	if (player.hp > 0 && initialized && joined) {
 		player.update(delta, world);
 	}
 

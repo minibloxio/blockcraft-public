@@ -1,6 +1,9 @@
 // Connection to server successful
 socket.on('connect', function () {
 	console.log("Connected successfully with id: " + socket.id);
+	
+	showSettings();
+    state += 1;
 })
 
 // Reconnection attempt

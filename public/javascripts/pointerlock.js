@@ -66,7 +66,7 @@ function initPointerLock() {
 		var pointerlockerror = function ( event ) {
 		};
 
-		// Hook pointer lock state change events
+		// Hook pointer lock change events
 		document.addEventListener( 'pointerlockchange', pointerlockchange, false );
 		document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
 		document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );

@@ -7,7 +7,17 @@
 
 
 // Setup
-let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Server Select, 2: Loading Game, 3: Loading Chunks, 4: In Game)
+let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Server Select, 2: Connecting to Server, 3: Loading Game, 4: Loading Chunks, 5: In Game)
+let states = {
+    "start": 0,
+    "serverSelect": 1,
+    "connecting": 2,
+    "loading": 3,
+    "loadingChunks": 4,
+    "inGame": 5,
+};
+function isState(check) {return state == states[check];}
+
 let socket = io({
 	autoConnect: false,
 	forceNew: true,
@@ -81,7 +91,7 @@ function refreshServers() {
             `)
 
             // Check if it's the first server
-            if (!currentServer) {
+            if (!currentServer && !$("#direct-connect-input").val().length) {
                 currentServer = data;
 
                 setJoinButton(data);
@@ -99,7 +109,7 @@ function refreshServers() {
 
 // Set join button
 function setJoinButton(server) {
-    if (state == 1 && !$("#direct-connect-input").val().length) {
+    if (isState("serverSelect") && !$("#direct-connect-input").val().length) {
         $("#continue-bar").text(`Join server (${server.region})`);
         $("#continue-bar").css({"background-color": "green"});
     }
@@ -112,7 +122,6 @@ function clickServer(event, doubleClick) {
     if (url in servers) {
         currentServer = servers[url];
     }
-    setJoinButton(currentServer.info);
 
     $("#server-container").children().css({
         "background-color": "rgba(0,0,0,0.5)",
@@ -123,6 +132,9 @@ function clickServer(event, doubleClick) {
         "background-color": "rgba(0,0,0,0.7)",
         "outline": "2px solid white",
     });
+
+    $("#direct-connect-input").val('');
+    deleteCookie('directConnect');
 
     if (doubleClick) {
         $("#start-button").click();
@@ -143,7 +155,18 @@ function connect(url) {
 // Error connecting to server
 function connectError() {
 	console.error("Error connecting to server!");
-    prevState();
+    $("#direct-connect-input").val('');
+    deleteCookie('directConnect');
+    
+    $("#continue-bar").text("Connection failed");
+    $("#continue-bar").css({"background-color": "red"});
+
+    setTimeout(function () {
+        $("#continue-bar").text(`Join server (${currentServer.region})`);
+        $("#continue-bar").css({"background-color": "green"});
+
+        state -= 1;
+    }, 1000);
 }
 
 // Join server
@@ -162,7 +185,8 @@ function joinServer() {
 
 // Disconnect server
 function disconnectServer() {
-    if (state != 4) return;
+    if (state != 5) return;
+
     joined = false;
 
     console.log("Disconnecting from server...");
@@ -189,7 +213,7 @@ function disconnectServer() {
 }
 
 
-// Menu Progression Logic
+// Menu progression logic
 $(document).ready(function () {
     // Initialize game
     init();
@@ -222,19 +246,20 @@ $(document).ready(function () {
             $("#continue-bar").text(`Direct Connect`);
             $("#continue-bar").css({"background-color": "green"});
         } else if (currentServer) {
-            $("#continue-bar").text(`Join server (${currentServer.region})`)
+            $("#continue-bar").text(`Join server (${currentServer.region})`);
+            $("#continue-bar").css({"background-color": "green"});
         }
         
     })
 })
 
-// Next menu state
+// Menu progression states
 function nextState(e) {
-    if (state == 0) { // Start Menu -> Server Select
+    if (isState("start")) { // Start Menu -> Server Select
         showServerSelect();
 
         state += 1;
-    } else if (state == 1 && currentServer) { // Server Select -> Loading Game
+    } else if (isState("serverSelect") && (currentServer || $("#direct-connect-input").val())) { // Server Select -> Connecting to Server
         // Direct connection
         let directConnect = $("#direct-connect-input").val();
         if (directConnect) {  
@@ -243,21 +268,23 @@ function nextState(e) {
             connect(currentServer.link);
         }
 
-        showSettings();
+        $("#continue-bar").text(`Connecting to server...`);
+        $("#continue-bar").css({"background-color": "orange"});
 
+        // Wait for connection to server
         state += 1;
-    } else if (state == 2 && loaded > maxLoaded) { // Loading Game -> Loading Chunks
+    } else if (isState("loading") && loaded > maxLoaded) { // Loading Game -> Loading Chunks
         console.log("Loading chunks...")
         loadedAnimate = new Ola(Object.keys(chunkManager.currCells).length);
         state += 1;
-    } else if (state == 3 && Object.keys(chunkManager.currCells).length >= maxChunks) { // Loading Chunks -> In Game
+    } else if (isState("loadingChunks") && Object.keys(chunkManager.currCells).length >= maxChunks) { // Loading Chunks -> In Game
         console.log("Requesting pointer lock");
         requestPointerLock();
 
         $(".menu-button").hide()
         $("#ingame-bar").show();
         state += 1;
-    } else if (state == 4) { // In Game
+    } else if (isState("inGame")) { // In Game
         
         if (e) {
             let x = e.pageX;
@@ -275,15 +302,15 @@ function nextState(e) {
 }
 
 function prevState() {
-    if (state == 2) { // Go back to server select menu
+    if (isState("loading")) { // Go back to server select menu
         showServerSelect();
 
         state -= 1; 
-    } else if (state == 4) { // Go back to server select menu
+    } else if (isState("inGame")) { // Go back to server select menu
         showServerSelect();
         
         loaded -= 1;
-        state -= 3; 
+        state -= 4; 
         initialized = false;
     }
 }
@@ -333,10 +360,10 @@ function showSettings() {
 function updateMenu() {
     
     // Animate menu
-	if (initialized && state == 4) { // In game
+	if (initialized && isState("inGame")) { // In game
 		$("#loading-bar").text("Return to game");
 		$("#loading-bar").width(100+"%");
-	} else if (state == 3) { // Loading chunks
+	} else if (isState("loadingChunks")) { // Loading chunks
 		let chunksLoaded = Object.keys(chunkManager.currCells).length;
 		loadedAnimate.value = chunksLoaded;
 		$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxChunks)/maxChunks)+"%");
@@ -345,7 +372,7 @@ function updateMenu() {
 		if (chunksLoaded >= maxChunks) {
 			nextState();
 		}
-	} else if (state == 2) { // Loading game
+	} else if (isState("loading")) { // Loading game
         // Update loading progress
         if (loadedAnimate.value >= maxLoaded) {
             $("#loading-bar").text("Spawn")
@@ -362,7 +389,7 @@ function updateMenu() {
         // Set loading progress
 		loadedAnimate.value = loaded;
 		$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxLoaded)/maxLoaded)+"%")
-    } else if (state == 1) {
+    } else if (isState("serverSelect")) { // Server select
 
     }
 }
