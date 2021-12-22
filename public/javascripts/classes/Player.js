@@ -117,10 +117,7 @@ class Player {
 		this.hp = 10;
 
 		// Hand
-		if (!initialized) {
-			this.addArm();
-			console.log("Add armr")
-		}
+		if (!initialized) this.addArm();
 		
 		// Select box wireframe
 		var select_box = new THREE.BoxGeometry(blockSize+0.1, blockSize+0.1, blockSize+0.1);

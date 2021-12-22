@@ -166,15 +166,19 @@ function disconnectServer() {
     joined = false;
 
     console.log("Disconnecting from server...");
+    currentServer = undefined;
     prevState();
     socket.disconnect();
+    
+    // Unload all chunks
+    chunkManager.unloadChunks(true);
 
-    chunkManager.unloadChunks(true); // Unload all chunks
     // Remove all players
     for (let id in players) {
         scene.remove(players[id].entity);
 	    delete players[id];
     }
+
     // Remove all entities
     for (let id in world.entities) {
         world.entities[id].mesh.geometry.dispose();
@@ -213,10 +217,13 @@ $(document).ready(function () {
         }
 
         let val = $("#direct-connect-input").val();
+        setCookie("directConnect", val, 365);
         if (val) {
             $("#continue-bar").text(`Direct Connect`);
             $("#continue-bar").css({"background-color": "green"});
-        } else if (currentServer) $("#continue-bar").text(`Join server (${currentServer.region})`)
+        } else if (currentServer) {
+            $("#continue-bar").text(`Join server (${currentServer.region})`)
+        }
         
     })
 })
@@ -224,18 +231,7 @@ $(document).ready(function () {
 // Next menu state
 function nextState(e) {
     if (state == 0) { // Start Menu -> Server Select
-        refreshServers();
-        
-        $(".input").hide();
-        $("#direct-connect-input").show();
-        if ($("#direct-connect-input").val()) $("#direct-connect-input").focus();
-
-        $("#continue-bar").text("Finding Server...");
-        $("#continue-bar").css({"background-color": "orange"});
-
-        $("#menu").hide();
-        $("#server-select").show();
-        $("#server-button")[0].click();
+        showServerSelect();
 
         state += 1;
     } else if (state == 1 && currentServer) { // Server Select -> Loading Game
@@ -247,15 +243,7 @@ function nextState(e) {
             connect(currentServer.link);
         }
 
-        $(".menu-button").hide();
-        $("#loading-bar").show();
-
-        $(".input").hide();
-        $("#name-input").show();
-
-        $("#server-select").hide();
-        $("#settings").show();
-        $("#video-button")[0].click();
+        showSettings();
 
         state += 1;
     } else if (state == 2 && loaded > maxLoaded) { // Loading Game -> Loading Chunks
@@ -287,56 +275,57 @@ function nextState(e) {
 }
 
 function prevState() {
-    if (state == 2) {
-        refreshServers();
-        
-        $(".input").hide();
-        $("#direct-connect-input").show();
-        $("#direct-connect-input").val('');
+    if (state == 2) { // Go back to server select menu
+        showServerSelect();
 
-        
-        $(".menu-button").hide();
-        
-        $("#continue-bar").text("Finding Server...");
-        $("#continue-bar").css({"background-color": "orange"});
-        $("#continue-bar").show();
-
-
-        $("#settings").hide();
-        $("#server-select").show();
-        $("#server-button")[0].click();
-
-        state -= 1; // Go back to server select menu
-    } else if (state == 4) {
-        refreshServers();
-
-        $(".input").hide();
-        $("#direct-connect-input").show();
-        $("#direct-connect-input").val('');
-
-        $(".menu-button").hide()
-        
-        $("#continue-bar").text("Finding Server...");
-        $("#continue-bar").css({"background-color": "orange"});
-        $("#continue-bar").show();
-
-
-        $("#settings").hide();
-        $("#server-select").show();
-        $("#server-button")[0].click();
-
-        
-        $("#background-image").show();
+        state -= 1; 
+    } else if (state == 4) { // Go back to server select menu
+        showServerSelect();
         
         loaded -= 1;
-        state -= 3; // Go back to server select menu
+        state -= 3; 
         initialized = false;
-        
     }
 }
 
-function toServerSelect() {
+// Show server select page
+function showServerSelect() {
+    refreshServers();
+        
+    $(".input").hide(); // Hide input fields
+    $(".menu-button").hide(); // Hide menu buttons
+    $(".tab-container").hide(); // Hide tab containers
+    
+    let directConnect = getCookie("directConnect");
+    if (directConnect) {
+        $("#direct-connect-input").val(directConnect).focus();
+        $("#continue-bar").text(`Direct Connect`);
+        $("#continue-bar").css({"background-color": "green"});
+    } else {
+        $("#continue-bar").text("Finding Servers...");
+        $("#continue-bar").css({"background-color": "orange"});
+    }
 
+    $("#direct-connect-input").show();
+    $("#continue-bar").show();
+
+    $("#server-select").show();
+    $("#server-button")[0].click();
+
+    $("#background-image").show();
+}
+
+// Show settings page
+function showSettings() {
+    $(".menu-button").hide();
+    $("#loading-bar").show();
+
+    $(".input").hide();
+    $("#name-input").show();
+
+    $(".tab-container").hide();
+    $("#settings").show();
+    $("#video-button")[0].click();
 }
 
 

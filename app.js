@@ -444,7 +444,7 @@ io.on('connection', function(socket_) {
 		let receivedChunks = [];
 		for (let chunk of data) {
 			if (chunk) {
-				let t = Date.now();
+				//let t = Date.now();
 
 				world.generateCell(chunk.x, chunk.y, chunk.z);
 				receivedChunks.push({
@@ -452,7 +452,7 @@ io.on('connection', function(socket_) {
 					cell: world.encodeCell(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize)
 				})
 
-				console.log("Generated chunk in " + (Date.now()-t) + "ms");
+				//console.log("Generated chunk in " + (Date.now()-t) + "ms");
 			}
 		}
 		socket.emit('receiveChunk', receivedChunks);
