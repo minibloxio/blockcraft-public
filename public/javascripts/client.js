@@ -3,10 +3,12 @@ socket.on('connect', function () {
 	console.log("Connected successfully with id: " + socket.id);
 })
 
+// Reconnection attempt
 socket.io.on('reconnect_attempt', function () {
 	console.log("Attempting to reconnect...");
 })
 
+// Reconnection to server unsuccessful
 socket.io.on('reconnect_failed', function () {
 	console.log("Reconnection failed!");
 	socket.disconnect();
@@ -20,16 +22,15 @@ socket.on('disconnect', function (reason) {
 
 // Initialize client
 let initialized = false;
-socket.on('init', function (data) {
+socket.on('joinResponse', function (data) {
 	// Check if already initialized
-	if (initialized)
-		location.reload(true);
+	if (initialized) location.reload(true);
 
 	// Receive common world attritutes
 	Object.assign(world, data.world)
 
 	// Initalize player
-	player.init(world.blockSize, data.startPos);
+	player.join(data.startPos);
 
 	// Initialize recipes
 	initRecipes();
@@ -64,9 +65,7 @@ socket.on('init', function (data) {
 	    cells: world.cells,
 	};
 
-	for (let voxelWorker of voxelWorkers) {
-		voxelWorker.postMessage(worldData);
-	}
+	for (let voxelWorker of voxelWorkers) voxelWorker.postMessage(worldData);
 
 	// Update to server tick
 	tick = new Ola(data.tick);
@@ -130,13 +129,10 @@ socket.on('punch', function (id) {
 })
 
 socket.on('update', function (data) {
-	if (!initialized)
-		return;
-
-	let {blockSize} = world;
+	if (!joined || !initialized) return;
 
 	// Update player
-	var serverPlayers = data.serverPlayers
+	var serverPlayers = data.serverPlayers;
 	updatePlayers(serverPlayers);
 
 	// Update blocks

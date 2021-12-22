@@ -237,8 +237,8 @@ io.on('connection', function(socket_) {
 			}
 		}
 
-		// Send initialization data to client (world data, online players)
-		socket.emit('init', {
+		// Send server data to client (world data, online players)
+		socket.emit('joinResponse', {
 			serverPlayers: players,
 			world: Object.assign({}, world, {cells: {}, cellDeltas: undefined}),
 			tick: world.tick,

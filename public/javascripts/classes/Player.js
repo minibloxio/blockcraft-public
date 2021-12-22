@@ -89,9 +89,11 @@ class Player {
 			headSize: 0.55*blockSize,
 			height: 1.8*blockSize
 		}
+
+		this.init(blockSize);
 	}
 
-	init(blockSize, startPos) {
+	init(blockSize) {
 		// Player appearance
 
 		this.halfWidth = blockSize * 0.3;
@@ -132,15 +134,17 @@ class Player {
 		this.select_wireframe.name = "wireframe";
 		scene.add(this.select_wireframe)
 
+		// Add to scene
+		scene.add( this.controls.getObject() );
+	}
+
+	join(startPos) {
 		// Inventory
 		this.currentSlot = 0;
 		this.toolbar = [];
 
 		// Spawn
-		this.respawn(blockSize, startPos);
-
-		// Add to scene
-		scene.add( player.controls.getObject() );
+		this.respawn(world.blockSize, startPos);
 	}
 
 	respawn(blockSize, pos) {
