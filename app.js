@@ -68,10 +68,7 @@ rl.on('line', (input) => {
   		io.emit('refresh');
   	} else if (input === 'save') {
   		let path =  __dirname + '/saves/test.json';
-		let t = Date.now();
-  		world.saveToFile(fs, io, path);
-		let msg = "Successfully saved world in " + (Date.now()-t) + "ms";
-		logger.info(msg);
+  		world.saveToFile(fs, io, path, logger);
   	} else if (input) {
   		io.emit('messageAll', {
 			text: "[Server] " + input,
@@ -178,7 +175,6 @@ fs.readFile(save_path, function (err, data) {
 // Server-client connection architecture
 io.on('connection', function(socket_) {
 	let socket = socket_;
-	console.log("connection");
 
 	// Server info request
 	socket.on('serverInfoRequest', function (data) {
@@ -252,13 +248,6 @@ io.on('connection', function(socket_) {
 				z: randomZ*world.blockSize
 			}
 		});
-	})
-
-	// Save world to file
-	socket.on('save', function (data) {
-		let filename = data || 'test.json'
-		let path =  __dirname + '/saves/' + filename;
-  		world.saveToFile(fs, io, path);
 	})
 
 	// Transmit texture info to client
@@ -498,8 +487,10 @@ let dt = 50;
 let autosaveTimer = Date.now();
 let autosaveWarningFlag = true;
 setInterval(function () {
-	if (!world || Object.keys(players).length == 0) 
+	if (!world || Object.keys(players).length == 0) {
+		autosaveTimer = Date.now(); // Don't autosave when nobody's online
 		return;
+	}
 
 	world.tick += 1;
 	// Regeneration
@@ -532,7 +523,7 @@ setInterval(function () {
 	}
 
 	// Auto save
-	let autosaveInterval = 1000 * 60 * 5; // 5 Minutes
+	let autosaveInterval = 1000 * 60 * 10; // 10 Minutes
 	let autosaveWarning = 1000 * 10; // 10 seconds
 	if (Date.now() - autosaveTimer > autosaveInterval - 1000 * 10 && autosaveWarningFlag) {
 		autosaveWarningFlag = false;
@@ -548,11 +539,7 @@ setInterval(function () {
 		autosaveWarningFlag = true;
 
 		let path =  __dirname + '/saves/test.json';
-		logger.info("Saving world..." + path);
-		let t = Date.now();
-  		world.saveToFile(fs, io, path);
-		let msg = "Successfully saved world in " + (Date.now()-t) + "ms";
-		logger.info(msg);
+  		world.saveToFile(fs, io, path, logger);
 	}
 
 	world.update(dt/1000, players, newEntities, io);

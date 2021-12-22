@@ -6,6 +6,7 @@ var SimplexNoise = require('simplex-noise'),
 function noise1(nx, ny) { return rng1.noise2D(nx, ny)/2 + 0.5; }
 function noise2(nx, ny) { return rng2.noise2D(nx, ny)/2 + 0.5; }
 
+// Decode RLE encoded array
 function RLEdecode(array) {
   var newArray=[],isRip,isRun,ripCount,runCount;
   for (var i = 0; i < array.length; i++) {
@@ -28,17 +29,11 @@ function RLEdecode(array) {
     }
     
   };
-  return newArray;}
+  return newArray;
+}
 
+// Encode array into RLE
 function RLEencode(array) {
-  // output an array of values
-  // consisting of alternating "rips" and "runs"
-  // a rip begins with a negative count followed by a 
-  // cooresponding number of non-repeating values
-  // 
-  // a run begins with a positive count, followed by 
-  // the value to be repeated by the count.
-
   var newArray=[];
   var rip=[];
   var lastValue=undefined;
@@ -113,6 +108,8 @@ module.exports = class World {
       this.itemId[this.itemOrder[i]] = i+1;
     }
   }
+
+  // Load save file
   loadSaveFile(data) {
     this.seed = data.seed;
     rng1 = new SimplexNoise(this.seed);
@@ -125,31 +122,41 @@ module.exports = class World {
       this.cellDeltas[cellId] = RLEdecode(data.deltas[cellId])
     }
   }
-  saveToFile(fs, io, filepath) {
+
+  // Save world to file
+  saveToFile(fs, io, filepath, logger) {
+		logger.info("Saving world to: " + filepath);
+		let t = Date.now();
+
     let deltas = {}
-      for (let cellId in this.cellDeltas) {
-        deltas[cellId] = RLEencode(this.cellDeltas[cellId])
-      }
+    for (let cellId in this.cellDeltas) {
+      deltas[cellId] = RLEencode(this.cellDeltas[cellId])
+      if (deltas[cellId].length == 2 && deltas[cellId][0] == Math.pow(this.cellSize, 3) && deltas[cellId][1] == 0) delete deltas[cellId];
+    }
 
-      let saveObject = {
-        seed: this.seed,
-        tick: this.tick,
-        deltas: deltas
-      }
-      let t = Date.now();
+    let saveObject = {
+      seed: this.seed,
+      tick: this.tick,
+      deltas: deltas
+    }
 
-      let data = JSON.stringify(saveObject);
+    let data = JSON.stringify(saveObject);
 
-      fs.writeFile(filepath, data,function (err) {
-          if (err) throw err;  
-          let txt = "Server successfully saved in " + (Date.now()-t) + " ms";
-          io.emit('messageAll', {
-            text: txt,
-            color: "purple",
-            discard: true
-          })
-      });
+    fs.writeFile(filepath, data,function (err) {
+        if (err) throw err;  
+        let txt = "Server successfully saved in " + (Date.now()-t) + " ms";
+        io.emit('messageAll', {
+          text: txt,
+          color: "purple",
+          discard: true
+        })
+    });
+
+		let msg = "Successfully saved world in " + (Date.now()-t) + "ms";
+		logger.info(msg);
   }
+
+  // Euclidean Modulo
   static euclideanModulo(a,b){return(a%b+b)%b}
   computeVoxelOffset(x, y, z) {
     const {cellSize, cellSliceSize} = this;
@@ -643,18 +650,7 @@ module.exports = class World {
 	    }
 	  }
   }
-
-  deleteCell(chunk) {
-    delete this.cells[chunk.id];
-    let object = scene.getObjectByName(chunk.id);
-    if (object) {
-      object.geometry.dispose();
-      object.material.dispose();
-      scene.remove(object);
-      delete cellIdToMesh[chunk.id];
-    }
-  }
-
+  
   update(dt, players, newEntities, io) {
   	const {blockSize} =  this;
   	// Update entities

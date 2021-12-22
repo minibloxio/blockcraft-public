@@ -1,8 +1,13 @@
 changelog = [
 	{
+		"date": "Dec 21, 2021",
+		"version": "0.27.0",
+		"changes": "Added spectator and camera gamemodes. Use /gamemode spectator or /gamemode camera| Added button to disconnect from servers"
+	},
+	{
 		"date": "Dec 19, 2021",
 		"version": "0.26.0",
-		"changes": "Added the ability to join servers from different regions| Added server logging| Added CORS support for servers| Increased the accuracy of shadows| Fixed empty chunks bug"
+		"changes": "Updated menu UI| Added the ability to join servers from different regions| Added server logging| Added CORS support for servers| Increased the accuracy of shadows| Fixed empty chunks bug"
 	},
 	{
 		"date": "Dec 17, 2021",
