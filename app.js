@@ -221,6 +221,11 @@ io.on('connection', function(socket_) {
 		let text = players[socket.id].name + " has joined the server";
 		logger.info(text)
 
+		io.emit('messageAll', {
+			text: data.name + " has joined the server", 
+			color:"yellow"
+		})
+
 		// Determine spawn position
 		let maxSpawnDistance = 16; // Maximum distance from spawn
 		let randomX = Function.random(-maxSpawnDistance, maxSpawnDistance);
@@ -260,7 +265,7 @@ io.on('connection', function(socket_) {
 			logger.info(text);
 			io.emit('messageAll', {
 				text: text,
-				color: "yellow"
+				color: "aqua"
 			});
 			players[socket.id].name = data.name;
 		}

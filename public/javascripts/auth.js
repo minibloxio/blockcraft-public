@@ -210,6 +210,9 @@ function disconnectServer() {
 		scene.remove(world.entities[id].mesh);
 		delete world.entities[id];
     }
+
+    // Reset chat
+	chat = JSON.parse(chatInit);
 }
 
 

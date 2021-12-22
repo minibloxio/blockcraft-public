@@ -1,7 +1,7 @@
 // Connection to server successful
 socket.on('connect', function () {
 	console.log("Connected successfully with id: " + socket.id);
-	
+
 	showSettings();
     state += 1;
 })
@@ -95,11 +95,6 @@ socket.on('addPlayer', function (data) {
 
 		addPlayer(players, data.id);
 	}
-
-	addChat({
-		text: data.name + " has joined the server", 
-		color:"yellow"
-	});
 })
 
 socket.on('removePlayer', function (id) {

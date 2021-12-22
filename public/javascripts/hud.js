@@ -26,12 +26,15 @@ let showChatFlag = true;
 let showChatBar = false;
 let hideChatId = undefined;
 let chatMsg = "";
-let chat = [
+let chatInit = JSON.stringify([
 	{
 		text: "Welcome to BlockCraft! This game is still a work in progress, but feel free to play around!",
 		t: Date.now()
 	}
-];
+]);
+
+// Init chat
+let chat = JSON.parse(chatInit);
 
 // Health
 let heartSize = 40;
