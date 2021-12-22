@@ -79,26 +79,30 @@ class World {
     }
   }
 
-  deleteCell(chunk, permanently) {
+  deleteChunk(chunk, permanently) {
     for (let i = 0; i < world.buildHeight/this.cellSize+1; i++) {
       let id = `${chunk.x},${i},${chunk.z}`
 
-      if (cellIdToMesh[id]) {
-        cellIdToMesh[id][0].visible = false;
-        cellIdToMesh[id][1].visible = false;
+      this.deleteCell(id, permanently);
+    }
+  }
 
-        // Delete cell permanently
-        if (permanently) {
-          cellIdToMesh[id][0].geometry.dispose();
-          cellIdToMesh[id][0].material.dispose();
-          scene.remove(cellIdToMesh[id][0]);
+  deleteCell(id, permanently) {
+    if (cellIdToMesh[id]) {
+      cellIdToMesh[id][0].visible = false;
+      cellIdToMesh[id][1].visible = false;
 
-          cellIdToMesh[id][1].geometry.dispose();
-          cellIdToMesh[id][1].material.dispose();
-          scene.remove(cellIdToMesh[id][1]);
+      // Delete cell permanently
+      if (permanently) {
+        cellIdToMesh[id][0].geometry.dispose();
+        cellIdToMesh[id][0].material.dispose();
+        scene.remove(cellIdToMesh[id][0]);
 
-          delete cellIdToMesh[id];
-        }
+        cellIdToMesh[id][1].geometry.dispose();
+        cellIdToMesh[id][1].material.dispose();
+        scene.remove(cellIdToMesh[id][1]);
+
+        delete cellIdToMesh[id];
       }
     }
   }

@@ -429,6 +429,9 @@ function updateMenu() {
         $("#disconnecting-bar").width(100*(Math.min(disconnectedAnimate.value, maxDisconnected)/maxDisconnected)+"%");
         
         if (disconnectedAnimate.value >= maxDisconnected) {
+            for (let id in cellIdToMesh) { // Dispose of all remaining meshes
+                world.deleteCell(id, true);
+            }
             prevState();
         }
     }

@@ -208,7 +208,7 @@ class ChunkManager {
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToUnload[i];
 			if (chunk) {
-				world.deleteCell(chunk, all);
+				world.deleteChunk(chunk, all);
 				this.chunksToUnload.splice(i, 1);
 			}
 		}
