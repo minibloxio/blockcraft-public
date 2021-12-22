@@ -85,7 +85,6 @@ function refreshServers() {
                 currentServer = data;
 
                 setJoinButton(data);
-                //connect(data.link); // Auto connect to first server
 
                 serverHTML.css({
                     "background-color": "rgba(0,0,0,0.7)",
@@ -100,7 +99,7 @@ function refreshServers() {
 
 // Set join button
 function setJoinButton(server) {
-    if (state == 1) {
+    if (state == 1 && !$("#direct-connect-input").val().length) {
         $("#continue-bar").text(`Join server (${server.region})`);
         $("#continue-bar").css({"background-color": "green"});
     }
@@ -171,7 +170,18 @@ function disconnectServer() {
     socket.disconnect();
 
     chunkManager.unloadChunks(true); // Unload all chunks
-
+    // Remove all players
+    for (let id in players) {
+        scene.remove(players[id].entity);
+	    delete players[id];
+    }
+    // Remove all entities
+    for (let id in world.entities) {
+        world.entities[id].mesh.geometry.dispose();
+		world.entities[id].mesh.material.dispose();
+		scene.remove(world.entities[id].mesh);
+		delete world.entities[id];
+    }
 }
 
 
@@ -203,8 +213,10 @@ $(document).ready(function () {
         }
 
         let val = $("#direct-connect-input").val();
-        if (val) $("#continue-bar").text(`Direct Connect`)
-        else $("#continue-bar").text(`Join server (${currentServer.region})`)
+        if (val) {
+            $("#continue-bar").text(`Direct Connect`);
+            $("#continue-bar").css({"background-color": "green"});
+        } else if (currentServer) $("#continue-bar").text(`Join server (${currentServer.region})`)
         
     })
 })
@@ -214,7 +226,7 @@ function nextState(e) {
     if (state == 0) { // Start Menu -> Server Select
         refreshServers();
         
-        $("#name-input").hide();
+        $(".input").hide();
         $("#direct-connect-input").show();
         if ($("#direct-connect-input").val()) $("#direct-connect-input").focus();
 
@@ -235,11 +247,11 @@ function nextState(e) {
             connect(currentServer.link);
         }
 
+        $(".menu-button").hide();
         $("#loading-bar").show();
-        $("#continue-bar").hide();
 
+        $(".input").hide();
         $("#name-input").show();
-        $("#direct-connect-input").hide();
 
         $("#server-select").hide();
         $("#settings").show();
@@ -254,7 +266,7 @@ function nextState(e) {
         console.log("Requesting pointer lock");
         requestPointerLock();
 
-        $("#loading-bar").hide();
+        $(".menu-button").hide()
         $("#ingame-bar").show();
         state += 1;
     } else if (state == 4) { // In Game
@@ -278,14 +290,17 @@ function prevState() {
     if (state == 2) {
         refreshServers();
         
-        $("#name-input").hide();
+        $(".input").hide();
         $("#direct-connect-input").show();
         $("#direct-connect-input").val('');
+
+        
+        $(".menu-button").hide();
         
         $("#continue-bar").text("Finding Server...");
         $("#continue-bar").css({"background-color": "orange"});
         $("#continue-bar").show();
-        $("#loading-bar").hide();
+
 
         $("#settings").hide();
         $("#server-select").show();
@@ -294,18 +309,17 @@ function prevState() {
         state -= 1; // Go back to server select menu
     } else if (state == 4) {
         refreshServers();
-        
-       
 
-        $("#name-input").hide();
+        $(".input").hide();
         $("#direct-connect-input").show();
         $("#direct-connect-input").val('');
+
+        $(".menu-button").hide()
         
         $("#continue-bar").text("Finding Server...");
         $("#continue-bar").css({"background-color": "orange"});
         $("#continue-bar").show();
 
-        $("#ingame-bar").hide();
 
         $("#settings").hide();
         $("#server-select").show();
@@ -321,6 +335,12 @@ function prevState() {
     }
 }
 
+function toServerSelect() {
+
+}
+
+
+// Update menu state
 function updateMenu() {
     
     // Animate menu

@@ -145,11 +145,11 @@
 					<input autocomplete="off" id="direct-connect-input" class="input" type="text" placeholder="Direct Connect (optional)" maxlength="50" style="display: none;">
 					<br />
 					<div id="start-button">
-						<div id="continue-bar" class="bar">Continue</div>
-						<div id="loading-bar" class="bar" style="display: none;">
+						<div id="continue-bar" class="bar menu-button">Continue</div>
+						<div id="loading-bar" class="bar menu-button" style="display: none;">
 							Connecting to server...
 						</div>
-						<div id="ingame-bar" style="display: none;">
+						<div id="ingame-bar" class="menu-button" style="display: none;">
 							<div id="disconnect-bar" class="bar">
 								Disconnect
 							</div>
@@ -169,8 +169,8 @@
 
 
 		<script>
-
-			$("#welcome-button")[0].click()
+			$("#welcome-button")[0].click();
+			let cookieExpiryTime = 14; // 14 days
 			
 			// Change tab
 			function changeTab(evt, cityName) {
@@ -275,7 +275,7 @@
 						keymap[old_key][2] = false;
 						//console.log("Escape")
 
-						setCookie(keymap[old_key][0], [old_key, keymap[old_key][0], keymap[old_key][1]], 7)
+						setCookie(keymap[old_key][0], [old_key, keymap[old_key][0], keymap[old_key][1]], cookieExpiryTime)
 					} else if (keymap[e.keyCode] && keymap[old_key][2]) {
 						e.target.value = action.toUpperCase();
 						e.target.savedKey = e.keyCode;
@@ -296,7 +296,7 @@
 								keyorder[i] = e.keyCode
 						}
 
-						setCookie(keymap[e.keyCode][0], [e.keyCode, keymap[e.keyCode][0], action.toUpperCase()], 7)
+						setCookie(keymap[e.keyCode][0], [e.keyCode, keymap[e.keyCode][0], action.toUpperCase()], cookieExpiryTime)
 					}
 
 					// Check if key has been cleared up
@@ -321,8 +321,8 @@
 								keymap[currKey][3].children[1].setAttribute("data-keycode", currKey);
 								keymap[shownKey][3].children[1].setAttribute("data-keycode", shownKey);
 
-								setCookie(keymap[currKey][0], [currKey, keymap[currKey][0], keymap[shownKey][1]], 7)
-								setCookie(keymap[shownKey][0], [shownKey, keymap[shownKey][0], keymap[currKey][1]], 7)
+								setCookie(keymap[currKey][0], [currKey, keymap[currKey][0], keymap[shownKey][1]], cookieExpiryTime)
+								setCookie(keymap[shownKey][0], [shownKey, keymap[shownKey][0], keymap[currKey][1]], cookieExpiryTime)
 
 								//console.log(currKey, shownKey , "SWITCHABLE")
 							}
@@ -362,7 +362,7 @@
 				$("#" + id + "Slider").on("change mousemove", function (e) {
 					object[key] = $("#" + id + "Slider")[0].value;
 					$("#" + id + "Value").text(name + ": " + object[key]);
-					setCookie(name, object[key], 7);
+					setCookie(name, object[key], cookieExpiryTime);
 				})
 			}
 
@@ -395,7 +395,7 @@
 					if (key2)
 						object[key2] = object[key];
 					$("#" + id + "Value").text(name + ": " + (object[key] ? "ON" : "OFF"));
-					setCookie(name, object[key], 7);
+					setCookie(name, object[key], cookieExpiryTime);
 				})
 			}
 
