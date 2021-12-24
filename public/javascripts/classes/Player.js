@@ -157,7 +157,7 @@ class Player {
 			this.savedPosition['y'] = pos.y;
 		} else {
 			// Respawn in new location
-			let maxSpawnDistance = 16; // Maximum distance from spawn
+			let maxSpawnDistance = 32; // Maximum distance from spawn
 			let randomX = random(-maxSpawnDistance, maxSpawnDistance);
 			let randomZ = random(-maxSpawnDistance, maxSpawnDistance);
 
@@ -707,7 +707,6 @@ class Player {
 			this.secondJumpPossible = false;
 			this.secondJump = false;
 		}
-		
 
 		if (this.key.up && this.secondJumpPossible) { // Double jump
 			this.secondJumpPossible = false;

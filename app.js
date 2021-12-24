@@ -251,7 +251,7 @@ io.on('connection', function(socket_) {
 		})
 
 		// Determine spawn position
-		let maxSpawnDistance = 0; // Maximum distance from spawn
+		let maxSpawnDistance = 32; // Maximum distance from spawn
 		let randomX = Function.random(-maxSpawnDistance, maxSpawnDistance);
 		let randomZ = Function.random(-maxSpawnDistance, maxSpawnDistance);
 
