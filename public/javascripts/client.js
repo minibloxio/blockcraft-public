@@ -4,6 +4,10 @@ socket.on('connect', function () {
 
 	showSettings();
     state += 1;
+
+	if (joined && loadedAnimate.value >= maxLoaded) { // If the player has joined and the game is loaded
+		joinServer();
+	}
 })
 
 // Reconnection attempt
@@ -21,6 +25,10 @@ socket.io.on('reconnect_failed', function () {
 // Disconnected from server
 socket.on('disconnect', function (reason) {
 	console.log("Disconnected from server due to:", reason);
+
+	if (reason == "transport close") {
+		location.reload(true);
+	}
 })
 
 // Initialize client
@@ -74,7 +82,7 @@ socket.on('joinResponse', function (data) {
 	tick = new Ola(data.tick);
 
 	initialized = true;
-	console.log("Succesfully joined the server!");
+	console.log("Successfully joined the server (" + data.info.region + ")");
 })
 
 // Load textures
@@ -89,6 +97,7 @@ socket.on('receiveChunk', function (data) {
 
 // Add newcoming players
 socket.on('addPlayer', function (data) {
+	if (!joined) return;
 	// Add to players
 	if (data.id != socket.id) { // Check if not own player
 		players[data.id] = data;

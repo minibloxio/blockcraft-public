@@ -321,7 +321,7 @@ function nextState(e) {
             }
         }
     } else if (isState("disconnecting")) { // Disconnecting from server
-        console.log("Bruh");
+        
     }
     
 }

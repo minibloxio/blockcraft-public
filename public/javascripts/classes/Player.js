@@ -938,7 +938,7 @@ class Player {
 			
 			this.speed = 0.75;
 
-			this.position.y += -this.walkSpeed;
+			this.position.y += -this.walkSpeed*1.5;
 			this.halfHeight = blockSize * 0.6;
 		}
 		if (this.blocking && !this.fly && this.onObject)

@@ -15,7 +15,6 @@ const options = {
 
 // Create HTTPS server
 const server = https.createServer(options, app);
-const cors = require('cors');
 const path = require('path');
 const readline = require('readline'); // Command line input
 const { Server } = require("socket.io");
@@ -30,7 +29,11 @@ const io = new Server(server, {
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 
-// Modules
+// Worker threads (used for offloading chunk generation)
+const { Worker } = require('worker_threads');
+const worker = new Worker('./worker.js');
+
+// Import server modules
 const Function = require('./modules/Function.js');
 const World = require('./modules/World.js');
 const SimplexNoise = require('simplex-noise'),
@@ -132,9 +135,9 @@ fs.readdir(public + '/textures/items', function (err, data) {
 textures.blockOrder = blockOrder;
 textures.itemOrder = itemOrder;
 
-// Setup world
 var players = {};
 
+// Setup world
 const cellSize = 16;
 const tileSize = 16;
 const tileTextureWidth = 512;
@@ -172,6 +175,20 @@ fs.readFile(save_path, function (err, data) {
   	logger.info("World successfully loaded in " + (Date.now()-t) + "ms");
 })
 
+// Worker process
+worker.on('message', (data) => {
+	let {socketId, id, chunk} = data;
+    //console.log(world.cells[id]);
+
+	let receivedChunks = [];
+
+	receivedChunks.push({
+		pos: chunk,
+		cell: world.encodeCell(chunk.x, chunk.y, chunk.z)
+	})
+	io.to(socketId).emit('receiveChunk', receivedChunks);
+})
+
 // Server-client connection architecture
 io.on('connection', function(socket_) {
 	let socket = socket_;
@@ -188,6 +205,9 @@ io.on('connection', function(socket_) {
 		socket.emit('serverInfoResponse', info);
 	})
 
+	// Transmit texture info to client
+	socket.emit('textureData', textures);
+
 	// Join request from the client
 	socket.on('join', function (data) {
 		// Set player object
@@ -202,6 +222,7 @@ io.on('connection', function(socket_) {
 			dead: false,
 			toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 5, c: 1, class: "item"}, {v: 6, c: 1, class: "item"}, {v: 7, c: 64, class: "item"}],
 			walking: false,
+			sneaking: false,
 			punching: false,
 			currSlot: 0,
 			pickupDelay: Date.now(),
@@ -227,7 +248,7 @@ io.on('connection', function(socket_) {
 		})
 
 		// Determine spawn position
-		let maxSpawnDistance = 16; // Maximum distance from spawn
+		let maxSpawnDistance = 0; // Maximum distance from spawn
 		let randomX = Function.random(-maxSpawnDistance, maxSpawnDistance);
 		let randomZ = Function.random(-maxSpawnDistance, maxSpawnDistance);
 
@@ -251,12 +272,11 @@ io.on('connection', function(socket_) {
 				x: randomX*world.blockSize,
 				y: groundHeight,
 				z: randomZ*world.blockSize
-			}
+			},
+			info: config,
 		});
 	})
 
-	// Transmit texture info to client
-	socket.emit('textureData', textures);
 
 	// Update player info
 	socket.on('playerInfo', function (data) {
@@ -289,93 +309,6 @@ io.on('connection', function(socket_) {
 		players[socket.id].ping.push(Date.now()-tick);
 		if (players[socket.id].ping.length > 30)
 			players[socket.id].ping.shift();
-	})
-
-	// Update player inventory
-	socket.on('updateInventory', function (data) {
-		if (!players[socket.id]) return;
-
-		players[socket.id].toolbar = data;
-	})
-
-	// Player interactivity
-	socket.on('respawn', function () {
-		if (!players[socket.id]) return;
-
-		if (players[socket.id]) {
-			players[socket.id].hp = 10;
-			players[socket.id].dead = false;
-		}
-	})
-
-	// Receive player punch event
-	socket.on('punchPlayer', function (data) {
-		if (!players[socket.id]) return;
-
-		if (players[data.id] && players[socket.id] && !players[socket.id].dead && players[data.id].mode == "survival") {
-			let dmg = 0.5;
-
-			let entity = data.curr;
-
-			if (entity && entity.class == "item" && world.itemId["wood_sword"]) {
-				dmg = 1.5;
-			}
-
-			// Check if blocking
-			if (players[data.id].blocking) {
-				dmg /= 2;
-				data.force /= 2;
-			}
-
-			players[data.id].hp -= data.crit ? dmg*1.5 : dmg;
-			players[data.id].dmgType = players[socket.id].name;
-			io.to(`${data.id}`).emit('knockback', data)
-			io.emit('punch', data.id);
-		}
-	})
-
-	// Take player damage if in survival mode
-	socket.on('takeDamage', function (data) {
-		if (!players[socket.id]) return;
-
-		if (players[socket.id].mode == "survival") {
-			players[socket.id].hp -= data.dmg;
-			players[socket.id].dmgType = data.type;
-		}
-	})
-
-	// Fire server-side arrow
-	socket.on('fireArrow', function (data) {
-		if (!players[socket.id]) return;
-
-		let {blockSize} = world;
-		players[socket.id].pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
-
-		for (let t of players[socket.id].toolbar) {
-			if (t && t.v == world.itemId["arrow"] && t.c > 0) {
-				t.c = Math.max(0, t.c-1);
-				break;
-			}
-		}
-
-		let entityId = Function.randomString(5);
-		let force = blockSize*10*data.force;
-		let entity = {
-			pos: {x: data.x, y: data.y, z: data.z},
-			vel: {x: data.dir.x*force, y: data.dir.y*force, z: data.dir.z*force},
-			acc: {x: 0, y: 0, z: 0},
-			force: data.force,
-			lethal: true,
-			type: "item",
-			v: world.itemId["arrow"],
-			class: "item",
-			id: entityId,
-			playerId: data.id,
-			t: Date.now(),
-			onObject: false
-		}
-		world.entities[entityId] = entity;
-		newEntities.push(entity)
 	})
 
 	// World functionality
@@ -446,21 +379,126 @@ io.on('connection', function(socket_) {
 
 	// Request chunk
 	socket.on('requestChunk', function (data) {
-		let receivedChunks = [];
 		for (let chunk of data) {
-			if (chunk) {
-				//let t = Date.now();
+			let id = `${chunk.x},${chunk.y},${chunk.z}`
+			let cell = world.cells[id];
+			if (!cell) {
+				world.cells[id] = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
 
-				world.generateCell(chunk.x, chunk.y, chunk.z);
-				receivedChunks.push({
+				if (!world.cellDeltas[id]) {
+					world.cellDeltas[id] = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
+				}
+
+				worker.postMessage({cmd: "generateChunk", socketId: socket.id, chunk: chunk, id: id, cell: world.cells[id], cellDelta: world.cellDeltas[id]});
+			}
+			else {
+				socket.emit('receiveChunk', [{
 					pos: chunk,
-					cell: world.encodeCell(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize)
-				})
-
-				//console.log("Generated chunk in " + (Date.now()-t) + "ms");
+					cell: world.encodeCell(chunk.x, chunk.y, chunk.z),
+				}]);
 			}
 		}
-		socket.emit('receiveChunk', receivedChunks);
+
+		// let receivedChunks = [];
+		// for (let chunk of data) {
+		// 	if (!chunk) continue;
+
+		// 	world.generateCell(chunk.x, chunk.y, chunk.z);
+
+
+		// 	receivedChunks.push({
+		// 		pos: chunk,
+		// 		cell: world.encodeCell(chunk.x, chunk.y, chunk.z)
+		// 	})
+		// }
+		// socket.emit('receiveChunk', receivedChunks);
+	})
+
+	// Update player inventory
+	socket.on('updateInventory', function (data) {
+		if (!players[socket.id]) return;
+
+		players[socket.id].toolbar = data;
+	})
+
+	// Player interactivity
+	socket.on('respawn', function () {
+		if (!players[socket.id]) return;
+
+		if (players[socket.id]) {
+			players[socket.id].hp = 10;
+			players[socket.id].dead = false;
+		}
+	})
+
+	// Receive player punch event
+	socket.on('punchPlayer', function (data) {
+		if (!players[socket.id]) return;
+
+		if (players[data.id] && players[socket.id] && !players[socket.id].dead && players[data.id].mode == "survival") {
+			let dmg = 0.5;
+
+			let entity = data.curr;
+
+			if (entity && entity.class == "item" && world.itemId["wood_sword"]) {
+				dmg = 1.5;
+			}
+
+			// Check if blocking
+			if (players[data.id].blocking) {
+				dmg /= 2;
+				data.force /= 2;
+			}
+
+			players[data.id].hp -= data.crit ? dmg*1.5 : dmg;
+			players[data.id].dmgType = players[socket.id].name;
+			io.to(`${data.id}`).emit('knockback', data)
+			io.volatile.emit('punch', data.id);
+		}
+	})
+
+	// Take player damage if in survival mode
+	socket.on('takeDamage', function (data) {
+		if (!players[socket.id]) return;
+
+		if (players[socket.id].mode == "survival") {
+			players[socket.id].hp -= data.dmg;
+			players[socket.id].dmgType = data.type;
+		}
+	})
+
+	// Fire server-side arrow
+	socket.on('fireArrow', function (data) {
+		if (!players[socket.id]) return;
+
+		let {blockSize} = world;
+		players[socket.id].pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
+
+		for (let t of players[socket.id].toolbar) {
+			if (t && t.v == world.itemId["arrow"] && t.c > 0) {
+				t.c = Math.max(0, t.c-1);
+				break;
+			}
+		}
+
+		let entityId = Function.randomString(5);
+		let force = blockSize*10*data.force;
+		let entity = {
+			pos: {x: data.x, y: data.y, z: data.z},
+			vel: {x: data.dir.x*force, y: data.dir.y*force, z: data.dir.z*force},
+			acc: {x: 0, y: 0, z: 0},
+			force: data.force,
+			lethal: true,
+			type: "item",
+			v: world.itemId["arrow"],
+			class: "item",
+			id: entityId,
+			playerId: data.id,
+			t: Date.now(),
+			onObject: false
+		}
+		world.entities[entityId] = entity;
+		newEntities.push(entity)
 	})
 
 	// Chat
@@ -543,6 +581,7 @@ setInterval(function () {
             discard: true
         })
 	}
+	
 	if (Date.now() - autosaveTimer > autosaveInterval) {
 		autosaveTimer = Date.now();
 		autosaveWarningFlag = true;

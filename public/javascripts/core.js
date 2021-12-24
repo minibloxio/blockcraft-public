@@ -174,6 +174,7 @@ function animate() {
 		rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
 		dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
 		walking: (new Vector(player.velocity.x, player.velocity.z)).getMag() > 2,
+		sneaking: player.key.sneak,
 		punching: player.punchT < 2,
 		blocking: player.blockT > 0,
 		currSlot: player.currentSlot,

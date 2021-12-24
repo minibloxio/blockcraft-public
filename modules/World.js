@@ -87,7 +87,8 @@ module.exports = class World {
     this.cellSliceSize = cellSize * cellSize;
     this.cells = {};
     this.cellDeltas = {};
-
+    this.newCells = {};
+    this.newCellDeltas = {};
 
     // Entities
     this.entities = {};
@@ -202,12 +203,14 @@ module.exports = class World {
     let cellDelta = this.cellDeltas[cellId];
 
     if (!cell) {
-      cell = new Uint8Array(cellSize * cellSize * cellSize);
+      cell = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
       this.cells[cellId] = cell;
+      this.newCells[cellId] = cell;
     }
 
     if (!cellDelta) {
-      this.cellDeltas[cellId] = new Uint8Array(cellSize * cellSize * cellSize);
+      this.cellDeltas[cellId] = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
+      this.newCellDeltas[cellId] = this.cellDeltas[cellId];
     }
     return cell;
   }
@@ -242,7 +245,7 @@ module.exports = class World {
     return cell[voxelOffset];
   }
   encodeCell(cellX, cellY, cellZ) { // RLE Encoding
-  	let array = this.getCellForVoxel(cellX, cellY, cellZ)
+  	let array = this.getCellForVoxel(cellX*this.blockSize, cellY*this.blockSize, cellZ*this.blockSize)
 
 		var newArray=[];
 		var rip=[];
@@ -326,6 +329,9 @@ module.exports = class World {
     return "TROPICAL_RAIN_FOREST";
   }
   generateCell(cellX, cellY, cellZ) {
+    this.newCells = {};
+    this.newCellDeltas = {};
+
   	let cell = this.cells[`${cellX},${cellY},${cellZ}`];
   	let cellExists = false;
   	if (cell)
@@ -575,7 +581,7 @@ module.exports = class World {
       }
     }
 
-    if (!cellExists) {
+    if (!cellExists || true) {
     	 // Add fauna
 	    for (let z = -3; z < cellSize+3; ++z) {
 	    	for (let x = -3; x < cellSize+3; ++x) {
@@ -649,6 +655,12 @@ module.exports = class World {
 	      }
 	    }
 	  }
+
+    // Return new cells generated
+    return {
+      newCells: this.newCells, 
+      newCellDeltas: this.newCellDeltas
+    };
   }
   
   update(dt, players, newEntities, io) {
