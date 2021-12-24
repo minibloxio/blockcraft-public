@@ -72,7 +72,9 @@ rl.on('line', (input) => {
   	} else if (input === 'save') {
   		let path =  __dirname + '/saves/test.json';
   		world.saveToFile(fs, io, path, logger);
-  	} else if (input) {
+  	} else if (input === 'purge') {
+		world.purge(); // Purge all chunks
+	} else if (input) {
   		io.emit('messageAll', {
 			text: "[Server] " + input,
 			color: "cyan"
@@ -171,6 +173,7 @@ fs.readFile(save_path, function (err, data) {
 
 	let saveFile = JSON.parse(data)
 	world.loadSaveFile(saveFile)
+	worker.postMessage({cmd: "seed", seed: saveFile.seed});
 
   	logger.info("World successfully loaded in " + (Date.now()-t) + "ms");
 })
@@ -243,7 +246,7 @@ io.on('connection', function(socket_) {
 		logger.info(text)
 
 		io.emit('messageAll', {
-			text: data.name + " has joined the server", 
+			text: players[socket.id].name + " has joined the server", 
 			color:"yellow"
 		})
 

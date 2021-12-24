@@ -3,9 +3,6 @@ const {
 } = require('worker_threads')
 
 const World = require('./modules/World.js');
-var SimplexNoise = require('simplex-noise'),
-    rng1 = new SimplexNoise(Math.random),
-    rng2 = new SimplexNoise(Math.random)
     
 function noise1(nx, ny) { return rng1.noise2D(nx, ny)/2 + 0.5; }
 function noise2(nx, ny) { return rng2.noise2D(nx, ny)/2 + 0.5; }
@@ -35,12 +32,15 @@ const world = new World({
 
 // Send a message to the main thread.
 parentPort.on('message', (data) => {
-    const { cmd, socketId, chunk, id, cell, cellDelta } = data;
+    if (data.cmd == "seed") {
+        world.updateSeed(data.seed);
+    } else if (data.cmd == "generateChunk") {
+        const { socketId, chunk, id, cell, cellDelta } = data;
 
-    world.cells[id] = cell;
-    world.cellDeltas[id] = cellDelta;
-    let newCells = world.generateCell(chunk.x, chunk.y, chunk.z, cell, cellDelta);
-    //console.log(newCells);
-    
-    parentPort.postMessage({socketId, id, chunk});
+        world.cells[id] = cell;
+        world.cellDeltas[id] = cellDelta;
+        world.generateCell(chunk.x, chunk.y, chunk.z, cell, cellDelta);
+        
+        parentPort.postMessage({socketId, id, chunk});
+    }
 })

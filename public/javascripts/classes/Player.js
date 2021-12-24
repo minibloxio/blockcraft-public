@@ -766,7 +766,7 @@ class Player {
 			if (!this.fly) {
 				currentVel = [originalY, original/2, original];
 			} else {
-				currentVel = [original, original, original];
+				currentVel = [original*2, original, original*2];
 			}
 			
 			this.previousPosition = this.position.clone();

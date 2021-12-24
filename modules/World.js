@@ -3,6 +3,9 @@ var SimplexNoise = require('simplex-noise'),
     rng1 = new SimplexNoise(Math.random),
     rng2 = new SimplexNoise(Math.random)
 
+// Garbage collection
+const gc = require('expose-gc/function');
+
 function noise1(nx, ny) { return rng1.noise2D(nx, ny)/2 + 0.5; }
 function noise2(nx, ny) { return rng2.noise2D(nx, ny)/2 + 0.5; }
 
@@ -87,8 +90,6 @@ module.exports = class World {
     this.cellSliceSize = cellSize * cellSize;
     this.cells = {};
     this.cellDeltas = {};
-    this.newCells = {};
-    this.newCellDeltas = {};
 
     // Entities
     this.entities = {};
@@ -110,11 +111,16 @@ module.exports = class World {
     }
   }
 
-  // Load save file
-  loadSaveFile(data) {
-    this.seed = data.seed;
+  // Update seed
+  updateSeed(seed) {
+    this.seed = seed;
     rng1 = new SimplexNoise(this.seed);
     rng2 = new SimplexNoise(this.seed+0.2 > 1 ? this.seed - 0.8 : this.seed+0.2);
+  }
+
+  // Load save file
+  loadSaveFile(data) {
+    this.updateSeed(data.seed);
 
     this.tick = data.tick;
 
@@ -153,8 +159,20 @@ module.exports = class World {
         })
     });
 
+    this.purge(logger);
+
 		let msg = "Successfully saved world in " + (Date.now()-t) + "ms";
 		logger.info(msg);
+  }
+
+  // Purge world
+  purge(logger) {
+    this.cells = {};
+    let t = Date.now();
+    let prevMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+    gc();
+    let newMemory = process.memoryUsage().heapUsed / 1024 / 1024;
+    logger.info("World purged in " + (Date.now()-t) + "ms. Memory saved: " + Math.floor((prevMemory - newMemory)*100)/100 + "MB");
   }
 
   // Euclidean Modulo
@@ -205,12 +223,10 @@ module.exports = class World {
     if (!cell) {
       cell = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
       this.cells[cellId] = cell;
-      this.newCells[cellId] = cell;
     }
 
     if (!cellDelta) {
       this.cellDeltas[cellId] = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
-      this.newCellDeltas[cellId] = this.cellDeltas[cellId];
     }
     return cell;
   }
@@ -329,8 +345,6 @@ module.exports = class World {
     return "TROPICAL_RAIN_FOREST";
   }
   generateCell(cellX, cellY, cellZ) {
-    this.newCells = {};
-    this.newCellDeltas = {};
 
   	let cell = this.cells[`${cellX},${cellY},${cellZ}`];
   	let cellExists = false;
@@ -655,12 +669,6 @@ module.exports = class World {
 	      }
 	    }
 	  }
-
-    // Return new cells generated
-    return {
-      newCells: this.newCells, 
-      newCellDeltas: this.newCellDeltas
-    };
   }
   
   update(dt, players, newEntities, io) {

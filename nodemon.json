@@ -1,4 +1,5 @@
 {   
 	"verbose": false,
-    "ignore": ["saves/*", "logs/*", "nodemon.json"]
+    "ignore": ["saves/*", "logs/*", "nodemon.json"],
+	"flags": "--expose-gc"
 }
