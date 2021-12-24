@@ -1,5 +1,10 @@
 changelog = [
 	{
+		"date": "Dec 24, 2021",
+		"version": "0.28.0",
+		"changes": "Reduced file sizes of world saves by 70% by removing chunks that have not been changed| Game now removes players and server entities after disconnection| Chat is now reset after disconnection| Offloaded chunk generation on the server using worker threads| Added a disconnection progress bar| Added multiple regional servers (eu-west, ap-south, ap-southeast)"
+	},
+	{
 		"date": "Dec 21, 2021",
 		"version": "0.27.0",
 		"changes": "Added spectator and camera gamemodes. Use /gamemode spectator or /gamemode camera| Added button to disconnect from servers"

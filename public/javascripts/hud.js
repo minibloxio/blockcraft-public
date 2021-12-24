@@ -542,6 +542,9 @@ function displayChat() {
 	let fontSize = msgHeight - 10;
 	let yOffset = 100;
 
+	let maxHeight = Math.min(500, innerHeight - 100);
+	let currHeight = 0;
+
 	ctx.font = fontSize+"px Minecraft-Regular";
 	var lines = [];
 	for (let i = 0; i < chat.length; i++) {
@@ -553,6 +556,8 @@ function displayChat() {
 			text = text.substr(0, 100);
 			let newLines = getLines(ctx, text, 600, msg.color || "white").reverse();
 			lines = lines.concat(newLines);
+			currHeight += msgHeight;
+			if (currHeight > maxHeight) break;
 		}
 	}
 
