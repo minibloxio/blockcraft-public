@@ -200,6 +200,7 @@ function joinServer() {
 function disconnectServer() {
     if (!isState("inGame")) return;
 
+    initialized = false;
     joined = false;
     currentServer = undefined;
     maxDisconnected = Object.keys(chunkManager.currChunks).length;
@@ -336,7 +337,6 @@ function prevState() {
         
         loaded -= 1;
         state -= 5; 
-        initialized = false;
     }
 }
 

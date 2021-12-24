@@ -5,9 +5,9 @@ socket.on('connect', function () {
 	showSettings();
     state += 1;
 
-	if (joined && loadedAnimate.value >= maxLoaded) { // If the player has joined and the game is loaded
-		joinServer();
-	}
+	// if (loadedAnimate.value >= maxLoaded) { // If the player has joined and the game is loaded
+	// 	joinServer();
+	// }
 })
 
 // Reconnection attempt
@@ -26,9 +26,9 @@ socket.io.on('reconnect_failed', function () {
 socket.on('disconnect', function (reason) {
 	console.log("Disconnected from server due to:", reason);
 
-	if (reason == "transport close") {
-		location.reload(true);
-	}
+	// if (reason == "transport close") {
+	// 	location.reload(true);
+	// }
 })
 
 // Initialize client

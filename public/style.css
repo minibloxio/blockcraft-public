@@ -102,7 +102,7 @@ a {
 /* NAVBAR CONTENT */
 
 .tabcontent {
-    height: 100%;
+    height: calc(100% - 140px);
     border-top: none;
     text-align: left;
     color: white;
