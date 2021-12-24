@@ -29,7 +29,7 @@ let loadedAnimate = new Ola(0);
 let maxLoaded = 5;
 let maxChunks = 10; // Chunks need to be loaded before pointerlock can be enabled
 
-let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com"] // Request this from the auth server
+let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com", "https://ap-southeast.victorwei.com"] // Request this from the auth server
 let servers = {};
 let currentServer = undefined;
 let joined = false;

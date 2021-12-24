@@ -167,7 +167,7 @@ module.exports = class World {
 
   // Purge world
   purge(logger) {
-    this.cells = {};
+    //this.cells = {};
     let t = Date.now();
     let prevMemory = process.memoryUsage().heapUsed / 1024 / 1024;
     gc();
