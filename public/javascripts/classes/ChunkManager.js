@@ -116,7 +116,9 @@ class ChunkManager {
 			let chunk = e.data[i];
 			let cellId = chunk.pos.x + "," + chunk.pos.y + "," + chunk.pos.z;
 
-			world.cells[cellId] = new Uint8Array(new SharedArrayBuffer(16 * 16 * 16)); // Maybe store this object in rleWorker?
+			//console.log(chunk);
+
+			world.cells[cellId] = chunk.cell;
 			world.cells[cellId].set(chunk.cell);
 
 			newCells[cellId] = world.cells[cellId];

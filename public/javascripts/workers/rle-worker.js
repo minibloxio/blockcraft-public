@@ -1,12 +1,14 @@
 self.addEventListener('message', e => {
 	let result = [];
 	for (let chunk of e.data) {
-		chunk.cell = RLEdecode(chunk.cell);
+		let cell = RLEdecode(chunk.cell);
+		chunk.cell = new Uint8Array(new SharedArrayBuffer(16*16*16));
+		chunk.cell.set(cell);
 		result.push(chunk);
 	}
+	
 	self.postMessage(result)
 });
-
 
 function RLEdecode(array) {
 	var newArray=[],isRip,isRun,ripCount,runCount;
