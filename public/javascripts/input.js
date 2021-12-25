@@ -175,25 +175,47 @@ var onKeyDown = function ( event ) {
 						});
     				}
     			} else if (msg[0] == "tp") {
-    				let exists = false;
-    				for (let id in players) {
-    					let p = players[id];
-    					if (p.name = msg[1]) {
-    						exists = true; 
-    						addChat({
-								text: "Teleported " + player.name + " to " + p.name
-							});
-							player.position.copy(p.pos)
+					msg.shift();
 
-    						break;
-    					}
-    				}
-    				if (!exists) {
-    					addChat({
-							text: 'Error: No player found with name "' + msg[1] + '" to teleport to',
-							color: "red"
-						});
-    				}
+					if (Number.isInteger(parseInt(msg[0]))) {
+						let validCoordinates = Number.isInteger(parseInt(msg[0])) && Number.isInteger(parseInt(msg[1])) && Number.isInteger(parseInt(msg[2]));
+
+						console.log("Attempting to teleport to " + msg[0] + " " + msg[1] + " " + msg[2]);
+
+						if (validCoordinates) {
+							let coord = new THREE.Vector3(parseInt(msg[0])*world.blockSize, parseInt(msg[1])*world.blockSize, parseInt(msg[2])*world.blockSize);
+							player.setCoord(coord);
+						} else {
+							addChat({
+								text: 'Error: Invalid coordinate (format: /tp <int> <int> <int>)',
+								color: "red"
+							});
+						}
+					} else {
+
+						let target = msg.join(" ");
+						console.log("Attempting to teleport to " + target);
+
+						let exists = false;
+						for (let id in players) {
+							let p = players[id];
+							if (p.name == target) {
+								exists = true; 
+								addChat({
+									text: "Teleported " + player.name + " to " + p.name
+								});
+								player.position.copy(p.pos)
+
+								break;
+							}
+						}
+						if (!exists) {
+							addChat({
+								text: 'Error: No player found with name "' + target + '" to teleport to',
+								color: "red"
+							});
+						}
+					}
     			} else if (msg[0] == "time") {
     				if (typeof(parseInt(msg[1])) == "number")
     					socket.emit('settime', parseInt(msg[1]))

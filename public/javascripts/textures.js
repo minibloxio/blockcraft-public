@@ -64,7 +64,7 @@ function loadTextures(data) {
 
 let material, materialTransparent;
 let blockFaces = {};
-let textureAtlas, blockOrder;
+let texture_atlas, blockOrder;
 
 
 let blocks = {
@@ -153,7 +153,7 @@ function setTexture(order) {
   materialTransparent.side = THREE.DoubleSide;
   materialTransparent.transparent = true;
 
-  textureAtlas = texture.image;
+  texture_atlas = texture.image;
 }
 
 function drawImageNet(ctx, order, entities) {

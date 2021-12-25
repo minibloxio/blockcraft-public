@@ -2,7 +2,7 @@ changelog = [
 	{
 		"date": "Dec 25, 2021",
 		"version": "0.29.0",
-		"changes": "Massively optimized chunk generation by using SharedArrayBuffers in web workers"
+		"changes": "Massively optimized chunk generation by using SharedArrayBuffers in web workers| Added ability to change material texture to improve performance| Added FOV slider in video settings| Fixed teleporting to players and added ability to teleport to coordinates (usage: /tp <int> <int> <int>)"
 	},
 	{
 		"date": "Dec 24, 2021",

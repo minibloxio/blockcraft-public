@@ -187,6 +187,13 @@ class Player {
 		this.respawnTimer = Date.now();
 	}
 
+	setCoord(coord) {
+		this.position.copy(coord);
+		this.previousPosition = this.position.clone();
+		this.savedPosition = this.position.clone();
+		this.prevHeight = this.position.y;
+	}
+
 	getCurrItem() {
 		let item = this.toolbar[this.currentSlot];
 		if (item && item.c > 0)
@@ -963,7 +970,6 @@ class Player {
 			}
 			this.maxSprintSpeed = this.defaultMaxSprintSpeed;
 		}
-		this.positionYOffset = 0;
 		if (this.key.sneak && !this.fly && this.onObject) {
 			
 			this.speed = 0.75;

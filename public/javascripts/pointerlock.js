@@ -17,6 +17,7 @@ function enterPointerLock () {
 	player.controls.enabled = true;
 	blocker.style.display = 'none';
 	$("#background-image").hide();
+	onWindowResize();
 
 	if (showInventory) {
 		showInventory = false;
