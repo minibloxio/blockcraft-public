@@ -238,4 +238,23 @@ class ChunkManager {
 
 		this.chunksToRequest = [];
 	}
+
+	updateTexture() {
+		setTexture(blockOrder);
+
+		for (let cellId in cellIdToMesh) { // Dispose of all remaining meshes
+			let mesh, meshT;
+
+			if (cellIdToMesh[cellId]) {
+				mesh = cellIdToMesh[cellId][0];
+				meshT = cellIdToMesh[cellId][1];
+			}
+
+			if (mesh) mesh.material = material;
+			if (meshT) meshT.material = materialTransparent;
+
+		}
+		
+		console.log("Updating texture to " + getCookie("Material Texture") + "...");
+	}
 }

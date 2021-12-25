@@ -50,6 +50,7 @@ let mining_progress = [
 function loadTextures(data) {
   t = Date.now();
   console.log("Loading textures...");
+  blockOrder = data.blockOrder;
   loadBlockImages(data.blocks, data.blockOrder)
   loadItemImages(data.items, data.itemOrder);
   fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
@@ -63,7 +64,8 @@ function loadTextures(data) {
 
 let material, materialTransparent;
 let blockFaces = {};
-let texture_atlas = undefined;
+let textureAtlas, blockOrder;
+
 
 let blocks = {
   "water": "water_clear",
@@ -92,7 +94,15 @@ function loadBlockImages(block_names, block_order) {
 }
 
 function mergeBlockTextures(order) {
+  
 
+  setTexture(order);
+
+  loaded += 1;
+  console.log("Done stitching block textures in " + (Date.now() - t) + "ms");
+}
+
+function setTexture(order) {
   let canvas = document.createElement("canvas");
   let ctx = canvas.getContext("2d");
   canvas.width = 512;
@@ -108,24 +118,42 @@ function mergeBlockTextures(order) {
 
   ctx.drawImage(texture.image, 500, 500)
 
-  material = new THREE.MeshLambertMaterial({
+  let settings = {
     map: texture,
     side: THREE.FrontSide, // Default: FrontSide
     transparent: false,
     depthWrite: true
-  });
+  }
 
-  materialTransparent = new THREE.MeshLambertMaterial({
-    map: texture,
-    side: THREE.DoubleSide,
-    transparent: true,
-    depthWrite: true
-  });
+  let textureType = getCookie("Material Texture") || "lambert";
 
-  texture_atlas = texture.image;
+  switch (textureType) {
+    case "basic":
+      material = new THREE.MeshBasicMaterial(settings);
+      materialTransparent = new THREE.MeshBasicMaterial(settings);
+      break;
+    case "lambert":
+      material = new THREE.MeshLambertMaterial(settings);
+      materialTransparent = new THREE.MeshLambertMaterial(settings);
+      break;
+    case "phong":
+      material = new THREE.MeshPhongMaterial(settings);
+      materialTransparent = new THREE.MeshPhongMaterial(settings);
+      break;
+    case "standard":
+      material = new THREE.MeshStandardMaterial(settings);
+      materialTransparent = new THREE.MeshStandardMaterial(settings);
+      break;
+    case "toon":
+      material = new THREE.MeshToonMaterial(settings);
+      materialTransparent = new THREE.MeshToonMaterial(settings);
+      break;
+  }
+  
+  materialTransparent.side = THREE.DoubleSide;
+  materialTransparent.transparent = true;
 
-  loaded += 1;
-  console.log("Done stitching block textures in " + (Date.now() - t) + "ms");
+  textureAtlas = texture.image;
 }
 
 function drawImageNet(ctx, order, entities) {

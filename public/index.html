@@ -136,11 +136,15 @@
 							<span id="starsValue" class="slider-text">Stars: ON</span>
 							<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
 
-							<!-- <span id="texturesValue" class="slider-text">Textures: ON</span>
-							<select type="select" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
-							 -->
+							<span id="textureValue" class="slider-text">Material Texture:</span>
+							<select id="textureSelect" type="select" class="select" style="position: relative; float: right; width: 130px; height: 30px">
+								<option value="basic">Basic</option>
+								<option value="lambert" selected="selected">Lambert</option>
+								<option value="phong">Phong</option>
+								<option value="standard">Standard</option>
+								<option value="toon">Toon</option>
+							</select>
 							
-							<div id="apply-video-changes" class="settings-button">Apply Changes</div>
 							<div id="reset-video" class="settings-button">Reset to Default</div>
 						</div>
 

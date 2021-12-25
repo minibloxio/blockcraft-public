@@ -144,7 +144,7 @@ const cellSize = 16;
 const tileSize = 16;
 const tileTextureWidth = 512;
 const tileTextureHeight = 64;
-const buildHeight = cellSize*4;
+const buildHeight = cellSize*8;
 const world = new World({
 	cellSize,
 	tileSize,

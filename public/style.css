@@ -274,11 +274,12 @@ a {
 
 .settings-button:hover {
     cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(156, 126, 126, 0.7);
 }
 
 .slider-text {
     color: white;
+    margin: 0;
 }
 
 .slider {
@@ -309,7 +310,18 @@ a {
     height: 20px; 
     background: green; 
     cursor: pointer; 
-  }
+}
+
+.select {
+    width: 100%;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 20px;
+    font-family : inherit;
+    outline: none;
+    border: none;
+}
 
 /* KEYBOARD SETTINGS */
 

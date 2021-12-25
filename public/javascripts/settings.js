@@ -163,7 +163,7 @@ function addVideoControls() {
     addSwitchControl("Clouds", "cloud", true, stage, "showClouds", "generate")
     addSwitchControl("Stars", "stars", true, stage.stars, "visible")
 
-    //addSelectControl("Material Texture", "texture", true, stage.stars, "visible")
+    addSelectControl("Material Texture", "texture", "lambert", chunkManager, "texture", chunkManager.updateTexture);
 }
 
 function addSwitchControl(name, id, defaultValue, object, key, key2) {
@@ -188,22 +188,18 @@ function addSwitchControl(name, id, defaultValue, object, key, key2) {
     })
 }
 
-function addSelectControl(name, id, defaultValue, object, key) {
+function addSelectControl(name, id, defaultValue, object, key, callback) {
     if (getCookie(name)) {
-        object[key] = getCookie(name) == "true" ? true : false;
+        object[key] = getCookie(name);
     } else {
         object[key] = defaultValue;
     }
-    $("#" + id + "Value").text(name + ": " + (object[key] ? "ON" : "OFF"));
-    $("#" + id + "Slider")[0].value = object[key] ? 1 : 0;
-    $("#" + id + "Slider").off();
-    $("#" + id + "Slider").on("change", function (e) {
-        object[key] = $("#" + id + "Slider")[0].value == "1" ? true : false;
-        if (key2)
-            object[key2] = object[key];
-        $("#" + id + "Value").text(name + ": " + (object[key] ? "ON" : "OFF"));
+    $("#" + id + "Select")[0].value = object[key];
+    $(document).on('change',"#" + id + "Select",function(){
+        object[key] = $("#" + id + "Select")[0].value;
         setCookie(name, object[key], cookieExpiryTime);
-    })
+        callback();
+    });
 }
 
 $("#reset-video").click(function () {
