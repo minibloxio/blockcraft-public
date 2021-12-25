@@ -690,35 +690,35 @@ class Player {
 		}
 		this.direction.y = this.key.up + this.key.down;
 		
-		// Check if double jump
-		if (Date.now()-this.firstJump > 400) {
-			this.firstJump = 0;
-		}
+		// // Check if double jump
+		// if (Date.now()-this.firstJump > 400) {
+		// 	this.firstJump = 0;
+		// }
 
-		if (this.key.up && !this.secondJump) this.firstJump = Date.now(); // First jump
-		else if (!this.key.up && this.secondJump) {
-			this.secondJump = false;
-		} else if (!this.key.up && !this.secondJump && this.firstJump && Date.now()-this.firstJump < 100) {
-			this.secondJumpPossible = true; // Second jump possible
-		}
+		// if (this.key.up && !this.secondJump) this.firstJump = Date.now(); // First jump
+		// else if (!this.key.up && this.secondJump) {
+		// 	this.secondJump = false;
+		// } else if (!this.key.up && !this.secondJump && this.firstJump && Date.now()-this.firstJump < 100) {
+		// 	this.secondJumpPossible = true; // Second jump possible
+		// }
 
-		if (Date.now()-this.firstJump >= 100) {
-			this.firstJump = false;
-			this.secondJumpPossible = false;
-			this.secondJump = false;
-		}
+		// if (Date.now()-this.firstJump >= 100) {
+		// 	this.firstJump = false;
+		// 	this.secondJumpPossible = false;
+		// 	this.secondJump = false;
+		// }
 
-		if (this.key.up && this.secondJumpPossible) { // Double jump
-			this.secondJumpPossible = false;
-			this.firstJump = undefined;
-			this.secondJump = true;
+		// if (this.key.up && this.secondJumpPossible) { // Double jump
+		// 	this.secondJumpPossible = false;
+		// 	this.firstJump = undefined;
+		// 	this.secondJump = true;
 
-			// Fly if allowed
-			if (player.controls.enabled) {
-				player.fly = !player.fly;
-				player.allowFly = false;
-			}
-		}
+		// 	// Fly if allowed
+		// 	if (player.controls.enabled) {
+		// 		player.fly = !player.fly;
+		// 		player.allowFly = false;
+		// 	}
+		// }
 
 		if (this.onObject && !this.fly) this.velocity.y = Math.max( 0, this.velocity.y );
 

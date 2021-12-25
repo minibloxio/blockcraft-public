@@ -265,11 +265,11 @@ function updateCellMesh(data) {
     const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
 
     const positionNumComponents = 3;
-    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(opaqueGeometry.positions), positionNumComponents));
+    geometry.setAttribute('position', new THREE.BufferAttribute(opaqueGeometry.positions, positionNumComponents));
     const normalNumComponents = 3;
-    geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(opaqueGeometry.normals), normalNumComponents));
+    geometry.setAttribute('normal', new THREE.BufferAttribute(opaqueGeometry.normals, normalNumComponents));
     const uvNumComponents = 2;
-    geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(opaqueGeometry.uvs), uvNumComponents));
+    geometry.setAttribute('uv', new THREE.BufferAttribute(opaqueGeometry.uvs, uvNumComponents));
     geometry.setIndex(opaqueGeometry.indices);
     geometry.computeBoundingSphere();
 

@@ -143,143 +143,82 @@ function addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y
 
 function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
 
-    const {cellSize} = world;
-    const positions = [];
-    const normals = [];
-    const uvs = [];
-    const indices = [];
-    const startX = cellX * cellSize;
-    const startY = cellY * cellSize;
-    const startZ = cellZ * cellSize;
+  const {cellSize} = world;
+  const positions = [];
+  const normals = [];
+  const uvs = [];
+  const indices = [];
+  const startX = cellX * cellSize;
+  const startY = cellY * cellSize;
+  const startZ = cellZ * cellSize;
 
-    for (let y = 0; y < cellSize; ++y) {
-      const voxelY = startY + y;
-      for (let z = 0; z < cellSize; ++z) {
-        const voxelZ = startZ + z;
-        for (let x = 0; x < cellSize; ++x) {
-          const voxelX = startX + x;
-          const voxel = getVoxel(voxelX, voxelY, voxelZ);
+  for (let y = 0; y < cellSize; ++y) {
+    const voxelY = startY + y;
+    for (let z = 0; z < cellSize; ++z) {
+      const voxelZ = startZ + z;
+      for (let x = 0; x < cellSize; ++x) {
+        const voxelX = startX + x;
+        const voxel = getVoxel(voxelX, voxelY, voxelZ);
 
-          if (voxel <= 0)
-            continue;
+        if (voxel <= 0)
+          continue;
 
-          // voxel 0 is sky (empty) so for UVs we start at 0
-          const uvVoxel = voxel - 1;
-          // There is a voxel here but do we need faces for it?
+        // voxel 0 is sky (empty) so for UVs we start at 0
+        const uvVoxel = voxel - 1;
+        // There is a voxel here but do we need faces for it?
 
-          let transparentTexture = voxel == world.blockId["water"] || voxel == world.blockId["ice"] || voxel == world.blockId["glass"];
+        let transparentTexture = voxel == world.blockId["water"] || voxel == world.blockId["ice"] || voxel == world.blockId["glass"];
 
-          // OPAQUE TEXTURES
-          if (!transparent && !transparentTexture) {
-            for (const {dir, corners, uvRow} of faces) {
+        // OPAQUE TEXTURES
+        if (!transparent && !transparentTexture) {
+          for (const {dir, corners, uvRow} of faces) {
 
-              const neighbor = getVoxel(
-                  voxelX + dir[0],
-                  voxelY + dir[1],
-                  voxelZ + dir[2]);
-              if (neighbor <= 1 || neighbor == 255 || ((neighbor == world.blockId["ice"] || neighbor == world.blockId["glass"]) && voxel != neighbor)) {
-                // this voxel has no neighbor in this direction so we need a face.
-                addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
-              }
-
+            const neighbor = getVoxel(
+                voxelX + dir[0],
+                voxelY + dir[1],
+                voxelZ + dir[2]);
+            if (neighbor <= 1 || neighbor == 255 || ((neighbor == world.blockId["ice"] || neighbor == world.blockId["glass"]) && voxel != neighbor)) {
+              // this voxel has no neighbor in this direction so we need a face.
+              addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
             }
-          }
-          
-          // TRANSPARENT TEXTURES
-          if (transparent && transparentTexture) { // Water
-            for (const {dir, corners, uvRow} of faces) {
 
-              const neighbor = getVoxel(
-                  voxelX + dir[0],
-                  voxelY + dir[1],
-                  voxelZ + dir[2]);
-              if (neighbor == 0) {
-                // this voxel has no neighbor in this direction so we need a face.
-                addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
-              }
-            }
-          }
-
-        }
-      }
-    }
-
-    return {
-      positions,
-      normals,
-      uvs,
-      indices,
-    };
-}
-
-
-/*
-
-
-function generateGeometryDataForCell(cellX, cellY, cellZ, world) {
-
-    const {cellSize} = world;
-    const positions = [];
-    const normals = [];
-    const uvs = [];
-    const indices = [];
-    const startX = cellX * cellSize;
-    const startY = cellY * cellSize;
-    const startZ = cellZ * cellSize;
-
-    for (let y = 0; y < cellSize; ++y) {
-      const voxelY = startY + y;
-      for (let z = 0; z < cellSize; ++z) {
-        const voxelZ = startZ + z;
-        for (let x = 0; x < cellSize; ++x) {
-          const voxelX = startX + x;
-          const voxel = getVoxel(voxelX, voxelY, voxelZ);
-
-          if (voxel <= 0)
-            continue;
-
-          // voxel 0 is sky (empty) so for UVs we start at 0
-          const uvVoxel = voxel - 1;
-          // There is a voxel here but do we need faces for it?
-          if (voxel != 1 && voxel != world.blockId["ice"] && voxel != world.blockId["glass"]) {
-            for (const {dir, corners, uvRow} of faces) {
-
-              const neighbor = getVoxel(
-                  voxelX + dir[0],
-                  voxelY + dir[1],
-                  voxelZ + dir[2]);
-              if (neighbor <= 1 || neighbor == 255 || ((neighbor == world.blockId["ice"] || neighbor == world.blockId["glass"]) && voxel != neighbor)) {
-                // this voxel has no neighbor in this direction so we need a face.
-                addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
-              }
-
-            }
-          }
-
-          if (voxel == 1 || voxel == world.blockId["ice"] || voxel == world.blockId["glass"]) { // Water
-            for (const {dir, corners, uvRow} of faces) {
-
-              const neighbor = getVoxel(
-                  voxelX + dir[0],
-                  voxelY + dir[1],
-                  voxelZ + dir[2]);
-              if (neighbor == 0) {
-                // this voxel has no neighbor in this direction so we need a face.
-                addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
-              }
-            }
-              
           }
         }
+        
+        // TRANSPARENT TEXTURES
+        if (transparent && transparentTexture) { // Water
+          for (const {dir, corners, uvRow} of faces) {
+
+            const neighbor = getVoxel(
+                voxelX + dir[0],
+                voxelY + dir[1],
+                voxelZ + dir[2]);
+            if (neighbor == 0) {
+              // this voxel has no neighbor in this direction so we need a face.
+              addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
+            }
+          }
+        }
+
       }
     }
+  }
 
-    return {
-      positions,
-      normals,
-      uvs,
-      indices,
-    };
+  let positionBuffer = new Float32Array(new SharedArrayBuffer(positions.length*4));
+  let normalBuffer = new Float32Array(new SharedArrayBuffer(normals.length*4));
+  let uvBuffer = new Float32Array(new SharedArrayBuffer(uvs.length*4));
+
+  positionBuffer.set(positions);
+  normalBuffer.set(normals);
+  uvBuffer.set(uvs);
+  indexBuffer = indices;
+
+  return {
+    positions: positionBuffer,
+    normals: normalBuffer,
+    uvs: uvBuffer,
+    indices: indexBuffer,
+  }
 }
 
-*/
+let bufferSize = 16*16*16*4;

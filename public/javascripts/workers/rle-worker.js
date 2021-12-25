@@ -1,8 +1,10 @@
+let cellBufferSize = 16*16*16;
+
 self.addEventListener('message', e => {
 	let result = [];
 	for (let chunk of e.data) {
 		let cell = RLEdecode(chunk.cell);
-		chunk.cell = new Uint8Array(new SharedArrayBuffer(16*16*16));
+		chunk.cell = new Uint8Array(new SharedArrayBuffer(cellBufferSize));
 		chunk.cell.set(cell);
 		result.push(chunk);
 	}
