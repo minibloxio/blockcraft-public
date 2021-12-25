@@ -1,5 +1,10 @@
 changelog = [
 	{
+		"date": "Dec 25, 2021",
+		"version": "0.29.0",
+		"changes": "Massively optimized chunk generation by using SharedArrayBuffers in web workers"
+	},
+	{
 		"date": "Dec 24, 2021",
 		"version": "0.28.0",
 		"changes": "Reduced file sizes of world saves by 70% by removing chunks that have not been changed| Game now removes players and server entities after disconnection| Chat is now reset after disconnection| Offloaded chunk generation on the server using worker threads| Added a disconnection progress bar| Added multiple regional servers (eu-west, ap-south, ap-southeast)"

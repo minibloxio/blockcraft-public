@@ -127,7 +127,7 @@ socket.on('knockback', function (data) {
 })
 
 socket.on('punch', function (id) {
-	if (id != socket.id && players[id]) {
+	if (id != socket.id && players && players[id]) {
 		updatePlayerColor(id, new THREE.Color(1, 0.5, 0.5))
 		setTimeout(function () {
 			updatePlayerColor(id, new THREE.Color(1, 1, 1))

@@ -261,7 +261,7 @@ module.exports = class World {
     return cell[voxelOffset];
   }
   encodeCell(cellX, cellY, cellZ) { // RLE Encoding
-  	let array = this.getCellForVoxel(cellX*this.blockSize, cellY*this.blockSize, cellZ*this.blockSize)
+  	let array = this.getCellForVoxel(cellX*this.cellSize, cellY*this.cellSize, cellZ*this.cellSize)
 
 		var newArray=[];
 		var rip=[];
@@ -293,7 +293,7 @@ module.exports = class World {
 		return newArray;
   }
   getColumnInfo(xPos, zPos) {
-    let size = 256
+    let size = 256;
     let exponent = 3;
 
     var nx = xPos/size - 0.5, ny = zPos/size - 0.5;
@@ -381,145 +381,99 @@ module.exports = class World {
 
           // Waterlands
           if (biome == "OCEAN" && yPos <= waterLevel) {
-            if (yPos >= height)
-              blockId = "water";
-            else if (yPos > height-3 && moisture < 0.33)
-              blockId = "sand"
-             else if (yPos > height-3 && moisture < 0.4)
-              blockId = "clay"
-            else if (yPos > height-3)
-              blockId = "gravel"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "water";
+            else if (yPos > height-3 && moisture < 0.33) blockId = "sand"
+            else if (yPos > height-3 && moisture < 0.4) blockId = "clay"
+            else if (yPos > height-3) blockId = "gravel"
+            else if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "BEACH" && yPos <= height) {
-            if (yPos > height-1)
-              blockId = "sand";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos > height-1) blockId = "sand";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           // Mountains
           if (biome == "SCORCHED" && yPos <= height) {
-            if (yPos > 0)
-              blockId = "stone"
+            if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "BARE" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "dirt";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "dirt";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "TUNDRA" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "snowy_grass";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "snowy_grass";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "SNOW" && yPos <= height) {
-            if (yPos > height-1)
-              blockId = "snow";
-            else if (yPos > height-2)
-              blockId = "snowy_grass"
-            else if (yPos > height-4)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos > height-1) blockId = "snow";
+            else if (yPos > height-2) blockId = "snowy_grass"
+            else if (yPos > height-4) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           // Highlands
           if (biome == "TEMPERATE_DESERT" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "sand";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "sand";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "SHRUBLAND" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "grass";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "grass";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "TAIGA" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "snowy_grass";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "snowy_grass";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           // Midlands
           if (biome == "GRASSLAND" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "grass";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "grass";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "TEMPERATE_DECIDUOUS_FOREST" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "grass";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "grass";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "TEMPERATE_RAIN_FOREST" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "grass";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "grass";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           // Lowlands
 
           if (biome == "SUBTROPICAL_DESERT" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "sand";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "sand";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "TROPICAL_SEASONAL_FOREST" && yPos <= height) {
-            if (yPos >= height)
-              blockId = "grass";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos >= height) blockId = "grass";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           if (biome == "TROPICAL_RAIN_FOREST" && yPos <= height) {
-            if (yPos == height)
-              blockId = "cobblestone";
-            else if (yPos > height-3)
-              blockId = "dirt"
-            else if (yPos > 0)
-              blockId = "stone"
+            if (yPos == height) blockId = "cobblestone";
+            else if (yPos > height-3) blockId = "dirt"
+            else if (yPos > 0) blockId = "stone"
           }
 
           const coal = rng1.noise3D(xPos*coalSparsity, yPos*coalSparsity, zPos*coalSparsity);
@@ -537,53 +491,6 @@ module.exports = class World {
             blockId = (diamond > 0.9 && yPos < 12) ? "diamond_ore" : blockId
           }
 
-          /*// Get cell offset for y
-          
-
-          const cave = (rng1.noise3D(xPos*0.05, yPos*caveSparsity, zPos*0.05)+1)/2;
-
-          const coal = rng1.noise3D(xPos*coalSparsity, yPos*coalSparsity, zPos*coalSparsity);
-          const iron = rng1.noise3D(xPos*ironSparsity, yPos*ironSparsity, zPos*ironSparsity);
-          const gold = rng1.noise3D(xPos*goldSparsity, yPos*goldSparsity, zPos*goldSparsity);
-          const diamond = rng1.noise3D(xPos*diamondSparsity, yPos*diamondSparsity, zPos*diamondSparsity);
-         
-          // Terrain generation
-          let blockId = 0;
-          if (yPos > height && yPos <= this.waterLevel)
-              blockId = "water";
-
-          if (cave > 0.1) {
-            if (yPos == height && yPos > this.waterLevel+1) {
-              blockId = "grass";
-            } else if (yPos == height && yPos <= this.waterLevel-2) {
-              blockId = "gravel";
-            } else if (yPos == height && yPos <= this.waterLevel+1) {
-              blockId = "sand";
-            } else if (yPos < height && yPos > height-3) {
-              blockId = "dirt";
-            } else if (yPos <= height-3 && yPos > 0) {
-              blockId = "stone";
-              // Ore generation
-
-              blockId = (coal > 0.6 && yPos > 24) ? "coal_ore" : blockId
-              blockId = (iron > 0.7 && yPos > 18) ? "iron_ore" : blockId
-              blockId = (gold > 0.9 && yPos < 18) ? "gold_ore" : blockId
-              blockId = (diamond > 0.9 && yPos < 12) ? "diamond_ore" : blockId
-            }
-
-            if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel+15 && moisture > 0.5) {
-              blockId = "snow";
-            } else if (yPos >= height && yPos <= height && yPos >= this.mountainLevel+10 && moisture > 0.5) {
-              blockId = "snow";
-            } else if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel && moisture > 0.6) {
-              blockId = "snowy_grass";
-            } else if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel && moisture > 0.4) {
-              blockId = "dirt";
-            } else if (yPos >= height-2 && yPos <= height && yPos >= this.mountainLevel) {
-              blockId = "stone";
-            }
-          }*/
-
           if (yPos == 0) {
             blockId = "bedrock"; // Force bedrock layer
           }
@@ -595,61 +502,59 @@ module.exports = class World {
       }
     }
 
-    if (!cellExists || true) {
-    	 // Add fauna
-	    for (let z = -3; z < cellSize+3; ++z) {
-	    	for (let x = -3; x < cellSize+3; ++x) {
-	    		// Get cell offset
-	        let xPos = x + cellX * cellSize;
-	        let zPos = z + cellZ * cellSize;
-	        let height, moisture, biome;
-          [height, moisture, biome] = this.getColumnInfo(xPos, zPos);
-          let heightNoise = 128;
-          height = Math.floor(height*heightNoise)+30
-          let waterLevel = Math.floor(0.1*heightNoise)+30
+    // Add fauna
+    for (let z = -3; z < cellSize+3; ++z) {
+      for (let x = -3; x < cellSize+3; ++x) {
+        // Get cell offset
+        let xPos = x + cellX * cellSize;
+        let zPos = z + cellZ * cellSize;
+        let height, moisture, biome;
+        [height, moisture, biome] = this.getColumnInfo(xPos, zPos);
+        let heightNoise = 128;
+        height = Math.floor(height*heightNoise)+30
+        let waterLevel = Math.floor(0.1*heightNoise)+30
 
-          // Add fauna
-          let tree = rng1.noise3D(xPos/30, height, zPos/30)*rng1.noise2D(xPos, zPos) > moisture && height > waterLevel && height < this.mountainLevel;
+        // Add fauna
+        let tree = rng1.noise3D(xPos/30, height, zPos/30)*rng1.noise2D(xPos, zPos) > moisture && height > waterLevel && height < this.mountainLevel;
 
-          let ungrowable = ["OCEAN", "BEACH", "SCORCHED", "BARE", "SNOW"]
-          if (ungrowable.indexOf(biome) > -1) tree = false;
+        let ungrowable = ["OCEAN", "BEACH", "SCORCHED", "BARE", "SNOW"]
+        if (ungrowable.indexOf(biome) > -1) tree = false;
 
-	        if ((rng1.noise3D(xPos*0.05, height*caveSparsity, zPos*0.05)+1)/2 <= 0.1)
-	        	continue;
+        if ((rng1.noise3D(xPos*0.05, height*caveSparsity, zPos*0.05)+1)/2 <= 0.1)
+          continue;
 
-					// Add trees?
-					if (tree) {
-						for (let y = 1; y < 6; y++) {
-							this.setVoxel(xPos, height+y, zPos, this.blockId["wood"]);
-						}
+        // Add trees?
+        if (tree) {
+          for (let y = 1; y < 6; y++) {
+            this.setVoxel(xPos, height+y, zPos, this.blockId["wood"]);
+          }
 
-						for (let y = 3; y <= 6; y++) {
-							if (y == 3 || y == 4) {
-								for (let x = -2; x <= 2; x++) {
-									for (let z = -2; z <= 2; z++) {
-										if (!(x == 0 && z == 0))
-											this.setVoxel(xPos+x, height+y, zPos+z, this.blockId["leaves"]);
-									}
-								}
-							} else if (y == 5) {
-								for (let x = -1; x <= 1; x++) {
-									for (let z = -1; z <= 1; z++) {
-										if (!(x == 0 && z == 0))
-											this.setVoxel(xPos+x, height+y, zPos+z, this.blockId["leaves"]);
-									}
-								}
-							} else {
-								for (let x = -1; x <= 1; x++) {
-									this.setVoxel(xPos+x, height+y, zPos, this.blockId["leaves"]);
-								}
-								for (let z = -1; z <= 1; z++) {
-									this.setVoxel(xPos, height+y, zPos+z, this.blockId["leaves"]);
-								}
-							}
-						}
-					}
-	    	}
-	    }
+          for (let y = 3; y <= 6; y++) {
+            if (y == 3 || y == 4) {
+              for (let x = -2; x <= 2; x++) {
+                for (let z = -2; z <= 2; z++) {
+                  if (!(x == 0 && z == 0))
+                    this.setVoxel(xPos+x, height+y, zPos+z, this.blockId["leaves"]);
+                }
+              }
+            } else if (y == 5) {
+              for (let x = -1; x <= 1; x++) {
+                for (let z = -1; z <= 1; z++) {
+                  if (!(x == 0 && z == 0))
+                    this.setVoxel(xPos+x, height+y, zPos+z, this.blockId["leaves"]);
+                }
+              }
+            } else {
+              for (let x = -1; x <= 1; x++) {
+                this.setVoxel(xPos+x, height+y, zPos, this.blockId["leaves"]);
+              }
+              for (let z = -1; z <= 1; z++) {
+                this.setVoxel(xPos, height+y, zPos+z, this.blockId["leaves"]);
+              }
+            }
+          }
+        }
+      }
     }
 
     // Adjust to cell deltas

@@ -212,10 +212,11 @@ class Player {
 
 		if (item && item.class == "item" && item.c > 0) { // Display item
 			let canvas = document.createElement("canvas");
-			canvas.width = 16;
-			canvas.height = 16;
+			let itemSize = 16;
+			canvas.width = itemSize;
+			canvas.height = itemSize;
 			let ctx = canvas.getContext("2d");
-			ctx.drawImage(item_atlas, (item.v-1)*16, (this.state ? this.state : 0)*16, 16, 16, 0, 0, 16, 16);
+			ctx.drawImage(item_atlas, (item.v-1)*itemSize, (this.state ? this.state : 0)*itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
 			let texture = new THREE.CanvasTexture(canvas);
 			texture.magFilter = THREE.NearestFilter;
 			texture.minFilter = THREE.NearestFilter;
@@ -990,7 +991,7 @@ class Player {
 	}
 
 	updateClient(data) {
-		if (data.hp > this.hp) {
+		if (data && data.hp > this.hp) {
 			heartUp = true;
 		}
 		this.hp = data.hp;

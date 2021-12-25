@@ -89,18 +89,25 @@ class World {
 
   deleteCell(id, permanently) {
     if (cellIdToMesh[id]) {
-      cellIdToMesh[id][0].visible = false;
-      cellIdToMesh[id][1].visible = false;
+      let opaqueMesh = cellIdToMesh[id][0];
+      let transparentMesh = cellIdToMesh[id][1];
+      
+      if (opaqueMesh) opaqueMesh.visible = false;
+      if (transparentMesh) transparentMesh.visible = false;
 
       // Delete cell permanently
       if (permanently) {
-        cellIdToMesh[id][0].geometry.dispose();
-        cellIdToMesh[id][0].material.dispose();
-        scene.remove(cellIdToMesh[id][0]);
+        if (opaqueMesh) {
+          opaqueMesh.geometry.dispose();
+          opaqueMesh.material.dispose();
+          scene.remove(opaqueMesh);
+        }
 
-        cellIdToMesh[id][1].geometry.dispose();
-        cellIdToMesh[id][1].material.dispose();
-        scene.remove(cellIdToMesh[id][1]);
+        if (transparentMesh) {
+          transparentMesh.geometry.dispose();
+          transparentMesh.material.dispose();
+          scene.remove(transparentMesh);
+        }
 
         delete cellIdToMesh[id];
       }
@@ -264,27 +271,29 @@ function updateCellMesh(data) {
   if (data) {
     const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
 
-    const positionNumComponents = 3;
-    geometry.setAttribute('position', new THREE.BufferAttribute(opaqueGeometry.positions, positionNumComponents));
-    const normalNumComponents = 3;
-    geometry.setAttribute('normal', new THREE.BufferAttribute(opaqueGeometry.normals, normalNumComponents));
-    const uvNumComponents = 2;
-    geometry.setAttribute('uv', new THREE.BufferAttribute(opaqueGeometry.uvs, uvNumComponents));
-    geometry.setIndex(opaqueGeometry.indices);
-    geometry.computeBoundingSphere();
+    if (opaqueGeometry.positions.length > 0) {
+      const positionNumComponents = 3;
+      geometry.setAttribute('position', new THREE.BufferAttribute(opaqueGeometry.positions, positionNumComponents));
+      const normalNumComponents = 3;
+      geometry.setAttribute('normal', new THREE.BufferAttribute(opaqueGeometry.normals, normalNumComponents));
+      const uvNumComponents = 2;
+      geometry.setAttribute('uv', new THREE.BufferAttribute(opaqueGeometry.uvs, uvNumComponents));
+      geometry.setIndex(opaqueGeometry.indices);
+      geometry.computeBoundingSphere();
 
-    if (!mesh) {
-      mesh = new THREE.Mesh(geometry, material);
-      mesh.name = cellId;
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      cellIdToMesh[cellId][0] = mesh;
-      mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
-      mesh.matrixAutoUpdate = false;
-      mesh.updateMatrix();
-      scene.add(mesh);
+      if (!mesh) {
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.name = cellId;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        cellIdToMesh[cellId][0] = mesh;
+        mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
+        mesh.matrixAutoUpdate = false;
+        mesh.updateMatrix();
+        scene.add(mesh);
 
-      if (opaqueGeometry.positions.length > 0) {
+        if (opaqueGeometry.positions.length > 0) {
+        }
       }
     }
   }
@@ -293,27 +302,30 @@ function updateCellMesh(data) {
   if (data) {
     const geometry = meshT ? meshT.geometry : new THREE.BufferGeometry();
 
-    const positionNumComponents = 3;
-    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(transparentGeometry.positions), positionNumComponents));
-    const normalNumComponents = 3;
-    geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(transparentGeometry.normals), normalNumComponents));
-    const uvNumComponents = 2;
-    geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(transparentGeometry.uvs), uvNumComponents));
-    geometry.setIndex(transparentGeometry.indices);
-    geometry.computeBoundingSphere();
+    if (transparentGeometry.positions.length > 0) {
+    
+      const positionNumComponents = 3;
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(transparentGeometry.positions), positionNumComponents));
+      const normalNumComponents = 3;
+      geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(transparentGeometry.normals), normalNumComponents));
+      const uvNumComponents = 2;
+      geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(transparentGeometry.uvs), uvNumComponents));
+      geometry.setIndex(transparentGeometry.indices);
+      geometry.computeBoundingSphere();
 
-    if (!meshT) {
-      meshT = new THREE.Mesh(geometry, materialTransparent);
-      meshT.name = cellId;
-      meshT.castShadow = true;
-      meshT.receiveShadow = true;
-      cellIdToMesh[cellId][1] = meshT;
-      meshT.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
-      meshT.matrixAutoUpdate = false;
-      meshT.updateMatrix();
-      scene.add(meshT);
+      if (!meshT) {
+        meshT = new THREE.Mesh(geometry, materialTransparent);
+        meshT.name = cellId;
+        meshT.castShadow = true;
+        meshT.receiveShadow = true;
+        cellIdToMesh[cellId][1] = meshT;
+        meshT.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
+        meshT.matrixAutoUpdate = false;
+        meshT.updateMatrix();
+        scene.add(meshT);
 
-      if (transparentGeometry.positions.length > 0) {
+        if (transparentGeometry.positions.length > 0) {
+        }
       }
     }
   }

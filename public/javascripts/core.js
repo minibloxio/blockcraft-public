@@ -54,7 +54,6 @@ function initWorkers() {
 	for (let i = 0; i < 4; i++) { 
 		voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
 		voxelWorkers[i].addEventListener('message', e => {
-			//console.log(e.data);
 			// Update Voxel Mesh
 			for (let i = 0; i < e.data.length; i++) {
 				chunkManager.chunksToRender.push(e.data[i]);
@@ -67,7 +66,7 @@ function initWorkers() {
 function initStatistics() {
 	statistics.push(new Stat("Gamemode", player, "mode", 2))
     statistics.push(new Stat("Pos", player.position, false, 2, function (pos) {
-    	return pos.clone().divideScalar(16);
+    	return pos.clone().divideScalar(world.blockSize);
     }))
     statistics.push(new Stat("Chunk Pos", player.position, false, 2, function (pos) {
     	return world.computeCellFromPlayer(pos.x, pos.y, pos.z);

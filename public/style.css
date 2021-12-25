@@ -263,7 +263,7 @@ a {
     overflow-y: scroll;
 }
 
-#reset-video {
+.settings-button {
     margin-top: 20px;
     text-align: center;
     line-height: 50px;
@@ -272,7 +272,7 @@ a {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-#reset-video:hover {
+.settings-button:hover {
     cursor: pointer;
     background-color: rgba(0, 0, 0, 0.7);
 }

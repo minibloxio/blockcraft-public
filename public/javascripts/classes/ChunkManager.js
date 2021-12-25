@@ -44,11 +44,14 @@ class ChunkManager {
 					})
 					requests++;
 				} else {
-					if (cellIdToMesh[cellId]) {
+					if (cellIdToMesh[cellId] && cellIdToMesh[cellId].length) {
 						this.currChunks[`${cellX},${cellZ}`] = 1;
+
+						let opaqueMesh = cellIdToMesh[cellId][0];
+						let transparentMesh = cellIdToMesh[cellId][1];
 						
-						cellIdToMesh[cellId][0].visible = true;
-						cellIdToMesh[cellId][1].visible = true;
+						if (opaqueMesh) opaqueMesh.visible = true;
+						if (transparentMesh) transparentMesh.visible = true;
 					}
 				}
 	    	}

@@ -144,7 +144,7 @@ const cellSize = 16;
 const tileSize = 16;
 const tileTextureWidth = 512;
 const tileTextureHeight = 64;
-const buildHeight = 128;
+const buildHeight = cellSize*4;
 const world = new World({
 	cellSize,
 	tileSize,
@@ -187,7 +187,8 @@ worker.on('message', (data) => {
 
 	receivedChunks.push({
 		pos: chunk,
-		cell: world.encodeCell(chunk.x, chunk.y, chunk.z)
+		cell: world.encodeCell(chunk.x, chunk.y, chunk.z),
+		cellSize: world.cellSize,
 	})
 	io.to(socketId).emit('receiveChunk', receivedChunks);
 })

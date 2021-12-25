@@ -220,5 +220,3 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
     indices: indexBuffer,
   }
 }
-
-let bufferSize = 16*16*16*4;
