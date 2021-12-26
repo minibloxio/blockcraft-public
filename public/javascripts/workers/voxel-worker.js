@@ -13,11 +13,11 @@ self.addEventListener('message', e => {
     let result = [];
 
     for (let cell of cells) {
-       let [cellX, cellY, cellZ, cellId] = cell;
+       let [cellX, cellY, cellZ, cellId, forceUpdate] = cell;
        let geometryData = generateGeometryDataForCell(cellX, cellY, cellZ, world);
        let geometryDataT = generateGeometryDataForCell(cellX, cellY, cellZ, world, true);
 
-       result.push([geometryData, cellX, cellY, cellZ, cellId, geometryDataT])
+       result.push([geometryData, cellX, cellY, cellZ, cellId, geometryDataT, forceUpdate]);
     }
 
     self.postMessage(result);

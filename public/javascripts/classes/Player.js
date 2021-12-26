@@ -541,7 +541,7 @@ class Player {
 
 				// Remove blocks
 				world.setVoxel(x, y, z, 0);
-			    updateVoxelGeometry(x, y, z, true);
+			    updateVoxelGeometry(x, y, z, true, true);
 
 				// Send data to server
 				socket.emit('setBlock', {

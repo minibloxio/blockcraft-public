@@ -222,7 +222,7 @@ const neighborOffsets = [
   [ 0,  0,  1], // front
 ];
 
-function updateVoxelGeometry(x, y, z, neighbor) {
+function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
   let {cellSize} = world;
 
   let cells = [];
@@ -241,11 +241,10 @@ function updateVoxelGeometry(x, y, z, neighbor) {
       const cellY = Math.floor(oy / cellSize);
       const cellZ = Math.floor(oz / cellSize);
 
-      cells.push([cellX, cellY, cellZ, cellId]);
+      cells.push([cellX, cellY, cellZ, cellId, forceUpdate]);
     }
 
-    if (!neighbor)
-      break;
+    if (!neighbor) break;
   }
 
   voxelWorkers[voxelWorkerIndex].postMessage(cells)
@@ -257,7 +256,7 @@ function updateVoxelGeometry(x, y, z, neighbor) {
 
 function updateCellMesh(data) {
   let {blockSize, cellSize} = world;
-  var [opaqueGeometry, cellX, cellY, cellZ, cellId, transparentGeometry] = data;
+  var [opaqueGeometry, cellX, cellY, cellZ, cellId, transparentGeometry, forceUpdate] = data;
   let mesh, meshT;
 
   if (cellIdToMesh[cellId]) {
@@ -271,7 +270,7 @@ function updateCellMesh(data) {
   if (data) {
     const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
 
-    if (opaqueGeometry.positions.length > 0) {
+    if (opaqueGeometry.positions.length > 0 || forceUpdate) {
       const positionNumComponents = 3;
       geometry.setAttribute('position', new THREE.BufferAttribute(opaqueGeometry.positions, positionNumComponents));
       const normalNumComponents = 3;
@@ -291,9 +290,6 @@ function updateCellMesh(data) {
         mesh.matrixAutoUpdate = false;
         mesh.updateMatrix();
         scene.add(mesh);
-
-        if (opaqueGeometry.positions.length > 0) {
-        }
       }
     }
   }
@@ -302,7 +298,7 @@ function updateCellMesh(data) {
   if (data) {
     const geometry = meshT ? meshT.geometry : new THREE.BufferGeometry();
 
-    if (transparentGeometry.positions.length > 0) {
+    if (transparentGeometry.positions.length > 0 || forceUpdate) {
     
       const positionNumComponents = 3;
       geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(transparentGeometry.positions), positionNumComponents));

@@ -173,7 +173,7 @@ class ChunkManager {
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToRender[i];
 			if (chunk) {
-				updateCellMesh(chunk)
+				updateCellMesh(chunk, true)
 				this.chunksToRender.splice(i, 1);
 			}	
 		}
