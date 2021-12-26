@@ -204,7 +204,7 @@ var onKeyDown = function ( event ) {
 								addChat({
 									text: "Teleported " + player.name + " to " + p.name
 								});
-								player.position.copy(p.pos)
+								player.setCoord(p.pos);
 
 								break;
 							}
