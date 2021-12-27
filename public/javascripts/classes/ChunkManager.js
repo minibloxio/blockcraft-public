@@ -1,6 +1,7 @@
 class ChunkManager {
 	constructor () {
 		// Chunk loading
+		this.reqChunks = {};
 		this.currChunks = {};
 
 		this.chunksToRequest = [];
@@ -14,6 +15,7 @@ class ChunkManager {
 		this.chunkDelay = 0;
 
 		this.neighborOffsets = [
+			[0,  0,  0],
 			[-1,  0,  0], // left
 			[ 1,  0,  0], // right
 			[ 0, -1,  0], // down
@@ -38,22 +40,21 @@ class ChunkManager {
 	    let maxChunkRequests = 1;
 	    let requests = 0;
 	    for ( let i = 0; i < this.renderDistance*this.renderDistance; i++ ) {
-	    	// Add chunks to request
-	    	for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
-	    		let cellX = this.cellPos.x + x;
-				let cellY = y;
-				let cellZ = this.cellPos.z + z;
-				let cellId = cellX + "," + cellY + "," + cellZ;
+			
+			let cellX = this.cellPos.x + x;
+			let cellZ = this.cellPos.z + z;
+			let chunkId = cellX + "," + cellZ;
 
-				if (!world.cells[cellId]) { // Check if chunk already exists
-					this.chunksToRequest.push({
-						x: cellX,
-						y: cellY,
-						z: cellZ
-					})
-					requests++;
-				} else {
-					if (cellIdToMesh[cellId] && cellIdToMesh[cellId].length) {
+			if (!this.reqChunks[chunkId]) { // Already requested
+				
+				this.reqChunks[chunkId] = true; // Mark as requested
+
+				// Add chunks to request
+				for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
+					let cellY = y;
+					let cellId = cellX + "," + cellY + "," + cellZ;
+
+					if (cellIdToMesh[cellId] && cellIdToMesh[cellId].length) { // Already loaded
 						this.currChunks[`${cellX},${cellZ}`] = 1;
 
 						let opaqueMesh = cellIdToMesh[cellId][0];
@@ -61,12 +62,18 @@ class ChunkManager {
 						
 						if (opaqueMesh) opaqueMesh.visible = true;
 						if (transparentMesh) transparentMesh.visible = true;
+					} else { // Not loaded
+						this.chunksToRequest.push({
+							x: cellX,
+							y: cellY,
+							z: cellZ
+						})
+						requests++;
 					}
 				}
-	    	}
 
-	    	if (requests > maxChunkRequests)
-	    		break;
+				if (requests > maxChunkRequests) break;
+			}
 	       
 	        distance++;
 	        switch ( direction ) {

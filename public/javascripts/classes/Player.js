@@ -392,13 +392,13 @@ class Player {
 		let nearbyMeshes = [];
 		let cellPos = chunkManager.cellPos;
 		for (let offset of chunkManager.neighborOffsets) {
-			let id = `${cellPos.x + offset[0]},${cellPos.y + offset[1]},${cellPos.z + offset[2]}`;
+			let id = (cellPos.x + offset[0]) + "," + (cellPos.y + offset[1]) + "," + (cellPos.z + offset[2]);
 			if (cellIdToMesh[id]) {
-				//console.log(id);
+				if (cellIdToMesh[id][0]) nearbyMeshes.push(cellIdToMesh[id][0]);
+				if (cellIdToMesh[id][1]) nearbyMeshes.push(cellIdToMesh[id][1]);
 			}
 		}
-		//console.log(nearbyMeshes)
-		intersects = this.raycaster.intersectObjects( scene.children );
+		intersects = this.raycaster.intersectObjects( nearbyMeshes );
 
 		// Eliminate wireframes, items, and clouds from being selected
 		var picked = []
