@@ -186,9 +186,6 @@ class Stage {
 		}
 
 		// Update sky lighting
-		var midnight = new Color("#151B54");
-		var sunrise = new Color("#fd5e53");
-		var noon = new Color("#ADD8E6");
 		var perc = Math.pow(Math.abs(this.offset.y), 0.3) / Math.pow(this.sunDist, 0.3) * 100;
 		let color;
 
@@ -206,22 +203,6 @@ class Stage {
 		scene.fog.far = Infinity;
 	}
 }
-
-Color = function(hexOrObject) {
-    var obj;
-    if (hexOrObject instanceof Object) {
-        obj = hexOrObject;
-    } else {
-        obj = LinearColorInterpolator.convertHexToRgb(hexOrObject);
-    }
-    this.r = obj.r;
-    this.g = obj.g;
-    this.b = obj.b;
-}
-Color.prototype.asRgbCss = function() {
-    return "rgb("+this.r+", "+this.g+", "+this.b+")";
-}
-
 var LinearColorInterpolator = {
     // convert 6-digit hex to rgb components;
     // accepts with or without hash ("335577" or "#335577")
@@ -247,3 +228,21 @@ var LinearColorInterpolator = {
         return new Color(newColor);
     }
 }
+Color = function(hexOrObject) {
+    var obj;
+    if (hexOrObject instanceof Object) {
+        obj = hexOrObject;
+    } else {
+        obj = LinearColorInterpolator.convertHexToRgb(hexOrObject);
+    }
+    this.r = obj.r;
+    this.g = obj.g;
+    this.b = obj.b;
+}
+Color.prototype.asRgbCss = function() {
+    return "rgb("+this.r+", "+this.g+", "+this.b+")";
+}
+var midnight = new Color("#151B54");
+var sunrise = new Color("#fd5e53");
+var noon = new Color("#ADD8E6");
+

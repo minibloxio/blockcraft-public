@@ -301,11 +301,11 @@ function updateCellMesh(data) {
     if (transparentGeometry.positions.length > 0 || forceUpdate) {
     
       const positionNumComponents = 3;
-      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(transparentGeometry.positions), positionNumComponents));
+      geometry.setAttribute('position', new THREE.BufferAttribute(transparentGeometry.positions, positionNumComponents));
       const normalNumComponents = 3;
-      geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(transparentGeometry.normals), normalNumComponents));
+      geometry.setAttribute('normal', new THREE.BufferAttribute(transparentGeometry.normals, normalNumComponents));
       const uvNumComponents = 2;
-      geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(transparentGeometry.uvs), uvNumComponents));
+      geometry.setAttribute('uv', new THREE.BufferAttribute(transparentGeometry.uvs, uvNumComponents));
       geometry.setIndex(transparentGeometry.indices);
       geometry.computeBoundingSphere();
 

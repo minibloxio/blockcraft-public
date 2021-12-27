@@ -12,7 +12,7 @@ class ChunkManager {
 		this.renderDistance = 8; // RENDER DIST
 		this.chunkLoadingRate = 1;
 		this.chunkTick = Date.now();
-		this.chunkDelay = 0;
+		this.chunkDelay = 0; // ms
 
 		this.neighborOffsets = [
 			[0,  0,  0],
@@ -38,16 +38,18 @@ class ChunkManager {
 	    let direction = 'up';
 
 	    let maxChunkRequests = 1;
-	    let requests = 0;
+		let maxChunkRevisible = 1;
+		let requests = 0;
+		let revisible = 0;
 	    for ( let i = 0; i < this.renderDistance*this.renderDistance; i++ ) {
 			
 			let cellX = this.cellPos.x + x;
 			let cellZ = this.cellPos.z + z;
 			let chunkId = cellX + "," + cellZ;
 
-			if (!this.reqChunks[chunkId]) { // Not requested
-				
+			if (requests < maxChunkRequests && !this.reqChunks[chunkId]) { // Not requested
 				this.reqChunks[chunkId] = true; // Mark as requested
+				let requests = 0;
 
 				// Add chunks to request
 				for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
@@ -59,25 +61,23 @@ class ChunkManager {
 						y: cellY,
 						z: cellZ
 					})
-					requests++;
 				}
+				requests++;
+			} else if (revisible < maxChunkRevisible && !this.currChunks[chunkId]) { // Check if chunk is loaded
+				this.currChunks[chunkId] = [cellX, cellZ]; // Mark as loaded
 
-				if (requests > maxChunkRequests) break;
-			} else { // Check if chunk is loaded
 				for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
 					let cellY = y;
 					let cellId = cellX + "," + cellY + "," + cellZ;
 
-					if (cellIdToMesh[cellId] && cellIdToMesh[cellId].length) { // Already loaded
-						this.currChunks[`${cellX},${cellZ}`] = 1;
-
-						let opaqueMesh = cellIdToMesh[cellId][0];
-						let transparentMesh = cellIdToMesh[cellId][1];
-						
-						if (opaqueMesh) opaqueMesh.visible = true;
-						if (transparentMesh) transparentMesh.visible = true;
-					}
+					if (!cellIdToMesh[cellId]) continue;
+					let opaqueMesh = cellIdToMesh[cellId][0];
+					let transparentMesh = cellIdToMesh[cellId][1];
+					
+					if (opaqueMesh) opaqueMesh.visible = true;
+					if (transparentMesh) transparentMesh.visible = true;
 				}
+				revisible++;
 			}
 	       
 	        distance++;
@@ -121,7 +121,7 @@ class ChunkManager {
 		let requestedChunks = [];
 		for (let chunk of this.chunksToRequest) {
 			if (chunk) {
-				world.generateCell(chunk.x, chunk.y, chunk.z);
+				//world.generateCell(chunk.x, chunk.y, chunk.z);
 				requestedChunks.push(chunk);
 			}
 		}
@@ -178,7 +178,7 @@ class ChunkManager {
 				// }
 				
 				if (canBeLoaded) {
-					this.currChunks[`${chunk.x},${chunk.z}`] = 1;
+					this.currChunks[`${chunk.x},${chunk.z}`] = [chunk.x, chunk.z];
 					updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
 					this.chunksToLoad.splice(i, 1);
 				}
@@ -233,9 +233,9 @@ class ChunkManager {
 
 		// Loop through current cells to determine which chunks to unload
 		for (let id in this.currChunks) {
-			let cell = id.split(",");
-			let cx = parseInt(cell[0]);
-			let cz = parseInt(cell[1]);
+			let cell = this.currChunks[id];
+			let cx = cell[0];
+			let cz = cell[1];
 
 			let xDist = this.cellPos.x - cx;
 			let zDist = this.cellPos.z - cz;

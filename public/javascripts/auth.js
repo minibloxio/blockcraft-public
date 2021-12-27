@@ -111,6 +111,8 @@ function refreshServers() {
             }
             
             $("#server-container").append(serverHTML);
+
+            server.socket.disconnect();
         })
     }
 }

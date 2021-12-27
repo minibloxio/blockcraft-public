@@ -135,9 +135,13 @@ let elasped, delta;
 let then = performance.now();
 let game = {
 	fps: getCookie("FPS") || 60,
+	packetDelay: 16,
+	lastPacket: Date.now(),
 }
 function animate() {
 	requestAnimationFrame( animate );
+	
+	composer.render( scene, camera );
 	
 	// Get the frame's delta
 	var time = performance.now();
@@ -173,20 +177,23 @@ function animate() {
 			e.mesh.rotation.y += delta;
 	}
 
-	// Emit events to server
-	socket.emit('packet', {
-		pos: player.position,
-		vel: player.velocity,
-		onObject: player.onObject,
-		rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
-		dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
-		walking: (new Vector(player.velocity.x, player.velocity.z)).getMag() > 2,
-		sneaking: player.key.sneak,
-		punching: player.punchT < 2,
-		blocking: player.blockT > 0,
-		currSlot: player.currentSlot,
-		mode: player.mode,
-	});
+	// Send events to server
+	if (Date.now()-game.lastPacket > game.packetDelay) {
+		game.lastPacket = Date.now();
+		socket.emit('packet', {
+			pos: player.position,
+			vel: player.velocity,
+			onObject: player.onObject,
+			rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
+			dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
+			walking: (new Vector(player.velocity.x, player.velocity.z)).getMag() > 2,
+			sneaking: player.key.sneak,
+			punching: player.punchT < 2,
+			blocking: player.blockT > 0,
+			currSlot: player.currentSlot,
+			mode: player.mode,
+		});
+	}
 
 	// Update HUD
 	updateHUD();
@@ -195,7 +202,6 @@ function animate() {
 	stage.update();
 	stats.update();
 
-	composer.render( scene, camera );
 
 	prevTime = time;
 }
