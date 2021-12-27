@@ -42,8 +42,8 @@ class Stage {
 	    scene.fog = new THREE.Fog("lightblue", 0, blockSize*cellSize*5)
 
 	    // Sun
-	    this.sun = loadSprite('./sun.png', 100000);
-	    this.moon = loadSprite('./moon.png', 100000);
+	    this.sun = loadSprite('./sun.png', 16*16*16);
+	    this.moon = loadSprite('./moon.png', 16*16*16);
 		this.dayNightCycle = true;
 		this.daySpeed = 0.001; // Default: 0.001
 
@@ -58,9 +58,9 @@ class Stage {
 		// Add stars
 		var vertices = [];
 
-		for ( var i = 0; i < 500; i ++ ) {
-
-			let radius = 16 * 16 * 16 * 16;
+		for ( var i = 0; i < 1000; i ++ ) {
+			let minRadius = this.sunDist + 1;
+			let radius = random(minRadius, minRadius*2);
 			var u = Math.random();
 			var v = Math.random();
 			var theta = 2 * Math.PI * u;
@@ -76,7 +76,7 @@ class Stage {
 		var geometry = new THREE.BufferGeometry();
 		geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
 
-		var starMaterial = new THREE.PointsMaterial( { transparent: true, color: 0xFFFFFF, size: random(16*8, 32*16)} );
+		var starMaterial = new THREE.PointsMaterial( { transparent: true, color: 0xFFFFFF, size: 300} );
 
 		this.stars = new THREE.Points( geometry, starMaterial );
 		scene.add(this.stars);
@@ -113,10 +113,16 @@ class Stage {
 		let t = tick.value || 1000;
 
 		// Update stars transparency
-		let opacityOffset = 0.5;
+		let opacityOffset = 0.1;
 		let opacity = opacityOffset-Math.pow(Math.sin(t*this.daySpeed)/2+0.5, 5);
 		let clampedOpacity = mapRange(opacity > 0 ? opacity : 0, 0, opacityOffset, 0, 1)
 		this.stars.material.opacity = clampedOpacity;
+
+		// Update star rotation
+		let starRotationSpeed = 0.001 // Default: 0.001
+		let rotationAxis = new THREE.Vector3(1, 1, 1);
+		rotationAxis.normalize();
+		this.stars.setRotationFromAxisAngle(rotationAxis, tick.value*starRotationSpeed);
 
 		// Update sun position
 		if (this.dayNightCycle) {
