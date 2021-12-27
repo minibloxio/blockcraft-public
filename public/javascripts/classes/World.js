@@ -75,7 +75,7 @@ class World {
   generateCell(cellX, cellY, cellZ) {
     if (!this.cells[`${cellX},${cellY},${cellZ}`]) { // Check if chunk already exists
       const {cellSize} = this;
-      this.cells[`${cellX},${cellY},${cellZ}`] = new Uint8Array(Math.pow(cellSize, 3)).fill(255)
+      this.cells[`${cellX},${cellY},${cellZ}`] = new Uint8Array(new SharedArrayBuffer(Math.pow(cellSize, 3))).fill(255)
     }
   }
 

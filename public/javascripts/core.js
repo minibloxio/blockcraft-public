@@ -57,7 +57,9 @@ function initWorkers() {
 		voxelWorkers[i].addEventListener('message', e => {
 			// Update Voxel Mesh
 			for (let i = 0; i < e.data.length; i++) {
-				chunkManager.chunksToRender.push(e.data[i]);
+				if (e.data[6]) chunkManager.chunksToRender.unshift(e.data[i]); // Prioritize chunks
+				else chunkManager.chunksToRender.push(e.data[i]);
+				
 			}
 		})
 	}
@@ -130,14 +132,19 @@ function initRenderer() {
 }
 
 // Game loop
+let elasped, delta;
+let then = performance.now();
+let game = {
+	fps: getCookie("FPS") || 60,
+}
 function animate() {
 	requestAnimationFrame( animate );
-
+	
 	// Get the frame's delta
 	var time = performance.now();
-	delta = ( time - prevTime );
-	delta /= 1000;
+	elasped = time - then;
 
+	delta = (time-prevTime)/1000;
 	delta = Math.min(delta, 0.1)
 
 	updateMenu(); // Update the menu
@@ -186,9 +193,9 @@ function animate() {
 	stage.update();
 	stats.update();
 
-	prevTime = time;
-
 	composer.render( scene, camera );
+
+	prevTime = time;
 }
 
 // Window resize

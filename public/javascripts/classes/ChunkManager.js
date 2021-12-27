@@ -109,6 +109,7 @@ class ChunkManager {
 		let requestedChunks = [];
 		for (let chunk of this.chunksToRequest) {
 			if (chunk) {
+				world.generateCell(chunk.x, chunk.y, chunk.z);
 				requestedChunks.push(chunk);
 			}
 		}
@@ -150,31 +151,54 @@ class ChunkManager {
 	loadChunks() {
 		let {cellSize} = world;
 
-		// Load chunks based on loading rate
-		let loadedChunks = 0;
-		for (let i = 0; i < this.chunksToLoad.length; i++) {
+		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToLoad[i];
-			if (!chunk) continue;
-
-			let canBeLoaded = true;
-			for (let offset of this.neighborOffsets) {
-				let neighborId = (chunk.x + offset[0]) + "," + (chunk.y + offset[1]) + "," + (chunk.z + offset[2]);
-				if (!world.cells[neighborId]) {
-					canBeLoaded = false;
-					break;
+			if (chunk) {
+				
+				let canBeLoaded = true;
+				// let dir = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+				// for (let d of dir) {
+				// 	let cellId = (chunk.x+d[0]) + "," + (chunk.y) + "," + (chunk.z+d[1]);
+				// 	if (!world.cells[cellId]) { 
+				// 		canBeLoaded = false;
+				// 		break;
+				// 	}
+				// }
+				
+				if (canBeLoaded) {
+					this.currChunks[`${chunk.x},${chunk.z}`] = 1;
+					updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
+					this.chunksToLoad.splice(i, 1);
 				}
 			}
-			
-			if (canBeLoaded) {
-				this.currChunks[`${chunk.x},${chunk.z}`] = 1;
-				updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
-				this.chunksToLoad.splice(i, 1);
-
-				loadedChunks++;
-				if (loadedChunks > this.chunkLoadingRate)
-					break;
-			}
 		}
+
+		// // Load chunks based on loading rate
+		// let loadedChunks = 0;
+		
+		// for (let i = 0; i < this.chunksToLoad.length; i++) {
+		// 	let chunk = this.chunksToLoad[i];
+		// 	if (!chunk) continue;
+
+		// 	let canBeLoaded = true;
+		// 	for (let offset of this.neighborOffsets) {
+		// 		let neighborId = (chunk.x + offset[0]) + "," + (chunk.y + offset[1]) + "," + (chunk.z + offset[2]);
+		// 		if (!world.cells[neighborId]) {
+		// 			canBeLoaded = false;
+		// 			break;
+		// 		}
+		// 	}
+			
+		// 	if (canBeLoaded || true) {
+		// 		this.currChunks[`${chunk.x},${chunk.z}`] = 1;
+		// 		updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
+		// 		this.chunksToLoad.splice(i, 1);
+
+		// 		loadedChunks++;
+		// 		if (loadedChunks > this.chunkLoadingRate)
+		// 			break;
+		// 	}
+		// }
 	}
 
 	renderChunks() {

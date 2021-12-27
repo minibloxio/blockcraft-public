@@ -395,7 +395,7 @@ document.addEventListener( 'keyup', onKeyUp, false );
 
 
 // Scrolling
-var lastScrollTop = 0, delta = 5;
+var lastScrollTop = 0;
 let zoomLevel = 3
 $(document).bind('wheel', function(e) {
 	if (!initialized) return;
