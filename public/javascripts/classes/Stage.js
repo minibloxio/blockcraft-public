@@ -123,6 +123,7 @@ class Stage {
 		let rotationAxis = new THREE.Vector3(1, 1, 1);
 		rotationAxis.normalize();
 		this.stars.setRotationFromAxisAngle(rotationAxis, tick.value*starRotationSpeed);
+		this.stars.position.set(player.position.x, player.position.y, player.position.z);
 
 		// Update sun position
 		if (this.dayNightCycle) {
