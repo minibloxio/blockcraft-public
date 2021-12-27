@@ -389,6 +389,15 @@ class Player {
 		this.raycaster.far = blockSize * 5;
 
 		// calculate blocks intersecting the picking ray
+		let nearbyMeshes = [];
+		let cellPos = chunkManager.cellPos;
+		for (let offset of chunkManager.neighborOffsets) {
+			let id = `${cellPos.x + offset[0]},${cellPos.y + offset[1]},${cellPos.z + offset[2]}`;
+			if (cellIdToMesh[id]) {
+				//console.log(id);
+			}
+		}
+		//console.log(nearbyMeshes)
 		intersects = this.raycaster.intersectObjects( scene.children );
 
 		// Eliminate wireframes, items, and clouds from being selected
@@ -447,7 +456,7 @@ class Player {
 
     	let playerBoxes = [];
     	for (let id in players) playerBoxes.push(players[id].skeleton);
-		var intersects = this.raycaster.intersectObjects(scene.children, true);
+		var intersects = this.raycaster.intersectObjects(playerBoxes, true);
 
 		var picked = [];
 		for (var i = 0; i < intersects.length; i++) {

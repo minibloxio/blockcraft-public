@@ -177,13 +177,27 @@ var onKeyDown = function ( event ) {
     			} else if (msg[0] == "tp") {
 					msg.shift();
 
-					if (Number.isInteger(parseInt(msg[0]))) {
-						let validCoordinates = Number.isInteger(parseInt(msg[0])) && Number.isInteger(parseInt(msg[1])) && Number.isInteger(parseInt(msg[2]));
+					if (Number.isInteger(parseInt(msg[0])) || msg[0] == "~") {
+						let validCoordinates = true;
+						for (let i = 0; i < 3; i++) {
+							if (!(Number.isInteger(parseInt(msg[i])) || msg[i] == "~")) {
+								validCoordinates = false;
+								break;
+							} else if (msg[i] == "~") {
+								if (i == 0) {
+									msg[i] = player.position.x/world.blockSize;
+								} else if (i == 1) {
+									msg[i] = player.position.y/world.blockSize;
+								} else if (i == 2) {
+									msg[i] = player.position.z/world.blockSize;
+								}
+							}
+						}
 
 						console.log("Attempting to teleport to " + msg[0] + " " + msg[1] + " " + msg[2]);
 
 						if (validCoordinates) {
-							let coord = new THREE.Vector3(parseInt(msg[0])*world.blockSize, parseInt(msg[1])*world.blockSize, parseInt(msg[2])*world.blockSize);
+							let coord = new THREE.Vector3(parseFloat(msg[0])*world.blockSize, parseFloat(msg[1])*world.blockSize, parseFloat(msg[2])*world.blockSize);
 							player.setCoord(coord);
 						} else {
 							addChat({

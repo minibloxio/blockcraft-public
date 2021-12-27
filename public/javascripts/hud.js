@@ -14,7 +14,11 @@ toolbar.src = "./textures/hotbar.png";
 var toolbar_selector = new Image();
 toolbar_selector.src = "./textures/hotbar-selector.png";
 
-let blockTextures = [];
+let hud = {
+	showStats: true,
+	updateInterval: 100,
+	hudTime: Date.now(),
+}
 
 // Crosshair
 var crosshairSize = 25
@@ -479,9 +483,6 @@ function displayToolbar() {
 }
 
 // Stats
-let hud = {
-	showStats: true
-}
 function displayStats() {
 	if (hud.showStats) {
 		for (var i = 0; i < statistics.length; i++) {
@@ -721,6 +722,9 @@ function displayPlayerTab() {
 }
 
 function updateHUD() {
+	if (Date.now()-hud.time < hud.updateInterval) return;
+	hud.time = Date.now();
+
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	if (!initialized) return;
 	
@@ -733,18 +737,8 @@ function updateHUD() {
 	displayPlayerTab();
 }
 
-let hudInterval; // Used to clear the HUD interval
-function initHUD() {
-	hudInterval = setInterval(updateHUD, 1000/60);
-}
-
-function stopHUD() {
-	clearInterval(hudInterval);
-}
-
 window.onresize = function(event) {
     resize();
-    updateHUD();
 };
 
 function resize() {
