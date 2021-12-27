@@ -229,6 +229,7 @@ class ChunkManager {
 			this.chunksToRequest = [];
 			this.chunksToLoad = [];
 			this.chunksToRender = [];
+			this.reqChunks = {};
 		}
 
 		// Loop through current cells to determine which chunks to unload
