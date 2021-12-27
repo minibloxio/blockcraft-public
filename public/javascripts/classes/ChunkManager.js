@@ -63,6 +63,9 @@ class ChunkManager {
 					})
 				}
 				requests++;
+				if (requests > maxChunkRequests) {
+					break;
+				}
 			} else if (revisible < maxChunkRevisible && !this.currChunks[chunkId]) { // Check if chunk is loaded
 				this.currChunks[chunkId] = [cellX, cellZ]; // Mark as loaded
 
