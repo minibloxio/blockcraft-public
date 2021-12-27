@@ -35,7 +35,7 @@ socket.on('disconnect', function (reason) {
 let initialized = false;
 socket.on('joinResponse', function (data) {
 	// Check if already initialized
-	if (initialized) location.reload(true);
+	if (initialized) console.log("Already initialized game!");//location.reload(true);
 
 	// Receive common world attritutes
 	Object.assign(world, data.world)

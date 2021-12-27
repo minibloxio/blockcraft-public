@@ -320,6 +320,8 @@ function nextState(e) {
             } else { // Return to game
                 requestPointerLock();
             }
+        } else {
+            requestPointerLock();
         }
     } else if (isState("disconnecting")) { // Disconnecting from server
         

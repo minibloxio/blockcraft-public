@@ -29,6 +29,7 @@ function init() {
 	stage = new Stage(); // Initialize the stage (light, sun, moon, stars, etc.)
 
 	addVideoControls(); // Add video settings
+	addKeyboardControls(); // Add keyboard controls
 	initWorkers(); // Initialize web workers
     initStatistics(); // Add statistics to record
 	initRenderer(); // Finalize by adding the renderer

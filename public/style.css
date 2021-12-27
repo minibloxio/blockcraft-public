@@ -333,9 +333,9 @@ a {
 
 #reset-keyboard {
     text-align: center;
-    line-height: 50px;
+    line-height: 40px;
     width: 100%;
-    height: 50px;
+    height: 40px;
     background-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -358,6 +358,10 @@ a {
 }
 
 /* CHANGE KEY */
+.key {
+    margin-bottom: 15px;
+}
+
 .change-key {
     outline: none;
     border: none;
@@ -370,6 +374,7 @@ a {
     font-family: inherit;
     color: white;
     text-align: center;
+    
 }
 
 .change-key::placeholder {

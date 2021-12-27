@@ -29,7 +29,7 @@ function addKeyboardControls() {
 
     // Add the key binds
     for (let key of keyorder) {
-        let keyHTML = $('<div class="key"><span>' + keymap[key][0] + '</span><input class="change-key" placeholder="' + keymap[key][1] + '" data-keycode="' + key + '" readonly></div><br>')
+        let keyHTML = $('<div class="key"><span>' + keymap[key][0] + '</span><input class="change-key" placeholder="' + keymap[key][1] + '" data-keycode="' + key + '" readonly></div>')
         $("#keyboard-settings").append(keyHTML)
         keymap[key][2] = keymap[key][2] != undefined ? keymap[key][2] : true; // Enable
         keymap[key][3] = keyHTML[0]
@@ -133,7 +133,6 @@ function addKeyboardControls() {
         addKeyboardControls();
     })
 }
-addKeyboardControls();
 
 function addSliderControl(name, id, defaultValue, object, key) {
     // Sensitivity
