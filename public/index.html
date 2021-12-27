@@ -121,32 +121,48 @@
 						</div>
 
 						<div id="video-settings" class="tabcontent" style="display: none;">
-							<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
-							<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-							<span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
-							<input type="range" min="1" max="32" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-							<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
-							<input type="range" min="0" max="20" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-							<span id="fovValue" class="slider-text">FOV: 75</span>
-							<input type="range" min="1" max="180" value="75" class="slider" id="fovSlider" style="position: relative; float: right; width: 50%; height: 20px"><br /><br />
-
-							<span id="statsValue" class="slider-text">Statistics: OFF</span>
-							<input type="range" min="0" max="1" value="0" class="slider" id="statsSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-							<span id="shadowValue" class="slider-text">Shadow Effect: OFF</span>
-							<input type="range" min="0" max="1" value="0" class="slider" id="shadowSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-							<span id="cloudValue" class="slider-text">Clouds: ON</span>
-							<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-							<span id="starsValue" class="slider-text">Stars: ON</span>
-							<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px"><br /><br />
-
-							<span id="textureValue" class="slider-text">Material Texture:</span>
-							<select id="textureSelect" type="select" class="select" style="position: relative; float: right; width: 130px; height: 30px">
-								<option value="basic">Basic</option>
-								<option value="lambert" selected="selected">Lambert</option>
-								<option value="phong">Phong</option>
-								<option value="standard">Standard</option>
-								<option value="toon">Toon</option>
-							</select>
+							<div class="control-container">
+								<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
+								<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px">
+							</div>
+							<div class="control-container">
+								<span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
+								<input type="range" min="1" max="32" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px">
+							</div>
+							<div class="control-container">
+								<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
+								<input type="range" min="0" max="20" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px">
+							</div>
+							<div class="control-container">
+								<span id="fovValue" class="slider-text">FOV: 75</span>
+								<input type="range" min="1" max="180" value="75" class="slider" id="fovSlider" style="position: relative; float: right; width: 50%; height: 20px">
+							</div>
+							<div class="control-container">
+								<span id="statsValue" class="slider-text">Statistics: OFF</span>
+								<input type="range" min="0" max="1" value="0" class="slider" id="statsSlider" style="position: relative; float: right; width: 40px; height: 20px">
+							</div>
+							<div class="control-container">
+								<span id="shadowValue" class="slider-text">Shadow Effect: OFF</span>
+								<input type="range" min="0" max="1" value="0" class="slider" id="shadowSlider" style="position: relative; float: right; width: 40px; height: 20px">
+							</div>
+							<div class="control-container">
+								<span id="cloudValue" class="slider-text">Clouds: ON</span>
+								<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px">
+							</div>
+							<div class="control-container">
+								<span id="starsValue" class="slider-text">Stars: ON</span>
+								<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
+							</div>
+							<div class="control-container">
+								<span id="textureValue" class="slider-text">Material Texture:</span>
+								<select id="textureSelect" type="select" class="select" style="position: relative; float: right; width: 130px; height: 30px">
+									<option value="basic">Basic</option>
+									<option value="lambert" selected="selected">Lambert</option>
+									<option value="phong">Phong</option>
+									<option value="standard">Standard</option>
+									<option value="toon">Toon</option>
+								</select>
+							</div>
 							
 							<div id="reset-video" class="settings-button">Reset to Default</div>
 						</div>
