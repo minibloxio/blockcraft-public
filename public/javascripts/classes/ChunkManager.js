@@ -12,6 +12,15 @@ class ChunkManager {
 		this.chunkLoadingRate = 1;
 		this.chunkTick = Date.now();
 		this.chunkDelay = 0;
+
+		this.neighborOffsets = [
+			[-1,  0,  0], // left
+			[ 1,  0,  0], // right
+			[ 0, -1,  0], // down
+			[ 0,  1,  0], // up
+			[ 0,  0, -1], // back
+			[ 0,  0,  1], // front
+		];
 	}
 
 	requestChunks() { // OPTIMIZE
@@ -100,7 +109,6 @@ class ChunkManager {
 		let requestedChunks = [];
 		for (let chunk of this.chunksToRequest) {
 			if (chunk) {
-				world.generateCell(chunk.x, chunk.y, chunk.z)
 				requestedChunks.push(chunk);
 			}
 		}
@@ -118,8 +126,6 @@ class ChunkManager {
 		for (let i = 0; i < e.data.length; i++) {
 			let chunk = e.data[i];
 			let cellId = chunk.pos.x + "," + chunk.pos.y + "," + chunk.pos.z;
-
-			//console.log(chunk);
 
 			world.cells[cellId] = chunk.cell;
 			world.cells[cellId].set(chunk.cell);
@@ -145,25 +151,28 @@ class ChunkManager {
 		let {cellSize} = world;
 
 		// Load chunks based on loading rate
-		for (var i = 0; i < this.chunkLoadingRate; i++) {
+		let loadedChunks = 0;
+		for (let i = 0; i < this.chunksToLoad.length; i++) {
 			let chunk = this.chunksToLoad[i];
-			if (chunk) {
-				
-				let canBeLoaded = true;
-				// let dir = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-				// for (let d of dir) {
-				// 	let cellId = (chunk.x+d[0]) + "," + (chunk.y) + "," + (chunk.z+d[1]);
-				// 	if (!world.cells[cellId]) { 
-				// 		canBeLoaded = false;
-				// 		break;
-				// 	}
-				// }
-				
-				if (canBeLoaded) {
-					this.currChunks[`${chunk.x},${chunk.z}`] = 1;
-					updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
-					this.chunksToLoad.splice(i, 1);
+			if (!chunk) continue;
+
+			let canBeLoaded = true;
+			for (let offset of this.neighborOffsets) {
+				let neighborId = (chunk.x + offset[0]) + "," + (chunk.y + offset[1]) + "," + (chunk.z + offset[2]);
+				if (!world.cells[neighborId]) {
+					canBeLoaded = false;
+					break;
 				}
+			}
+			
+			if (canBeLoaded) {
+				this.currChunks[`${chunk.x},${chunk.z}`] = 1;
+				updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
+				this.chunksToLoad.splice(i, 1);
+
+				loadedChunks++;
+				if (loadedChunks > this.chunkLoadingRate)
+					break;
 			}
 		}
 	}
