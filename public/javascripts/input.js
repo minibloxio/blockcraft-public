@@ -148,6 +148,7 @@ var onKeyDown = function ( event ) {
     			msg = msg.slice(1).split(" ");
 
     			if (msg[0] == "gamemode") {
+					let prevGamemode = player.mode;
     				if (["survival", "s"].indexOf(msg[1]) > -1) {
     					addChat({
 							text: "Gamemode changed to survival mode"
@@ -174,6 +175,10 @@ var onKeyDown = function ( event ) {
 							color: "red"
 						});
     				}
+
+					if (player.mode != prevGamemode) {
+						player.updateGamemode();
+					}
     			} else if (msg[0] == "tp") {
 					msg.shift();
 

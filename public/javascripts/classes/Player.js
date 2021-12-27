@@ -194,6 +194,15 @@ class Player {
 		this.prevHeight = this.position.y;
 	}
 
+	updateGamemode() {
+		console.log("Updated gamemode to " + this.gamemode);
+		if (this.mode == "camera") {
+			$("#chat-input").attr('placeholder', '');
+		} else {
+			$("#chat-input").attr('placeholder', '> Press Enter to Chat')
+		}
+	}
+
 	getCurrItem() {
 		let item = this.toolbar[this.currentSlot];
 		if (item && item.c > 0)

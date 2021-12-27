@@ -532,12 +532,7 @@ function hideChatTimer(time) {
 hideChatTimer(5000);
 
 function displayChat() {
-	if (player.mode == "camera") {
-		$("#chat-input").attr('placeholder', '');
-		return;
-	} else {
-		$("#chat-input").attr('placeholder', '> Press Enter to Chat')
-	}
+	if (player.mode == "camera") return;
 
 	let msgHeight = 35;
 	let fontSize = msgHeight - 10;

@@ -45,11 +45,25 @@ class ChunkManager {
 			let cellZ = this.cellPos.z + z;
 			let chunkId = cellX + "," + cellZ;
 
-			if (!this.reqChunks[chunkId]) { // Already requested
+			if (!this.reqChunks[chunkId]) { // Not requested
 				
 				this.reqChunks[chunkId] = true; // Mark as requested
 
 				// Add chunks to request
+				for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
+					let cellY = y;
+					let cellId = cellX + "," + cellY + "," + cellZ;
+
+					this.chunksToRequest.push({
+						x: cellX,
+						y: cellY,
+						z: cellZ
+					})
+					requests++;
+				}
+
+				if (requests > maxChunkRequests) break;
+			} else { // Check if chunk is loaded
 				for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
 					let cellY = y;
 					let cellId = cellX + "," + cellY + "," + cellZ;
@@ -62,17 +76,8 @@ class ChunkManager {
 						
 						if (opaqueMesh) opaqueMesh.visible = true;
 						if (transparentMesh) transparentMesh.visible = true;
-					} else { // Not loaded
-						this.chunksToRequest.push({
-							x: cellX,
-							y: cellY,
-							z: cellZ
-						})
-						requests++;
 					}
 				}
-
-				if (requests > maxChunkRequests) break;
 			}
 	       
 	        distance++;
