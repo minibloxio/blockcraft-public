@@ -5,26 +5,34 @@
 
 let commandsInit = JSON.stringify({
     "gamemode": {
-        "hint": "gamemode <mode> - Changes your gamemode",
-        "survival": "Survival mode (default)",
-        "creative": "Creative mode (no damage taken)",
-        "spectator": "Spectator mode (free movement)",
-        "camera": "Camera mode (no hud)"
+        "hint": "<mode> - Changes your gamemode",
+        "hints": {
+            "survival": "Survival mode (default)",
+            "creative": "Creative mode (no damage taken)",
+            "spectator": "Spectator mode (free movement)",
+            "camera": "Camera mode (no hud)"
+        },
+        "error": "Invalid gamemode"
     },
     "tp": {
-        "hint": "tp <player>|<x> <y> <z> - Teleports you to the specified player or coordinates",
+        "hint": "<player>|<x> <y> <z> - Teleports you to the specified player or coordinates",
+        "hints": {},
+        "error": "Invalid player"
     },
     "time": {
-        "hint": "time <int> - Sets the time to the specified number",
+        "hint": "<int> - Sets the time to the specified number",
     },
     "god": {
-        "hint": "god - Toggles god mode",
+        "hint": "- Toggles god mode",
     },
     "help": {
-        "hint": "help - Displays this message",
+        "hint": "- Displays this message",
     },
     "tutorial": {
-        "hint": "tutorial - Displays the tutorial"
+        "hint": "- Displays the tutorial"
+    },
+    "seed": {
+        "hint": "- Displays the world seed",
     },
 })
 let commands = JSON.parse(commandsInit);
@@ -34,14 +42,14 @@ function giveCommandHint(msg, autocomplete) {
     // Initialize variables
     commands = JSON.parse(commandsInit);
     hintText = "/";
-    let firstArgUnique = true;
+    let firstArgUnique = false;
     let firstArgValue = "";
     let secondHint = false;
     let secondHintValue = "";
 
     // Update tp hint
     for (let id in players) {
-        commands.tp[players[id].name] = "Teleport to " + players[id].name;
+        commands.tp.hints[players[id].name] = "Teleport to " + players[id].name;
     }
     
     // Check if the command exists
@@ -52,14 +60,13 @@ function giveCommandHint(msg, autocomplete) {
         // If the string is a substring of a command
         if (command.startsWith(msg[0]) && command != msg[0]) {
 
-            if (!firstArgUnique) {
-                hintText += ", " + command;
-            }
-
             if (firstArgUnique) {
+                hintText += ", " + command;
+                firstArgValue = "";
+            } else {
                 hintText += command;
+                firstArgUnique = command;
                 firstArgValue = command;
-                firstArgUnique = false;
             }
 
             if (autocomplete) {
@@ -81,15 +88,15 @@ function giveCommandHint(msg, autocomplete) {
                 return;
             }
 
-            hintText += commands[command].hint;
+            hintText += command + " " + commands[command].hint;
         }
 
         // If the command exists and the command has a second argument
-        if (command == msg[0] && msg.length >= 2) { 
+        if (command == msg[0] && msg.length >= 2 && commands[command].hints) { 
             hintText += msg[0] + " ";
 
             // Check if the second argument is a valid
-            let hints = Object.keys(commands[command]);
+            let hints = Object.keys(commands[command].hints);
             for (let hint of hints) {
                 if (hint == "hint") continue;
 
@@ -121,30 +128,45 @@ function giveCommandHint(msg, autocomplete) {
 
             // Check if the second argument is the only one available
             if (secondHintValue) {
-                hintText += " - " + commands[command][secondHintValue];
+                hintText += " - " + commands[command].hints[secondHintValue];
+            } else if (!secondHint) {
+                hintText += msg[1] + " - " + commands[command].error;
+                hintText = "?" + hintText;
             }
         }
     }
 
     if (hintText == "/") {
         hintText += msg.join(" ") + " - No command found";
+        hintText = "?" + hintText;
+    }
+    if (firstArgUnique && firstArgValue) {
+        hintText += " " + commands[firstArgValue].hint;
     }
 }
 
 // Check command validity
 function checkCommand(msg) {
     let commandIds = Object.keys(commands);
-    if (commandIds.indexOf(msg[0]) == 0) {
+    if (msg[0] == "gamemode") {
         updateGamemode(msg[1]);
-    } else if (commandIds.indexOf(msg[0]) == 1) {
+    } else if (msg[0] == "tp") {
         teleport(msg)
-    } else if (commandIds.indexOf(msg[0]) == 2) {
+    } else if (msg[0] == "time") {
         setTime(msg[1]);
-    } else if (commandIds.indexOf(msg[0]) == 3) {
+    } else if (msg[0] == "god") {
         changeGodmode();
-    } else if (commandIds.indexOf(msg[0]) == 4) {
+    } else if (msg[0] == "help") {
         displayHelp(msg);
-    } else if (commandIds.indexOf(msg[0]) == 5) {
+    } else if (msg[0] == "tutorial") {
+        displayTutorial();
+    } else if (msg[0] == "seed") {
+        displaySeed();
+    } else if (msg[0] == "tutorial") {
+        displayTutorial();
+    } else if (msg[0] == "tutorial") {
+        displayTutorial();
+    } else if (msg[0] == "tutorial") {
         displayTutorial();
     } else {
         addChat({
@@ -336,4 +358,11 @@ function changeGodmode() {
         });
         player.updateGamemode(true);
     }
+}
+
+// Display world seed
+function displaySeed() {
+    addChat({
+        text: "World seed: " + world.seed
+    });
 }

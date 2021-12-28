@@ -613,13 +613,20 @@ function displayChat() {
 	// Draw command hint
 
 	if (hintText && showChatBar) {
+		let hintColor = "grey";
+		let text = hintText;
+		if (hintText[0] == "?") {
+			text = hintText.slice(1);
+			hintColor = "red";
+		}
+
 		let command = $("#chat-input").val();
 		let commandWidth = ctx.measureText(command).width;
-		let hintWidth = ctx.measureText(hintText).width;
+		let hintWidth = ctx.measureText(text).width;
 		let width = Math.max(commandWidth, hintWidth);
 		
 		drawRectangle(5, canvas.height-50-msgHeight+10-5, width + 10, msgHeight, "black", {alpha: 0.7});
-		drawText(hintText, 10, canvas.height-50-5, fontSize+"px Minecraft-Regular", "grey", "start", "alphabetic");
+		drawText(text, 10, canvas.height-50-5, fontSize+"px Minecraft-Regular", hintColor, "start", "alphabetic");
 		drawText(command, 10, canvas.height-50-5, fontSize+"px Minecraft-Regular", "white", "start", "alphabetic");
 	}
 }
