@@ -201,9 +201,14 @@ io.on('connection', function(socket_) {
 
 	// Server info request
 	socket.on('serverInfoRequest', function (data) {
+		let playerInfo = {};
+		for (let id in players) {
+			playerInfo[id] = players[id].name;
+		}
+
 		let info = {
 			ping: data,
-			numPlayers: Object.keys(players).length,
+			players: playerInfo,
 			region: config.region,
 			uptime: Date.now() - startTime,
 			link: config.link,

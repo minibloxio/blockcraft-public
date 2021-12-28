@@ -102,7 +102,7 @@ function refreshServers() {
             let serverHTML = $(`
                 <div class='server' data-link='${data.link}' onClick='clickServer(event)'  ondblclick='clickServer(event, true)'>
                     <p>Region: ${serverNames[data.region]}</p>
-                    <p>Players: ${data.numPlayers}/20</p>
+                    <p>Players: ${Object.keys(data.players).length}/20</p>
                     <p>Latency: ${latency}ms</p>
                     <p style="margin-bottom: 0;">Uptime: ${msToTime(data.uptime)} </p>
                 </div>
