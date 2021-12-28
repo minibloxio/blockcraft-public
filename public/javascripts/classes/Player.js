@@ -19,6 +19,7 @@ class Player {
 
 		// Mode
 		this.mode = "survival";
+		this.god = false;
 
 		// Movement
 
@@ -196,12 +197,24 @@ class Player {
 		this.prevHeight = this.position.y;
 	}
 
-	updateGamemode() {
-		console.log("Updated gamemode to " + this.gamemode);
-		if (this.mode == "camera") {
-			$("#chat-input").attr('placeholder', '');
+	updateGamemode(god) {
+		if (god) {
+			if (this.god) {
+				this.defaultMaxSprintSpeed = 10;
+				this.bhopMaxSpeed = 10;
+				this.initialJumpVelocity = 500;
+			} else {
+				this.defaultMaxSprintSpeed = 2.9;
+				this.bhopMaxSpeed = 2.9;
+				this.initialJumpVelocity = 150;
+			}
 		} else {
-			$("#chat-input").attr('placeholder', '> Press Enter to Chat')
+			console.log("Updated gamemode to " + this.gamemode);
+			if (this.mode == "camera") {
+				$("#chat-input").attr('placeholder', '');
+			} else {
+				$("#chat-input").attr('placeholder', '> Press Enter to Chat')
+			}
 		}
 	}
 
@@ -872,7 +885,7 @@ class Player {
 					if (!this.inWater && this.velocity.y <= 0 || this.position.y <= blockSize) {
 						let jumpDiff = Math.floor((this.prevHeight - this.position.y)/blockSize)-3;
 
-						if (jumpDiff > 0 && jumpDiff < 500 && this.mode == "survival") { // Fall damage
+						if (jumpDiff > 0 && jumpDiff < 500 && this.mode == "survival" && !this.god) { // Fall damage
 							socket.emit('takeDamage', {
 								dmg: jumpDiff*0.5,
 								type: 'fall'

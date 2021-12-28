@@ -239,6 +239,21 @@ var onKeyDown = function ( event ) {
     				if (typeof(parseInt(msg[1])) == "number")
     					socket.emit('settime', parseInt(msg[1]))
 	    				
+    			} else if (msg[0] == "god") {
+    				if (!player.god) {
+						player.god = true;
+						addChat({
+							text: "God mode enabled"
+						});
+						player.updateGamemode(true);
+					} else if (player.god) {
+						player.god = false;
+						addChat({
+							text: "God mode disabled"
+						});
+						player.updateGamemode(true);
+					}
+	    				
     			} else {
     				addChat({
 						text: 'Error: Unable to recognize command "' + msg[0] + '"',
