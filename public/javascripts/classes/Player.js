@@ -32,12 +32,12 @@ class Player {
 		this.speed = 2;
 		this.walkSpeed = 2;
 		this.maxWalkSpeed = 2;
-		this.defaultMaxSprintSpeed = 10//2.9;
+		this.defaultMaxSprintSpeed = 2.9;
 		this.sprintSpeed = this.defaultMaxSprintSpeed;
 		this.maxSprintSpeed = this.defaultMaxSprintSpeed;
 		this.distanceMoved = 0;
 
-		this.initialJumpVelocity = 500//150;
+		this.initialJumpVelocity = 150;
 
 		this.fly = false;
 		this.clip = true;
@@ -873,10 +873,10 @@ class Player {
 						let jumpDiff = Math.floor((this.prevHeight - this.position.y)/blockSize)-3;
 
 						if (jumpDiff > 0 && jumpDiff < 500 && this.mode == "survival") { // Fall damage
-							// socket.emit('takeDamage', {
-							// 	dmg: jumpDiff*0.5,
-							// 	type: 'fall'
-							// })
+							socket.emit('takeDamage', {
+								dmg: jumpDiff*0.5,
+								type: 'fall'
+							})
 							camera.rotation.order = "YXZ"
 							camera.rotation.z = Math.PI/16 + Math.PI/64 * Math.min(20, jumpDiff); // Yoink the camera
 							this.fallCooldown = Date.now();
