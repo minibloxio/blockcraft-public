@@ -649,6 +649,18 @@ function displayPlayerHealth() {
 	}
 }
 
+function getPlayerColor(mode) {
+	if (mode == "creative") {
+		return "aqua";
+	} else if (mode == "survival") {
+		return "white";
+	} else if (mode == "spectator") {
+		return "grey";
+	} else if (mode == "camera") {
+		return "grey";
+	}
+}
+
 function displayPlayerTab() {
 	if (!showPlayerTab)
 		return;
@@ -678,11 +690,11 @@ function displayPlayerTab() {
 
 		// Draw player ping
 		let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";
-
 		drawText(ping, rightX, yPos, "20px Minecraft-Regular", "white", "left", "top")
 
 		// Draw name
-		drawText(p.name, leftX, yPos, "20px Minecraft-Regular", "white", "left", "top")
+		let color = getPlayerColor(p.mode);
+		drawText(p.name, leftX, yPos, "20px Minecraft-Regular", color, "left", "top")
 
 		// Draw player health
 		for (let i = 0; i < 10; i++) {
@@ -708,7 +720,7 @@ function displayPlayerTab() {
 	// Draw client name
 	let xPos = canvas.width/2-width/2+pad;
 	let yPos = topY+30*(index+1);
-	drawText(p.name, xPos, yPos, "20px Minecraft-Regular", "white", "left", "top")
+	drawText(p.name, xPos, yPos, "20px Minecraft-Regular", getPlayerColor(player.mode), "left", "top")
 
 	// Draw player ping
 	let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";

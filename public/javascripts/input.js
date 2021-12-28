@@ -251,9 +251,11 @@ var onKeyDown = function ( event ) {
 						player.updateGamemode(true);
 					}
 	    				
-    			} else {
+    			} else if (msg[0] == "help") {
+				
+				} else {
     				addChat({
-						text: 'Error: Unable to recognize command "' + msg[0] + '"',
+						text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',
 						color: "red"
 					});
     			}
