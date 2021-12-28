@@ -591,7 +591,7 @@ function displayChat() {
 
 			if (msg.name)
 				text = "<"+msg.name+"> "+text;
-			text = text.substr(0, 100);
+			text = text.substr(0, 1000);
 			let newLines = getLines(ctx, text, 580, msg.color || "white", opacity).reverse();
 			lines = lines.concat(newLines);
 			currHeight += msgHeight;

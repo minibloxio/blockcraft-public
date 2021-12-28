@@ -327,7 +327,7 @@ io.on('connection', function(socket_) {
 
 		let {blockSize} = world;
 		// Update server world
-		players[socket.id].punching = true;
+		if (!data.cmd) players[socket.id].punching = true;
 		world.setVoxel(data.x, data.y, data.z, data.t, true, true);
 		updatedBlocks.push(data);
 
@@ -346,7 +346,7 @@ io.on('connection', function(socket_) {
 			}
 			world.entities[entityId] = entity;
 			newEntities.push(entity)
-		} else if (data.t > 0) { // Remove from player inventory if block is placed
+		} else if (data.t > 0 && !data.cmd) { // Remove from player inventory if block is placed
 			for (let t of players[socket.id].toolbar) {
 				if (!t)
 					continue;

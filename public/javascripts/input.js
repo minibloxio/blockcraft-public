@@ -239,6 +239,8 @@ var onKeyDown = function ( event ) {
 };
 
 var onKeyUp = function ( event ) {
+	hintText = "";
+
 	if ([13].indexOf(event.keyCode) > -1) {
 
 		showChatFlag = true;
@@ -250,8 +252,6 @@ var onKeyUp = function ( event ) {
 	if (player.controls.enabled && showChatFlag && msg && msg[0] == "/") {
 		msg = msg.slice(1).split(" ");
 		giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
-	} else {
-		hintText = "";
 	}
 
 	if (!initialized || !player.controls.enabled || showChatBar)

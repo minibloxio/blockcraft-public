@@ -26,7 +26,7 @@ let commandsInit = JSON.stringify({
         "hint": "- Toggles god mode",
     },
     "help": {
-        "hint": "- Displays this message",
+        "hint": "- Displays available commands",
     },
     "tutorial": {
         "hint": "- Displays the tutorial"
@@ -34,6 +34,11 @@ let commandsInit = JSON.stringify({
     "seed": {
         "hint": "- Displays the world seed",
     },
+    "setblock": {
+        "hint": "<x> <y> <z> <block> - Sets the block at the specified coordinates to the specified block",
+        "hints": {},
+        "error": "Invalid coordinates/block"
+    }
 })
 let commands = JSON.parse(commandsInit);
 
@@ -51,6 +56,8 @@ function giveCommandHint(msg, autocomplete) {
     for (let id in players) {
         commands.tp.hints[players[id].name] = "Teleport to " + players[id].name;
     }
+    commands.setblock.hints = world.blockId;
+    commands.help.hints = commands;
     
     // Check if the command exists
     let commandIds = Object.keys(commands);
@@ -95,6 +102,27 @@ function giveCommandHint(msg, autocomplete) {
         if (command == msg[0] && msg.length >= 2 && commands[command].hints) { 
             hintText += msg[0] + " ";
 
+            // Special case for /setblock
+            if (msg[0] == "setblock") {
+                msg.shift();
+                if (msg.length < 4) {
+                    hintText += msg.join(" ");
+
+                    if (autocomplete) {
+                        let completedCommand = hintText + "~ ";
+                        $("#chat-input").val(completedCommand);
+                        giveCommandHint(completedCommand.slice(1).split(" "), false);
+                        return;
+                    }
+
+                    hintText += "~ - Set block at " + getCoord(msg);
+                    return;
+                } else if (msg.length == 4) {
+                    hintText += msg.slice(0, 3).join(" ") + " ";
+                    msg.splice(0, 2);
+                }
+            }
+
             // Check if the second argument is a valid
             let hints = Object.keys(commands[command].hints);
             for (let hint of hints) {
@@ -119,30 +147,67 @@ function giveCommandHint(msg, autocomplete) {
                 }
             }
 
-            if (msg[0] == "tp" && Number.isInteger(parseInt(msg[1])) && !msg[4]) {
+            // Special case for /tp
+            if (msg[0] == "tp") {
                 msg.shift();
-                hintText += msg.join(" ");
-                hintText += " - Teleport to " + msg[0] + " " + (msg[1] || "<int>") + " " + (msg[2] || "<int>");
-                return;
+                if ((Number.isInteger(parseInt(msg[0])) || msg[0] == "~")) {
+                    let coord = getCoord(msg);
+                    if (coord) {
+                        if (msg.length == 3 && !validateCoord(msg)) {
+                            hintText += msg.join(" ") + " - Invalid coordinates";
+                            return;
+                        } else {
+                            hintText += msg.join(" ") + " - Teleport to " + coord;
+                            return;
+                        }
+                    }
+                } else if (Object.keys(commands[command].hints) == 0) {
+                    hintText += msg.join(" ") + " - No players online to teleport to";
+                    return;
+                }
             }
 
             // Check if the second argument is the only one available
             if (secondHintValue) {
-                hintText += " - " + commands[command].hints[secondHintValue];
+                hintText += " " + (commands[command].hints[secondHintValue].hint || ("- " + commands[command].hints[secondHintValue]));
+                return;
             } else if (!secondHint) {
-                hintText += msg[1] + " - " + commands[command].error;
+                msg.shift();
+                hintText += msg.join(" ") + " - " + commands[command].error;
                 hintText = "?" + hintText;
             }
         }
     }
 
-    if (hintText == "/") {
+    //console.log(firstArgUnique, firstArgValue, secondHint, secondHintValue);
+    if (hintText == "/" && !firstArgUnique) {
         hintText += msg.join(" ") + " - No command found";
         hintText = "?" + hintText;
     }
     if (firstArgUnique && firstArgValue) {
         hintText += " " + commands[firstArgValue].hint;
     }
+}
+
+function getCoord(msg, pos, decimalPlace) {
+    let x = msg[0] == "~" ? round(player.position.x/world.blockSize, decimalPlace) : parseInt(msg[0]);
+    let y = msg[1] == "~" ? round(player.position.y/world.blockSize, decimalPlace) : parseInt(msg[1]);
+    let z = msg[2] == "~" ? round(player.position.z/world.blockSize, decimalPlace) : parseInt(msg[2]);
+    if (pos) {
+        return {x: x, y: y, z: z};
+    } else {
+        return "x: " + (x || "<int>") + " y: " + (y || "<int>") + " z: " + (z || "<int>");
+    }
+}
+
+function validateCoord(msg) {
+    console.log(msg);
+    if (msg.length != 3) return false;
+    if (msg[0].length == 0 || msg[1].length == 0 || msg[2].length == 0) return true;
+    let x = msg[0] == "~" ? round(player.position.x/world.blockSize, 2) : parseInt(msg[0]);
+    let y = msg[1] == "~" ? round(player.position.y/world.blockSize, 2) : parseInt(msg[1]);
+    let z = msg[2] == "~" ? round(player.position.z/world.blockSize, 2) : parseInt(msg[2]);
+    return x && y && z;
 }
 
 // Check command validity
@@ -162,8 +227,8 @@ function checkCommand(msg) {
         displayTutorial();
     } else if (msg[0] == "seed") {
         displaySeed();
-    } else if (msg[0] == "tutorial") {
-        displayTutorial();
+    } else if (msg[0] == "setblock") {
+        setBlock(msg);
     } else if (msg[0] == "tutorial") {
         displayTutorial();
     } else if (msg[0] == "tutorial") {
@@ -187,36 +252,13 @@ function displayHelp(msg) {
         })
     } else {
         let command = msg[1];
-        if (command == "tp") {
+        if (commands[command]) {
             addChat({
-                text: '/tp <int> <int> <int> - Teleports you to the specified coordinates'
-            })
-            addChat({
-                text: '/tp <player> - Teleports you to the specified player'
-            })
-        } else if (command == "time") {
-            addChat({
-                text: '/time <int> - Sets the time to the specified number'
-            })
-        } else if (command == "gamemode") {
-            addChat({
-                text: '/gamemode - Displays your current gamemode'
-            })
-        } else if (command == "help") {
-            addChat({
-                text: '/help - Displays this message'
-            })
-        } else if (command == "god") {
-            addChat({
-                text: '/god - Toggles god mode'
-            })
-        } else if (command == "tutorial") {
-            addChat({
-                text: '/tutorial - Displays the tutorial'
+                text: 'Usage: /' + command + ' ' + commands[command].hint
             })
         } else {
             addChat({
-                text: 'Error: Command not found'
+                text: 'Error: Unable to recognize command "' + command + '"'
             })
         }
     }
@@ -289,26 +331,12 @@ function setTime(time) {
 function teleport(msg) {
     msg.shift();
     if (Number.isInteger(parseInt(msg[0])) || msg[0] == "~") {
-        let validCoordinates = true;
-        for (let i = 0; i < 3; i++) {
-            if (!(Number.isInteger(parseInt(msg[i])) || msg[i] == "~")) {
-                validCoordinates = false;
-                break;
-            } else if (msg[i] == "~") {
-                if (i == 0) {
-                    msg[i] = player.position.x/world.blockSize;
-                } else if (i == 1) {
-                    msg[i] = player.position.y/world.blockSize;
-                } else if (i == 2) {
-                    msg[i] = player.position.z/world.blockSize;
-                }
-            }
-        }
-
-        console.log("Attempting to teleport to " + msg[0] + " " + msg[1] + " " + msg[2]);
+        let validCoordinates = validateCoord(msg);
+        let pos = getCoord(msg, true, 3);
+        console.log("Attempting to teleport to " + pos.x + " " + pos.y + " " + pos.z);
 
         if (validCoordinates) {
-            let coord = new THREE.Vector3(parseFloat(msg[0])*world.blockSize, parseFloat(msg[1])*world.blockSize, parseFloat(msg[2])*world.blockSize);
+            let coord = new THREE.Vector3(pos.x*world.blockSize, pos.y*world.blockSize, pos.z*world.blockSize);
             player.setCoord(coord);
         } else {
             addChat({
@@ -365,4 +393,33 @@ function displaySeed() {
     addChat({
         text: "World seed: " + world.seed
     });
+}
+
+// Set a block
+function setBlock(msg) {
+    msg.shift();
+    console.log(msg);
+    let validCoordinates = validateCoord(msg.slice(0, 3));
+    console.log(validCoordinates);
+    let pos = getCoord(msg, true);
+    console.log("Attempting to set block at " + pos.x + " " + pos.y + " " + pos.z);
+
+    if (validCoordinates) {
+        let coord = new THREE.Vector3(pos.x, pos.y, pos.z);
+        socket.emit('setBlock', {
+            x: coord.x,
+            y: coord.y,
+            z: coord.z,
+            t: world.blockId[msg[3]],
+            cmd: true,
+        });
+        addChat({
+            text: "Set block at " + coord.x + " " + coord.y + " " + coord.z + " to " + msg[3] + " (" + world.blockId[msg[3]] + ")"
+        })
+    } else {
+        addChat({
+            text: 'Error: Invalid coordinate (format: /setblock <int> <int> <int>)',
+            color: "red"
+        });
+    }
 }
