@@ -209,7 +209,7 @@ class Player {
 				this.initialJumpVelocity = 150;
 			}
 		} else {
-			console.log("Updated gamemode to " + this.gamemode);
+			console.log("Updated gamemode to " + this.mode);
 			if (this.mode == "camera") {
 				$("#chat-input").attr('placeholder', '');
 			} else {

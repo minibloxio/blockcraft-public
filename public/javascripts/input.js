@@ -252,7 +252,48 @@ var onKeyDown = function ( event ) {
 					}
 	    				
     			} else if (msg[0] == "help") {
-				
+					if (msg.length == 1) {
+						addChat({
+							text: 'COMMANDS: /help, /tutorial, /tp <player>, /tp <x> <y> <z>, /time <int>, /gamemode <mode>, /god, /time <int>'
+						})
+						addChat({
+							text: 'Type /help <command> for more info on a command'
+						})
+					} else {
+						let command = msg[1];
+						if (command == "tp") {
+							addChat({
+								text: '/tp <int> <int> <int> - Teleports you to the specified coordinates'
+							})
+							addChat({
+								text: '/tp <player> - Teleports you to the specified player'
+							})
+						} else if (command == "time") {
+							addChat({
+								text: '/time <int> - Sets the time to the specified number'
+							})
+						} else if (command == "gamemode") {
+							addChat({
+								text: '/gamemode - Displays your current gamemode'
+							})
+						} else if (command == "help") {
+							addChat({
+								text: '/help - Displays this message'
+							})
+						} else if (command == "god") {
+							addChat({
+								text: '/god - Toggles god mode'
+							})
+						} else if (command == "tutorial") {
+							addChat({
+								text: '/tutorial - Displays the tutorial'
+							})
+						} else {
+							addChat({
+								text: 'Error: Command not found'
+							})
+						}
+					}
 				} else {
     				addChat({
 						text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',

@@ -32,13 +32,21 @@ let hideChatId = undefined;
 let chatMsg = "";
 let chatInit = JSON.stringify([
 	{
+		text: "Type /tutorial for more information on how to play or /help for a list of commands."
+	},
+	{
 		text: "Welcome to BlockCraft! This game is still a work in progress, but feel free to play around!",
-		t: Date.now()
-	}
+		color: "yellow"
+	},
+	{
+		text: "------------------------------------------------------",
+		color: "aqua",
+	},
 ]);
 
 // Init chat
 let chat = JSON.parse(chatInit);
+let chatTimer = 0;
 
 // Health
 let heartSize = 40;
@@ -523,15 +531,22 @@ function addChat(options) {
 			discard: options.discard
 		}
 	)
-	hideChatTimer(options.timer || 5000);
+	chatTimer = options.timer ? options.timer : undefined;
+	if (chatTimer) hideChatTimer(options.timer || 5000);
 	if (chat.length > 100) {
 		chat.pop();
 	}
 }
+addChat({
+	text: "------------------------------------------------------",
+	color: "aqua",
+	timer: 15000
+})
 
 function hideChatTimer(time) {
 	clearTimeout(hideChatId)
 	hideChatId = setTimeout(function () {
+		chatTimer = 0;
 		if (!showChatBar) {
 			showChat = false;
 
@@ -543,7 +558,6 @@ function hideChatTimer(time) {
 		}
 	}, time)
 }
-hideChatTimer(5000);
 
 function displayChat() {
 	if (player.mode == "camera") return;
