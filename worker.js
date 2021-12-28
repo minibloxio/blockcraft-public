@@ -34,13 +34,21 @@ const world = new World({
 parentPort.on('message', (data) => {
     if (data.cmd == "seed") {
         world.updateSeed(data.seed);
-    } else if (data.cmd == "generateChunk") {
-        const { socketId, chunk, id, cell, cellDelta } = data;
+    } else if (data.cmd == "generateChunks") {
+        const { socketId, chunkData } = data;
 
-        world.cells[id] = cell;
-        world.cellDeltas[id] = cellDelta;
-        world.generateCell(chunk.x, chunk.y, chunk.z, cell, cellDelta);
+        let chunks = [];
+
+        for (let data of chunkData) {
+            let id = data.id;
+            let chunk = data.chunk;
+            chunks.push(chunk);
+
+            world.cells[id] = data.cell;
+            world.cellDeltas[id] = data.cellDelta;
+            world.generateCell(chunk.x, chunk.y, chunk.z, data.cell, data.cellDelta);
+        }
         
-        parentPort.postMessage({socketId, id, chunk});
+        parentPort.postMessage({socketId, chunks});
     }
 })

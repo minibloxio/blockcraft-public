@@ -180,16 +180,18 @@ fs.readFile(save_path, function (err, data) {
 
 // Worker process
 worker.on('message', (data) => {
-	let {socketId, id, chunk} = data;
-    //console.log(world.cells[id]);
+	let {socketId, id, chunks} = data;
 
 	let receivedChunks = [];
 
-	receivedChunks.push({
-		pos: chunk,
-		cell: world.encodeCell(chunk.x, chunk.y, chunk.z),
-		cellSize: world.cellSize,
-	})
+	for (let chunk of chunks) {
+		receivedChunks.push({
+			pos: chunk,
+			cell: world.encodeCell(chunk.x, chunk.y, chunk.z),
+			cellSize: world.cellSize,
+		})
+	}
+
 	io.to(socketId).emit('receiveChunk', receivedChunks);
 })
 
@@ -280,7 +282,6 @@ io.on('connection', function(socket_) {
 			info: config,
 		});
 	})
-
 
 	// Update player info
 	socket.on('playerInfo', function (data) {
@@ -383,39 +384,42 @@ io.on('connection', function(socket_) {
 
 	// Request chunk
 	socket.on('requestChunk', function (data) {
+		let chunksToGenerate = [];
+		let chunksToSend = [];
+
 		for (let chunk of data) {
 			let id = `${chunk.x},${chunk.y},${chunk.z}`
 			let cell = world.cells[id];
 			if (!cell) {
+				
 				world.cells[id] = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
+
+				let data = {
+					id: id,
+					chunk: chunk,
+					cell: world.cells[id],
+					cellDelta: undefined,
+				}
 
 				if (!world.cellDeltas[id]) {
 					world.cellDeltas[id] = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
+					data.cellDelta = world.cellDeltas[id];
+
 				}
 
-				worker.postMessage({cmd: "generateChunk", socketId: socket.id, chunk: chunk, id: id, cell: world.cells[id], cellDelta: world.cellDeltas[id]});
+				chunksToGenerate.push(data);
 			}
 			else {
-				socket.emit('receiveChunk', [{
+				chunksToSend.push({
 					pos: chunk,
 					cell: world.encodeCell(chunk.x, chunk.y, chunk.z),
-				}]);
+				})
 			}
 		}
 
-		// let receivedChunks = [];
-		// for (let chunk of data) {
-		// 	if (!chunk) continue;
+		worker.postMessage({cmd: "generateChunks", socketId: socket.id, chunkData: chunksToGenerate});
 
-		// 	world.generateCell(chunk.x, chunk.y, chunk.z);
-
-
-		// 	receivedChunks.push({
-		// 		pos: chunk,
-		// 		cell: world.encodeCell(chunk.x, chunk.y, chunk.z)
-		// 	})
-		// }
-		// socket.emit('receiveChunk', receivedChunks);
+		socket.emit('receiveChunk', chunksToSend);
 	})
 
 	// Update player inventory

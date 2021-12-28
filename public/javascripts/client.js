@@ -90,8 +90,8 @@ socket.on('textureData', function (data) {
 })
 
 // Update chunk
-socket.on('receiveChunk', function (data) {
-	rleWorker.postMessage(data); // Send decoding to the rleWorker
+socket.on('receiveChunk', async function (data) {
+	await rleWorker.postMessage(data); // Send decoding to the rleWorker
 })
 
 // Add newcoming players

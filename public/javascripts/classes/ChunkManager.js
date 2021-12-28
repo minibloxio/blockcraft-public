@@ -47,9 +47,8 @@ class ChunkManager {
 			let cellZ = this.cellPos.z + z;
 			let chunkId = cellX + "," + cellZ;
 
-			if (requests < maxChunkRequests && !this.reqChunks[chunkId]) { // Not requested
+			if (requests < this.chunkLoadingRate && !this.reqChunks[chunkId]) { // Not requested
 				this.reqChunks[chunkId] = true; // Mark as requested
-				let requests = 0;
 
 				// Add chunks to request
 				for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
@@ -63,9 +62,6 @@ class ChunkManager {
 					})
 				}
 				requests++;
-				if (requests > maxChunkRequests) {
-					break;
-				}
 			} else if (revisible < maxChunkRevisible && !this.currChunks[chunkId] && Number.isInteger(cellX)) { // Check if chunk is loaded
 				this.currChunks[chunkId] = [cellX, cellZ]; // Mark as loaded
 
@@ -81,6 +77,8 @@ class ChunkManager {
 					if (transparentMesh) transparentMesh.visible = true;
 				}
 				revisible++;
+			} else if (requests > this.chunkLoadingRate) {
+				break;
 			}
 	       
 	        distance++;
@@ -124,7 +122,6 @@ class ChunkManager {
 		let requestedChunks = [];
 		for (let chunk of this.chunksToRequest) {
 			if (chunk) {
-				//world.generateCell(chunk.x, chunk.y, chunk.z);
 				requestedChunks.push(chunk);
 			}
 		}
@@ -134,33 +131,41 @@ class ChunkManager {
 		}
 	}
 
-	processChunks(e) {
+	processChunks(data, type) {
 		if (!joined || isState("disconnecting")) return;
 
-		let newCells = {};
+		if (type == "rle") {
+			let newCells = {};
 
-		for (let i = 0; i < e.data.length; i++) {
-			let chunk = e.data[i];
-			let cellId = chunk.pos.x + "," + chunk.pos.y + "," + chunk.pos.z;
+			for (let i = 0; i < data.length; i++) {
+				let chunk = data[i];
+				let cellId = chunk.pos.x + "," + chunk.pos.y + "," + chunk.pos.z;
 
-			world.cells[cellId] = chunk.cell;
-			world.cells[cellId].set(chunk.cell);
+				world.cells[cellId] = chunk.cell;
+				world.cells[cellId].set(chunk.cell);
 
-			newCells[cellId] = world.cells[cellId];
+				newCells[cellId] = world.cells[cellId];
 
-			chunk.pos.id = cellId;
+				chunk.pos.id = cellId;
 
-			chunkManager.chunksToLoad.push(chunk.pos)
+				chunkManager.chunksToLoad.push(chunk.pos)
+			}
+
+			// Update information to each voxel worker
+			let worldData = {
+				cells: newCells,
+			}
+
+			for (let voxelWorker of voxelWorkers) {
+				voxelWorker.postMessage(worldData);
+			}
+		} else if (type == "voxel") {
+			for (let i = 0; i < data.length; i++) {
+				if (data[6]) chunkManager.chunksToRender.unshift(data[i]); // Prioritize chunks
+				else chunkManager.chunksToRender.push(data[i]);
+			}
 		}
-
-		// Update information to each voxel worker
-		let worldData = {
-			cells: newCells,
-		}
-
-		for (let voxelWorker of voxelWorkers) {
-			voxelWorker.postMessage(worldData);
-		}
+		
 	}
 
 	loadChunks() {

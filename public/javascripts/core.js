@@ -46,20 +46,15 @@ function init() {
 function initWorkers() {
 	rleWorker = new Worker('javascripts/workers/rle-worker.js'); // Run length encoding worker
 	
-	rleWorker.addEventListener('message', e => {
-		chunkManager.processChunks(e);
+	rleWorker.addEventListener('message', async (e) => {
+		await chunkManager.processChunks(e.data, "rle");
 	})
 
 	// Voxel geometry workers
 	for (let i = 0; i < 4; i++) { 
 		voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
-		voxelWorkers[i].addEventListener('message', e => {
-			// Update Voxel Mesh
-			for (let i = 0; i < e.data.length; i++) {
-				if (e.data[6]) chunkManager.chunksToRender.unshift(e.data[i]); // Prioritize chunks
-				else chunkManager.chunksToRender.push(e.data[i]);
-				
-			}
+		voxelWorkers[i].addEventListener('message', async (e) => {
+			await chunkManager.processChunks(e.data, "voxel");
 		})
 	}
 }
