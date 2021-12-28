@@ -135,7 +135,25 @@ socket.on('punch', function (id) {
 	}
 })
 
-socket.on('update', function (data) {
+socket.on('update', async function (data) {
+	await updateClient(data);
+})
+
+socket.on('messageAll', function (data) {
+	addChat({
+		text: data.text,
+		color: data.color,
+		name: data.name,
+		discard: data.discard,
+		timer: data.timer || 5000,
+	})
+})
+
+socket.on('refresh', function () {
+	location.reload(true);
+})
+
+function updateClient(data) {
 	if (!joined || !initialized) return;
 
 	// Update player
@@ -178,18 +196,4 @@ socket.on('update', function (data) {
 		lastUpdate = Date.now();
 		socket.emit('latency', data.t);
 	}
-})
-
-socket.on('messageAll', function (data) {
-	addChat({
-		text: data.text,
-		color: data.color,
-		name: data.name,
-		discard: data.discard,
-		timer: data.timer || 5000,
-	})
-})
-
-socket.on('refresh', function () {
-	location.reload(true);
-})
+}

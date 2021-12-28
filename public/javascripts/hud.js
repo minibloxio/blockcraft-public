@@ -588,6 +588,7 @@ function displayChat() {
 			if (elaspedTime > msg.timer - 300) {
 				opacity = 1 - (elaspedTime - (msg.timer - 300))/300;
 			}
+			opacity = showChatBar ? 1 : opacity;
 
 			if (msg.name)
 				text = "<"+msg.name+"> "+text;
@@ -616,11 +617,11 @@ function displayChat() {
 		let hintColor = "grey";
 		let text = hintText;
 		if (hintText[0] == "?") {
-			text = hintText.slice(1);
+			text = text.slice(1);
 			hintColor = "red";
 		}
 
-		let command = $("#chat-input").val();
+		let command = $("#chat-input").val().removeExtraSpaces();
 		let commandWidth = ctx.measureText(command).width;
 		let hintWidth = ctx.measureText(text).width;
 		let width = Math.max(commandWidth, hintWidth);

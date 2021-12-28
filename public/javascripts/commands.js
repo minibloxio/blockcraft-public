@@ -106,10 +106,10 @@ function giveCommandHint(msg, autocomplete) {
             if (msg[0] == "setblock") {
                 msg.shift();
                 if (msg.length < 4) {
-                    hintText += msg.join(" ");
+                    hintText += msg.join(" ").removeExtraSpaces();
 
                     if (autocomplete) {
-                        let completedCommand = hintText + "~ ";
+                        let completedCommand = (hintText + "~ ").removeExtraSpaces();
                         $("#chat-input").val(completedCommand);
                         giveCommandHint(completedCommand.slice(1).split(" "), false);
                         return;
@@ -153,7 +153,7 @@ function giveCommandHint(msg, autocomplete) {
                 if ((Number.isInteger(parseInt(msg[0])) || msg[0] == "~")) {
                     let coord = getCoord(msg);
                     if (coord) {
-                        if (msg.length == 3 && !validateCoord(msg)) {
+                        if (msg.length == 3 && !validCoord(msg)) {
                             hintText += msg.join(" ") + " - Invalid coordinates";
                             return;
                         } else {
@@ -176,6 +176,8 @@ function giveCommandHint(msg, autocomplete) {
                 hintText += msg.join(" ") + " - " + commands[command].error;
                 hintText = "?" + hintText;
             }
+
+            break;
         }
     }
 
@@ -200,14 +202,12 @@ function getCoord(msg, pos, decimalPlace) {
     }
 }
 
-function validateCoord(msg) {
+function validCoord(msg) {
     console.log(msg);
     if (msg.length != 3) return false;
     if (msg[0].length == 0 || msg[1].length == 0 || msg[2].length == 0) return true;
-    let x = msg[0] == "~" ? round(player.position.x/world.blockSize, 2) : parseInt(msg[0]);
-    let y = msg[1] == "~" ? round(player.position.y/world.blockSize, 2) : parseInt(msg[1]);
-    let z = msg[2] == "~" ? round(player.position.z/world.blockSize, 2) : parseInt(msg[2]);
-    return x && y && z;
+    let pos = getCoord(msg, true);
+    return pos.x && pos.y && pos.z;
 }
 
 // Check command validity
@@ -331,7 +331,7 @@ function setTime(time) {
 function teleport(msg) {
     msg.shift();
     if (Number.isInteger(parseInt(msg[0])) || msg[0] == "~") {
-        let validCoordinates = validateCoord(msg);
+        let validCoordinates = validCoord(msg);
         let pos = getCoord(msg, true, 3);
         console.log("Attempting to teleport to " + pos.x + " " + pos.y + " " + pos.z);
 
@@ -399,7 +399,7 @@ function displaySeed() {
 function setBlock(msg) {
     msg.shift();
     console.log(msg);
-    let validCoordinates = validateCoord(msg.slice(0, 3));
+    let validCoordinates = validCoord(msg.slice(0, 3));
     console.log(validCoordinates);
     let pos = getCoord(msg, true);
     console.log("Attempting to set block at " + pos.x + " " + pos.y + " " + pos.z);

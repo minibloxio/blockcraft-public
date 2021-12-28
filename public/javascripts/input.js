@@ -138,7 +138,7 @@ var onKeyDown = function ( event ) {
 	    		$("#chat-input").val("")
     		} else { // Check minecraft command
 	    		$("#chat-input").val("")
-    			msg = msg.slice(1).split(" ");
+    			msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
     			checkCommand(msg);
     		}
     	}
@@ -248,9 +248,10 @@ var onKeyUp = function ( event ) {
 	}
 
 	// Give command hint
-	let msg = $("#chat-input").val()
+	let msg = $("#chat-input").val();
+    
 	if (player.controls.enabled && showChatFlag && msg && msg[0] == "/") {
-		msg = msg.slice(1).split(" ");
+		msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
 		giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
 	}
 

@@ -76,7 +76,7 @@ function refreshServers() {
         server.socket.on('connect', function () {
             setTimeout(function () {
                 server.socket.emit('serverInfoRequest', Date.now())
-            }, 0);
+            }, 500);
         });
 
         // Error connecting to server
