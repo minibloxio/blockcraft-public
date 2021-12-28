@@ -38,6 +38,7 @@ const Function = require('./modules/Function.js');
 const World = require('./modules/World.js');
 const SimplexNoise = require('simplex-noise'),
     simplex = new SimplexNoise(Math.random)
+var filter = require('leo-profanity')
 
 // Listen to server port
 server.listen(serverPort, function () {
@@ -520,7 +521,7 @@ io.on('connection', function(socket_) {
 			logger.verbose("<"+players[socket.id].name+"> " + data)
 			io.emit('messageAll', {
 				name: players[socket.id].name,
-				text: data
+				text: filter.clean(data),
 			});
 		}
 	})
