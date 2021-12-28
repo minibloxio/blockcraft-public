@@ -825,7 +825,7 @@ class Player {
 			}
 			
 			this.previousPosition = this.position.clone();
-			var currentPosition = this.controls.getObject().clone();
+			var currentPosition = this.controls.getObject().clone(false);
 			currentPosition.translateOnAxis(axesVec, currentVel[i]);
 			var move = currentPosition.position.sub(this.previousPosition)
 			this.newMove.add(move);

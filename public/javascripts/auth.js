@@ -6,6 +6,9 @@
 */
 
 // Setup
+
+let initialized = false;
+let lastUpdate = Date.now();
 let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Server Select, 2: Connecting to Server, 3: Loading Game, 4: Loading Chunks, 5: In Game, 6: Disconnecting)
 let states = {
     "start": 0,

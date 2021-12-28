@@ -66,7 +66,7 @@ class ChunkManager {
 				if (requests > maxChunkRequests) {
 					break;
 				}
-			} else if (revisible < maxChunkRevisible && !this.currChunks[chunkId]) { // Check if chunk is loaded
+			} else if (revisible < maxChunkRevisible && !this.currChunks[chunkId] && Number.isInteger(cellX)) { // Check if chunk is loaded
 				this.currChunks[chunkId] = [cellX, cellZ]; // Mark as loaded
 
 				for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
@@ -187,33 +187,6 @@ class ChunkManager {
 				}
 			}
 		}
-
-		// // Load chunks based on loading rate
-		// let loadedChunks = 0;
-		
-		// for (let i = 0; i < this.chunksToLoad.length; i++) {
-		// 	let chunk = this.chunksToLoad[i];
-		// 	if (!chunk) continue;
-
-		// 	let canBeLoaded = true;
-		// 	for (let offset of this.neighborOffsets) {
-		// 		let neighborId = (chunk.x + offset[0]) + "," + (chunk.y + offset[1]) + "," + (chunk.z + offset[2]);
-		// 		if (!world.cells[neighborId]) {
-		// 			canBeLoaded = false;
-		// 			break;
-		// 		}
-		// 	}
-			
-		// 	if (canBeLoaded || true) {
-		// 		this.currChunks[`${chunk.x},${chunk.z}`] = 1;
-		// 		updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
-		// 		this.chunksToLoad.splice(i, 1);
-
-		// 		loadedChunks++;
-		// 		if (loadedChunks > this.chunkLoadingRate)
-		// 			break;
-		// 	}
-		// }
 	}
 
 	renderChunks() {

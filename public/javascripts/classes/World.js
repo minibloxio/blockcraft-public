@@ -268,17 +268,9 @@ function updateCellMesh(data) {
 
   // OPAQUE TEXTURES
   if (data) {
-    const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
-
     if (opaqueGeometry.positions.length > 0 || forceUpdate) {
-      const positionNumComponents = 3;
-      geometry.setAttribute('position', new THREE.BufferAttribute(opaqueGeometry.positions, positionNumComponents));
-      const normalNumComponents = 3;
-      geometry.setAttribute('normal', new THREE.BufferAttribute(opaqueGeometry.normals, normalNumComponents));
-      const uvNumComponents = 2;
-      geometry.setAttribute('uv', new THREE.BufferAttribute(opaqueGeometry.uvs, uvNumComponents));
-      geometry.setIndex(opaqueGeometry.indices);
-      geometry.computeBoundingSphere();
+      const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
+      setGeometry(geometry, opaqueGeometry);
 
       if (!mesh) {
         mesh = new THREE.Mesh(geometry, material);
@@ -296,18 +288,9 @@ function updateCellMesh(data) {
 
   // TRANSPARENT TEXTURES
   if (data) {
-    const geometry = meshT ? meshT.geometry : new THREE.BufferGeometry();
-
     if (transparentGeometry.positions.length > 0 || forceUpdate) {
-    
-      const positionNumComponents = 3;
-      geometry.setAttribute('position', new THREE.BufferAttribute(transparentGeometry.positions, positionNumComponents));
-      const normalNumComponents = 3;
-      geometry.setAttribute('normal', new THREE.BufferAttribute(transparentGeometry.normals, normalNumComponents));
-      const uvNumComponents = 2;
-      geometry.setAttribute('uv', new THREE.BufferAttribute(transparentGeometry.uvs, uvNumComponents));
-      geometry.setIndex(transparentGeometry.indices);
-      geometry.computeBoundingSphere();
+      const geometry = meshT ? meshT.geometry : new THREE.BufferGeometry();
+      setGeometry(geometry, transparentGeometry);
 
       if (!meshT) {
         meshT = new THREE.Mesh(geometry, materialTransparent);
@@ -325,4 +308,16 @@ function updateCellMesh(data) {
       }
     }
   }
+}
+
+function setGeometry(geometry, data) {
+  const positionNumComponents = 3;
+  geometry.setAttribute('position', new THREE.BufferAttribute(data.positions, positionNumComponents));
+  const normalNumComponents = 3;
+  geometry.setAttribute('normal', new THREE.BufferAttribute(data.normals, normalNumComponents));
+  const uvNumComponents = 2;
+  geometry.setAttribute('uv', new THREE.BufferAttribute(data.uvs, uvNumComponents));
+  const indexNumComponents = 1;
+  geometry.setIndex(new THREE.BufferAttribute(data.indices, indexNumComponents));
+  geometry.computeBoundingSphere();
 }

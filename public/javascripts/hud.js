@@ -50,6 +50,7 @@ let showInventory = false;
 let blockWidth = 30;
 let boxSize = 40;
 let hotboxWidth = 60;
+let selectorWidth = 65;
 
 let selectedItem = undefined;
 let inventory = [];
@@ -450,17 +451,29 @@ function displayCrosshair() {
 }
 
 // Toolbar
+let toolbarX = canvas.width/2-hotboxWidth*4;
+let toolbarSelectorX = canvas.width/2-hotboxWidth*3.5-2.5;
+
+
 function displayToolbar() {
-	if (!initialized) return;
-	if (!player.toolbar) return;
+	if (!initialized || !player.toolbar) return;
 	if (player.mode == "spectator" || player.mode == "camera") return;
 
-	let hotboxWidth = 60;
-	let selectorWidth = 65;
-	drawImageTopLeft(toolbar, canvas.width/2-hotboxWidth*4, canvas.height-hotboxWidth-10, hotboxWidth*8, hotboxWidth);
-	drawImage(toolbar_selector, canvas.width/2-hotboxWidth*3.5-2.5+(player.currentSlot*hotboxWidth)*(8/9), canvas.height-hotboxWidth/2-10, selectorWidth/2, selectorWidth/2)
+	drawImageTopLeft(
+		toolbar, 
+		toolbarX, 
+		canvas.height-hotboxWidth-10, 
+		hotboxWidth*8, 
+		hotboxWidth
+	);
+	drawImage(
+		toolbar_selector, 
+		toolbarSelectorX+(player.currentSlot*hotboxWidth)*(8/9), 
+		canvas.height-hotboxWidth/2-10, 
+		selectorWidth/2, 
+		selectorWidth/2
+	);
 
-	let blockWidth = 30;
 	for (let i = 0; i < 9; i++) {
 		let entity = player.toolbar[i];
 		if (showInventory)
@@ -468,13 +481,14 @@ function displayToolbar() {
 		if (entity && entity.c > 0) {
 			let index = entity.v-1;
 			let atlas = entity.class == "item" ? item_atlas : texture_atlas;
-			ctx.drawImage(atlas, index*16, 0, 16, 16, 
-				canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1, 
+			ctx.drawImage(atlas, 
+				index*16, 0, 16, 16, 
+				toolbarX+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1, 
 				canvas.height-hotboxWidth+(hotboxWidth-blockWidth)/8, 
 				blockWidth, blockWidth
 			);
 			drawText(entity.c, 
-				canvas.width/2-hotboxWidth*4+blockWidth+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1,
+				toolbarX+blockWidth+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1,
 				canvas.height-hotboxWidth+blockWidth+(hotboxWidth-blockWidth)/8, 
 				"15px Minecraft-Regular", "white", "right", "bottom"
 			);
@@ -739,5 +753,8 @@ window.onresize = function(event) {
 function resize() {
 	canvas.width = $("html").innerWidth();
 	canvas.height = $("html").innerHeight();
+
+	toolbarX = canvas.width/2-hotboxWidth*4;
+	toolbarSelectorX = canvas.width/2-hotboxWidth*3.5-2.5;
 }
 resize();

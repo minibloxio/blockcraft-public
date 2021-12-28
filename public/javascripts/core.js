@@ -141,8 +141,6 @@ let game = {
 function animate() {
 	requestAnimationFrame( animate );
 	
-	composer.render( scene, camera );
-	
 	// Get the frame's delta
 	var time = performance.now();
 	elasped = time - then;
@@ -202,6 +200,7 @@ function animate() {
 	stage.update();
 	stats.update();
 
+	composer.render( scene, camera );
 
 	prevTime = time;
 }

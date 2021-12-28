@@ -32,7 +32,6 @@ socket.on('disconnect', function (reason) {
 })
 
 // Initialize client
-let initialized = false;
 socket.on('joinResponse', function (data) {
 	// Check if already initialized
 	if (initialized) console.log("Already initialized game!");//location.reload(true);
@@ -174,7 +173,10 @@ socket.on('update', function (data) {
 
 	tick.value = data.tick;
 
-	socket.emit('latency', data.t);
+	if (Date.now() - lastUpdate > 500) {
+		lastUpdate = Date.now();
+		socket.emit('latency', data.t);
+	}
 })
 
 socket.on('messageAll', function (data) {

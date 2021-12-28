@@ -207,11 +207,12 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
   let positionBuffer = new Float32Array(new SharedArrayBuffer(positions.length*4));
   let normalBuffer = new Float32Array(new SharedArrayBuffer(normals.length*4));
   let uvBuffer = new Float32Array(new SharedArrayBuffer(uvs.length*4));
+  let indexBuffer = new Uint16Array(new SharedArrayBuffer(indices.length*2));
 
   positionBuffer.set(positions);
   normalBuffer.set(normals);
   uvBuffer.set(uvs);
-  indexBuffer = indices;
+  indexBuffer.set(indices);
 
   return {
     positions: positionBuffer,
