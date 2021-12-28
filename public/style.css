@@ -227,6 +227,7 @@ a {
     position: relative;
     margin-bottom: 20px;
     padding: 20px;
+    padding-bottom: 10px;
     background-color: rgba(0, 0, 0, 0.5);
     overflow-y: none;
 }
@@ -237,15 +238,15 @@ a {
     outline: 2px solid white;
 }
 
-.latencyInfo {
+.serverInfo {
     position: absolute;
-    top: 10px;
+    top: 20px;
     right: 50px;
 }
 
-.latencyBar {
+.serverBar {
     position: absolute;
-    top: 10px;
+    top: 20px;
     right: 10px;
 }
 
@@ -254,6 +255,7 @@ a {
     margin-bottom: 10px;
 }
 
+/* Refresh button */
 #refresh-servers {
     margin-bottom: 20px;
     text-align: center;

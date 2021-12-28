@@ -30,7 +30,7 @@ let socket = io({
 let loaded = 0;
 let loadedAnimate = new Ola(0);
 let maxLoaded = 5;
-let maxChunks = 10; // Chunks need to be loaded before pointerlock can be enabled
+let maxChunks = 20; // Chunks need to be loaded before pointerlock can be enabled
 
 let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com", "https://ap-southeast.victorwei.com"] // Request this from the auth server
 let serverNames = {
@@ -104,11 +104,14 @@ function refreshServers() {
                     <p>Region: ${serverNames[data.region]}</p>
                     <p>Players: ${Object.keys(data.players).length}/20</p>
                     <div>
-                        <p class="latencyInfo">${latency}ms</p>
-                        <canvas id="${data.region}" class="latencyBar" width="30" height="20"></canvas>
+                        <p class="serverInfo">${latency}ms</p>
+                        <canvas id="${data.region}" class="serverBar" width="30" height="24"></canvas>
                     </div>
                     
-                    <p style="margin-bottom: 0;">Uptime: ${msToTime(data.uptime)} </p>
+                    <div>
+                        <p class="serverInfo" style="margin-bottom: 0; top: 54px;">${msToTime(data.uptime)} </p>
+                        <canvas id="${data.region}-2" class="serverBar" style="top: 54px;" width="30" height="24"></canvas>
+                    </div>
                 </div>
             `)
 
@@ -153,6 +156,10 @@ function refreshServers() {
                 drawRectangle(i*6, 16-i*4, 5, (i+1)*4, "grey", {ctx: ctx_});
             }
 
+            ctx_ = $("#"+data.region+"-2")[0].getContext("2d");
+            drawCircle(15, 12, 11, "white", {ctx: ctx_, fill: false, outline: true, outlineColor: "white", outlineWidth: 2});
+            drawCircle(15, 12, 2, "white", {ctx: ctx_});
+            drawRectangle(14, 3, 2, 7, "white", {ctx: ctx_});
 
             server.socket.disconnect();
         })
