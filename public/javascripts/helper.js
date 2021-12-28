@@ -1,45 +1,47 @@
 function drawCircle(x, y, r, c, options) {
 	if (!options)
 		options = {};
-
-	ctx.save();
-	ctx.beginPath();
-	ctx.arc(x, y, r, 0, 2 * Math.PI, false);
-    ctx.fillStyle = c || 'red';
-    ctx.globalAlpha = options.alpha || 1;
+    
+    let _ctx = options.ctx || ctx;
+	_ctx.save();
+	_ctx.beginPath();
+	_ctx.arc(x, y, r, 0, 2 * Math.PI, false);
+    _ctx.fillStyle = c || 'red';
+    _ctx.globalAlpha = options.alpha || 1;
     if (options.glow)
-    	ctx.shadowBlur = 100;
+    	_ctx.shadowBlur = 100;
     if (options.glowColor)
-		ctx.shadowColor = options.glowColor || 'aqua';
+		_ctx.shadowColor = options.glowColor || 'aqua';
 	if (options.fill || options.fill == undefined)
-    	ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.lineWidth = options.outlineWidth || 1;
-    ctx.strokeStyle = options.outlineColor || 'black';
+    	_ctx.fill();
+    _ctx.shadowBlur = 0;
+    _ctx.lineWidth = options.outlineWidth || 1;
+    _ctx.strokeStyle = options.outlineColor || 'black';
     if (options.outline)
-    	ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
+    	_ctx.stroke();
+    _ctx.closePath();
+    _ctx.restore();
 }
 
 function drawRectangle(x, y, w, h, c, options) {
 	if (!options)
 		options = {};
 
-	ctx.save();
-	ctx.translate(x, y);
-	ctx.beginPath();
-	ctx.rect(0, 0, w, h);
-	ctx.fillStyle = c || 'grey';
-	ctx.globalAlpha = options.alpha || 1;
+    let _ctx = options.ctx || ctx;
+	_ctx.save();
+	_ctx.translate(x, y);
+	_ctx.beginPath();
+	_ctx.rect(0, 0, w, h);
+	_ctx.fillStyle = c || 'grey';
+	_ctx.globalAlpha = options.alpha || 1;
 	if (options.fill == undefined || options.fill)
-		ctx.fill();
-	ctx.strokeStyle = options.outlineColor || "black";
-	ctx.lineWidth = options.outlineWidth || 1;
+		_ctx.fill();
+	_ctx.strokeStyle = options.outlineColor || "black";
+	_ctx.lineWidth = options.outlineWidth || 1;
 	if (options.outline)
-		ctx.stroke();
-	ctx.closePath();
-	ctx.restore();
+		_ctx.stroke();
+	_ctx.closePath();
+	_ctx.restore();
 }
 
 // Draw rectangle but centered
@@ -47,63 +49,65 @@ function drawRect(x, y, w, h, d, c, options) {
 	if (!options)
 		options = {};
 
-	ctx.translate(x, y)
-	ctx.rotate(d);
-	ctx.beginPath();
+    let _ctx = options.ctx || ctx;
+	_ctx.translate(x, y)
+	_ctx.rotate(d);
+	_ctx.beginPath();
 
-	ctx.rect(-w/2, -h/2, w, h);
-	ctx.fillStyle = c || 'grey';
-	ctx.globalAlpha = options.alpha || 1;
-		ctx.fill();
-	ctx.globalAlpha = 1;
+	_ctx.rect(-w/2, -h/2, w, h);
+	_ctx.fillStyle = c || 'grey';
+	_ctx.globalAlpha = options.alpha || 1;
+		_ctx.fill();
+	_ctx.globalAlpha = 1;
 
-	ctx.closePath();
-	ctx.resetTransform();
+	_ctx.closePath();
+	_ctx.resetTransform();
 }
 
 function drawRoundedRect(x, y, w, h, r, c, options) {
 	// Draw rounded rectangle
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.lineTo(x+w-r, y);
-    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r);
-    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    ctx.lineTo(x+r, y+h);
-    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-    ctx.lineTo(x, y+r);
-    ctx.quadraticCurveTo(x, y, x+r, y);
-    ctx.fillStyle = c || 'grey';
-	ctx.globalAlpha = options.alpha || 1;
-		ctx.fill();
-	ctx.globalAlpha = 1;
+    let _ctx = options.ctx || ctx;
+    _ctx.beginPath();
+    _ctx.moveTo(x+r, y);
+    _ctx.lineTo(x+w-r, y);
+    _ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    _ctx.lineTo(x+w, y+h-r);
+    _ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    _ctx.lineTo(x+r, y+h);
+    _ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    _ctx.lineTo(x, y+r);
+    _ctx.quadraticCurveTo(x, y, x+r, y);
+    _ctx.fillStyle = c || 'grey';
+	_ctx.globalAlpha = options.alpha || 1;
+		_ctx.fill();
+	_ctx.globalAlpha = 1;
 }
 
 function drawRotatedRoundedRect(x, y, w, h, r, c, d, options) {
 	if (!options)
 		options = {};
-
-	ctx.translate(x, y);
-	ctx.rotate(d);
+    let _ctx = options.ctx || ctx;
+	_ctx.translate(x, y);
+	_ctx.rotate(d);
 	
-	ctx.moveTo(-w/2+r, -h/2);
-    ctx.lineTo(-w/2+w-r, -h/2);
-    ctx.quadraticCurveTo(-w/2+w, -h/2+0, -w/2+w, -h/2+0+r);
-   	ctx.lineTo(-w/2+w, -h/2+h-r);
-    ctx.quadraticCurveTo(-w/2+w, -h/2+h, -w/2+w-r, -h/2+h);
-    ctx.lineTo(-w/2+r, -h/2+h);
-    ctx.quadraticCurveTo(-w/2, -h/2+h, -w/2, -h/2+h-r);
-    ctx.lineTo(-w/2, -h/2+r);
-    ctx.quadraticCurveTo(-w/2, -h/2, -w/2+r, -h/2);
+	_ctx.moveTo(-w/2+r, -h/2);
+    _ctx.lineTo(-w/2+w-r, -h/2);
+    _ctx.quadraticCurveTo(-w/2+w, -h/2+0, -w/2+w, -h/2+0+r);
+   	_ctx.lineTo(-w/2+w, -h/2+h-r);
+    _ctx.quadraticCurveTo(-w/2+w, -h/2+h, -w/2+w-r, -h/2+h);
+    _ctx.lineTo(-w/2+r, -h/2+h);
+    _ctx.quadraticCurveTo(-w/2, -h/2+h, -w/2, -h/2+h-r);
+    _ctx.lineTo(-w/2, -h/2+r);
+    _ctx.quadraticCurveTo(-w/2, -h/2, -w/2+r, -h/2);
 
-    ctx.fillStyle = c || 'grey';
-	ctx.globalAlpha = options.alpha || 1;
-	ctx.lineWidth = 3*display.zoom;
-		ctx.fill();
-	ctx.globalAlpha = 1;
+    _ctx.fillStyle = c || 'grey';
+	_ctx.globalAlpha = options.alpha || 1;
+	_ctx.lineWidth = 3*display.zoom;
+		_ctx.fill();
+	_ctx.globalAlpha = 1;
 
-	ctx.closePath();
-	ctx.resetTransform();
+	_ctx.closePath();
+	_ctx.resetTransform();
 }
 
 function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
@@ -111,7 +115,6 @@ function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
     var x = cx;
     var y = cy;
     var step = Math.PI / spikes;
-
     ctx.strokeSyle = "#000";
     ctx.beginPath();
     ctx.moveTo(cx, cy - outerRadius)

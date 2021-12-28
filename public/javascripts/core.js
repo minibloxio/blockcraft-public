@@ -145,9 +145,10 @@ function animate() {
 
 	updateMenu(); // Update the menu
 
-	// Player update
-	if (player.hp > 0 && initialized && joined && isState("inGame")) {
-		player.update(delta, world);
+	
+	if (player.hp > 0 && initialized && joined && isState("inGame")) { // If the player is alive and the game is initialized and joined
+		player.update(delta, world); // Player update
+		// Update HUD
 	}
 
 	// Update chunks
@@ -188,14 +189,13 @@ function animate() {
 		});
 	}
 
-	// Update HUD
-	updateHUD();
-
 	// Scene update
 	stage.update();
 	stats.update();
 
 	composer.render( scene, camera );
+	
+	updateHUD();
 
 	prevTime = time;
 }

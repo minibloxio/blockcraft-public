@@ -103,7 +103,11 @@ function refreshServers() {
                 <div class='server' data-link='${data.link}' onClick='clickServer(event)'  ondblclick='clickServer(event, true)'>
                     <p>Region: ${serverNames[data.region]}</p>
                     <p>Players: ${Object.keys(data.players).length}/20</p>
-                    <p>Latency: ${latency}ms</p>
+                    <div>
+                        <p class="latencyInfo">${latency}ms</p>
+                        <canvas id="${data.region}" class="latencyBar" width="30" height="20"></canvas>
+                    </div>
+                    
                     <p style="margin-bottom: 0;">Uptime: ${msToTime(data.uptime)} </p>
                 </div>
             `)
@@ -121,6 +125,34 @@ function refreshServers() {
             }
             
             $("#server-container").append(serverHTML);
+
+            let ctx_ = $("#"+data.region)[0].getContext("2d");
+            let numOfBars = Math.max(5-Math.floor(latency/60), 1);
+            let color;
+            switch (numOfBars) {
+                case 1:
+                    color = "red";
+                    break;
+                case 2:
+                    color = "orange";
+                    break;
+                case 3:
+                    color = "yellow";
+                    break;
+                case 4:
+                    color = "green";
+                    break;
+                case 5:
+                    color = "lime";
+                    break;
+            }
+            for (let i = 0; i < numOfBars; i++) {
+                drawRectangle(i*6, 16-i*4, 5, (i+1)*4, color, {ctx: ctx_});
+            }
+            for (let i = numOfBars; i < 5; i++) {
+                drawRectangle(i*6, 16-i*4, 5, (i+1)*4, "grey", {ctx: ctx_});
+            }
+
 
             server.socket.disconnect();
         })

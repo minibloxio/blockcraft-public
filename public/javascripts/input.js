@@ -1,6 +1,3 @@
-// Prevent right-click
-document.addEventListener('contextmenu', event => event.preventDefault());
-
 // Key event handling
 $('html').mousedown(function(event) {
 	if (!initialized)
