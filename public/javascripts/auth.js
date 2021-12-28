@@ -33,6 +33,13 @@ let maxLoaded = 5;
 let maxChunks = 10; // Chunks need to be loaded before pointerlock can be enabled
 
 let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com", "https://ap-southeast.victorwei.com"] // Request this from the auth server
+let serverNames = {
+    "na-east": "North America East",
+    "na-west": "North America West",
+    "eu-west": "Europe West",
+    "ap-south": "Asia Pacific South",
+    "ap-southeast": "Asia Pacific Southeast",
+}
 let servers = {};
 let currentServer = undefined;
 let joined = false;
@@ -94,7 +101,7 @@ function refreshServers() {
             let latency = Date.now()-data.ping;
             let serverHTML = $(`
                 <div class='server' data-link='${data.link}' onClick='clickServer(event)'  ondblclick='clickServer(event, true)'>
-                    <p>Region: ${data.region}</p>
+                    <p>Region: ${serverNames[data.region]}</p>
                     <p>Players: ${data.numPlayers}/20</p>
                     <p>Latency: ${latency}ms</p>
                     <p style="margin-bottom: 0;">Uptime: ${msToTime(data.uptime)} </p>
