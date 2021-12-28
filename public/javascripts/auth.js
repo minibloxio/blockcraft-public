@@ -277,9 +277,6 @@ function disconnectServer() {
 		delete world.entities[id];
     }
 
-    // Reset chat
-	chat = JSON.parse(chatInit);
-
     //prevState(); // Go back to server select
 }
 
@@ -351,6 +348,7 @@ function nextState(e) {
     } else if (isState("loadingChunks") && Object.keys(chunkManager.currChunks).length >= maxChunks) { // Loading Chunks -> In Game
         console.log("Requesting pointer lock");
         requestPointerLock();
+        initChat();
 
         $(".menu-button").hide();
         $("#ingame-bar").show();

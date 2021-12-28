@@ -16,7 +16,7 @@ toolbar_selector.src = "./textures/hotbar-selector.png";
 
 let hud = {
 	showStats: true,
-	updateInterval: 100,
+	updateInterval: 50,
 	hudTime: Date.now(),
 }
 
@@ -30,23 +30,10 @@ let showChatFlag = true;
 let showChatBar = false;
 let hideChatId = undefined;
 let chatMsg = "";
-let chatInit = JSON.stringify([
-	{
-		text: "Type /tutorial for more information on how to play or /help for a list of commands."
-	},
-	{
-		text: "Welcome to BlockCraft! This game is still a work in progress, but feel free to play around!",
-		color: "yellow"
-	},
-	{
-		text: "------------------------------------------------------",
-		color: "aqua",
-	},
-]);
 
 // Init chat
-let chat = JSON.parse(chatInit);
-let chatTimer = 0;
+let chat = [];
+let chatTimer;
 
 // Health
 let heartSize = 40;
@@ -522,26 +509,46 @@ function addChat(options) {
 	if (!options)
 		return;
 
+	let timer = Math.max(1000, options.timer || 5000);
 	chat.unshift(
 		{
 			text: options.text,
 			color: options.color,
 			name: options.name,
 			t: Date.now(), // timestamp
-			discard: options.discard
+			discard: options.discard,
+			timer: timer,
 		}
 	)
 	chatTimer = options.timer ? options.timer : undefined;
-	if (chatTimer) hideChatTimer(options.timer || 5000);
+	if (chatTimer) hideChatTimer(timer);
 	if (chat.length > 100) {
 		chat.pop();
 	}
 }
-addChat({
-	text: "------------------------------------------------------",
-	color: "aqua",
-	timer: 15000
-})
+function initChat() {
+	chat = [];
+	chatTimer = undefined;
+	addChat({
+		text: "------------------",
+		color: "aqua",
+		timer: 15000
+	})
+	addChat({
+		text: "Welcome to BlockCraft! This game is still a work in progress, but feel free to play around!",
+		color: "yellow",
+		timer: 15000
+	})
+	addChat({
+		text: "Type /tutorial for more information on how to play or /help for a list of commands.",
+		timer: 15000
+	})
+	addChat({
+		text: "------------------",
+		color: "aqua",
+		timer: 15000
+	})
+}
 
 function hideChatTimer(time) {
 	clearTimeout(hideChatId)
@@ -573,12 +580,18 @@ function displayChat() {
 	var lines = [];
 	for (let i = 0; i < chat.length; i++) {
 		let msg = chat[i];
-		if (showChat || Date.now()-msg.t < 5000) {
+		let elaspedTime = Date.now() - msg.t;
+		if (showChatBar || elaspedTime < msg.timer) {
 			let text = msg.text;
+			let opacity = 1; // Fade out
+			if (elaspedTime > msg.timer - 300) {
+				opacity = 1 - (elaspedTime - (msg.timer - 300))/300;
+			}
+
 			if (msg.name)
 				text = "<"+msg.name+"> "+text;
 			text = text.substr(0, 100);
-			let newLines = getLines(ctx, text, 600, msg.color || "white").reverse();
+			let newLines = getLines(ctx, text, 580, msg.color || "white", opacity).reverse();
 			lines = lines.concat(newLines);
 			currHeight += msgHeight;
 			if (currHeight > maxHeight) break;
@@ -591,13 +604,13 @@ function displayChat() {
 	ctx.clip();
 
 	for (let i = 0; i < lines.length; i++) {
-		drawText(lines[i].text, 10, canvas.height-yOffset-10-i*msgHeight, fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic");
+		drawText(lines[i].text, 10, canvas.height-yOffset-10-i*msgHeight, fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity);
 	}
 
 	ctx.restore();
 }
 
-function getLines(ctx, text, maxWidth, color) {
+function getLines(ctx, text, maxWidth, color, opacity) {
     var words = text.split(" ");
     var lines = [];
     var currentLine = words[0];
@@ -610,14 +623,16 @@ function getLines(ctx, text, maxWidth, color) {
         } else {
             lines.push({
             	text:currentLine,
-            	color: color
+            	color: color,
+				opacity: opacity
             });
             currentLine = word;
         }
     }
     lines.push({
     	text: currentLine,
-    	color: color
+    	color: color,
+		opacity: opacity
     });
     return lines;
 }

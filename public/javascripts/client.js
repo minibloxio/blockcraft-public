@@ -110,7 +110,8 @@ socket.on('removePlayer', function (id) {
 		return;
 
 	addChat({text: players[id].name + " has left the server", 
-		color: "yellow"
+		color: "yellow",
+		timer: 3000,
 	});
 	scene.remove(players[id].entity);
 	delete players[id];
@@ -184,7 +185,8 @@ socket.on('messageAll', function (data) {
 		text: data.text,
 		color: data.color,
 		name: data.name,
-		discard: data.discard
+		discard: data.discard,
+		timer: data.timer || 5000,
 	})
 })
 

@@ -112,18 +112,21 @@ class Stage {
 		let {blockSize, cellSize} = world;
 		let t = tick.value || 1000;
 
-		// Update stars transparency
-		let opacityOffset = 0.1;
-		let opacity = opacityOffset-Math.pow(Math.sin(t*this.daySpeed)/2+0.5, 5);
-		let clampedOpacity = mapRange(opacity > 0 ? opacity : 0, 0, opacityOffset, 0, 1)
-		this.stars.material.opacity = clampedOpacity;
+		if (this.stars.visible) {
+			// Update stars transparency
+			let opacityOffset = 0.1;
+			let opacity = opacityOffset-Math.pow(Math.sin(t*this.daySpeed)/2+0.5, 5);
+			let clampedOpacity = mapRange(opacity > 0 ? opacity : 0, 0, opacityOffset, 0, 1)
+			this.stars.material.opacity = clampedOpacity;
 
-		// Update star rotation
-		let starRotationSpeed = 0.001 // Default: 0.001
-		let rotationAxis = new THREE.Vector3(1, 1, 1);
-		rotationAxis.normalize();
-		this.stars.setRotationFromAxisAngle(rotationAxis, tick.value*starRotationSpeed);
-		this.stars.position.set(player.position.x, player.position.y, player.position.z);
+			// Update star rotation
+			let starRotationSpeed = 0.001 // Default: 0.001
+			let rotationAxis = new THREE.Vector3(1, 1, 1);
+			rotationAxis.normalize();
+			this.stars.setRotationFromAxisAngle(rotationAxis, tick.value*starRotationSpeed);
+			this.stars.position.set(player.position.x, player.position.y, player.position.z);
+		}
+		
 
 		// Update sun position
 		if (this.dayNightCycle) {
