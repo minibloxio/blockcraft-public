@@ -398,7 +398,7 @@ io.on('connection', function(socket_) {
 					id: id,
 					chunk: chunk,
 					cell: world.cells[id],
-					cellDelta: undefined,
+					cellDelta: world.cellDeltas[id],
 				}
 
 				if (!world.cellDeltas[id]) {
