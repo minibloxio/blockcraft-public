@@ -245,9 +245,19 @@ var onKeyUp = function ( event ) {
 		return;
 	}
 
+	// Give command hint
+	let msg = $("#chat-input").val()
+	if (player.controls.enabled && showChatFlag && msg && msg[0] == "/") {
+		msg = msg.slice(1).split(" ");
+		giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
+	} else {
+		hintText = "";
+	}
+
 	if (!initialized || !player.controls.enabled || showChatBar)
 		return;
 
+	// Update keymap
 	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
 		switch ( keymap[event.keyCode][0] ) {
 			case "Attack":

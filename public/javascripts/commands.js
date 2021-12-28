@@ -2,180 +2,338 @@
     MINECRAFT COMMANDS	
 */
 
-function checkCommand(msg) {
-    if (msg[0] == "gamemode") {
-        let prevGamemode = player.mode;
-        if (["survival", "s"].indexOf(msg[1]) > -1) {
-            addChat({
-                text: "Gamemode changed to survival mode"
-            });
-            player.mode = "survival";
-        } else if (["creative", "c"].indexOf(msg[1]) > -1) {
-            addChat({
-                text: "Gamemode changed to creative mode"
-            });
-            player.mode = "creative";
-        } else if (["spectator", "sp"].indexOf(msg[1]) > -1) {
-            addChat({
-                text: "Gamemode changed to spectator mode"
-            });
-            player.mode = "spectator";
-        } else if (["camera", "ca"].indexOf(msg[1]) > -1) {
-            addChat({
-                text: "Gamemode changed to camera mode"
-            });
-            player.mode = "camera";
-        } else {
-            addChat({
-                text: "Error: Unrecognized gamemode",
-                color: "red"
-            });
+
+let commandsInit = JSON.stringify({
+    "gamemode": {
+        "hint": "gamemode <mode> - Changes your gamemode",
+        "survival": "Survival mode (default)",
+        "creative": "Creative mode (no damage taken)",
+        "spectator": "Spectator mode (free movement)",
+        "camera": "Camera mode (no hud)"
+    },
+    "tp": {
+        "hint": "tp <player>|<x> <y> <z> - Teleports you to the specified player or coordinates",
+    },
+    "time": {
+        "hint": "time <int> - Sets the time to the specified number",
+    },
+    "god": {
+        "hint": "god - Toggles god mode",
+    },
+    "help": {
+        "hint": "help - Displays this message",
+    },
+    "tutorial": {
+        "hint": "tutorial - Displays the tutorial"
+    },
+})
+let commands = JSON.parse(commandsInit);
+
+// Give command hints
+function giveCommandHint(msg, autocomplete) {
+    // Initialize variables
+    commands = JSON.parse(commandsInit);
+    hintText = "/";
+    let firstArgUnique = true;
+    let firstArgValue = "";
+    let secondHint = false;
+    let secondHintValue = "";
+
+    // Update tp hint
+    for (let id in players) {
+        commands.tp[players[id].name] = "Teleport to " + players[id].name;
+    }
+    
+    // Check if the command exists
+    let commandIds = Object.keys(commands);
+    for (let i = 0; i < commandIds.length; i++) {
+        let command = commandIds[i];
+
+        // If the string is a substring of a command
+        if (command.startsWith(msg[0]) && command != msg[0]) {
+
+            if (!firstArgUnique) {
+                hintText += ", " + command;
+            }
+
+            if (firstArgUnique) {
+                hintText += command;
+                firstArgValue = command;
+                firstArgUnique = false;
+            }
+
+            if (autocomplete) {
+                let extraSpace = Object.keys(commands[command]).length > 1 ? " " : "";
+                let completedCommand = hintText + extraSpace;
+                $("#chat-input").val(completedCommand);
+                giveCommandHint(completedCommand.slice(1).split(" "), false);
+                return;
+            }
         }
 
-        if (player.mode != prevGamemode) {
-            player.updateGamemode();
-        }
-    } else if (msg[0] == "tp") {
-        msg.shift();
+        // If the command exists and the command has no second argument
+        if (command == msg[0] && msg.length == 1) { 
+            if (autocomplete) {
+                let extraSpace = Object.keys(commands[command]).length > 1 ? " " : "";
+                let completedCommand = hintText + command + extraSpace;
+                $("#chat-input").val(completedCommand);
+                giveCommandHint(completedCommand.slice(1).split(" "), false);
+                return;
+            }
 
-        if (Number.isInteger(parseInt(msg[0])) || msg[0] == "~") {
-            let validCoordinates = true;
-            for (let i = 0; i < 3; i++) {
-                if (!(Number.isInteger(parseInt(msg[i])) || msg[i] == "~")) {
-                    validCoordinates = false;
-                    break;
-                } else if (msg[i] == "~") {
-                    if (i == 0) {
-                        msg[i] = player.position.x/world.blockSize;
-                    } else if (i == 1) {
-                        msg[i] = player.position.y/world.blockSize;
-                    } else if (i == 2) {
-                        msg[i] = player.position.z/world.blockSize;
+            hintText += commands[command].hint;
+        }
+
+        // If the command exists and the command has a second argument
+        if (command == msg[0] && msg.length >= 2) { 
+            hintText += msg[0] + " ";
+
+            // Check if the second argument is a valid
+            let hints = Object.keys(commands[command]);
+            for (let hint of hints) {
+                if (hint == "hint") continue;
+
+                if (hint.startsWith(msg[1])) {
+                    if (secondHint) {
+                        hintText += ", " + hint;
+                        secondHintValue = "";
+                    } else {
+                        hintText += hint;
+                        secondHint = hint;
+                        secondHintValue = hint;
+                    }
+
+                    if (autocomplete) {
+                        let completedCommand = hintText;
+                        $("#chat-input").val(completedCommand);
+                        giveCommandHint(completedCommand.slice(1).split(" "), false);
+                        return;
                     }
                 }
             }
 
-            console.log("Attempting to teleport to " + msg[0] + " " + msg[1] + " " + msg[2]);
-
-            if (validCoordinates) {
-                let coord = new THREE.Vector3(parseFloat(msg[0])*world.blockSize, parseFloat(msg[1])*world.blockSize, parseFloat(msg[2])*world.blockSize);
-                player.setCoord(coord);
-            } else {
-                addChat({
-                    text: 'Error: Invalid coordinate (format: /tp <int> <int> <int>)',
-                    color: "red"
-                });
+            if (msg[0] == "tp" && Number.isInteger(parseInt(msg[1])) && !msg[4]) {
+                msg.shift();
+                hintText += msg.join(" ");
+                hintText += " - Teleport to " + msg[0] + " " + (msg[1] || "<int>") + " " + (msg[2] || "<int>");
+                return;
             }
-        } else {
 
-            let target = msg.join(" ");
-            console.log("Attempting to teleport to " + target);
-
-            let exists = false;
-            for (let id in players) {
-                let p = players[id];
-                if (p.name == target) {
-                    exists = true; 
-                    addChat({
-                        text: "Teleported " + player.name + " to " + p.name
-                    });
-                    player.setCoord(p.pos);
-
-                    break;
-                }
-            }
-            if (!exists) {
-                addChat({
-                    text: 'Error: No player found with name "' + target + '" to teleport to',
-                    color: "red"
-                });
+            // Check if the second argument is the only one available
+            if (secondHintValue) {
+                hintText += " - " + commands[command][secondHintValue];
             }
         }
-    } else if (msg[0] == "time") {
-        if (typeof(parseInt(msg[1])) == "number")
-            socket.emit('settime', parseInt(msg[1]))
-            
-    } else if (msg[0] == "god") {
-        if (!player.god) {
-            player.god = true;
-            addChat({
-                text: "God mode enabled"
-            });
-            player.updateGamemode(true);
-        } else if (player.god) {
-            player.god = false;
-            addChat({
-                text: "God mode disabled"
-            });
-            player.updateGamemode(true);
-        }
-            
-    } else if (msg[0] == "help") {
-        if (msg.length == 1) {
-            addChat({
-                text: 'COMMANDS: /help, /tutorial, /tp <player>, /tp <x> <y> <z>, /time <int>, /gamemode <mode>, /god, /time <int>'
-            })
-            addChat({
-                text: 'Type /help <command> for more info on a command'
-            })
-        } else {
-            let command = msg[1];
-            if (command == "tp") {
-                addChat({
-                    text: '/tp <int> <int> <int> - Teleports you to the specified coordinates'
-                })
-                addChat({
-                    text: '/tp <player> - Teleports you to the specified player'
-                })
-            } else if (command == "time") {
-                addChat({
-                    text: '/time <int> - Sets the time to the specified number'
-                })
-            } else if (command == "gamemode") {
-                addChat({
-                    text: '/gamemode - Displays your current gamemode'
-                })
-            } else if (command == "help") {
-                addChat({
-                    text: '/help - Displays this message'
-                })
-            } else if (command == "god") {
-                addChat({
-                    text: '/god - Toggles god mode'
-                })
-            } else if (command == "tutorial") {
-                addChat({
-                    text: '/tutorial - Displays the tutorial'
-                })
-            } else {
-                addChat({
-                    text: 'Error: Command not found'
-                })
-            }
-        }
-    } else if (msg[0] == "tutorial") {
-        addChat({
-            text: "------------------"
-        })
-        addChat({
-            text: "TUTORIAL"
-        })
-        addChat({
-            text: "Use WASD to move around and SPACEBAR to jump"
-        })
-        addChat({
-            text: "Use the mouse to look around, left click to mine and attack, right click to place blocks"
-        })
-        addChat({
-            text: "Press E to open your inventory and crafting menu"
-        })
-        addChat({
-            text: "------------------"
-        })
+    }
+
+    if (hintText == "/") {
+        hintText += msg.join(" ") + " - No command found";
+    }
+}
+
+// Check command validity
+function checkCommand(msg) {
+    let commandIds = Object.keys(commands);
+    if (commandIds.indexOf(msg[0]) == 0) {
+        updateGamemode(msg[1]);
+    } else if (commandIds.indexOf(msg[0]) == 1) {
+        teleport(msg)
+    } else if (commandIds.indexOf(msg[0]) == 2) {
+        setTime(msg[1]);
+    } else if (commandIds.indexOf(msg[0]) == 3) {
+        changeGodmode();
+    } else if (commandIds.indexOf(msg[0]) == 4) {
+        displayHelp(msg);
+    } else if (commandIds.indexOf(msg[0]) == 5) {
+        displayTutorial();
     } else {
         addChat({
             text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',
             color: "red"
         });
+    }
+}
+
+// Display help
+function displayHelp(msg) {
+    if (msg.length == 1) {
+        addChat({
+            text: 'COMMANDS: /help, /tutorial, /tp <player>, /tp <x> <y> <z>, /time <int>, /gamemode <mode>, /god, /time <int>'
+        })
+        addChat({
+            text: 'Type /help <command> for more info on a command'
+        })
+    } else {
+        let command = msg[1];
+        if (command == "tp") {
+            addChat({
+                text: '/tp <int> <int> <int> - Teleports you to the specified coordinates'
+            })
+            addChat({
+                text: '/tp <player> - Teleports you to the specified player'
+            })
+        } else if (command == "time") {
+            addChat({
+                text: '/time <int> - Sets the time to the specified number'
+            })
+        } else if (command == "gamemode") {
+            addChat({
+                text: '/gamemode - Displays your current gamemode'
+            })
+        } else if (command == "help") {
+            addChat({
+                text: '/help - Displays this message'
+            })
+        } else if (command == "god") {
+            addChat({
+                text: '/god - Toggles god mode'
+            })
+        } else if (command == "tutorial") {
+            addChat({
+                text: '/tutorial - Displays the tutorial'
+            })
+        } else {
+            addChat({
+                text: 'Error: Command not found'
+            })
+        }
+    }
+}
+
+// Display tutorial
+function displayTutorial() {
+    addChat({
+        text: "------------------"
+    })
+    addChat({
+        text: "TUTORIAL"
+    })
+    addChat({
+        text: "Use WASD to move around and SPACEBAR to jump"
+    })
+    addChat({
+        text: "Use the mouse to look around, left click to mine and attack, right click to place blocks"
+    })
+    addChat({
+        text: "Press E to open your inventory and crafting menu"
+    })
+    addChat({
+        text: "------------------"
+    })
+}
+
+// Update the gamemode of the player
+function updateGamemode(mode) {
+    let prevGamemode = player.mode;
+    if (["survival", "s"].indexOf(mode) > -1) {
+        addChat({
+            text: "Gamemode changed to survival mode"
+        });
+        player.mode = "survival";
+    } else if (["creative", "c"].indexOf(mode) > -1) {
+        addChat({
+            text: "Gamemode changed to creative mode"
+        });
+        player.mode = "creative";
+    } else if (["spectator", "sp"].indexOf(mode) > -1) {
+        addChat({
+            text: "Gamemode changed to spectator mode"
+        });
+        player.mode = "spectator";
+    } else if (["camera", "ca"].indexOf(mode) > -1) {
+        addChat({
+            text: "Gamemode changed to camera mode"
+        });
+        player.mode = "camera";
+    } else {
+        addChat({
+            text: "Error: Unrecognized gamemode",
+            color: "red"
+        });
+    }
+
+    if (player.mode != prevGamemode) {
+        player.updateGamemode();
+    }
+}
+
+// Set the time of day
+function setTime(time) {
+    if (typeof(parseInt(time)) == "number")
+        socket.emit('settime', parseInt(time))
+}
+
+// Teleport the player to the specified coordinates or player
+function teleport(msg) {
+    msg.shift();
+    if (Number.isInteger(parseInt(msg[0])) || msg[0] == "~") {
+        let validCoordinates = true;
+        for (let i = 0; i < 3; i++) {
+            if (!(Number.isInteger(parseInt(msg[i])) || msg[i] == "~")) {
+                validCoordinates = false;
+                break;
+            } else if (msg[i] == "~") {
+                if (i == 0) {
+                    msg[i] = player.position.x/world.blockSize;
+                } else if (i == 1) {
+                    msg[i] = player.position.y/world.blockSize;
+                } else if (i == 2) {
+                    msg[i] = player.position.z/world.blockSize;
+                }
+            }
+        }
+
+        console.log("Attempting to teleport to " + msg[0] + " " + msg[1] + " " + msg[2]);
+
+        if (validCoordinates) {
+            let coord = new THREE.Vector3(parseFloat(msg[0])*world.blockSize, parseFloat(msg[1])*world.blockSize, parseFloat(msg[2])*world.blockSize);
+            player.setCoord(coord);
+        } else {
+            addChat({
+                text: 'Error: Invalid coordinate (format: /tp <int> <int> <int>)',
+                color: "red"
+            });
+        }
+    } else {
+
+        let target = msg.join(" ");
+        console.log("Attempting to teleport to " + target);
+
+        let exists = false;
+        for (let id in players) {
+            let p = players[id];
+            if (p.name == target) {
+                exists = true; 
+                addChat({
+                    text: "Teleported " + player.name + " to " + p.name
+                });
+                player.setCoord(p.pos);
+
+                break;
+            }
+        }
+        if (!exists) {
+            addChat({
+                text: 'Error: No player found with name "' + target + '" to teleport to',
+                color: "red"
+            });
+        }
+    }
+}
+
+// Change godmode
+function changeGodmode() {
+    if (!player.god) {
+        player.god = true;
+        addChat({
+            text: "God mode enabled"
+        });
+        player.updateGamemode(true);
+    } else if (player.god) {
+        player.god = false;
+        addChat({
+            text: "God mode disabled"
+        });
+        player.updateGamemode(true);
     }
 }

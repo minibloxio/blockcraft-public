@@ -30,6 +30,7 @@ let showChatFlag = true;
 let showChatBar = false;
 let hideChatId = undefined;
 let chatMsg = "";
+let hintText = "";
 
 // Init chat
 let chat = [];
@@ -603,11 +604,24 @@ function displayChat() {
 	drawRectangle(0, canvas.height-yOffset-lines.length*msgHeight, 600, lines.length*msgHeight, "black", {alpha: 0.3});
 	ctx.clip();
 
+	// Draw chat messages
 	for (let i = 0; i < lines.length; i++) {
 		drawText(lines[i].text, 10, canvas.height-yOffset-10-i*msgHeight, fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity);
 	}
-
 	ctx.restore();
+
+	// Draw command hint
+
+	if (hintText && showChatBar) {
+		let command = $("#chat-input").val();
+		let commandWidth = ctx.measureText(command).width;
+		let hintWidth = ctx.measureText(hintText).width;
+		let width = Math.max(commandWidth, hintWidth);
+		
+		drawRectangle(5, canvas.height-50-msgHeight+10-5, width + 10, msgHeight, "black", {alpha: 0.7});
+		drawText(hintText, 10, canvas.height-50-5, fontSize+"px Minecraft-Regular", "grey", "start", "alphabetic");
+		drawText(command, 10, canvas.height-50-5, fontSize+"px Minecraft-Regular", "white", "start", "alphabetic");
+	}
 }
 
 function getLines(ctx, text, maxWidth, color, opacity) {
