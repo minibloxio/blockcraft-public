@@ -13,8 +13,10 @@ const world = new World();
 // Send a message to the main thread.
 parentPort.on('message', (data) => {
     if (data.cmd == "setup") {
-        world.init(data.blockOrder, data.itemOrder);
-        console.log(world);
+        world.init({
+            blockOrder: data.blockOrder, 
+            itemOrder: data.itemOrder
+        });
     } else if (data.cmd == "seed") {
         world.updateSeed(data.seed);
     } else if (data.cmd == "generateChunks") {

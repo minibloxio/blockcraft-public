@@ -145,7 +145,13 @@ const tileSize = 16;
 const tileTextureWidth = 512;
 const tileTextureHeight = 64;
 const world = new World();
-world.init(blockOrder, itemOrder);
+world.init({
+	blockOrder: blockOrder, 
+	itemOrder: itemOrder,
+	tileSize: tileSize,
+	tileTextureWidth: tileTextureWidth,
+	tileTextureHeight: tileTextureHeight,
+});
 
 worker.postMessage({cmd: "setup", blockOrder, itemOrder});
 

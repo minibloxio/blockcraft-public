@@ -95,16 +95,22 @@ module.exports = class World {
   }
 
   // Initiate textures
-  init(blockOrder, itemOrder) {
+  init(options) {
+    
+    // Tile size
+    this.tileSize = options.tileSize;
+    this.tileTextureWidth = options.tileTextureWidth;
+	  this.tileTextureHeight = options.tileTextureHeight;
+
     // Block ids
 
-    this.blockOrder = blockOrder;
+    this.blockOrder = options.blockOrder || [];
 
     for (let i = 0; i < this.blockOrder.length; i++) {
       this.blockId[this.blockOrder[i]] = i+1;
     }
 
-    this.itemOrder = itemOrder;
+    this.itemOrder = options.itemOrder || [];
     this.itemId = {};
 
     for (let i = 0; i < this.itemOrder.length; i++) {
