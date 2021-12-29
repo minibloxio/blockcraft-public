@@ -1,17 +1,17 @@
-var canvas = document.getElementById("canvas-hud");
-var ctx = canvas.getContext("2d");
+let canvas = document.getElementById("canvas-hud");
+let ctx = canvas.getContext("2d");
 
 // Load static images
-var full_heart = new Image()
+let full_heart = new Image()
 full_heart.src = "./textures/hearts/full.png";
-var half_heart = new Image()
+let half_heart = new Image()
 half_heart.src = "./textures/hearts/half.png";
-var empty_heart = new Image()
+let empty_heart = new Image()
 empty_heart.src = "./textures/hearts/empty.png";
 
-var toolbar = new Image();
+let toolbar = new Image();
 toolbar.src = "./textures/hotbar.png";
-var toolbar_selector = new Image();
+let toolbar_selector = new Image();
 toolbar_selector.src = "./textures/hotbar-selector.png";
 
 let hud = {
@@ -21,8 +21,8 @@ let hud = {
 }
 
 // Crosshair
-var crosshairSize = 25
-var crosshairWidth = 2
+let crosshairSize = 25
+let crosshairWidth = 2
 
 // Chat
 let showChat = true
@@ -495,14 +495,14 @@ function displayToolbar() {
 // Stats
 function displayStats() {
 	if (hud.showStats) {
-		for (var i = 0; i < statistics.length; i++) {
+		for (let i = 0; i < statistics.length; i++) {
 			let stat = statistics[i];
 			stat.display(i);
 		}
 		
-		stats.showPanel(0);
+		//stats.showPanel(0);
 	} else {
-		stats.showPanel();
+		//stats.showPanel();
 	}
 }
 
@@ -528,7 +528,7 @@ function addChat(options) {
 	}
 }
 function initChat() {
-	chat = [];
+	chat.length = 0;
 	chatTimer = undefined;
 	addChat({
 		text: "------------------",
@@ -578,7 +578,7 @@ function displayChat() {
 	let currHeight = 0;
 
 	ctx.font = fontSize+"px Minecraft-Regular";
-	var lines = [];
+	let lines = [];
 	for (let i = 0; i < chat.length; i++) {
 		let msg = chat[i];
 		let elaspedTime = Date.now() - msg.t;
@@ -633,13 +633,13 @@ function displayChat() {
 }
 
 function getLines(ctx, text, maxWidth, color, opacity) {
-    var words = text.split(" ");
-    var lines = [];
-    var currentLine = words[0];
+    let words = text.split(" ");
+    let lines = [];
+    let currentLine = words[0];
 
-    for (var i = 1; i < words.length; i++) {
-        var word = words[i];
-        var width = ctx.measureText(currentLine + " " + word).width;
+    for (let i = 1; i < words.length; i++) {
+        let word = words[i];
+        let width = ctx.measureText(currentLine + " " + word).width;
         if (width < maxWidth) {
             currentLine += " " + word;
         } else {

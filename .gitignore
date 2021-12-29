@@ -3,3 +3,5 @@ profiles/
 logs/
 node_modules/
 config.json
+package.json
+package-lock.json

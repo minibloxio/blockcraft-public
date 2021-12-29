@@ -92,8 +92,12 @@ class World {
       let opaqueMesh = cellIdToMesh[id][0];
       let transparentMesh = cellIdToMesh[id][1];
       
-      if (opaqueMesh) opaqueMesh.visible = false;
-      if (transparentMesh) transparentMesh.visible = false;
+      if (opaqueMesh) {
+        opaqueMesh.visible = false;
+      }
+      if (transparentMesh) {
+        transparentMesh.visible = false;
+      }
 
       // Delete cell permanently
       if (permanently) {

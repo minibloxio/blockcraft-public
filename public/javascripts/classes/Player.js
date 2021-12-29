@@ -1044,6 +1044,8 @@ class Player {
 	}
 
 	update(delta, world) {
+		if (player.hp <= 0 || !initialized || !joined || !isState("inGame")) return;
+
 		if (Date.now() - this.lastRaycast > 100) {
 			this.select(true);
 			this.lastRaycast = Date.now();
