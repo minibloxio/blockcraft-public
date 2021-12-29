@@ -3,6 +3,7 @@ class ChunkManager {
 		// Chunk loading
 		this.reqChunks = {};
 		this.currChunks = {};
+		this.visibleChunks = {};
 
 		this.chunksToRequest = [];
 		this.requestedChunks = [];
@@ -187,7 +188,6 @@ class ChunkManager {
 				// }
 				
 				if (canBeLoaded) {
-					this.currChunks[`${chunk.x},${chunk.z}`] = [chunk.x, chunk.z];
 					updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
 					this.chunksToLoad.splice(i, 1);
 				}
@@ -200,6 +200,9 @@ class ChunkManager {
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToRender[i];
 			if (chunk) {
+				let chunkX = chunk[1];
+				let chunkZ = chunk[3];
+				this.currChunks[`${chunkX},${chunkZ}`] = [chunkX, chunkZ];
 				updateCellMesh(chunk, true)
 				this.chunksToRender.splice(i, 1);
 			}	

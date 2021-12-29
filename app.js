@@ -181,7 +181,7 @@ fs.readFile(save_path, function (err, data) {
 
 // Worker process
 worker.on('message', (data) => {
-	let {socketId, id, chunks} = data;
+	let {socketId, chunks} = data;
 
 	let receivedChunks = [];
 
@@ -192,7 +192,6 @@ worker.on('message', (data) => {
 			cellSize: world.cellSize,
 		})
 	}
-
 	io.to(socketId).emit('receiveChunk', receivedChunks);
 })
 

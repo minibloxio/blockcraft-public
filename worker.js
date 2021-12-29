@@ -30,6 +30,7 @@ const world = new World({
 	itemOrder,
 });
 
+
 // Send a message to the main thread.
 parentPort.on('message', (data) => {
     if (data.cmd == "seed") {
@@ -51,4 +52,4 @@ parentPort.on('message', (data) => {
         
         parentPort.postMessage({socketId, chunks});
     }
-})
+});
