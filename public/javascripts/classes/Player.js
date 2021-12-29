@@ -676,8 +676,10 @@ class Player {
 	}
 
 	dropItem() {
-		if (!this.allowDrop)
+		if (!this.allowDrop || !player.controls.enabled || showChatBar) {
+			this.allowDrop = false; 
 			return;
+		}
 
 		this.allowDrop = false;
 		let item = this.getCurrItem();

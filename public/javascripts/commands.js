@@ -38,7 +38,12 @@ let commandsInit = JSON.stringify({
         "hint": "<x> <y> <z> <block> - Sets the block at the specified coordinates to the specified block",
         "hints": {},
         "error": "Invalid coordinates/block"
-    }
+    },
+    "give": {
+        "hint": "<item> [amount] - Gives you the specified item with the specified amount",
+        "hints": {},
+        "error": "Invalid item"
+    },
 })
 let commands = JSON.parse(commandsInit);
 
@@ -56,9 +61,10 @@ function giveCommandHint(msg, autocomplete) {
     for (let id in players) {
         commands.tp.hints[players[id].name] = "Teleport to " + players[id].name;
     }
-    commands.setblock.hints = world.blockId;
-    commands.help.hints = commands;
-    
+    commands.setblock.hints = world.blockId; // Update setblock hint
+    commands.give.hints = world.blockId; // Update give hint
+    commands.help.hints = commands; // Update help hint
+
     // Check if the command exists
     let commandIds = Object.keys(commands);
     for (let i = 0; i < commandIds.length; i++) {
@@ -154,6 +160,17 @@ function giveCommandHint(msg, autocomplete) {
                         return;
                     }
                 }
+                
+                // Check for third argument
+                if (msg[0] == "give" && hint == msg[1]) {
+                    if (msg[2] == undefined || msg[2].length == 0) {
+                        hintText += " [int] Give 1 " + hint;
+                        return;
+                    } else if (msg.length == 3) {
+                        hintText += " " + msg[2] + " - Give " + clamp(parseInt(msg[2]), 0, 64) + " " + hint;
+                        return;
+                    }
+                }
             }
 
             // Special case for /tp
@@ -238,8 +255,8 @@ function checkCommand(msg) {
         displaySeed();
     } else if (msg[0] == "setblock") {
         setBlock(msg);
-    } else if (msg[0] == "tutorial") {
-        displayTutorial();
+    } else if (msg[0] == "give") {
+        giveItem(msg);
     } else if (msg[0] == "tutorial") {
         displayTutorial();
     } else {
@@ -427,6 +444,30 @@ function setBlock(msg) {
     } else {
         addChat({
             text: 'Error: Invalid coordinate (format: /setblock <int> <int> <int>)',
+            color: "red"
+        });
+    }
+}
+
+// Give a player a specified amount of a specified item
+function giveItem(msg) {
+    msg.shift();
+    let item = msg.shift();
+    let amount = msg.shift();
+    if (amount == undefined || amount.length == 0) amount = 1;
+
+    if (Number.isInteger(parseInt(amount)) && world.blockId[item]) {
+        amount = clamp(amount, 1, 64);
+        socket.emit('giveItem', {
+            item: item,
+            amount: amount,
+        })
+        addChat({
+            text: "Gave " + amount + " " + item + " to " + player.name
+        })
+    } else {
+        addChat({
+            text: 'Error: Invalid item or amount',
             color: "red"
         });
     }

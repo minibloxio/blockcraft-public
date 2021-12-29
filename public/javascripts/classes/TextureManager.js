@@ -63,6 +63,7 @@ class TextureManager {
             "crafting_table": ["crafting_table_front", "planks_oak", "crafting_table_top"],
             "planks": "planks_oak",
             "sandstone": ["sandstone_normal", "sandstone_bottom", "sandstone_top"],
+            "bookshelf": ["bookshelf", "planks_oak", "planks_oak"],
         }
 
         this.blockFaces = {};
