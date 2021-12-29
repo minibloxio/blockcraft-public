@@ -612,7 +612,6 @@ function displayChat() {
 	ctx.restore();
 
 	// Draw command hint
-
 	if (hintText && showChatBar) {
 		let hintColor = "grey";
 		let text = hintText;
@@ -659,6 +658,7 @@ function getLines(ctx, text, maxWidth, color, opacity) {
     return lines;
 }
 
+// Display player health
 function displayPlayerHealth() {
 	if (!initialized) return;
 	if (player.mode != "survival") return;
@@ -700,7 +700,9 @@ function displayPlayerHealth() {
 	}
 }
 
-function getPlayerColor(mode) {
+// Get player color
+function getPlayerColor(player) {
+	let mode = player.mode;
 	if (mode == "creative") {
 		return "aqua";
 	} else if (mode == "survival") {
@@ -712,6 +714,7 @@ function getPlayerColor(mode) {
 	}
 }
 
+// Display player tab list
 function displayPlayerTab() {
 	if (!showPlayerTab)
 		return;
@@ -744,8 +747,10 @@ function displayPlayerTab() {
 		drawText(ping, rightX, yPos, "20px Minecraft-Regular", "white", "left", "top")
 
 		// Draw name
-		let color = getPlayerColor(p.mode);
+		let color = getPlayerColor(p);
 		drawText(p.name, leftX, yPos, "20px Minecraft-Regular", color, "left", "top")
+		let nameWidth = ctx.measureText(p.name).width;
+		if (p.operator) drawText(" [admin]", leftX + nameWidth, yPos, "20px Minecraft-Regular", "red", "left", "top")
 
 		// Draw player health
 		for (let i = 0; i < 10; i++) {
@@ -771,7 +776,9 @@ function displayPlayerTab() {
 	// Draw client name
 	let xPos = canvas.width/2-width/2+pad;
 	let yPos = topY+30*(index+1);
-	drawText(p.name, xPos, yPos, "20px Minecraft-Regular", getPlayerColor(player.mode), "left", "top")
+	drawText(p.name, xPos, yPos, "20px Minecraft-Regular", getPlayerColor(player), "left", "top")
+	let nameWidth = ctx.measureText(p.name).width;
+	if (p.operator) drawText(" [admin]", xPos + nameWidth, yPos, "20px Minecraft-Regular", "red", "left", "top")
 
 	// Draw player ping
 	let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";

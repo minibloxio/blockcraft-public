@@ -136,7 +136,7 @@ function updatePlayers(serverPlayers) {
 			}
 
 			// Transfer data
-			let transferredValues = (({ ping, toolbar, walking, sneaking, punching, blocking }) => ({ ping, toolbar, walking, sneaking, punching, blocking }))(serverPlayers[id]);
+			let transferredValues = (({ ping, toolbar, walking, sneaking, punching, blocking, operator }) => ({ ping, toolbar, walking, sneaking, punching, blocking, operator }))(serverPlayers[id]);
 			Object.assign(p, transferredValues)
 
 			// Update player hand if necessary

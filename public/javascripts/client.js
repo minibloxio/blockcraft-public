@@ -26,9 +26,16 @@ socket.io.on('reconnect_failed', function () {
 socket.on('disconnect', function (reason) {
 	console.log("Disconnected from server due to:", reason);
 
-	// if (reason == "transport close") {
-	// 	location.reload(true);
-	// }
+	if (reason == "io server disconnect") { // Served closed the connection
+		disconnectServer();
+	}
+})
+
+// Kicked from server
+socket.on('kick', function (reason) {
+	let msg = reason ? "Kicked from server due to: " + reason : "Kicked from server";
+	console.log(msg);
+	disconnectServer();
 })
 
 // Initialize client
@@ -187,13 +194,15 @@ function updateClient(data) {
 		}
 	}
 
-	// Update client
+	// Update client player
 	if (player) {
 		player.updateClient(serverPlayers[socket.id]);
 	}
 
+	// Update tick
 	tick.value = data.tick;
 
+	// Latency check
 	if (Date.now() - lastUpdate > 500) {
 		lastUpdate = Date.now();
 		socket.emit('latency', data.t);

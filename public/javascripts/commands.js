@@ -15,7 +15,6 @@ let commandsInit = JSON.stringify({
     },
     "tp": {
         "hint": "<player>|<x> <y> <z> - Teleports you to the specified player or coordinates",
-        "hints": {},
         "error": "Invalid player"
     },
     "time": {
@@ -35,12 +34,10 @@ let commandsInit = JSON.stringify({
     },
     "setblock": {
         "hint": "<x> <y> <z> <block> - Sets the block at the specified coordinates to the specified block",
-        "hints": {},
         "error": "Invalid coordinates/block"
     },
     "give": {
         "hint": "<item> [amount] - Gives you the specified item with the specified amount",
-        "hints": {},
         "error": "Invalid item"
     },
     "clear": {
@@ -57,29 +54,46 @@ let commandsInit = JSON.stringify({
     },
     "op": {
         "hint": "<player> <password> - Makes the specified player an operator",
-        "hints": {},
         "error": "Invalid player"
     },
     "deop": {
         "hint": "<player> <password> - Removes the specified player's operator status",
-        "hints": {},
         "error": "Invalid player"
     },
     "leave": {
         "hint": "- Disconnect from this server (alias: quit, exit, disconnect)",
+    },
+    "kill": {
+        "hint": "<player> - Kills the specified player (requires operator status)",
+        "error": "Invalid player"
+    },
+    "kick": {
+        "hint": "<player> [reason] - Kicks the specified player (requires operator status)",
+        "error": "Invalid player"
     },
 })
 let commands = JSON.parse(commandsInit);
 
 // Update hints
 function updateHints() {
+    commands.tp.hints = {};
+    commands.op.hints = {};
+    commands.deop.hints = {};
+    commands.kick.hints = {};
+    commands.kill.hints = {};
+    commands.setblock.hints = {};
+    commands.give.hints = {};
+
     for (let id in players) {
         commands.tp.hints[players[id].name] = "Teleport to " + players[id].name; // Update tp hint
         commands.op.hints[players[id].name] = "Make " + players[id].name + " an operator"; // Update op hint
         commands.deop.hints[players[id].name] = "Remove " + players[id].name + "'s operator status"; // Update deop hint
+        commands.kick.hints[players[id].name] = "Kick " + players[id].name + " from the server"; // Update kick hint
+        commands.kill.hints[players[id].name] = "Kill " + players[id].name; // Update kill hint
     }
     commands.op.hints[player.name] = "Make yourself an operator"; // Update op hint
     commands.deop.hints[player.name] = "Remove your operator status"; // Update deop hint
+    commands.kill.hints[player.name] = "Kill yourself" // Update kill hint
 
     for (let id in world.blockId) {
         commands.setblock.hints[id] = "Set block to " + id; // Update setblock hint
@@ -217,6 +231,9 @@ function giveCommandHint(msg, autocomplete) {
                     } else if (msg[0] == "deop") {
                         hintText += " " + msg[2] + " - Enter the password to remove " + hint + " as an operator";
                         return;
+                    } else if (msg[0] == "kick") {
+                        hintText += " " + msg[2] + " - Enter the reason for kicking " + hint;
+                        return;
                     }
                 }
             }
@@ -314,8 +331,10 @@ function checkCommand(msg) {
         setOperator(msg, false);
     } else if (msg[0] == "leave" || msg[0] == "quit" || msg[0] == "exit" || msg[0] == "disconnect" || msg[0] == "disc") {
         disconnectServer();
-    }else if (msg[0] == "deop") {
-        setOperator(msg, false);
+    } else if (msg[0] == "kick") {
+        kickPlayer(msg);
+    } else if (msg[0] == "kill") {
+        killPlayer(msg);
     } else if (msg[0] == "deop") {
         setOperator(msg, false);
     } else {
@@ -608,6 +627,84 @@ function setOperator(msg, isOp) {
             name: target,
             password: password,
             isOp: isOp
+        });
+    }
+}
+
+// Kick a player
+function kickPlayer(msg) {
+    msg.shift();
+    let target = msg[0];
+    let reason = msg[1] ? msg[1] : "No reason specified";
+    let playerId = null;
+
+    let exists = false;
+    if (target == player.name) {
+        exists = true;
+        playerId = socket.id;
+    }
+    for (let id in players) {
+        let p = players[id];
+        if (p.name == target) {
+            exists = true; 
+            playerId = id;
+            break;
+        }
+    }
+
+    if (!player.operator) {
+        addChat({
+            text: 'Error: This command can only be used by operators',
+            color: "red"
+        });
+    } else if (!exists) {
+        addChat({
+            text: 'Error: No player found with name "' + target + '" to kick',
+            color: "red"
+        });
+    } else {
+        socket.emit('kickPlayer', {
+            id: playerId,
+            name: target,
+            reason: reason,
+        });
+    }
+}
+
+// Kill a player
+function killPlayer(msg) {
+    msg.shift();
+    let target = msg[0];
+    let playerId = null;
+
+    let exists = false;
+    if (target == player.name) {
+        exists = true;
+        playerId = socket.id;
+    }
+    for (let id in players) {
+        let p = players[id];
+        if (p.name == target) {
+            exists = true; 
+            playerId = id;
+            break;
+        }
+    }
+
+    if (!player.operator) {
+        addChat({
+            text: 'Error: This command can only be used by operators',
+            color: "red"
+        });
+    } else if (!exists) {
+        addChat({
+            text: 'Error: No player found with name "' + target + '" to kill',
+            color: "red"
+        });
+    } else {
+        socket.emit('killPlayer', {
+            id: playerId,
+            name: target
         });
     }
 }

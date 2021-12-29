@@ -295,6 +295,7 @@ io.on('connection', function(socket_) {
 			let text = players[socket.id].name + " changed their name to " + data.name;
 			logger.info(text);
 			io.emit('messageAll', {
+				name: "Server",
 				text: text,
 				color: "aqua"
 			});
@@ -566,19 +567,60 @@ io.on('connection', function(socket_) {
 			io.emit('messageAll', {
 				name: "Server",
 				text: (data.isOp ? "Enabled" : "Disabled") + " operator status for " + players[data.id].name,
-				color: "grey"
+				color: "aqua"
 			});
 		} else if (data.password != password) {
 			socket.emit('message', {
 				name: "Server",
 				text: "Incorrect password",
-				color: "grey"
+				color: "aqua"
 			});
 		} else if (players[data.id].operator == data.isOp) {
 			socket.emit('message', {
 				name: "Server",
 				text: players[data.id].name + " is already " + (data.isOp ? "enabled" : "disabled") + " operator status",
-				color: "grey"
+				color: "aqua"
+			});
+		}
+	})
+	
+	// Kick player from server
+	socket.on('kickPlayer', function (data) {
+		if (!players[socket.id]) return;
+
+		if (players[socket.id].operator) {
+			io.emit('messageAll', {
+				name: "Server",
+				text: "Kicked " + players[data.id].name + " from the server due to: " + data.reason,
+				color: "aqua"
+			});
+			io.to(`${data.id}`).emit('kick', data.reason);
+			io.to(`${data.id}`).disconnectSockets();
+		} else {
+			socket.emit('message', {
+				name: "Server",
+				text: "You do not have operator status to kick players",
+				color: "aqua"
+			});
+		}
+	})
+
+	// Kill player
+	socket.on('killPlayer', function (data) {
+		if (!players[socket.id]) return;
+
+		if (players[socket.id].operator) {
+			io.emit('messageAll', {
+				name: "Server",
+				text: "Killed " + players[data.id].name,
+				color: "aqua"
+			});
+			io.to(`${data.id}`).emit('kill');
+		} else {
+			socket.emit('message', {
+				name: "Server",
+				text: "You do not have operator status to kill players",
+				color: "aqua"
 			});
 		}
 	})

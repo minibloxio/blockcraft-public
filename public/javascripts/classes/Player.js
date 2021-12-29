@@ -1048,6 +1048,7 @@ class Player {
 		this.name = data.name;
 		this.ping = data.ping;
 		this.toolbar = data.toolbar;
+		this.operator = data.operator;
 	}
 
 	update(delta, world) {
