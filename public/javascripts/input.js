@@ -242,7 +242,6 @@ var onKeyUp = function ( event ) {
 	hintText = "";
 
 	if ([13].indexOf(event.keyCode) > -1) {
-
 		showChatFlag = true;
 		return;
 	}
@@ -255,8 +254,7 @@ var onKeyUp = function ( event ) {
 		giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
 	}
 
-	if (!initialized || !player.controls.enabled || showChatBar)
-		return;
+	if (!initialized) return;
 
 	// Update keymap
 	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
