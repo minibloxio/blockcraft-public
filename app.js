@@ -616,6 +616,7 @@ io.on('connection', function(socket_) {
 				color: "aqua"
 			});
 			io.to(`${data.id}`).emit('kill');
+			players[data.id].hp = 0;
 		} else {
 			socket.emit('message', {
 				name: "Server",

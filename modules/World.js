@@ -604,7 +604,7 @@ module.exports = class World {
         this.checkCollision(entity);
 
 				// Gravitate towards players
-        let deletedEntities = this.gravitateEntities(players, entity, entity_id);
+        let deletedEntities = this.gravitateEntities(players, entity, entity_id, io);
         for (let deletedEntity of deletedEntities) {
           newEntities.push(deletedEntity);
         }
@@ -638,7 +638,7 @@ module.exports = class World {
     }
   }
 
-  gravitateEntities(players, entity, entity_id) {
+  gravitateEntities(players, entity, entity_id, io) {
     const {blockSize} = this;
     let newEntities = []; // Entities to be removed
 
