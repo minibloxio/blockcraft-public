@@ -88,6 +88,7 @@ socket.on('joinResponse', function (data) {
 socket.on('textureData', function (data) {
 	if (loaded < maxLoaded) {
 		//loadTextures(data);
+		console.log(data);
 		textureManager.loadTextures(data);
 	}
 })

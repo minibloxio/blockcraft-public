@@ -298,6 +298,7 @@ function updatePlayer(p) {
 	p.rightShoulder.rotation.z = Math.sin(p.punchingT*Math.PI*2)/2;
 }
 
+// Update player color
 function updatePlayerColor(id, color, opacity) {
 	for (let a of players[id].skeleton.children) {
 		if (a.type == "Mesh") {
@@ -326,7 +327,6 @@ function updateServerEntities(delta) {
 }
 
 // Add entity
-
 function addEntity(entity) {
 	if (entity.type == "item") {
 		let {blockSize} = world;

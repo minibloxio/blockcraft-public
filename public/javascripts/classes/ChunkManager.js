@@ -273,7 +273,7 @@ class ChunkManager {
 	}
 
 	updateTexture() {
-		setTexture(blockOrder);
+		textureManager.setTexture(textureManager.blockOrder);
 
 		for (let cellId in cellIdToMesh) { // Dispose of all remaining meshes
 			let mesh, meshT;
@@ -283,8 +283,8 @@ class ChunkManager {
 				meshT = cellIdToMesh[cellId][1];
 			}
 
-			if (mesh) mesh.material = material;
-			if (meshT) meshT.material = materialTransparent;
+			if (mesh) mesh.material = textureManager.material;
+			if (meshT) meshT.material = textureManager.materialTransparent;
 
 		}
 		

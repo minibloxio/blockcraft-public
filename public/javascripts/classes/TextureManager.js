@@ -99,6 +99,7 @@ class TextureManager {
 
     // Load block images
     loadBlockImages(block_names, block_order) {
+        console.log(block_names, block_order)
         let self = this;
         this.loader.setPath("textures/blocks/");
         let loading_index = 0;
@@ -135,6 +136,7 @@ class TextureManager {
     // Set the texture atlas
     setTexture(order) {
         let canvas = document.createElement("canvas");
+        $("#blocker").append(canvas);
         let ctx_ = canvas.getContext("2d");
         canvas.width = 512;
         canvas.height = 64;
@@ -189,7 +191,6 @@ class TextureManager {
 
     // Draw the image net
     drawImageNet(ctx_, order, entities) {
-        console.log(entities);
         let index = 0;
         for (let entity of order) {
             let b = entities[entity];
@@ -198,6 +199,7 @@ class TextureManager {
                     ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)
                 }
             } else if (b) {
+                console.log(b);
                 ctx_.drawImage(this.blockFaces[b].image, index*16, 0)
                 ctx_.drawImage(this.blockFaces[b].image, index*16, 16)
                 ctx_.drawImage(this.blockFaces[b].image, index*16, 32)

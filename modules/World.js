@@ -68,7 +68,7 @@ function RLEencode(array) {
 }
 
 module.exports = class World {
-  constructor(options) {
+  constructor() {
   	// World seed
   	this.seed = Math.random();
     rng1 = new SimplexNoise(this.seed);
@@ -81,11 +81,8 @@ module.exports = class World {
 
     // Cell management
   	this.blockSize = 16;
-    this.cellSize = options.cellSize;
-    this.buildHeight = options.buildHeight;
-    this.tileSize = options.tileSize;
-    this.tileTextureWidth = options.tileTextureWidth;
-    this.tileTextureHeight = options.tileTextureHeight;
+    this.cellSize = 16;
+    this.buildHeight = this.cellSize*8;
     const {cellSize} = this;
     this.cellSliceSize = cellSize * cellSize;
     this.cells = {};
@@ -94,16 +91,20 @@ module.exports = class World {
     // Entities
     this.entities = {};
 
+    this.blockId = {};
+  }
+
+  // Initiate textures
+  init(blockOrder, itemOrder) {
     // Block ids
 
-    this.blockOrder = options.blockOrder;
-    this.blockId = {};
+    this.blockOrder = blockOrder;
 
     for (let i = 0; i < this.blockOrder.length; i++) {
       this.blockId[this.blockOrder[i]] = i+1;
     }
 
-    this.itemOrder = options.itemOrder;
+    this.itemOrder = itemOrder;
     this.itemId = {};
 
     for (let i = 0; i < this.itemOrder.length; i++) {
@@ -348,8 +349,7 @@ module.exports = class World {
 
   	let cell = this.cells[`${cellX},${cellY},${cellZ}`];
   	let cellExists = false;
-  	if (cell)
-  		cellExists = true;
+  	if (cell) cellExists = true;
 
     let caveSparsity = 0.02;
     let coalSparsity = 0.2;
@@ -471,7 +471,7 @@ module.exports = class World {
           }
 
           if (biome == "TROPICAL_RAIN_FOREST" && yPos <= height) {
-            if (yPos == height) blockId = "cobblestone";
+            if (yPos == height) blockId = "cobblestone"
             else if (yPos > height-3) blockId = "dirt"
             else if (yPos > 0) blockId = "stone"
           }
@@ -583,7 +583,7 @@ module.exports = class World {
   		let entity = this.entities[entity_id];
   		if (entity.type == "item" || entity.type == "arrow") {
   			// Delete entity if too long
-  			if (Date.now()-entity.t > 60000) {
+  			if (Date.now()-entity.t > 1000 * 60 * 10) { // 10 minutes
   				// Remove the item from world
 					newEntities.push({
 						type: "remove_item",
@@ -602,11 +602,9 @@ module.exports = class World {
         for (let deletedEntity of deletedEntities) {
           newEntities.push(deletedEntity);
         }
-
         
         // Apply physics
         this.applyPhysics(entity, dt);
-
   		}
   	}
   }
@@ -646,7 +644,7 @@ module.exports = class World {
         let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
 
         // Add to player if within a block distance
-        if (dist < blockSize*1.5) {
+        if (dist < blockSize) {
           if (entity.v == this.itemId["arrow"] && entity.class == "item" && entity.lethal && !entity.onObject && !players[id].blocking) { // Arrow hit
 
             players[id].hp -= entity.force;

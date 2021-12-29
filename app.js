@@ -124,7 +124,7 @@ const logger = createLogger({
 });
 
 // Get textures
-let blockOrder = ["water", "bedrock", "stone", "cobblestone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "glass"];
+let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "glass", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy"];
 
 let itemOrder = ["stick", "wood_sword", "wood_pickaxe", "wood_axe", "wood_shovel", "bow", "arrow", "diamond"];
 
@@ -141,20 +141,14 @@ textures.itemOrder = itemOrder;
 var players = {};
 
 // Setup world
-const cellSize = 16;
 const tileSize = 16;
 const tileTextureWidth = 512;
 const tileTextureHeight = 64;
-const buildHeight = cellSize*8;
-const world = new World({
-	cellSize,
-	tileSize,
-	tileTextureWidth,
-	tileTextureHeight,
-	buildHeight,
-	blockOrder,
-	itemOrder,
-});
+const world = new World();
+world.init(blockOrder, itemOrder);
+
+worker.postMessage({cmd: "setup", blockOrder, itemOrder});
+
 const startTime = Date.now();
 var updatedBlocks = [];
 var newEntities = [];
@@ -398,7 +392,8 @@ io.on('connection', function(socket_) {
 			let cell = world.cells[id];
 			if (!cell) {
 				
-				world.cells[id] = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
+				let cellSizeCubed = Math.pow(world.cellSize, 3);
+				world.cells[id] = new Uint8Array(new SharedArrayBuffer(cellSizeCubed));
 
 				let data = {
 					id: id,
@@ -408,7 +403,7 @@ io.on('connection', function(socket_) {
 				}
 
 				if (!world.cellDeltas[id]) {
-					world.cellDeltas[id] = new Uint8Array(new SharedArrayBuffer(cellSize * cellSize * cellSize));
+					world.cellDeltas[id] = new Uint8Array(new SharedArrayBuffer(cellSizeCubed));
 					data.cellDelta = world.cellDeltas[id];
 
 				}
