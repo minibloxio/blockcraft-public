@@ -260,16 +260,26 @@ class ChunkManager {
 		this.cellPos = world.computeCellFromPlayer(player.position.x, player.position.y, player.position.z);
 		this.chunkTick = Date.now();
 
-		if (!isState("disconnecting")) {
+		if (!isState("disconnecting") && !this.reloading) {
 			this.requestChunks(); // Request chunks
 			this.loadChunks(); // Load chunks
 			this.renderChunks(); // Render chunks
 			this.unloadChunks(); // Unload chunks
-		} else {
+		} else if (this.reloading || isState("disconnecting")) {
+
 			this.unloadChunks(true);
+
+			if (Object.keys(cellIdToMesh).length == 0 || this.chunksToUnload.length == 0) {
+				this.reloading = false;
+			}
+
 		}
 
 		this.chunksToRequest.length = 0;
+	}
+
+	reload() {
+		this.reloading = true;
 	}
 
 	updateTexture() {

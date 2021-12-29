@@ -44,6 +44,18 @@ let commandsInit = JSON.stringify({
         "hints": {},
         "error": "Invalid item"
     },
+    "clear": {
+        "hint": "- Clears the specified type",
+        "hints": {
+            "hand": "Clears the item in your hand",
+            "inventory": "Clears all items in your inventory",
+            "chat": "Clears all messages in the chat"
+        },
+        "error": "Invalid type to clear"
+    },
+    "reload": {
+        "hint": "- Reloads the chunks",
+    }
 })
 let commands = JSON.parse(commandsInit);
 
@@ -54,8 +66,11 @@ function giveCommandHint(msg, autocomplete) {
     hintText = "/";
     let firstArgUnique = false;
     let firstArgValue = "";
+    let firstArgCounter = 0;
     let secondHint = false;
     let secondHintValue = "";
+    let secondHintCounter = 0;
+    let commandHintLimit = 5;
 
     // Update tp hint
     for (let id in players) {
@@ -66,12 +81,14 @@ function giveCommandHint(msg, autocomplete) {
     commands.help.hints = commands; // Update help hint
 
     // Check if the command exists
-    let commandIds = Object.keys(commands);
+    let commandIds = Object.keys(commands).sort();
     for (let i = 0; i < commandIds.length; i++) {
         let command = commandIds[i];
 
         // If the string is a substring of a command
         if (command.startsWith(msg[0]) && command != msg[0] && msg.length == 1) {
+            firstArgCounter += 1;
+            if (firstArgCounter > commandHintLimit) return;
 
             if (firstArgUnique) {
                 hintText += ", " + command;
@@ -144,6 +161,9 @@ function giveCommandHint(msg, autocomplete) {
                 if (hint == "hint") continue;
 
                 if (hint.startsWith(msg[1])) {
+                    secondHintCounter += 1;
+                    if (secondHintCounter > commandHintLimit) return;
+
                     if (secondHint) {
                         hintText += ", " + hint;
                         secondHintValue = "";
@@ -257,6 +277,12 @@ function checkCommand(msg) {
         setBlock(msg);
     } else if (msg[0] == "give") {
         giveItem(msg);
+    } else if (msg[0] == "clear") {
+        clear(msg[1]);
+    } else if (msg[0] == "reload") {
+        chunkManager.reload();
+    } else if (msg[0] == "tutorial") {
+        displayTutorial();
     } else if (msg[0] == "tutorial") {
         displayTutorial();
     } else {
@@ -270,8 +296,14 @@ function checkCommand(msg) {
 // Display help
 function displayHelp(msg) {
     if (msg.length == 1) {
+        let helpText = "";
+        for (let command of Object.keys(commands).sort()) {
+            helpText += "/" + command + ", ";
+        }
+
+        // Display all commands
         addChat({
-            text: 'COMMANDS: /help, /tutorial, /tp <player>, /tp <x> <y> <z>, /time <int>, /gamemode <mode>, /god, /time <int>'
+            text: 'COMMANDS: ' + helpText.slice(0, -2),
         })
         addChat({
             text: 'Type /help <command> for more info on a command'
@@ -468,6 +500,41 @@ function giveItem(msg) {
     } else {
         addChat({
             text: 'Error: Invalid item or amount',
+            color: "red"
+        });
+    }
+}
+
+// Clears the specified type
+function clear(type) {
+    if (type == "hand") { // Clear the hand
+        let item = player.toolbar[player.currentSlot];
+        if (item) {
+            socket.emit('clearHand', player.currentSlot);
+            let thing = item.class == "block" ? world.blockOrder[item.v] : world.itemOrder[item.v];
+            addChat({
+                text: "Cleared " + item.c + " " + thing + " from hand"
+            });
+        } else {
+            addChat({
+                text: "No item in hand to clear",
+                color: "red"
+            });
+        }
+        socket.emit('clearHand', player.currentSlot);
+    } else if (type == "inventory") { // Clear the inventory
+        socket.emit('clearInventory');
+        addChat({
+            text: "Cleared inventory"
+        });
+    } else if (type == "chat") { // Clear the chat
+        chat.length = 0;
+        addChat({
+            text: "Cleared chat"
+        });
+    } else { // Invalid type
+        addChat({
+            text: 'Error: Invalid clear type',
             color: "red"
         });
     }

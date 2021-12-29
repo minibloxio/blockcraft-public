@@ -432,8 +432,19 @@ io.on('connection', function(socket_) {
 	// Update player inventory
 	socket.on('updateInventory', function (data) {
 		if (!players[socket.id]) return;
-
 		players[socket.id].toolbar = data;
+	})
+
+	// Clear inventory
+	socket.on('clearInventory', function (data) {
+		if (!players[socket.id]) return;
+		players[socket.id].toolbar = [];
+	})
+
+	// Clear hand
+	socket.on('clearHand', function (data) {
+		if (!players[socket.id]) return;
+		players[socket.id].toolbar[data] = null;
 	})
 
 	// Give player item
