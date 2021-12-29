@@ -436,6 +436,15 @@ io.on('connection', function(socket_) {
 		players[socket.id].toolbar = data;
 	})
 
+	// Give player item
+	socket.on('giveItem', function (data) {
+		if (!players[socket.id]) return;
+		World.addItem(players[socket.id], {
+			v: data.item,
+			amount: data.amount
+		});
+	})
+
 	// Player interactivity
 	socket.on('respawn', function () {
 		if (!players[socket.id]) return;

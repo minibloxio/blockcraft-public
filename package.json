@@ -20,7 +20,6 @@
     "socket.io": "^4.4.0",
     "winston": "^3.3.3"
   },
-  "devDependencies": {},
   "scripts": {
     "start": "node app.js"
   },

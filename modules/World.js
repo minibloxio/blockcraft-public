@@ -713,7 +713,7 @@ module.exports = class World {
       if (!t)
         continue;
       if (t.v == entity.v && t.class == entity.class) {
-        t.c += 1;
+        t.c += entity.amount || 1;
         added = true;
       }
     }
@@ -725,7 +725,7 @@ module.exports = class World {
         if (!p.toolbar[i] || p.toolbar[i].c == 0) {
           p.toolbar[i] = {
             v: entity.v,
-            c: 1,
+            c: entity.amount || 1,
             class: entity.class
           }
           filled = true;
@@ -736,7 +736,7 @@ module.exports = class World {
       if (!filled) {
         p.toolbar.push({
           v: entity.v,
-          c: 1,
+          c: entity.amount || 1,
           class: entity.class
         })
       }

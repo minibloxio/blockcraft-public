@@ -457,9 +457,9 @@ function giveItem(msg) {
     if (amount == undefined || amount.length == 0) amount = 1;
 
     if (Number.isInteger(parseInt(amount)) && world.blockId[item]) {
-        amount = clamp(amount, 1, 64);
+        amount = clamp(parseInt(amount), 1, 64);
         socket.emit('giveItem', {
-            item: item,
+            item: world.blockId[item],
             amount: amount,
         })
         addChat({
