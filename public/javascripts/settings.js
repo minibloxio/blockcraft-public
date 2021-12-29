@@ -202,11 +202,15 @@ function addSelectControl(name, id, defaultValue, object, key, callback) {
     });
 }
 
-$("#reset-video").click(function () {
-    let videoCookies = ["Sensitivity", "Render Distance", "Chunk Loading Rate", "FOV",  "Statistics", "Shadow Effect", "Clouds", "Stars"];
-    for (let cookie of videoCookies) {
-        deleteCookie(cookie)
-    }
+$(document).ready(function () {
 
-    addVideoControls();
+    $("#reset-video").click(function () {
+        let videoCookies = ["Sensitivity", "Render Distance", "Chunk Loading Rate", "FOV",  "Statistics", "Shadow Effect", "Clouds", "Stars", "Material Texture"];
+        for (let cookie of videoCookies) {
+            deleteCookie(cookie)
+        }
+        console.log("Reset")
+
+        addVideoControls();
+    })
 })

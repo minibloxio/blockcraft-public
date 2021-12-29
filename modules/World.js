@@ -577,7 +577,7 @@ module.exports = class World {
   }
   
   update(dt, players, newEntities, io) {
-  	const {blockSize} =  this;
+  	const {blockSize} = this;
   	// Update entities
   	for (let entity_id in this.entities) {
   		let entity = this.entities[entity_id];
@@ -594,118 +594,148 @@ module.exports = class World {
 					delete this.entities[entity_id];
   			}
 
-        // Entity gravity
-  			var x = Math.floor(entity.pos.x/blockSize);
-				var y = Math.floor((entity.pos.y-4)/blockSize);
-				var dy = Math.floor((entity.pos.y-6)/blockSize);
-				var z = Math.floor(entity.pos.z/blockSize);
-
-				entity.acc = {x: 0, y: -9.81*blockSize, z: 0};
+        // Check collision
+        this.checkCollision(entity);
 
 				// Gravitate towards players
-				for (let id in players) {
-					let p = players[id];
-
-					if (p.pickupDelay < Date.now()) { // Pick up item
-						let dir = {x: (p.pos.x-entity.pos.x), y: (p.pos.y-blockSize-(entity.pos.y)), z: (p.pos.z-entity.pos.z)}
-						let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
-
-            // Add to player if within a block distance
-						if (dist < blockSize*1.5) {
-              if (entity.v == this.itemId["arrow"] && entity.class == "item" && entity.lethal && !entity.onObject && !players[id].blocking) { // Arrow hit
-
-                players[id].hp -= entity.force;
-                if (players[entity.playerId])
-                  players[id].dmgType = players[entity.playerId].name;
-                entity.force *= 300
-                entity.dir = entity.vel;
-                io.to(`${id}`).emit('knockback', entity)
-                io.emit('punch', id);
-
-                // Remove the item from world
-                newEntities.push({
-                  type: "remove_item",
-                  id: entity.id,
-                  v: entity.v,
-                  class: entity.class
-                })
-                delete this.entities[entity_id];
-              } else {
-                // Add item to player's inventory if item already exists in inventory
-                let added = false;
-                for (let t of p.toolbar) {
-                  if (!t)
-                    continue;
-                  if (t.v == entity.v && t.class == entity.class) {
-                    t.c += 1;
-                    added = true;
-                  }
-                }
-
-                // Add item if item does not exist in inventory
-                if (!added) {
-                  let filled = false;
-                  for (let i = 0; i < p.toolbar.length; i++) {
-                    if (!p.toolbar[i] || p.toolbar[i].c == 0) {
-                      p.toolbar[i] = {
-                        v: entity.v,
-                        c: 1,
-                        class: entity.class
-                      }
-                      filled = true;
-                      break;
-                    }
-                  }
-
-                  if (!filled) {
-                    p.toolbar.push({
-                      v: entity.v,
-                      c: 1,
-                      class: entity.class
-                    })
-                  }
-                }
-
-                // Remove the item from world
-                newEntities.push({
-                  type: "remove_item",
-                  id: entity.id,
-                  v: entity.v,
-                  class: entity.class
-                })
-                delete this.entities[entity_id];
-              }
-						}
-
-						if (dist < blockSize*2 && (entity.v != this.itemId["arrow"] || entity.onObject)) { // Pull when 2 blocks away
-							let distSquared = dist * dist / (blockSize*blockSize);
-
-							entity.acc.x = dir.x * 2 * blockSize;
-							entity.acc.y = dir.y * 2 * blockSize;
-							entity.acc.z = dir.z * 2 * blockSize;
-						}
-					}
-				}
-
-        if (this.getVoxel(x, dy, z) > 0) {
-          entity.acc = {x: 0, y: 0, z: 0}
-          entity.vel = {x: 0, y: 0, z: 0}
-        }
-        if (this.getVoxel(x, y, z) > 0) {
-          entity.acc = {x: 0, y: 9.81*blockSize, z: 0}
-          entity.vel = {x: 0, y: 0, z: 0}
-          entity.onObject = true;
+        let deletedEntities = this.gravitateEntities(players, entity, entity_id);
+        for (let deletedEntity of deletedEntities) {
+          newEntities.push(deletedEntity);
         }
 
-				// Update velocity and acceleration
-  			entity.vel.x += entity.acc.x*dt;
-  			entity.vel.y += entity.acc.y*dt;
-  			entity.vel.z += entity.acc.z*dt;
+        
+        // Apply physics
+        this.applyPhysics(entity, dt);
 
-  			entity.pos.x += entity.vel.x*dt;
-  			entity.pos.y += entity.vel.y*dt;
-  			entity.pos.z += entity.vel.z*dt;
   		}
   	}
+  }
+
+  checkCollision(entity) {
+    const {blockSize} = this;
+
+    // Entity gravity
+    var x = Math.floor(entity.pos.x/blockSize);
+    var y = Math.floor((entity.pos.y-4)/blockSize);
+    var dy = Math.floor((entity.pos.y-6)/blockSize);
+    var z = Math.floor(entity.pos.z/blockSize);
+
+    entity.acc = {x: 0, y: -9.81*blockSize, z: 0};
+
+    // Check if entity is on ground
+    if (this.getVoxel(x, dy, z) > 0) {
+      entity.acc = {x: 0, y: 0, z: 0}
+      entity.vel = {x: 0, y: 0, z: 0}
+    }
+    if (this.getVoxel(x, y, z) > 0) {
+      entity.acc = {x: 0, y: 9.81*blockSize, z: 0}
+      entity.vel = {x: 0, y: 0, z: 0}
+      entity.onObject = true;
+    }
+  }
+
+  gravitateEntities(players, entity, entity_id) {
+    const {blockSize} = this;
+    let newEntities = []; // Entities to be removed
+
+    for (let id in players) {
+      let p = players[id];
+
+      if (p.pickupDelay < Date.now()) { // Pick up item
+        let dir = {x: (p.pos.x-entity.pos.x), y: (p.pos.y-blockSize-(entity.pos.y)), z: (p.pos.z-entity.pos.z)}
+        let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
+
+        // Add to player if within a block distance
+        if (dist < blockSize*1.5) {
+          if (entity.v == this.itemId["arrow"] && entity.class == "item" && entity.lethal && !entity.onObject && !players[id].blocking) { // Arrow hit
+
+            players[id].hp -= entity.force;
+            if (players[entity.playerId])
+              players[id].dmgType = players[entity.playerId].name;
+            entity.force *= 300
+            entity.dir = entity.vel;
+            io.to(`${id}`).emit('knockback', entity)
+            io.emit('punch', id);
+
+            // Remove the item from world
+            newEntities.push({
+              type: "remove_item",
+              id: entity.id,
+              v: entity.v,
+              class: entity.class
+            })
+            delete this.entities[entity_id];
+          } else {
+            // Add item to player's inventory if item already exists in inventory
+            World.addItem(p, entity);
+
+            // Remove the item from world
+            newEntities.push({
+              type: "remove_item",
+              id: entity.id,
+              v: entity.v,
+              class: entity.class
+            })
+            delete this.entities[entity_id];
+          }
+        }
+
+        if (dist < blockSize*2.5 && (entity.v != this.itemId["arrow"] || entity.onObject)) { // Pull when 2 blocks away
+          
+          entity.acc.x = dir.x * 2 * blockSize;
+          entity.acc.y = dir.y * 2 * blockSize;
+          entity.acc.z = dir.z * 2 * blockSize;
+        }
+      }
+    }
+
+    return newEntities;
+  }
+
+  applyPhysics(entity, dt) {
+    // Update velocity and acceleration
+    entity.vel.x += entity.acc.x*dt;
+    entity.vel.y += entity.acc.y*dt;
+    entity.vel.z += entity.acc.z*dt;
+
+    entity.pos.x += entity.vel.x*dt;
+    entity.pos.y += entity.vel.y*dt;
+    entity.pos.z += entity.vel.z*dt;
+  }
+
+  static addItem(p, entity) {
+    let added = false;
+    for (let t of p.toolbar) {
+      if (!t)
+        continue;
+      if (t.v == entity.v && t.class == entity.class) {
+        t.c += 1;
+        added = true;
+      }
+    }
+
+    // Add item if item does not exist in inventory
+    if (!added) {
+      let filled = false;
+      for (let i = 0; i < p.toolbar.length; i++) {
+        if (!p.toolbar[i] || p.toolbar[i].c == 0) {
+          p.toolbar[i] = {
+            v: entity.v,
+            c: 1,
+            class: entity.class
+          }
+          filled = true;
+          break;
+        }
+      }
+
+      if (!filled) {
+        p.toolbar.push({
+          v: entity.v,
+          c: 1,
+          class: entity.class
+        })
+      }
+    }
   }
 }

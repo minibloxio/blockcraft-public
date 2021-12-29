@@ -113,7 +113,7 @@ class Stage {
 	}
 
 	update() {
-		let {blockSize, cellSize} = world;
+		let {blockSize} = world;
 		let t = tick.value || 1000;
 
 		if (this.stars.visible) {
@@ -131,7 +131,6 @@ class Stage {
 			this.stars.position.set(player.position.x, player.position.y, player.position.z);
 		}
 		
-
 		// Update sun position
 		if (this.dayNightCycle) {
 			this.offset.x = Math.cos(t*this.daySpeed)*this.sunDist;
