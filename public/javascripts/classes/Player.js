@@ -79,6 +79,9 @@ class Player {
 		this.drop = false; // Drop item
 
 		this.lastRaycast = Date.now();
+		this.nearbyMeshes = [];
+		this.playerBoxes = [];
+		this.picked = [];
 
 		// Player dimensions
 		let blockSize = 16;
@@ -123,13 +126,13 @@ class Player {
 		if (!initialized) this.addArm();
 		
 		// Select box wireframe
-		var select_box = new THREE.BoxGeometry(blockSize+0.1, blockSize+0.1, blockSize+0.1);
+		let select_box = new THREE.BoxGeometry(blockSize+0.1, blockSize+0.1, blockSize+0.1);
 		this.mine_box = new THREE.Mesh(select_box, mining_progress[0].material)
 		this.mine_box.name = "wireframe";
 		scene.add(this.mine_box)
 
-		var geometry = new THREE.EdgesGeometry(select_box);
-		var material = new THREE.LineBasicMaterial({color: "black", linewidth: 2})
+		let geometry = new THREE.EdgesGeometry(select_box);
+		let material = new THREE.LineBasicMaterial({color: "black", linewidth: 2})
 		this.select_wireframe = new THREE.LineSegments(geometry, material);
 		this.select_wireframe.name = "wireframe";
 		scene.add(this.select_wireframe)
@@ -260,7 +263,7 @@ class Player {
 			camera.add(this.arm)
 		} else if (item && item.c > 0) { // Display block
 			let uvVoxel = item.v-1;
-			var item_geometry = new THREE.BufferGeometry();
+			let item_geometry = new THREE.BufferGeometry();
 			const {positions, normals, uvs, indices} = world.generateGeometryDataForItem(uvVoxel);
 			const positionNumComponents = 3;
 			item_geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
@@ -406,43 +409,43 @@ class Player {
 		let {blockSize} = world;
     	// Crosshair selection for blocks
 
-		var intersects;
+		let intersects;
 
 		// update the picking ray with the camera and mouse position
 		this.raycaster.setFromCamera( new THREE.Vector3(0, 0, 0), camera );
 		this.raycaster.far = blockSize * 5;
 
 		// calculate blocks intersecting the picking ray
-		let nearbyMeshes = [];
+		this.nearbyMeshes.length = 0;
 		let cellPos = chunkManager.cellPos;
 		for (let offset of chunkManager.neighborOffsets) {
 			let id = (cellPos.x + offset[0]) + "," + (cellPos.y + offset[1]) + "," + (cellPos.z + offset[2]);
 			if (cellIdToMesh[id]) {
-				if (cellIdToMesh[id][0]) nearbyMeshes.push(cellIdToMesh[id][0]);
-				if (cellIdToMesh[id][1]) nearbyMeshes.push(cellIdToMesh[id][1]);
+				if (cellIdToMesh[id][0]) this.nearbyMeshes.push(cellIdToMesh[id][0]);
+				if (cellIdToMesh[id][1]) this.nearbyMeshes.push(cellIdToMesh[id][1]);
 			}
 		}
-		intersects = this.raycaster.intersectObjects( nearbyMeshes );
+		intersects = this.raycaster.intersectObjects( this.nearbyMeshes );
 
 		// Eliminate wireframes, items, and clouds from being selected
-		var picked = []
-		for (var i = 0; i < intersects.length; i++) {
+		this.picked.length = 0;
+		for (let i = 0; i < intersects.length; i++) {
 			let object = intersects[i].object;
 			if (!(object.name == "wireframe" || object.name == "item" || object.name == "cloud")) {
-				picked.push(intersects[i])
+				this.picked.push(intersects[i]);
 			}
 		}
 
 		// Get the closest block
-		var closest = {distance: Infinity};
-		for (var i = 0; i < picked.length; i++) {
-			let block = picked[i];
+		let closest = {distance: Infinity};
+		for (let i = 0; i < this.picked.length; i++) {
+			let block = this.picked[i];
 			let x = Math.floor((block.point.x-block.face.normal.x)/blockSize);
 			let y = Math.floor((block.point.y-block.face.normal.y)/blockSize);
 			let z = Math.floor((block.point.z-block.face.normal.z)/blockSize);
 			let voxel = world.getVoxel(x, y, z);
-			if (closest.distance > picked[i].distance && voxel != world.blockId["water"]) {
-				closest = picked[i]
+			if (closest.distance > this.picked[i].distance && voxel != world.blockId["water"]) {
+				closest = this.picked[i];
 			}
 		}
 
@@ -472,31 +475,30 @@ class Player {
     	if (this.blocking || !this.raycaster.camera || this.click)
     		return;
     	// Punch players
-
 		let {blockSize} = world;
     	this.raycaster.far = blockSize * 4;
     	this.key.leftClick = Date.now();
         this.punching = Date.now();
 
-    	let playerBoxes = [];
-    	for (let id in players) playerBoxes.push(players[id].skeleton);
-		var intersects = this.raycaster.intersectObjects(playerBoxes, true);
+    	this.playerBoxes.length = 0;
+    	for (let id in players) this.playerBoxes.push(players[id].skeleton);
+		let intersects = this.raycaster.intersectObjects(this.playerBoxes, true);
 
-		var picked = [];
-		for (var i = 0; i < intersects.length; i++) {
+		this.picked.length = 0;
+		for (let i = 0; i < intersects.length; i++) {
 			let object = intersects[i].object;
 			if (!(object.name == "wireframe" || object.name == "item" || object.name == "cloud")) {
-				picked.push(intersects[i])
+				this.picked.push(intersects[i])
 			}
 		}
 			
 		// Get the closest intersection
-		var closest = {
+		let closest = {
 			distance: Infinity
 		};
-		for (var i = 0; i < picked.length; i++) {
-			if (closest.distance > picked[i].distance) {
-				closest = picked[i]
+		for (let i = 0; i < this.picked.length; i++) {
+			if (closest.distance > this.picked[i].distance) {
+				closest = this.picked[i]
 			}
 		}
 		if (closest.object) {
@@ -716,7 +718,7 @@ class Player {
 		}
 
 		// Reduce velocity (friction)
-		var previousVelocity = this.velocity.clone();
+		let previousVelocity = this.velocity.clone();
 		this.velocity.x -= previousVelocity.x * 10.0 * delta;
 		this.velocity.z -= previousVelocity.z * 10.0 * delta;
 		// Determine direction vector
@@ -773,10 +775,10 @@ class Player {
 			this.velocity.divideScalar(Math.max(1+delta*50, 1.01))
 
 			this.previousPosition = this.position.clone();
-			var currentPosition = this.position.clone();
+			let currentPosition = this.position.clone();
 			
 			currentPosition.add(dir);
-			var move = currentPosition.sub(this.previousPosition)
+			let move = currentPosition.sub(this.previousPosition)
 			this.newMove.add(move);
 			this.halfHeight = blockSize * 0.4;
 
@@ -823,16 +825,16 @@ class Player {
 		// Get movement preview by adding up all the movement from object space
 		this.onObject = false;
 
-		var axes = ['y', 'x', 'z']
+		let axes = ['y', 'x', 'z']
 		
-		for (var i = 0; i < axes.length; i++) {
-			var axis = axes[i];
-			var axesVec = new THREE.Vector3();
+		for (let i = 0; i < axes.length; i++) {
+			let axis = axes[i];
+			let axesVec = new THREE.Vector3();
 			axesVec[axis] = 1;
 
-			var original = this.velocity[axis] * delta * this.speed;
-			var originalY = this.velocity[axis] * delta;
-			var currentVel;
+			let original = this.velocity[axis] * delta * this.speed;
+			let originalY = this.velocity[axis] * delta;
+			let currentVel;
 			if (!this.fly) {
 				currentVel = [originalY, original/2, original];
 			} else {
@@ -840,9 +842,9 @@ class Player {
 			}
 			
 			this.previousPosition = this.position.clone();
-			var currentPosition = this.controls.getObject().clone(false);
+			let currentPosition = this.controls.getObject().clone(false);
 			currentPosition.translateOnAxis(axesVec, currentVel[i]);
-			var move = currentPosition.position.sub(this.previousPosition)
+			let move = currentPosition.position.sub(this.previousPosition)
 			this.newMove.add(move);
 		}
 	}
@@ -864,14 +866,14 @@ class Player {
 
 	checkCollision(delta) {
 		let {blockSize} = world;
-		var test_axes = ['y', 'x', 'z', 'xz']
+		let test_axes = ['y', 'x', 'z', 'xz']
 
 		// Check for collision
 		if (this.clip) {
-			var savedMove = this.newMove.clone();
+			let savedMove = this.newMove.clone();
 
 			// Test each axis in collsion
-			var previousPosition = this.position.clone();
+			let previousPosition = this.position.clone();
 
 			for (let axes of test_axes) {
 
@@ -1054,13 +1056,13 @@ class Player {
 		this.mine();
 		this.placeBlock();
 		this.dropItem();
-
 		this.updateHand();
+		
 		this.move(delta);
 	}
 
 	collideVoxel(x, y, z) {
-		var voxel = world.getVoxel(x, y, z)
+		let voxel = world.getVoxel(x, y, z)
 		if (voxel > 1 && voxel != 255)
 			return voxel;
 	}
@@ -1068,42 +1070,45 @@ class Player {
 	collides() {
 		let {blockSize} = world;
 
+		let posX = Math.floor(this.position.x/blockSize);
+		let posZ = Math.floor(this.position.z/blockSize);
+
 		// Under water
-		var x = Math.floor(this.position.x/blockSize);
-		var y = Math.floor((this.position.y-blockSize*1.62)/blockSize);
-		var z = Math.floor(this.position.z/blockSize);
+		let x = posX;
+		let y = Math.floor((this.position.y-blockSize*1.62)/blockSize);
+		let z = posZ;
 
-		var voxel1 = world.getVoxel(x, y, z)
+		let voxel1 = world.getVoxel(x, y, z)
 
-		var x = Math.floor(this.position.x/blockSize);
-		var y = Math.floor((this.position.y+blockSize*0.2)/blockSize);
-		var z = Math.floor(this.position.z/blockSize);
+		x = posX;
+		y = Math.floor((this.position.y+blockSize*0.2)/blockSize);
+		z = posZ;
 
-		var voxel2 = world.getVoxel(x, y, z)
+		let voxel2 = world.getVoxel(x, y, z)
 
 		if (!world.blockId) return;
 
 		this.inWater = voxel1 == world.blockId["water"] || voxel2 == world.blockId["water"];
 
-		var x = Math.floor(this.position.x/blockSize);
-		var y = Math.floor((this.position.y)/blockSize);
-		var z = Math.floor(this.position.z/blockSize);
+		x = posX;
+		y = Math.floor((this.position.y)/blockSize);
+		z = posZ;
 
-		var voxel = world.getVoxel(x, y, z)
+		let voxel = world.getVoxel(x, y, z)
 		colorPass.enabled = voxel == world.blockId["water"];
 		
 
 		// Head and feet
 
-		var x = Math.floor(this.position.x/blockSize);
-		var y = Math.floor((this.position.y-this.halfHeight*2)/blockSize);
-		var z = Math.floor(this.position.z/blockSize);
+		x = posX;
+		y = Math.floor((this.position.y-this.halfHeight*2)/blockSize);
+		z = posZ;
 
 		if (this.collideVoxel(x, y, z)) return true;
 
-		var x = Math.floor(this.position.x/blockSize);
-		var y = Math.floor((this.position.y+blockSize*0.2)/blockSize);
-		var z = Math.floor(this.position.z/blockSize);
+		x = posX;
+		y = Math.floor((this.position.y+blockSize*0.2)/blockSize);
+		z = posZ;
 
 		if (this.collideVoxel(x, y, z)) return true;
 
@@ -1111,9 +1116,9 @@ class Player {
 
 		for (let i = -1; i < 2; i+=2) {
 			for (let j = -1; j < 2; j+=2) {
-				var x = Math.floor((this.position.x+i*blockSize*0.25)/blockSize);
-				var y = Math.floor((this.position.y)/blockSize);
-				var z = Math.floor((this.position.z+i*blockSize*0.25)/blockSize);
+				x = Math.floor((this.position.x+i*blockSize*0.25)/blockSize);
+				y = Math.floor((this.position.y)/blockSize);
+				z = Math.floor((this.position.z+i*blockSize*0.25)/blockSize);
 
 				if (this.collideVoxel(x, y, z)) return true;
 			}
@@ -1123,9 +1128,9 @@ class Player {
 
 		for (let i = -1; i < 2; i+=2) {
 			for (let j = -1; j < 2; j+=2) {
-				var x = Math.floor((this.position.x+i*blockSize*0.25)/blockSize);
-				var y = Math.floor((this.position.y-blockSize*0.8)/blockSize);
-				var z = Math.floor((this.position.z+j*blockSize*0.25)/blockSize);
+				x = Math.floor((this.position.x+i*blockSize*0.25)/blockSize);
+				y = Math.floor((this.position.y-blockSize*0.8)/blockSize);
+				z = Math.floor((this.position.z+j*blockSize*0.25)/blockSize);
 
 				if (this.collideVoxel(x, y, z)) return true;
 			}
@@ -1136,9 +1141,9 @@ class Player {
 
 		for (let i = -1; i < 2; i+=2) {
 			for (let j = -1; j < 2; j+=2) {
-				var x = Math.floor((this.position.x+i*blockSize*0.25)/blockSize);
-				var y = Math.floor((this.position.y-this.halfHeight*2)/blockSize);
-				var z = Math.floor((this.position.z+j*blockSize*0.25)/blockSize);
+				x = Math.floor((this.position.x+i*blockSize*0.25)/blockSize);
+				y = Math.floor((this.position.y-this.halfHeight*2)/blockSize);
+				z = Math.floor((this.position.z+j*blockSize*0.25)/blockSize);
 
 				if (this.collideVoxel(x, y, z)) return true;
 			}

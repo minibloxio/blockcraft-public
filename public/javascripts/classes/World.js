@@ -214,6 +214,7 @@ World.faces = [
   },
 ];
 
+let cells = [];
 const cellIdToMesh = {};
 
 const neighborOffsets = [
@@ -229,7 +230,7 @@ const neighborOffsets = [
 function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
   let {cellSize} = world;
 
-  let cells = [];
+  cells.length = 0;
   const updatedCellIds = {};
 
   for (let offset of neighborOffsets) {
@@ -260,12 +261,14 @@ function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
 
 function updateCellMesh(data) {
   let {blockSize, cellSize} = world;
-  var [opaqueGeometry, cellX, cellY, cellZ, cellId, transparentGeometry, forceUpdate] = data;
+  let [opaqueGeometry, cellX, cellY, cellZ, cellId, transparentGeometry, forceUpdate] = data;
   let mesh, meshT;
 
   if (cellIdToMesh[cellId]) {
     mesh = cellIdToMesh[cellId][0];
     meshT = cellIdToMesh[cellId][1];
+  } else if (cellIdToMesh[cellId]) {
+    cellIdToMesh[cellId].length = 0;
   } else {
     cellIdToMesh[cellId] = [];
   }

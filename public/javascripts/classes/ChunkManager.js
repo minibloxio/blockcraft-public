@@ -5,6 +5,7 @@ class ChunkManager {
 		this.currChunks = {};
 
 		this.chunksToRequest = [];
+		this.requestedChunks = [];
 		this.chunksToLoad = [];
 		this.chunksToRender = [];
 		this.chunksToUnload = [];
@@ -119,15 +120,15 @@ class ChunkManager {
 	    }
 
 		// Request chunks based on loading rate
-		let requestedChunks = [];
+		this.requestedChunks.length = 0;
 		for (let chunk of this.chunksToRequest) {
 			if (chunk) {
-				requestedChunks.push(chunk);
+				this.requestedChunks.push(chunk);
 			}
 		}
 
-		if (requestedChunks.length > 0) {
-			socket.emit('requestChunk', requestedChunks) // Call server to load this chunk
+		if (this.requestedChunks.length > 0) {
+			socket.emit('requestChunk', this.requestedChunks) // Call server to load this chunk
 		}
 	}
 
@@ -207,10 +208,13 @@ class ChunkManager {
 
 	unloadChunks(all) { // OPTIMIZE
 		if (all) { // Completely unload all chunks
-			this.chunksToRequest = [];
-			this.chunksToLoad = [];
-			this.chunksToRender = [];
-			this.reqChunks = {};
+			this.chunksToRequest.length = 0;
+			this.chunksToLoad.length = 0;
+			this.chunksToRender.length = 0;
+
+			for (let id in this.reqChunks) {
+				delete this.reqChunks[id];
+			}
 		}
 
 		// Loop through current cells to determine which chunks to unload
@@ -247,8 +251,7 @@ class ChunkManager {
 	}
 
 	update(player) {
-		if (Date.now()-this.chunkTick < this.chunkDelay)
-			return;
+		if (Date.now()-this.chunkTick < this.chunkDelay || this.chunkLoadingRate == 0) return;
 
 		// Update chunks
 		this.cellPos = world.computeCellFromPlayer(player.position.x, player.position.y, player.position.z);
@@ -263,7 +266,7 @@ class ChunkManager {
 			this.unloadChunks(true);
 		}
 
-		this.chunksToRequest = [];
+		this.chunksToRequest.length = 0;
 	}
 
 	updateTexture() {

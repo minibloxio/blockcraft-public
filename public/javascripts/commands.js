@@ -65,7 +65,7 @@ function giveCommandHint(msg, autocomplete) {
         let command = commandIds[i];
 
         // If the string is a substring of a command
-        if (command.startsWith(msg[0]) && command != msg[0]) {
+        if (command.startsWith(msg[0]) && command != msg[0] && msg.length == 1) {
 
             if (firstArgUnique) {
                 hintText += ", " + command;
@@ -86,36 +86,45 @@ function giveCommandHint(msg, autocomplete) {
         }
 
         // If the command exists and the command has no second argument
-        if (command == msg[0] && msg.length == 1) { 
-            if (autocomplete) {
-                let extraSpace = Object.keys(commands[command]).length > 1 ? " " : "";
-                let completedCommand = hintText + command + extraSpace;
-                $("#chat-input").val(completedCommand);
-                giveCommandHint(completedCommand.slice(1).split(" "), false);
-                return;
-            }
+        if (command == msg[0]) {
+            firstArgUnique = command;
 
-            hintText += command + " " + commands[command].hint;
+            if (msg.length == 1) {
+                if (autocomplete) {
+                    let extraSpace = Object.keys(commands[command]).length > 1 ? " " : "";
+                    let completedCommand = hintText + command + extraSpace;
+                    $("#chat-input").val(completedCommand);
+                    giveCommandHint(completedCommand.slice(1).split(" "), false);
+                    return;
+                }
+
+                hintText += command + " " + commands[command].hint;
+            }
         }
 
         // If the command exists and the command has a second argument
         if (command == msg[0] && msg.length >= 2 && commands[command].hints) { 
+            firstArgUnique = command;
             hintText += msg[0] + " ";
 
             // Special case for /setblock
             if (msg[0] == "setblock") {
                 msg.shift();
                 if (msg.length < 4) {
-                    hintText += msg.join(" ").removeExtraSpaces();
+                    hintText += msg.join(" ").removeExtraSpaces() + " ";
 
-                    if (autocomplete) {
-                        let completedCommand = (hintText + "~ ").removeExtraSpaces();
+                    if (autocomplete && msg.length <= 3) {
+                        if ((msg[2] == undefined || msg[2].length == 0)) hintText += '~';
+                        let completedCommand = (hintText + " ").removeExtraSpaces();
                         $("#chat-input").val(completedCommand);
                         giveCommandHint(completedCommand.slice(1).split(" "), false);
                         return;
                     }
 
-                    hintText += "~ - Set block at " + getCoord(msg);
+                    if (msg.length <= 3 && (msg[2] == undefined || !msg[2].length)) hintText += "~";
+
+                    hintText += " - Set block at " + getCoord(msg);
+                    hintText = hintText.removeExtraSpaces();
                     return;
                 } else if (msg.length == 4) {
                     hintText += msg.slice(0, 3).join(" ") + " ";
@@ -181,8 +190,8 @@ function giveCommandHint(msg, autocomplete) {
         }
     }
 
-    //console.log(firstArgUnique, firstArgValue, secondHint, secondHintValue);
-    if (hintText == "/" && !firstArgUnique) {
+    msg = msg.join(" ").trim().split(" ");
+    if ((hintText == "/" && !firstArgUnique) || (msg.length > 1 && msg[0] != firstArgUnique && msg[1].length > 0 && !secondHint)) {
         hintText += msg.join(" ") + " - No command found";
         hintText = "?" + hintText;
     }
@@ -400,7 +409,6 @@ function setBlock(msg) {
     msg.shift();
     console.log(msg);
     let validCoordinates = validCoord(msg.slice(0, 3));
-    console.log(validCoordinates);
     let pos = getCoord(msg, true);
     console.log("Attempting to set block at " + pos.x + " " + pos.y + " " + pos.z);
 

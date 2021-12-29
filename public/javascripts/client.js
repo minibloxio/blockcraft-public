@@ -157,24 +157,24 @@ function updateClient(data) {
 	if (!joined || !initialized) return;
 
 	// Update player
-	var serverPlayers = data.serverPlayers;
+	let serverPlayers = data.serverPlayers;
 	updatePlayers(serverPlayers);
 
 	// Update blocks
-	var updatedBlocks = data.updatedBlocks;
+	let updatedBlocks = data.updatedBlocks;
 	for (let block of updatedBlocks) {
 		world.setVoxel(block.x, block.y, block.z, block.t);
 		updateVoxelGeometry(block.x, block.y, block.z, true); // Update if in different chunk?
 	}
 
 	// Add new entities
-	var newEntities = data.newEntities;
+	let newEntities = data.newEntities;
 	for (let entity of newEntities) {
 		addEntity(entity);
 	}
 
 	// Update existing entities PUT THIS IN THE WORLD CLASS FUNCTION
-	var updatedEntities = data.entities;
+	let updatedEntities = data.entities;
 	for (let id in updatedEntities) {
 		let entity = updatedEntities[id];
 		if (entity.type == "item" && world.entities[id]) {

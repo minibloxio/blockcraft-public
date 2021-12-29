@@ -1,10 +1,12 @@
 let bufferSize = 16*16*16;
+let result = [];
+let newArray = [];
 
 self.addEventListener('message', e => {
 
 	let chunks = e.data;
 
-	let result = [];
+	result.length = 0;
 	for (let chunk of chunks) {
 		let cell = RLEdecode(chunk.cell);
 		chunk.cell = new Uint8Array(new SharedArrayBuffer(bufferSize));
@@ -16,8 +18,9 @@ self.addEventListener('message', e => {
 });
 
 function RLEdecode(array) {
-	var newArray=[],isRip,isRun,ripCount,runCount;
-	for (var i = 0; i < array.length; i++) {
+	let isRip,isRun,ripCount,runCount;
+	newArray.length = 0;
+	for (let i = 0; i < array.length; i++) {
 		isRip=array[i]<0;
 		isRun=array[i]>0;
 		if(isRip){
@@ -33,7 +36,7 @@ function RLEdecode(array) {
 		if(isRun){
 			runCount=array[i];
 			i+=1;
-			for (var j = 0; j < runCount; j++) {
+			for (let j = 0; j < runCount; j++) {
 				newArray.push(array[i])
 			};
 			

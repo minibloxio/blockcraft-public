@@ -39,7 +39,7 @@ class Stage {
 	    this.torches = [];
 
 	    // Fog
-	    scene.fog = new THREE.Fog("lightblue", 0, blockSize*cellSize*5)
+	    //scene.fog = new THREE.Fog("lightblue", 0, blockSize*cellSize*5)
 
 	    // Sun
 	    this.sun = loadSprite('./sun.png', 16*16*16);
@@ -80,6 +80,10 @@ class Stage {
 
 		this.stars = new THREE.Points( geometry, starMaterial );
 		scene.add(this.stars);
+
+		// Update fog based on render distance
+		// scene.fog.near = (chunkManager.renderDistance-3)*blockSize*cellSize;
+		// scene.fog.far = Infinity;
 	}
 
 	generateClouds(type) {
@@ -199,11 +203,6 @@ class Stage {
 		}
 		
 		scene.background = color;
-		scene.fog.color = color;
-
-		// Update fog based on render distance
-		scene.fog.near = (chunkManager.renderDistance-3)*blockSize*cellSize;
-		scene.fog.far = Infinity;
 	}
 }
 var LinearColorInterpolator = {

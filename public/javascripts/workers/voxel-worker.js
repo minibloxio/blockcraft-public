@@ -1,4 +1,5 @@
 let world, cells;
+let result = [];
 
 self.addEventListener('message', e => {
   if (e.data.cellSize) {
@@ -10,7 +11,7 @@ self.addEventListener('message', e => {
   } else {
     cells = e.data;
 
-    let result = [];
+    result.length = 0;
 
     for (let cell of cells) {
       let [cellX, cellY, cellZ, cellId, forceUpdate] = cell;
@@ -199,7 +200,6 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
             }
           }
         }
-
       }
     }
   }
