@@ -249,7 +249,7 @@ var onKeyUp = function ( event ) {
 	// Give command hint
 	let msg = $("#chat-input").val();
     
-	if (player.controls.enabled && showChatFlag && msg && msg[0] == "/") {
+	if (player && player.controls.enabled && showChatFlag && msg && msg[0] == "/") {
 		msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
 		giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
 	}

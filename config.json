@@ -1,5 +1,6 @@
 {
 	"port": 3001,
 	"region": "na-east",
-	"link": "https://na-east.victorwei.com"
+	"link": "https://na-east.victorwei.com",
+	"operatorPassword": "poop"
 }

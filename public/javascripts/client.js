@@ -144,13 +144,11 @@ socket.on('update', async function (data) {
 })
 
 socket.on('messageAll', function (data) {
-	addChat({
-		text: data.text,
-		color: data.color,
-		name: data.name,
-		discard: data.discard,
-		timer: data.timer || 5000,
-	})
+	addChat(data);
+})
+
+socket.on('message', function (data) {
+	addChat(data);
 })
 
 socket.on('refresh', function () {

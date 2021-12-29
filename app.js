@@ -435,27 +435,6 @@ io.on('connection', function(socket_) {
 		players[socket.id].toolbar = data;
 	})
 
-	// Clear inventory
-	socket.on('clearInventory', function (data) {
-		if (!players[socket.id]) return;
-		players[socket.id].toolbar = [];
-	})
-
-	// Clear hand
-	socket.on('clearHand', function (data) {
-		if (!players[socket.id]) return;
-		players[socket.id].toolbar[data] = null;
-	})
-
-	// Give player item
-	socket.on('giveItem', function (data) {
-		if (!players[socket.id]) return;
-		World.addItem(players[socket.id], {
-			v: data.item,
-			amount: data.amount
-		});
-	})
-
 	// Player interactivity
 	socket.on('respawn', function () {
 		if (!players[socket.id]) return;
@@ -547,13 +526,64 @@ io.on('connection', function(socket_) {
 		}
 	})
 
-	// Commands
+	// COMMANDS
+
+	// Set the time of day
 	socket.on('settime', function (data) {
 		let text = "<"+players[socket.id].name+"> set the time to " + data;
 		logger.info(text)
 		world.tick = data;
 	})
 
+	// Clear inventory
+	socket.on('clearInventory', function (data) {
+		if (!players[socket.id]) return;
+		players[socket.id].toolbar = [];
+	})
+
+	// Clear hand
+	socket.on('clearHand', function (data) {
+		if (!players[socket.id]) return;
+		players[socket.id].toolbar[data] = null;
+	})
+
+	// Give player item
+	socket.on('giveItem', function (data) {
+		if (!players[socket.id]) return;
+		World.addItem(players[socket.id], {
+			v: data.item,
+			amount: data.amount
+		});
+	})
+
+	// Set player's operater status
+	socket.on('setOperator', function (data) {
+		if (!players[socket.id]) return;
+
+		let password = config.operatorPassword;
+		if (data.password == password && players[data.id].operator != data.isOp) {
+			players[data.id].operator = data.isOp;
+			io.emit('messageAll', {
+				name: "Server",
+				text: (data.isOp ? "Enabled" : "Disabled") + " operator status for " + players[data.id].name,
+				color: "grey"
+			});
+		} else if (data.password != password) {
+			socket.emit('message', {
+				name: "Server",
+				text: "Incorrect password",
+				color: "grey"
+			});
+		} else if (players[data.id].operator == data.isOp) {
+			socket.emit('message', {
+				name: "Server",
+				text: players[data.id].name + " is already " + (data.isOp ? "enabled" : "disabled") + " operator status",
+				color: "grey"
+			});
+		}
+	})
+
+	// DISCONNECT
 	socket.on('disconnect', function () {
 		if (players[socket.id] && players[socket.id].connected) {
 			let text = players[socket.id].name + " has left the server";

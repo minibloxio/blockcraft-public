@@ -2,7 +2,6 @@
     MINECRAFT COMMANDS	
 */
 
-
 let commandsInit = JSON.stringify({
     "gamemode": {
         "hint": "<mode> - Changes your gamemode",
@@ -55,9 +54,36 @@ let commandsInit = JSON.stringify({
     },
     "reload": {
         "hint": "- Reloads the chunks",
-    }
+    },
+    "op": {
+        "hint": "<player> <password> - Makes the specified player an operator",
+        "hints": {},
+        "error": "Invalid player"
+    },
+    "deop": {
+        "hint": "<player> <password> - Removes the specified player's operator status",
+        "hints": {},
+        "error": "Invalid player"
+    },
 })
 let commands = JSON.parse(commandsInit);
+
+// Update hints
+function updateHints() {
+    for (let id in players) {
+        commands.tp.hints[players[id].name] = "Teleport to " + players[id].name; // Update tp hint
+        commands.op.hints[players[id].name] = "Make " + players[id].name + " an operator"; // Update op hint
+        commands.deop.hints[players[id].name] = "Remove " + players[id].name + "'s operator status"; // Update deop hint
+    }
+    commands.op.hints[player.name] = "Make yourself an operator"; // Update op hint
+    commands.deop.hints[player.name] = "Remove your operator status"; // Update deop hint
+    
+    for (let id in world.blockId) {
+        commands.setblock.hints[id] = "Set block to " + id; // Update setblock hint
+        commands.give.hints[id] = "Give 1 " + id + " to yourself"; // Update give hint
+    }
+    commands.help.hints = commands; // Update help hint
+}
 
 // Give command hints
 function giveCommandHint(msg, autocomplete) {
@@ -72,13 +98,7 @@ function giveCommandHint(msg, autocomplete) {
     let secondHintCounter = 0;
     let commandHintLimit = 5;
 
-    // Update tp hint
-    for (let id in players) {
-        commands.tp.hints[players[id].name] = "Teleport to " + players[id].name;
-    }
-    commands.setblock.hints = world.blockId; // Update setblock hint
-    commands.give.hints = world.blockId; // Update give hint
-    commands.help.hints = commands; // Update help hint
+    updateHints(); // Update hints
 
     // Check if the command exists
     let commandIds = Object.keys(commands).sort();
@@ -182,12 +202,17 @@ function giveCommandHint(msg, autocomplete) {
                 }
                 
                 // Check for third argument
-                if (msg[0] == "give" && hint == msg[1]) {
-                    if (msg[2] == undefined || msg[2].length == 0) {
-                        hintText += " [int] Give 1 " + hint;
+                if (hint == msg[1] && msg.length >= 3) {
+                    if (msg[0] == "give") {
+                        let num = clamp(parseInt(msg[2]), 0, 64);
+                        if (msg[2] == '') num = 1;
+                        hintText += " " + msg[2] + " - Give " + num + " " + hint + " to yourself";
                         return;
-                    } else if (msg.length == 3) {
-                        hintText += " " + msg[2] + " - Give " + clamp(parseInt(msg[2]), 0, 64) + " " + hint;
+                    } else if (msg[0] == "op") {
+                        hintText += " " + msg[2] + " - Enter the password to make " + hint + " an operator";
+                        return;
+                    } else if (msg[0] == "deop") {
+                        hintText += " " + msg[2] + " - Enter the password to remove " + hint + " as an operator";
                         return;
                     }
                 }
@@ -249,7 +274,6 @@ function getCoord(msg, pos, decimalPlace) {
 }
 
 function validCoord(msg) {
-    console.log(msg);
     if (msg.length != 3) return false;
     if (msg[0].length == 0 || msg[1].length == 0 || msg[2].length == 0) return true;
     let pos = getCoord(msg, true);
@@ -281,10 +305,10 @@ function checkCommand(msg) {
         clear(msg[1]);
     } else if (msg[0] == "reload") {
         chunkManager.reload();
-    } else if (msg[0] == "tutorial") {
-        displayTutorial();
-    } else if (msg[0] == "tutorial") {
-        displayTutorial();
+    } else if (msg[0] == "op") {
+        setOperator(msg, true);
+    } else if (msg[0] == "deop") {
+        setOperator(msg, false);
     } else {
         addChat({
             text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',
@@ -456,7 +480,6 @@ function displaySeed() {
 // Set a block
 function setBlock(msg) {
     msg.shift();
-    console.log(msg);
     let validCoordinates = validCoord(msg.slice(0, 3));
     let pos = getCoord(msg, true);
     console.log("Attempting to set block at " + pos.x + " " + pos.y + " " + pos.z);
@@ -471,7 +494,7 @@ function setBlock(msg) {
             cmd: true,
         });
         addChat({
-            text: "Set block at " + coord.x + " " + coord.y + " " + coord.z + " to " + msg[3] + " (" + world.blockId[msg[3]] + ")"
+            text: "Set block at " + coord.x + " " + coord.y + " " + coord.z + " to " + msg[3]
         })
     } else {
         addChat({
@@ -521,7 +544,6 @@ function clear(type) {
                 color: "red"
             });
         }
-        socket.emit('clearHand', player.currentSlot);
     } else if (type == "inventory") { // Clear the inventory
         socket.emit('clearInventory');
         addChat({
@@ -536,6 +558,47 @@ function clear(type) {
         addChat({
             text: 'Error: Invalid clear type',
             color: "red"
+        });
+    }
+}
+
+// Set operator status
+function setOperator(msg, isOp) {
+    msg.shift();
+    let target = msg[0];
+    let password = msg[1];
+    let playerId = null;
+
+    let exists = false;
+    if (target == player.name) {
+        exists = true;
+        playerId = socket.id;
+    }
+    for (let id in players) {
+        let p = players[id];
+        if (p.name == target) {
+            exists = true; 
+            playerId = id;
+            break;
+        }
+    }
+
+    if (!exists) {
+        addChat({
+            text: 'Error: No player found with name "' + target + '" to set operator status for',
+            color: "red"
+        });
+    } else if (password == undefined || password.length == 0) {
+        addChat({
+            text: 'Error: No password specified',
+            color: "red"
+        });
+    } else {
+        socket.emit('setOperator', {
+            id: playerId,
+            name: target,
+            password: password,
+            isOp: isOp
         });
     }
 }
