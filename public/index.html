@@ -3,9 +3,12 @@
 <html lang="en">
 	<head>
 		<title>BlockCraft</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=yes, minimum-scale=1.0, maximum-scale=1.0">
 		<meta name=description content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!">
+		<meta name="theme-color" content="#317EFB"/>
+
+
 		<meta property="og:title" content="BlockCraft" />
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content="https://blockcraft.victorwei.com" />
@@ -25,7 +28,9 @@
 		
 		<canvas id="canvas-hud"></canvas>
 
+		<!-- Load CDNs -->
 		<script src="https://cdn.jsdelivr.net/npm/ola"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 		<!-- Load Resources -->
 		<script src="javascripts/resources/three.js"></script>
@@ -36,11 +41,8 @@
 		<script src="javascripts/resources/simplex.js"></script>
 		<script src="javascripts/resources/matrix.js"></script>
 		<script src="javascripts/resources/sizeof.js"></script>
-		<script src="javascripts/resources/jquery.js"></script>
 		<script src="javascripts/resources/cookie.js"></script>
 		<script src="javascripts/resources/rle-encoding.js"></script>
-		<script src="javascripts/resources/GLTFLoader.js"></script>
-		<script src="javascripts/resources/Inflate.min.js"></script>
 		<script src="javascripts/resources/TextureMerger.js"></script>
 		<script src="javascripts/resources/TextGeometry.js"></script>
 		<script src="javascripts/resources/FontLoader.js"></script>
@@ -94,9 +96,9 @@
 							<span>BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!</span><br><br>
 							<span>BlockCraft is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way.</span><br><br>
 							<span>Supported browsers: Chrome, Safari, Edge</span><br><br>
-							<span>You can view my development journey <a href="https://victorwei.com/blog/blockcraft.pdf">on my blog.</a></span><br><br>
-							<span>This project is open source and the source code can be accessed through <a href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank">Github</a></span><br><br>
-							<span>You can view my other projects <a href="https://victorwei.com" target="_blank">on my personal website.</a></span><br><br>
+							<span>You can view my development journey <a cross-origin="anonymous" href="https://victorwei.com/blog/blockcraft.pdf">on my blog.</a></span><br><br>
+							<span>This project is open source and the source code can be accessed through <a cross-origin="anonymous"href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank">Github</a></span><br><br>
+							<span>You can view my other projects <a cross-origin="anonymous"href="https://victorwei.com" target="_blank">on my personal website.</a></span><br><br>
 							<span></span>This site uses cookies to enhance your experience on BlockCraft. Have fun!</span>
 						</div>
 

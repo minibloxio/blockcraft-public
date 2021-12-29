@@ -23,6 +23,7 @@ a {
 @font-face {
     font-family: 'Minecraft-Regular';
     src: url('Minecraft-Regular.otf');
+    font-display: fallback;
 }
 
 /* BlockCraft title */
