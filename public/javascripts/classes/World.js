@@ -280,7 +280,7 @@ function updateCellMesh(data) {
       setGeometry(geometry, opaqueGeometry);
 
       if (!mesh) {
-        mesh = new THREE.Mesh(geometry, material);
+        mesh = new THREE.Mesh(geometry, textureManager.material);
         mesh.name = cellId;
         mesh.castShadow = true;
         mesh.receiveShadow = true;
@@ -300,7 +300,7 @@ function updateCellMesh(data) {
       setGeometry(geometry, transparentGeometry);
 
       if (!meshT) {
-        meshT = new THREE.Mesh(geometry, materialTransparent);
+        meshT = new THREE.Mesh(geometry, textureManager.materialTransparent);
         meshT.name = cellId;
         meshT.castShadow = true;
         meshT.receiveShadow = true;

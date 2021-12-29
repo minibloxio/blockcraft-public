@@ -424,7 +424,7 @@ function drawItem(xPos, yPos, entity) {
 	if (!entity)
 		return;
 	let index = entity.v-1;
-	let atlas = entity.class == "item" ? item_atlas : texture_atlas;
+	let atlas = textureManager.getTextureAtlas(entity.class);
 	ctx.drawImage(atlas, index*16, 0, 16, 16, 
 		xPos, 
 		yPos, 
@@ -476,7 +476,7 @@ function displayToolbar() {
 			entity = inventory[i];
 		if (entity && entity.c > 0) {
 			let index = entity.v-1;
-			let atlas = entity.class == "item" ? item_atlas : texture_atlas;
+			let atlas = textureManager.getTextureAtlas(entity.class);
 			ctx.drawImage(atlas, 
 				index*16, 0, 16, 16, 
 				toolbarX+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1, 

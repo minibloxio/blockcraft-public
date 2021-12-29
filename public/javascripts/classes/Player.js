@@ -127,6 +127,7 @@ class Player {
 		
 		// Select box wireframe
 		let select_box = new THREE.BoxGeometry(blockSize+0.1, blockSize+0.1, blockSize+0.1);
+		let {mining_progress} = textureManager;
 		this.mine_box = new THREE.Mesh(select_box, mining_progress[0].material)
 		this.mine_box.name = "wireframe";
 		scene.add(this.mine_box)
@@ -250,7 +251,8 @@ class Player {
 			canvas.width = itemSize;
 			canvas.height = itemSize;
 			let ctx = canvas.getContext("2d");
-			ctx.drawImage(item_atlas, (item.v-1)*itemSize, (this.state ? this.state : 0)*itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
+			let atlas = textureManager.getTextureAtlas(item.class);
+			ctx.drawImage(atlas, (item.v-1)*itemSize, (this.state ? this.state : 0)*itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
 			let texture = new THREE.CanvasTexture(canvas);
 			texture.magFilter = THREE.NearestFilter;
 			texture.minFilter = THREE.NearestFilter;
@@ -274,7 +276,7 @@ class Player {
 			item_geometry.setIndex(indices);
 			item_geometry.computeBoundingSphere();
 
-			this.arm = new THREE.Mesh(item_geometry, materialTransparent);
+			this.arm = new THREE.Mesh(item_geometry, textureManager.materialTransparent);
 			this.arm.position.set(3, -7, -8);
 		} else {
 			// Display hand if empty
@@ -289,6 +291,8 @@ class Player {
 	}
 
 	moveHand(entity) {
+		if (this.mode == "spectator" || this.mode == "camera") return;
+
 		this.punchT = (Date.now()-this.punching)/120; // Punching
 
 		
@@ -462,6 +466,7 @@ class Player {
 			if (this.prevBlock && !this.prevBlock.equals(new THREE.Vector3(x, y, z)) && this.key.leftClick) {
 				this.key.leftClick = Date.now();
 				this.prevBlock = new THREE.Vector3(x, y, z);
+				let {mining_progress} = textureManager;
 				this.mine_box.material = mining_progress[0].material
 			}
 		} else if (this.select_wireframe) {
@@ -472,8 +477,9 @@ class Player {
     }
 
     punch() {
-    	if (this.blocking || !this.raycaster.camera || this.click)
-    		return;
+		
+		if (this.mode == "spectator" || this.mode == "camera") return;
+    	if (this.blocking || !this.raycaster.camera || this.click) return;
     	// Punch players
 		let {blockSize} = world;
     	this.raycaster.far = blockSize * 4;
@@ -483,7 +489,7 @@ class Player {
     	this.playerBoxes.length = 0;
     	for (let id in players) this.playerBoxes.push(players[id].skeleton);
 		let intersects = this.raycaster.intersectObjects(this.playerBoxes, true);
-
+		
 		this.picked.length = 0;
 		for (let i = 0; i < intersects.length; i++) {
 			let object = intersects[i].object;
@@ -541,6 +547,7 @@ class Player {
     	this.miningDelayConstant = this.mode == "survival" ? 750 : 200;
 
 		let {blockSize} = world;
+		let {mining_progress} = textureManager;
 
 		// Check if block is mined
 		if (this.closest.point && this.closest.face) {
@@ -608,11 +615,7 @@ class Player {
 					this.mine_box.material = mining_progress[index].material
 					this.mine_box.visible = true;
 				}
-					
 			}
-
-				
-		
 		} else if (this.mine_box) {
 			this.mine_box.material = mining_progress[0].material
 			this.mine_box.visible = false;

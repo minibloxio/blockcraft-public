@@ -86,7 +86,10 @@ socket.on('joinResponse', function (data) {
 
 // Load textures
 socket.on('textureData', function (data) {
-	if (loaded < maxLoaded) loadTextures(data);
+	if (loaded < maxLoaded) {
+		//loadTextures(data);
+		textureManager.loadTextures(data);
+	}
 })
 
 // Update chunk
@@ -100,6 +103,7 @@ socket.on('addPlayer', function (data) {
 	// Add to players
 	if (data.id != socket.id) { // Check if not own player
 		players[data.id] = data;
+		console.log(data);
 
 		addPlayer(players, data.id);
 	}

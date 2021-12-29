@@ -1,16 +1,14 @@
 // Three.js
-let scene, renderer, world, chunkManager, stage, sky, stats, composer, colorShader, player, players;
+let scene, renderer, world, chunkManager, textureManager, stage, sky, stats, composer, colorShader, player, players;
 let tick = new Ola(0);
 
 // Stats
 let prevTime = performance.now();
 let statistics = [];
 
-// Camera
-let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000000);
+let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000000); // Camera
 
-// Mouse
-let mouse = new Ola({x: 0, y: 0}, 10);
+let mouse = new Ola({x: 0, y: 0}, 10); // Mouse
 
 // Web workers
 let rleWorker;
@@ -25,6 +23,7 @@ function init() {
 	scene = new THREE.Scene(); // Add scene
 	world = new World(); // Init world
 	chunkManager = new ChunkManager(); // Add chunk manager
+	textureManager = new TextureManager();
 	player = new Player(camera); // Add player
 	stage = new Stage(); // Initialize the stage (light, sun, moon, stars, etc.)
 
@@ -37,7 +36,7 @@ function init() {
 	
 	window.addEventListener( 'resize', onWindowResize, false ); // Add resize event
 
-	console.log('Game initialized in ' + (Date.now() - t) + 'ms')
+	console.log('Game initialized in ' + (Date.now() - t) + 'ms') // Log time
 	
 	animate(); // Animate
 }

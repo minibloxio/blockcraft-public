@@ -75,7 +75,7 @@ function addPlayer(players, id) {
 
 	// Add nametag
 	var name_geometry = new THREE.TextGeometry( p.name, {
-		font: minecraft_font,
+		font: textureManager.minecraft_font,
 		size: 3,
 		height: 0.5
 	});
@@ -107,6 +107,9 @@ function addPlayer(players, id) {
 	scene.add(p.entity);
 
 	p.punchingT = 0;
+
+	// Set gamemode
+	setPlayerGamemode(p, p.mode);
 }
 
 function updatePlayers(serverPlayers) {
@@ -126,6 +129,10 @@ function updatePlayers(serverPlayers) {
 				p.entity.visible = false;
 			} else if (p.hp > 0) {
 				p.entity.visible = true;
+			}
+			// Update gamemode
+			if (p.mode != serverPlayers[id].mode) {
+				setPlayerGamemode(p, serverPlayers[id].mode);
 			}
 
 			// Transfer data
@@ -153,7 +160,7 @@ function updatePlayers(serverPlayers) {
 				p.entity.remove(p.nameTag)
 
 				var name_geometry = new THREE.TextGeometry( p.name, {
-					font: minecraft_font,
+					font: textureManager.minecraft_font,
 					size: 3,
 					height: 0.5
 				} );
@@ -166,6 +173,24 @@ function updatePlayers(serverPlayers) {
 			}
 		}
 	}
+}
+
+function setPlayerGamemode(p, mode) {
+	p.mode = mode;
+
+if (p.mode == "spectator" || p.mode == "camera") {
+	p.body.visible = false;
+	p.leftArm.visible = false;
+	p.leftLeg.visible = false;
+	p.rightArm.visible = false;
+	p.rightLeg.visible = false;
+} else {
+	p.body.visible = true;
+	p.leftArm.visible = true;
+	p.leftLeg.visible = true;
+	p.rightArm.visible = true;
+	p.rightLeg.visible = true;
+}
 }
 
 function updatePlayer(p) {
@@ -269,15 +294,17 @@ function updatePlayer(p) {
 	p.rightShoulder.rotation.z = Math.sin(p.punchingT*Math.PI*2)/2;
 }
 
-function updatePlayerColor(id, color) {
+function updatePlayerColor(id, color, opacity) {
 	for (let a of players[id].skeleton.children) {
 		if (a.type == "Mesh") {
 			for (let material of a.material) {
-				material.color = color;
+				if (color) material.color = color;
+				if (opacity) material.opacity = opacity;
 			}
 		} else {
 			for (let material of a.children[0].material) {
-				material.color = color;
+				if (color) material.color = color;
+				if (opacity) material.opacity = opacity;
 			}
 		}
 	}
@@ -301,12 +328,12 @@ function addEntity(entity) {
 		let {blockSize} = world;
 
 		if (entity.class == "item") {
-
 			let canvas = document.createElement("canvas");
+			let atlas = textureManager.getTextureAtlas(entity.class);
 			canvas.width = 16;
 			canvas.height = 16;
 			let ctx = canvas.getContext("2d");
-			ctx.drawImage(item_atlas, (entity.v-1)*16, 0, 16, 16, 0, 0, 16, 16);
+			ctx.drawImage(atlas, (entity.v-1)*16, 0, 16, 16, 0, 0, 16, 16);
 			let texture = new THREE.CanvasTexture(canvas);
 			texture.magFilter = THREE.NearestFilter;
 			texture.minFilter = THREE.NearestFilter;
@@ -334,7 +361,7 @@ function addEntity(entity) {
 			block_geometry.setIndex(indices);
 			block_geometry.computeBoundingSphere();
 
-			let block_mesh = new THREE.Mesh(block_geometry, material);
+			let block_mesh = new THREE.Mesh(block_geometry, textureManager.materialTransparent);
 			block_mesh.name = "item";
 			block_mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
 			block_mesh.castShadow = true;
@@ -356,8 +383,8 @@ function addEntity(entity) {
 
 // Update player hand
 function updateHand(entity, p) {
-	if (!item_atlas)
-		return;
+	let atlas = textureManager.getTextureAtlas(entity.class);
+	if (!atlas) return;
 
 	let {blockSize} = world;
 
@@ -366,7 +393,7 @@ function updateHand(entity, p) {
 		canvas.width = 16;
 		canvas.height = 16;
 		let ctx = canvas.getContext("2d");
-		ctx.drawImage(item_atlas, (entity.v-1)*16, 0, 16, 16, 0, 0, 16, 16);
+		ctx.drawImage(atlas, (entity.v-1)*16, 0, 16, 16, 0, 0, 16, 16);
 		let texture = new THREE.CanvasTexture(canvas);
 		texture.wrapS = THREE.RepeatWrapping;
 		texture.repeat.x = -1;
@@ -400,7 +427,7 @@ function updateHand(entity, p) {
 		block_geometry.setIndex(indices);
 		block_geometry.computeBoundingSphere();
 
-		let block_mesh = new THREE.Mesh(block_geometry, material);
+		let block_mesh = new THREE.Mesh(block_geometry, textureManager.materialTransparent);
 		block_mesh.name = "item";
 		block_mesh.castShadow = true;
 		block_mesh.receiveShadow = true;
