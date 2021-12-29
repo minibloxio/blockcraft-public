@@ -178,19 +178,23 @@ function updatePlayers(serverPlayers) {
 function setPlayerGamemode(p, mode) {
 	p.mode = mode;
 
-if (p.mode == "spectator" || p.mode == "camera") {
-	p.body.visible = false;
-	p.leftArm.visible = false;
-	p.leftLeg.visible = false;
-	p.rightArm.visible = false;
-	p.rightLeg.visible = false;
-} else {
-	p.body.visible = true;
-	p.leftArm.visible = true;
-	p.leftLeg.visible = true;
-	p.rightArm.visible = true;
-	p.rightLeg.visible = true;
-}
+	if (p.mode == "spectator" || p.mode == "camera") {
+		p.body.visible = false;
+		p.leftArm.visible = false;
+		p.leftLeg.visible = false;
+		p.rightArm.visible = false;
+		p.rightLeg.visible = false;
+
+		updatePlayerColor(p.id, false, 0.5)
+	} else {
+		p.body.visible = true;
+		p.leftArm.visible = true;
+		p.leftLeg.visible = true;
+		p.rightArm.visible = true;
+		p.rightLeg.visible = true;
+
+		updatePlayerColor(p.id, false, 1)
+	}
 }
 
 function updatePlayer(p) {
