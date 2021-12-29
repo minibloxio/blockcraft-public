@@ -34,11 +34,8 @@ function enterPointerLock () {
 }
 
 function exitPointerLock() {
-	let element = document.body;
-	
 	if (!showInventory) {
 		blocker.style.display = 'block';
-
 		//element.requestPointerLock();
 	}
 	player.controls.enabled = false;
@@ -50,7 +47,6 @@ function exitPointerLock() {
 }
 
 function initPointerLock() {
- 	var blocker = document.getElementById('blocker');
 
 	var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 	if ( havePointerLock ) {

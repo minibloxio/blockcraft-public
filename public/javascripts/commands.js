@@ -65,6 +65,9 @@ let commandsInit = JSON.stringify({
         "hints": {},
         "error": "Invalid player"
     },
+    "leave": {
+        "hint": "- Disconnect from this server (alias: quit, exit, disconnect)",
+    },
 })
 let commands = JSON.parse(commandsInit);
 
@@ -77,7 +80,7 @@ function updateHints() {
     }
     commands.op.hints[player.name] = "Make yourself an operator"; // Update op hint
     commands.deop.hints[player.name] = "Remove your operator status"; // Update deop hint
-    
+
     for (let id in world.blockId) {
         commands.setblock.hints[id] = "Set block to " + id; // Update setblock hint
         commands.give.hints[id] = "Give 1 " + id + " to yourself"; // Update give hint
@@ -110,7 +113,7 @@ function giveCommandHint(msg, autocomplete) {
             firstArgCounter += 1;
             if (firstArgCounter > commandHintLimit) return;
 
-            if (firstArgUnique) {
+            if (firstArgUnique) { // If the first argument is unique
                 hintText += ", " + command;
                 firstArgValue = "";
             } else {
@@ -118,8 +121,8 @@ function giveCommandHint(msg, autocomplete) {
                 firstArgUnique = command;
                 firstArgValue = command;
             }
-
-            if (autocomplete) {
+            
+            if (autocomplete) { // Autocomplete the command
                 let extraSpace = Object.keys(commands[command]).length > 1 ? " " : "";
                 let completedCommand = hintText + extraSpace;
                 $("#chat-input").val(completedCommand);
@@ -307,6 +310,12 @@ function checkCommand(msg) {
         chunkManager.reload();
     } else if (msg[0] == "op") {
         setOperator(msg, true);
+    } else if (msg[0] == "deop") {
+        setOperator(msg, false);
+    } else if (msg[0] == "leave" || msg[0] == "quit" || msg[0] == "exit" || msg[0] == "disconnect" || msg[0] == "disc") {
+        disconnectServer();
+    }else if (msg[0] == "deop") {
+        setOperator(msg, false);
     } else if (msg[0] == "deop") {
         setOperator(msg, false);
     } else {

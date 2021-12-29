@@ -251,6 +251,10 @@ function joinServer() {
 function disconnectServer() {
     if (!isState("inGame")) return;
 
+    $(".menu-button").hide();
+    $("#disconnecting-bar").show();
+    document.exitPointerLock();
+
     initialized = false;
     joined = false;
     currentServer = undefined;
@@ -277,6 +281,7 @@ function disconnectServer() {
 		delete world.entities[id];
     }
 
+    state += 1;
     //prevState(); // Go back to server select
 }
 
@@ -362,10 +367,6 @@ function nextState(e) {
 
             if (disconnectButton) { // Disconnect from server
                 disconnectServer();
-                $(".menu-button").hide();
-                $("#disconnecting-bar").show();
-
-                state += 1;
             } else { // Return to game
                 requestPointerLock();
             }
