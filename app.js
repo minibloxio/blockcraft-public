@@ -148,7 +148,7 @@ var players = {};
 
 // Setup world
 const tileSize = 16;
-const tileTextureWidth = 1024;
+const tileTextureWidth = 2048;
 const tileTextureHeight = 64;
 const world = new World();
 world.init({
