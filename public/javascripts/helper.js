@@ -540,3 +540,22 @@ function roughSizeOfObject( object ) {
 String.prototype.removeExtraSpaces = function() {
     return this.replace(/\s\s+/g, ' ');
 }
+
+// Regex for parsing commands
+function regex(msg) {
+    var exp = /[^ \s"]+|"([^"]*)"/gi;
+    var result = [];
+
+    do {
+        //Each call to exec returns the next regex match as an array
+        var match = exp.exec(msg);
+        if (match != null)
+        {
+            //Index 1 in the array is the captured group if it exists
+            //Index 0 is the matched text, which we use if no captured group exists
+            result.push(match[1] ? match[1] : match[0]);
+        }
+    } while (match != null);
+
+    return result;
+}

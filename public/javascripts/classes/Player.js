@@ -164,8 +164,10 @@ class Player {
 		// Check if respawn is possible
 		if (!pos && Date.now()-this.respawnTimer < this.respawnDelay) return;
 
-		// Respawn at given location
+		// Check if spawnpoint is set
+		if (this.spawnpoint && !pos) pos = this.spawnpoint;
 		
+		// Respawn at given location
 		if (pos) {
 			// Set player position
 			this.position.set(pos.x, pos.y, pos.z);

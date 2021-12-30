@@ -307,7 +307,6 @@ function validCoord(msg) {
 
 // Check command validity
 function checkCommand(msg) {
-    let commandIds = Object.keys(commands);
     if (msg[0] == "gamemode") {
         updateGamemode(msg[1]);
     } else if (msg[0] == "tp") {
@@ -340,8 +339,8 @@ function checkCommand(msg) {
         kickPlayer(msg);
     } else if (msg[0] == "kill") {
         killPlayer(msg);
-    } else if (msg[0] == "deop") {
-        setOperator(msg, false);
+    } else if (msg[0] == "spawnpoint") {
+        setSpawn();
     } else {
         addChat({
             text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',
@@ -713,4 +712,12 @@ function killPlayer(msg) {
             name: target
         });
     }
+}
+
+// Set spawnpoint
+function setSpawn() {
+    player.spawnpoint = player.position.clone();
+    addChat({
+        text: "Set spawnpoint to x: " + round(player.spawnpoint.x) + " y: " + round(player.spawnpoint.y) + " z: " + round(player.spawnpoint.z)
+    })
 }

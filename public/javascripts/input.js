@@ -67,7 +67,7 @@ $("body").mousedown(function (e) {
 		return;
 	if (!showInventory)
 		return;
-	switch (event.which) {
+	switch (e.which) {
         case 1:
 		    selectInventory("left");
 		    mouseLeft = true;
@@ -87,7 +87,7 @@ $("body").mousedown(function (e) {
 		return;
 	if (!showInventory)
 		return;
-	switch (event.which) {
+	switch (e.which) {
         case 1:
         	mouseLeft = false
             break;
