@@ -166,7 +166,7 @@ class Player {
 
 		// Check if spawnpoint is set
 		if (this.spawnpoint && !pos) pos = this.spawnpoint;
-		
+
 		// Respawn at given location
 		if (pos) {
 			// Set player position
@@ -205,7 +205,7 @@ class Player {
 		this.respawnTimer = Date.now();
 	}
 
-	setCoord(coord) {
+	setCoords(coord) {
 		this.position.copy(coord);
 		this.previousPosition = this.position.clone();
 		this.savedPosition = this.position.clone();

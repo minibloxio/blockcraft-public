@@ -74,6 +74,12 @@ let commandsInit = JSON.stringify({
     "spawnpoint": {
         "hint": "- Sets your spawnpoint to your current position",
     },
+    "sethome": {
+        "hint": "- Sets your home to your current position",
+    },
+    "home": {
+        "hint": "- Teleports you to your home", 
+    },
 })
 let commands = JSON.parse(commandsInit);
 let prevCommands = [];
@@ -244,7 +250,7 @@ function giveCommandHint(msg, autocomplete) {
 
             // Special case for /tp
             if (msg[0] == "tp") {
-                if ((Number.isInteger(parseInt(msg[0])) || msg[0] == "~")) {
+                if ((Number.isInteger(parseInt(msg[1])) || msg[1] == "~")) {
                     msg.shift();
                     let coord = getCoord(msg);
                     if (coord) {
@@ -339,6 +345,16 @@ function checkCommand(msg) {
         kickPlayer(msg);
     } else if (msg[0] == "kill") {
         killPlayer(msg);
+    } else if (msg[0] == "spawnpoint") {
+        setSpawn();
+    } else if (msg[0] == "sethome") {
+        setHome();
+    } else if (msg[0] == "home") {
+        goHome();
+    } else if (msg[0] == "spawnpoint") {
+        setSpawn();
+    } else if (msg[0] == "spawnpoint") {
+        setSpawn();
     } else if (msg[0] == "spawnpoint") {
         setSpawn();
     } else {
@@ -451,7 +467,7 @@ function teleport(msg) {
 
         if (validCoordinates) {
             let coord = new THREE.Vector3(pos.x*world.blockSize, pos.y*world.blockSize, pos.z*world.blockSize);
-            player.setCoord(coord);
+            player.setCoords(coord);
         } else {
             addChat({
                 text: 'Error: Invalid coordinate (format: /tp <int> <int> <int>)',
@@ -471,7 +487,7 @@ function teleport(msg) {
                 addChat({
                     text: "Teleported " + player.name + " to " + p.name
                 });
-                player.setCoord(p.pos);
+                player.setCoords(p.pos);
 
                 break;
             }
@@ -720,4 +736,24 @@ function setSpawn() {
     addChat({
         text: "Set spawnpoint to x: " + round(player.spawnpoint.x) + " y: " + round(player.spawnpoint.y) + " z: " + round(player.spawnpoint.z)
     })
+}
+
+// Set home
+function setHome() {
+    player.home = player.position.clone();
+    addChat({
+        text: "Set home to x: " + round(player.home.x) + " y: " + round(player.home.y) + " z: " + round(player.home.z)
+    })
+}
+
+// Go to home
+function goHome() {
+    if (player.home) {
+        player.setCoords(player.home);
+    } else {
+        addChat({
+            text: "Error: No home set",
+            color: "red"
+        });
+    }
 }
