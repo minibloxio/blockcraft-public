@@ -137,8 +137,8 @@ class TextureManager {
     setTexture(order) {
         let canvas = document.createElement("canvas");
         let ctx_ = canvas.getContext("2d");
-        canvas.width = 2048;
-        canvas.height = 64;
+        canvas.width = world.tileTextureWidth;
+        canvas.height = world.tileTextureHeight;
 
         this.drawImageNet(ctx_, order, this.blocks);
 

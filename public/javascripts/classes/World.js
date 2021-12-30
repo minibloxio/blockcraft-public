@@ -119,7 +119,7 @@ class World {
   }
 
   generateGeometryDataForItem(uvVoxel) {
-    const {cellSize, tileSize, tileTextureWidth, tileTextureHeight} = this;
+    const {tileSize, tileTextureWidth, tileTextureHeight} = this;
     const positions = [];
     const normals = [];
     const uvs = [];

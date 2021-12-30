@@ -143,20 +143,18 @@ fs.readdir(public + '/textures/items', function (err, data) {
 })
 textures.blockOrder = blockOrder;
 textures.itemOrder = itemOrder;
+textures.tileSize = 16;
+textures.tileTextureWidth = 2048;
+textures.tileTextureHeight = 64;
 
+// Players
 var players = {};
 
 // Setup world
-const tileSize = 16;
-const tileTextureWidth = 2048;
-const tileTextureHeight = 64;
 const world = new World();
 world.init({
 	blockOrder: blockOrder, 
-	itemOrder: itemOrder,
-	tileSize: tileSize,
-	tileTextureWidth: tileTextureWidth,
-	tileTextureHeight: tileTextureHeight,
+	itemOrder: itemOrder
 });
 
 worker.postMessage({cmd: "setup", blockOrder, itemOrder});

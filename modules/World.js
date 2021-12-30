@@ -96,11 +96,6 @@ module.exports = class World {
 
   // Initiate textures
   init(options) {
-    
-    // Tile size
-    this.tileSize = options.tileSize;
-    this.tileTextureWidth = options.tileTextureWidth;
-	  this.tileTextureHeight = options.tileTextureHeight;
 
     // Block ids
 
