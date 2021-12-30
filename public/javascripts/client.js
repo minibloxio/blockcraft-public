@@ -156,6 +156,9 @@ socket.on('messageAll', function (data) {
 
 socket.on('message', function (data) {
 	addChat(data);
+	if (data.type == "whisper") {
+		player.lastWhisper = data.id;
+	}
 })
 
 socket.on('refresh', function () {

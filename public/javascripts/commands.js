@@ -88,6 +88,9 @@ let commandsInit = JSON.stringify({
         "hint": "<player> <message> - Sends a private message to the specified player",
         "error": "Invalid player"
     },
+    "reply": {  
+        "hint": "<message> - Replies to the last private message",
+    },
 })
 let commands = JSON.parse(commandsInit);
 let prevCommands = [];
@@ -368,8 +371,8 @@ function checkCommand(msg) {
         goHome();
     } else if (msg[0] == "msg" || msg[0] == "whisper") {
         messagePlayer(msg);
-    } else if (msg[0] == "spawnpoint") {
-        setSpawn();
+    } else if (msg[0] == "reply" || msg[0] == "r") {
+        replyPlayer(msg);
     } else if (msg[0] == "spawnpoint") {
         setSpawn();
     } else {
@@ -807,10 +810,44 @@ function messagePlayer(msg) {
             color: "red"
         });
     } else {
+        addChat({
+            name: 'You whisper to ' + target,
+            text: message,
+            color: "grey",
+        })
         socket.emit('messagePlayer', {
             id: playerId,
-            name: target,
-            message: message
+            text: message
+        });
+    }
+}
+
+// Reply to a player
+function replyPlayer(msg) {
+    msg.shift();
+
+    let message = msg.join(" ");
+    let target = players[player.lastWhisper].name;
+
+    if (!player.lastWhisper) {
+        addChat({
+            text: 'Error: No player found with name "' + target + '" to reply to',
+            color: "red"
+        });
+    } else if (message.length == 0) {
+        addChat({
+            text: 'Error: No message specified',
+            color: "red"
+        });
+    } else {
+        addChat({
+            name: 'You reply to ' + target,
+            text: message,
+            color: "grey",
+        })
+        socket.emit('replyPlayer', {
+            id: player.lastWhisper,
+            text: message
         });
     }
 }

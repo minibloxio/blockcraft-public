@@ -543,7 +543,22 @@ io.on('connection', function(socket_) {
 		if (players[socket.id]) {
 			logger.verbose("<"+players[socket.id].name+" whispers to " + players[data.id].name + "> " + data)
 			io.to(`${data.id}`).emit('message', {
+				type: "whisper",
+				id: socket.id,
 				name: players[socket.id].name + " whispers to you",
+				text: filter.clean(data.text),
+				color: "grey",
+			});
+		}
+	})
+
+	socket.on('replyPlayer', function (data) {
+		if (players[socket.id]) {
+			logger.verbose("<"+players[socket.id].name+" replies to " + players[data.id].name + "> " + data)
+			io.to(`${data.id}`).emit('message', {
+				type: "whisper",
+				id: socket.id,
+				name: players[socket.id].name + " replies to you",
 				text: filter.clean(data.text),
 				color: "grey",
 			});
