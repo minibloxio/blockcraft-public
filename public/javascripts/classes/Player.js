@@ -18,7 +18,7 @@ class Player {
 		};
 
 		// Mode
-		this.mode = "survival";
+		this.mode = "creative";
 		this.god = false;
 
 		// Movement

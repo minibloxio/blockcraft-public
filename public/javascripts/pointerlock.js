@@ -82,7 +82,7 @@ function initPointerLock() {
 					inventory = JSON.parse(JSON.stringify(player.toolbar));
 
 					document.exitPointerLock();
-				} else {
+				} else if (document.activeElement.id != "search-input") {
 					showInventory = false;
 					// Ask the browser to lock the pointer
 					element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;

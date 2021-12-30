@@ -190,6 +190,7 @@ function drawText(text, x, y, font, color, align, baseline, alpha) {
 		options = font;
 	}
 	ctx.beginPath();
+    
 	ctx.font = options.font || font || "20px Arial";
 	ctx.fillStyle = options.color || color || "red";
 	ctx.textAlign = options.align || align || "default";

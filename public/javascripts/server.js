@@ -217,8 +217,6 @@ function setPlayerGamemode(p, mode) {
 
 	if (p.operator) color = "red";
 
-	console.log(color);
-
 	updateNameTag(p, {
 		color: color,
 	})

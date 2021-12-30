@@ -249,7 +249,7 @@ io.on('connection', function(socket_) {
 			pickupDelay: Date.now(),
 			ping: [],
 			connected: false,
-			mode: "survival",
+			mode: "creative",
 			fps: 0,
 		}
 

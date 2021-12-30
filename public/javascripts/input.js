@@ -57,8 +57,8 @@ $(window).keydown(function(event) {
 });
 
 $("body").mousemove(function (e) {
-	mouse.x = e.offsetX;
-	mouse.y = e.offsetY;
+	mouse.x = e.pageX;
+	mouse.y = e.pageY;
 })
 
 let mouseLeft, mouseRight = false;
@@ -318,6 +318,13 @@ var onKeyUp = function ( event ) {
 document.addEventListener( 'keydown', onKeyDown, false );
 document.addEventListener( 'keyup', onKeyUp, false );
 
+// Inventory search
+$(document).ready(function() {
+	$("#search-input").on("input", function() {
+		let search = $(this).val();
+		updateItemSearch(search);
+	});
+});
 
 // Scrolling
 var lastScrollTop = 0;

@@ -1,3 +1,16 @@
+// Load static images
+let full_heart = new Image()
+full_heart.src = "./textures/hearts/full.png";
+let half_heart = new Image()
+half_heart.src = "./textures/hearts/half.png";
+let empty_heart = new Image()
+empty_heart.src = "./textures/hearts/empty.png";
+
+let toolbar = new Image();
+toolbar.src = "./textures/hotbar.png";
+let toolbar_selector = new Image();
+toolbar_selector.src = "./textures/hotbar-selector.png";
+
 // Texture Loader
 let loader  = new THREE.TextureLoader();
 	loader.setPath("textures/");

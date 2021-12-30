@@ -1,18 +1,7 @@
+// Initiate canvas
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");
-
-// Load static images
-let full_heart = new Image()
-full_heart.src = "./textures/hearts/full.png";
-let half_heart = new Image()
-half_heart.src = "./textures/hearts/half.png";
-let empty_heart = new Image()
-empty_heart.src = "./textures/hearts/empty.png";
-
-let toolbar = new Image();
-toolbar.src = "./textures/hotbar.png";
-let toolbar_selector = new Image();
-toolbar_selector.src = "./textures/hotbar-selector.png";
+ctx.imageSmoothingEnabled = false;
 
 let hud = {
 	showStats: true,
@@ -56,10 +45,21 @@ let craftingOutput = undefined;
 // Player tab
 let showPlayerTab = false;
 
+// Crosshair
+function displayCrosshair() {
+	if (!initialized || player.mode == "camera") return;
+
+	// Draw crosshair
+	ctx.fillRect(canvas.width/2-crosshairWidth/2, canvas.height/2-crosshairSize/2, crosshairWidth, crosshairSize)
+	ctx.fillRect(canvas.width/2-crosshairSize/2, canvas.height/2-crosshairWidth/2, crosshairSize, crosshairWidth)
+}
+
+// Check if mouse is within item frame
 function withinItemFrame(xPos, yPos) {
 	return mouse.x > xPos && mouse.x < xPos + boxSize && mouse.y > yPos && mouse.y < yPos + boxSize;
 }
 
+// Update item in inventory
 function updateItem(block, i, type) {
 	if (block == "creative") {
 		if (type == "left") { // Left click item
@@ -195,6 +195,7 @@ function updateItem(block, i, type) {
 	}
 }
 
+// Select inventory item
 function selectInventory(type) {
 	let width = 480;
 	let height = 600;
@@ -281,14 +282,28 @@ function updateCraftingOutput(remove) {
 	}
 }
 
+// Update item search
+function updateItemSearch(search) {
+	let items = [];
+	for (let block of world.blockOrder) {
+		if (block.includes(search)) {
+			items.push(block);
+		}
+	}
+	console.log(items);
+}
+
+// Display inventory background
 function displayInventoryBackground() {
 	let width = 480;
 	let height = 600;
 	let padding = 10;
 
+	$("#search-input").hide();
+
 	drawRectangle(0, 0, canvas.width, canvas.height, "rgba(0, 0, 0, 0.5)")
 	drawRect(canvas.width/2, canvas.height/2, width, height, 0, "lightgrey")
-	let title = player.mode == "survival" ? "Crafting" : player.mode == "creative" ? "Block selection" : "Adventure Mode"
+	let title = player.mode == "survival" ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode"
 	drawText(title, canvas.width/2, canvas.height/2-height/2+padding, "25px Minecraft-Regular", "grey", "center", "top")
 
 	// Add background boxes
@@ -332,6 +347,11 @@ function displayInventoryBackground() {
 		)
 		drawItem(xPos, yPos, craftingOutput);
 	} else if (player.mode == "creative") { // CREATIVE MODE
+		$("#search-input").show();
+		$("#search-input").css("top", canvas.height/2-height/2+padding);
+		$("#search-input").css("left", canvas.width/2-hotboxWidth*4+padding);
+		$("#search-input").css("width", width-2.5*padding);
+		
 		// Add background boxes
 		for (let j = 0; j < 4; j++) {
 			for (let i = 0; i < 9; i++) {
@@ -343,6 +363,9 @@ function displayInventoryBackground() {
 				// Draw items in inventory
 				let index = 0;
 				for (let block of world.blockOrder) {
+					if (index >= 36)
+						break;
+
 					let voxel = world.blockId[block];
 					if (voxel) {
 						let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(index%9)*hotboxWidth*8/9.1;
@@ -358,6 +381,8 @@ function displayInventoryBackground() {
 				}
 
 				for (let item of world.itemOrder) {
+					if (index >= 36) break;
+
 					let voxel = world.itemId[item];
 					if (voxel) {
 						let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(index%9)*hotboxWidth*8/9.1;
@@ -376,6 +401,7 @@ function displayInventoryBackground() {
 	}
 }
 
+// Display inventory
 function displayInventory() {
 	if (showInventory) {
 		displayInventoryBackground();
@@ -417,14 +443,19 @@ function displayInventory() {
 			drawItem(mouse.x, mouse.y, selectedItem)
 		}
 		
+	} else {
+		$("#search-input").hide();
 	}
 }
 
+// Draw item in inventory
 function drawItem(xPos, yPos, entity) {
 	if (!entity)
 		return;
 	let index = entity.v-1;
 	let atlas = textureManager.getTextureAtlas(entity.class);
+	
+	ctx.imageSmoothingEnabled = false;
 	ctx.drawImage(atlas, index*16, 0, 16, 16, 
 		xPos, 
 		yPos, 
@@ -437,20 +468,13 @@ function drawItem(xPos, yPos, entity) {
 	);
 }
 
-// Crosshair
-function displayCrosshair() {
-	if (!initialized || player.mode == "camera") return;
 
-	// Draw crosshair
-	ctx.fillRect(canvas.width/2-crosshairWidth/2, canvas.height/2-crosshairSize/2, crosshairWidth, crosshairSize)
-	ctx.fillRect(canvas.width/2-crosshairSize/2, canvas.height/2-crosshairWidth/2, crosshairSize, crosshairWidth)
-}
 
 // Toolbar
 let toolbarX = canvas.width/2-hotboxWidth*4;
 let toolbarSelectorX = canvas.width/2-hotboxWidth*3.5-2.5;
 
-
+// Display toolbar
 function displayToolbar() {
 	if (!initialized || !player.toolbar) return;
 	if (player.mode == "spectator" || player.mode == "camera") return;
@@ -506,6 +530,7 @@ function displayStats() {
 	}
 }
 
+// Add chat message
 function addChat(options) {
 	if (!options)
 		return;
@@ -527,6 +552,8 @@ function addChat(options) {
 		chat.pop();
 	}
 }
+
+// Initialize chat
 function initChat() {
 	chat.length = 0;
 	chatTimer = undefined;
@@ -551,6 +578,7 @@ function initChat() {
 	})
 }
 
+// Hide chat after timer
 function hideChatTimer(time) {
 	clearTimeout(hideChatId)
 	hideChatId = setTimeout(function () {
@@ -567,6 +595,7 @@ function hideChatTimer(time) {
 	}, time)
 }
 
+// Display chat
 function displayChat() {
 	if (player.mode == "camera") return;
 
@@ -631,6 +660,7 @@ function displayChat() {
 	}
 }
 
+// Get lines of text
 function getLines(ctx, text, maxWidth, color, opacity) {
     let words = text.split(" ");
     let lines = [];
