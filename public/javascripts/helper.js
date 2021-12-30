@@ -184,7 +184,7 @@ function drawLine(x1, y1, x2, y2, color, thickness, cap, alpha) {
 	ctx.closePath();
 }
 
-function drawText(text, x, y, font, color, align, baseline, alpha) {
+function drawText(text, x, y, font, color, align, baseline, alpha, stroke) {
 	let options = {};
 	if (font instanceof Object) {
 		options = font;
@@ -195,9 +195,11 @@ function drawText(text, x, y, font, color, align, baseline, alpha) {
 	ctx.textAlign = options.align || align || "default";
 	ctx.globalAlpha = alpha || 1;
 	ctx.textBaseline = options.baseline || baseline || "default";
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 3;
-    ctx.strokeText(text, x, y);
+    if (stroke) {
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 3;
+        ctx.strokeText(text, x, y);
+    }
 	ctx.fillText(text, x, y);
 	ctx.globalAlpha = 1;
 	ctx.closePath();

@@ -37,6 +37,8 @@ let hotboxWidth = 60;
 let selectorWidth = 65;
 
 let selectedItem = undefined;
+let searchBlocks, searchItems;
+let currentRow = 0;
 let inventory = [];
 let craftingGrid = [undefined, undefined, undefined, undefined];
 let craftingOutput = undefined;
@@ -61,6 +63,7 @@ function withinItemFrame(xPos, yPos) {
 // Update item in inventory
 function updateItem(block, i, type) {
 	if (block == "creative") {
+		i = i + currentRow*9;
 		if (type == "left") { // Left click item
 			let entity = {}
 			if (i < searchBlocks.length) {
@@ -206,9 +209,7 @@ function selectInventory(type) {
 		let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(i%9)*hotboxWidth*8/9.1;
 		let yPos = canvas.height/2+height/2-boxSize;
 
-		if (i > 8) {
-			yPos = canvas.height/2+height/2-boxSize*5.5+hotboxWidth*Math.floor((i-9)/9);
-		}
+		if (i > 8) yPos = canvas.height/2+height/2-boxSize*5.5+hotboxWidth*Math.floor((i-9)/9);
 
 		if (withinItemFrame(xPos, yPos))
 			updateItem(inventory, i, type);
@@ -286,7 +287,6 @@ function updateCraftingOutput(remove) {
 }
 
 // Update item search
-let searchBlocks, searchItems;
 function updateItemSearch(search) {
 	if (!search || search == "") {
 		searchBlocks = world.blockOrder;
@@ -376,9 +376,11 @@ function displayInventoryBackground() {
 
 				// Draw items in inventory
 				let index = 0;
-				for (let block of searchBlocks || world.blockOrder) {
-					if (index >= 36)
-						break;
+				let blocks = searchBlocks || world.blockOrder;
+				for (let k = currentRow*9; k < blocks.length; k++) {
+					if (index >= 36) break;
+
+					let block = blocks[k];
 
 					let voxel = world.blockId[block];
 					if (voxel) {
@@ -393,9 +395,16 @@ function displayInventoryBackground() {
 					}
 					index++;
 				}
-
-				for (let item of searchItems || world.itemOrder) {
+				// let offset = (blocks.length - currentRow*9)%9;
+				// if (offset < 0) {
+				// 	offset += 9;
+				// 	index += offset;
+				// }
+				let items = searchItems || world.itemOrder;
+				for (let k = 0; k < items.length; k++) {
 					if (index >= 36) break;
+
+					let item = items[k];
 
 					let voxel = world.itemId[item];
 					if (voxel) {
@@ -478,11 +487,9 @@ function drawItem(xPos, yPos, entity) {
 	drawText(entity.c, 
 		xPos+blockWidth,
 		yPos+blockWidth, 
-		"15px Minecraft-Regular", "white", "right", "bottom"
+		"15px Minecraft-Regular", "white", "right", "bottom", 1, true
 	);
 }
-
-
 
 // Toolbar
 let toolbarX = canvas.width/2-hotboxWidth*4;
@@ -524,7 +531,7 @@ function displayToolbar() {
 			drawText(entity.c, 
 				toolbarX+blockWidth+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1,
 				canvas.height-hotboxWidth+blockWidth+(hotboxWidth-blockWidth)/8, 
-				"15px Minecraft-Regular", "white", "right", "bottom"
+				"15px Minecraft-Regular", "white", "right", "bottom", 1, true
 			);
 		}
 	}

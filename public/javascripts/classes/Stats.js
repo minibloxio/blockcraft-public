@@ -36,6 +36,6 @@ class Stat {
 			text += round(this.value.reduce((a, b) => a + b, 0)/this.value.length, this.round);
 		}
 
-		drawText(text, 10, index*20+55, "20px Minecraft-Regular", "white", "left", "top");
+		drawText(text, 10, index*20+55, "20px Minecraft-Regular", "white", "left", "top", 1, true);
 	}
 }
