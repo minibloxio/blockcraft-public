@@ -419,6 +419,7 @@ class Player {
 	}
 
     select(update) {
+		if (this.mode == "spectator" || this.mode == "camera") return;
 		let {blockSize} = world;
     	// Crosshair selection for blocks
 

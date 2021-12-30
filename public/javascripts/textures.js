@@ -97,3 +97,38 @@ let leg_materials = [
 ];
 
 let leg = new Texture(loader, "leg", leg_materials );
+
+function getPlayerTextures() {
+    let headMat = [];
+    head.material.forEach(function (mat) {
+        headMat.push(mat.clone());
+    })
+
+    let bodyMat = [];
+    body.material.forEach(function (mat) {
+        bodyMat.push(mat.clone());
+    })
+
+    let armMat = [];
+    arm.material.forEach(function (mat) {
+        armMat.push(mat.clone());
+    })
+    
+    let armCMat = [];
+    armC.material.forEach(function (mat) {
+        armCMat.push(mat.clone());
+    })
+
+    let legMat = [];
+    leg.material.forEach(function (mat) {
+        legMat.push(mat.clone());
+    })
+
+    return {
+        head: headMat,
+        body: bodyMat,
+        arm: armMat,
+        armC: armCMat,
+        leg: legMat
+    }
+}

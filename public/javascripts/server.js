@@ -55,27 +55,29 @@ function addPlayer(players, id) {
 
 	let p = players[id];
 
+	let playerMat = getPlayerTextures();
+
 	// Set position of entity
 	p.pos = Ola({x:0, y:0, z:0});
 	p.rot = Ola({x:0, y:0, z:0});
 	p.dir = Ola({x:0, y:0, z:0});
 
 	// Add head
-	p.head = addMesh(new THREE.BoxGeometry(player.dim.headSize, player.dim.headSize, player.dim.headSize), head.material);
+	p.head = addMesh(new THREE.BoxGeometry(player.dim.headSize, player.dim.headSize, player.dim.headSize), playerMat.head);
 	p.head.position.set(0, blockSize*0.2, 0);
 
 	p.neck = new THREE.Object3D();
 	p.neck.add(p.head);
 
 	// Add body
-	p.body = addMesh(new THREE.BoxGeometry(player.dim.torso, player.dim.torsoHeight, player.dim.legSize), body.material);
+	p.body = addMesh(new THREE.BoxGeometry(player.dim.torso, player.dim.torsoHeight, player.dim.legSize), playerMat.body);
 	p.body.position.set(0, -blockSize*0.45, 0);
 
 	// Add arms
-	p.leftArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), arm.material)
+	p.leftArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), playerMat.arm)
 	p.leftArm.position.set(-player.dim.armSize*3/2, -blockSize*0.45, 0);
 
-	p.rightArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), arm.material)
+	p.rightArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), playerMat.arm)
 	p.rightArm.position.set(0, -blockSize*0.3, 0);
 
 	// Add hand
@@ -93,10 +95,10 @@ function addPlayer(players, id) {
 	p.rightShoulder.add(p.rightArm);
 
 	// Add legs
-	p.leftLeg = addMesh(new THREE.BoxGeometry(player.dim.legSize, player.dim.legHeight, player.dim.legSize), leg.material)
+	p.leftLeg = addMesh(new THREE.BoxGeometry(player.dim.legSize, player.dim.legHeight, player.dim.legSize), playerMat.leg)
 	p.leftLeg.position.set(-player.dim.legSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
 
-	p.rightLeg = addMesh(new THREE.BoxGeometry(player.dim.legSize, player.dim.legHeight, player.dim.legSize), leg.material)
+	p.rightLeg = addMesh(new THREE.BoxGeometry(player.dim.legSize, player.dim.legHeight, player.dim.legSize), playerMat.leg);
 	p.rightLeg.position.set(player.dim.armSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
 
 	// Create skeleton of head, body, arms, and legs
@@ -115,7 +117,6 @@ function addPlayer(players, id) {
 	p.entity = new THREE.Group();
 	p.entity.name = p.id;
 	p.entity.add(p.skeleton);
-	p.entity.add(p.nameTag);
 
 	p.entity.type = "player";
 
