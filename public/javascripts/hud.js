@@ -1,7 +1,6 @@
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");
-ctx.imageSmoothingEnabled = false;
 
 let hud = {
 	showStats: true,
@@ -64,14 +63,18 @@ function updateItem(block, i, type) {
 	if (block == "creative") {
 		if (type == "left") { // Left click item
 			let entity = {}
-			if (i < world.blockOrder.length) {
+			if (i < searchBlocks.length) {
 				entity.class = "block";
 				entity.c = map[16] ? 64 : 1;
-				entity.v = i+1;
-			} else if (i < world.blockOrder.length+world.itemOrder.length) {
+
+				let block = world.blockId[searchBlocks[i]]; // Get block id
+				entity.v = block;
+			} else if (i < searchBlocks.length+searchItems.length) {
 				entity.class = "item";
 				entity.c = map[16] ? 64 : 1;
-				entity.v = i-world.blockOrder.length+1;
+
+				let item = world.itemId[searchItems[i-searchBlocks.length]]; // Get item id
+				entity.v = item;
 			}
 			if (selectedItem == undefined ) {
 				// Pick up item
@@ -283,14 +286,25 @@ function updateCraftingOutput(remove) {
 }
 
 // Update item search
+let searchBlocks, searchItems;
 function updateItemSearch(search) {
-	let items = [];
-	for (let block of world.blockOrder) {
-		if (block.includes(search)) {
-			items.push(block);
+	if (!search || search == "") {
+		searchBlocks = world.blockOrder;
+		searchItems = world.itemOrder;
+	} else {
+		searchBlocks = [];
+		searchItems = [];
+		for (let block of world.blockOrder) {
+			if (block.search(search) > -1) {
+				searchBlocks.push(block);
+			}
+		}
+		for (let item of world.itemOrder) {
+			if (item.search(search) > -1) {
+				searchItems.push(item);
+			}
 		}
 	}
-	console.log(items);
 }
 
 // Display inventory background
@@ -362,7 +376,7 @@ function displayInventoryBackground() {
 
 				// Draw items in inventory
 				let index = 0;
-				for (let block of world.blockOrder) {
+				for (let block of searchBlocks || world.blockOrder) {
 					if (index >= 36)
 						break;
 
@@ -380,7 +394,7 @@ function displayInventoryBackground() {
 					index++;
 				}
 
-				for (let item of world.itemOrder) {
+				for (let item of searchItems || world.itemOrder) {
 					if (index >= 36) break;
 
 					let voxel = world.itemId[item];

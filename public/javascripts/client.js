@@ -44,7 +44,7 @@ socket.on('joinResponse', function (data) {
 	if (initialized) console.log("Already initialized game!");//location.reload(true);
 
 	// Receive common world attritutes
-	Object.assign(world, data.world)
+	Object.assign(world, data.world);
 
 	// Initalize player
 	player.join(data.startPos);
@@ -86,6 +86,9 @@ socket.on('joinResponse', function (data) {
 
 	// Update to server tick
 	tick = new Ola(data.tick);
+
+	// Update item search
+	updateItemSearch();
 
 	initialized = true;
 	console.log("Successfully joined the server (" + data.info.region + ")");
