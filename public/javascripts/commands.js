@@ -91,6 +91,9 @@ let commandsInit = JSON.stringify({
     "reply": {  
         "hint": "<message> - Replies to the last private message",
     },
+    "list": {
+        "hint": "- Lists all players on the server",
+    },
 })
 let commands = JSON.parse(commandsInit);
 let prevCommands = [];
@@ -373,8 +376,8 @@ function checkCommand(msg) {
         messagePlayer(msg);
     } else if (msg[0] == "reply" || msg[0] == "r") {
         replyPlayer(msg);
-    } else if (msg[0] == "spawnpoint") {
-        setSpawn();
+    } else if (msg[0] == "list") {
+        listPlayers();
     } else {
         addChat({
             text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',
@@ -850,4 +853,23 @@ function replyPlayer(msg) {
             text: message
         });
     }
+}
+
+// List players
+function listPlayers() {
+    let playersOnline = Object.keys(players).length + 1;
+    addChat({
+        text: "Players online (" + playersOnline + "):",
+    })
+    for (let id in players) {
+        let p = players[id];
+        let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";
+        addChat({
+            text: p.name + " (" + ping + "ms ping, " + p.fps + " fps)",
+        })
+    }
+    let ping = round(player.ping.reduce((a, b) => a + b, 0)/player.ping.length, 0) || "disc";
+    addChat({
+        text: player.name + " (" + ping + "ms ping, " + player.fps + " fps)",
+    })
 }

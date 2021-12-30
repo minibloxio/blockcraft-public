@@ -250,6 +250,7 @@ io.on('connection', function(socket_) {
 			ping: [],
 			connected: false,
 			mode: "survival",
+			fps: 0,
 		}
 
 		// Set name

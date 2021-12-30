@@ -184,12 +184,12 @@ class TextureManager {
         
         this.materialTransparent.side = THREE.DoubleSide;
         this.materialTransparent.transparent = true;
-        this.materialTransparent.depthWrite = false;
+        //this.materialTransparent.depthWrite = false;
 
         //this.materialTransparent.dithering = true;
         // this.materialTransparent.polygonOffset = true;
         // this.materialTransparent.polygonOffsetFactor = -4;
-        this.materialTransparent.alphaTest = 0.3;
+        //this.materialTransparent.alphaTest = 0.3;
         //this.materialTransparent.clipIntersection = true;
 
         this.texture_atlas = texture.image;

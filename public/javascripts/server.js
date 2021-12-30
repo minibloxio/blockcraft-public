@@ -13,6 +13,7 @@ function sendPacket() {
 			blocking: player.blockT > 0,
 			currSlot: player.currentSlot,
 			mode: player.mode,
+			fps: round(stats.fps, 1),
 		});
 	}
 }
@@ -132,8 +133,6 @@ function addPlayer(players, id) {
 }
 
 function updatePlayers(serverPlayers) {
-	let {blockSize} = world;
-
 	for (let id in players) {
 		let p = players[id];
 		if (p.pos && p.rot && serverPlayers[id]) {
@@ -158,7 +157,7 @@ function updatePlayers(serverPlayers) {
 			}
 
 			// Transfer data
-			let transferredValues = (({ ping, toolbar, walking, sneaking, punching, blocking }) => ({ ping, toolbar, walking, sneaking, punching, blocking }))(serverPlayers[id]);
+			let transferredValues = (({ ping, toolbar, walking, sneaking, punching, blocking, fps }) => ({ ping, toolbar, walking, sneaking, punching, blocking, fps }))(serverPlayers[id]);
 			Object.assign(p, transferredValues)
 
 			// Update player hand if necessary

@@ -166,6 +166,7 @@ function animate() {
 	// Scene update
 	stage.update();
 	stats.update();
+	player.fps = round(stats.fps, 1);
 
 	composer.render( scene, camera );
 	
