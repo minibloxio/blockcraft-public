@@ -629,6 +629,7 @@ io.on('connection', function(socket_) {
 			});
 			io.to(`${data.id}`).emit('kill');
 			players[data.id].hp = 0;
+			players[data.id].dead = true;
 		} else {
 			socket.emit('message', {
 				name: "Server",
