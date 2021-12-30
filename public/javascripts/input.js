@@ -117,7 +117,7 @@ onkeydown = onkeyup = function(e){
 
 var onKeyDown = function ( event ) {
 	if (!initialized) return;
-
+	
 	if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && showChatFlag) {
 		showChatFlag = false;
     	showChatBar = !showChatBar;
@@ -137,12 +137,14 @@ var onKeyDown = function ( event ) {
     			socket.emit("message", $("#chat-input").val());
 	    		$("#chat-input").val("")
     		} else { // Check minecraft command
+				prevCommands.push($("#chat-input").val());
 	    		$("#chat-input").val("")
     			msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
     			checkCommand(msg);
     		}
     	}
 	}
+	//  else if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && !showChatFlag) {
 
 	if (!initialized || !player.controls.enabled || showChatBar)
 		return;

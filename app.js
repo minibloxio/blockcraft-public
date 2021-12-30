@@ -124,7 +124,13 @@ const logger = createLogger({
 });
 
 // Get textures
-let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "glass", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy"];
+let colors = ["black", "blue", "brown", "cyan", "gray", "green", "light_blue", "lime", "magenta", "orange", "pink", "purple", "red", "silver", "white", "yellow"];
+let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white"];
+
+for (let color of colors) {
+	blockOrder.push("wool_colored_" + color);
+	blockOrder.push("glass_" + color);
+}
 
 let itemOrder = ["stick", "wood_sword", "wood_pickaxe", "wood_axe", "wood_shovel", "bow", "arrow", "diamond"];
 
@@ -142,7 +148,7 @@ var players = {};
 
 // Setup world
 const tileSize = 16;
-const tileTextureWidth = 512;
+const tileTextureWidth = 1024;
 const tileTextureHeight = 64;
 const world = new World();
 world.init({
@@ -231,7 +237,16 @@ io.on('connection', function(socket_) {
 			dir: {x: 0,y: 0,z: 0},
 			hp: 10,
 			dead: false,
-			toolbar: [{v: 2, c: 1, class: "item"}, {v: 3, c: 1, class: "item"}, {v: 4, c: 1, class: "item"}, {v: 5, c: 1, class: "item"}, {v: 6, c: 1, class: "item"}, {v: 7, c: 64, class: "item"}],
+			toolbar: [
+				{v: 2, c: 1, class: "item"}, 
+				{v: 3, c: 1, class: "item"}, 
+				{v: 4, c: 1, class: "item"}, 
+				{v: 6, c: 1, class: "item"}, 
+				{v: 7, c: 64, class: "item"},
+				{v: blockOrder.indexOf("glass")+1, c: 64, class: "block"},
+				{v: blockOrder.indexOf("ice")+1, c: 64, class: "block"},
+				{v: blockOrder.indexOf("glass_red")+1, c: 64, class: "block"},
+			],
 			walking: false,
 			sneaking: false,
 			punching: false,
@@ -551,10 +566,7 @@ io.on('connection', function(socket_) {
 	// Give player item
 	socket.on('giveItem', function (data) {
 		if (!players[socket.id]) return;
-		World.addItem(players[socket.id], {
-			v: data.item,
-			amount: data.amount
-		});
+		World.addItem(players[socket.id], data);
 	})
 
 	// Set player's operater status

@@ -73,6 +73,7 @@ let commandsInit = JSON.stringify({
     },
 })
 let commands = JSON.parse(commandsInit);
+let prevCommands = [];
 
 // Update hints
 function updateHints() {
@@ -240,8 +241,8 @@ function giveCommandHint(msg, autocomplete) {
 
             // Special case for /tp
             if (msg[0] == "tp") {
-                msg.shift();
                 if ((Number.isInteger(parseInt(msg[0])) || msg[0] == "~")) {
+                    msg.shift();
                     let coord = getCoord(msg);
                     if (coord) {
                         if (msg.length == 3 && !validCoord(msg)) {
@@ -253,6 +254,7 @@ function giveCommandHint(msg, autocomplete) {
                         }
                     }
                 } else if (Object.keys(commands[command].hints) == 0) {
+                    msg.shift();
                     hintText += msg.join(" ") + " - No players online to teleport to";
                     return;
                 }
@@ -383,10 +385,10 @@ function displayTutorial() {
         text: "TUTORIAL"
     })
     addChat({
-        text: "Use WASD to move around and SPACEBAR to jump"
+        text: "Use WASD to move around, SPACEBAR to jump, SHIFT to sprint, and ALT to crouch"
     })
     addChat({
-        text: "Use the mouse to look around, left click to mine and attack, right click to place blocks"
+        text: "Use the mouse to look around, LEFT CLICK to mine and attack, RIGHT CLICK to place blocks"
     })
     addChat({
         text: "Press E to open your inventory and crafting menu"
@@ -542,8 +544,9 @@ function giveItem(msg) {
     if (Number.isInteger(parseInt(amount)) && world.blockId[item]) {
         amount = clamp(parseInt(amount), 1, 64);
         socket.emit('giveItem', {
-            item: world.blockId[item],
+            v: world.blockId[item],
             amount: amount,
+            class: "block",
         })
         addChat({
             text: "Gave " + amount + " " + item + " to " + player.name

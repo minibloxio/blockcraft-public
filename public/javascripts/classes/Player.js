@@ -83,6 +83,15 @@ class Player {
 		this.playerBoxes = [];
 		this.picked = [];
 
+		this.neighborOffsets = [];
+		for (let x = -1; x <= 1; x++) {
+			for (let y = -1; y <= 1; y++) {	
+				for (let z = -1; z <= 1; z++) {
+					this.neighborOffsets.push([x, y, z]);
+				}
+			}
+		}
+
 		// Player dimensions
 		let blockSize = 16;
 		this.dim = {
@@ -422,7 +431,7 @@ class Player {
 		// calculate blocks intersecting the picking ray
 		this.nearbyMeshes.length = 0;
 		let cellPos = chunkManager.cellPos;
-		for (let offset of chunkManager.neighborOffsets) {
+		for (let offset of player.neighborOffsets) {
 			let id = (cellPos.x + offset[0]) + "," + (cellPos.y + offset[1]) + "," + (cellPos.z + offset[2]);
 			if (cellIdToMesh[id]) {
 				if (cellIdToMesh[id][0]) this.nearbyMeshes.push(cellIdToMesh[id][0]);

@@ -140,7 +140,16 @@ function addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y
       ndx, ndx + 1, ndx + 2,
       ndx + 2, ndx + 1, ndx + 3,
     );
+}
+
+let transparentBlocks = ["water", "glass", "ice", "glass_black", "glass_blue", "glass_brown", "glass_cyan", "glass_gray", "glass_green", "glass_light_blue", "glass_lime", "glass_magenta", "glass_orange", "glass_pink", "glass_purple", "glass_red", "glass_silver", "glass_white", "glass_yellow"]
+
+// Check if is transparent
+function isTransparent(voxel) {
+  for (let block of transparentBlocks) {
+    if (world.blockId[block] == voxel) return true;
   }
+}
 
 function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
 
@@ -166,9 +175,9 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
 
         // voxel 0 is sky (empty) so for UVs we start at 0
         const uvVoxel = voxel - 1;
+        
         // There is a voxel here but do we need faces for it?
-
-        let transparentTexture = voxel == world.blockId["water"] || voxel == world.blockId["ice"] || voxel == world.blockId["glass"];
+        let transparentTexture = isTransparent(voxel)
 
         // OPAQUE TEXTURES
         if (!transparent && !transparentTexture) {
@@ -178,7 +187,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
                 voxelX + dir[0],
                 voxelY + dir[1],
                 voxelZ + dir[2]);
-            if (neighbor <= 1 || neighbor == 255 || ((neighbor == world.blockId["ice"] || neighbor == world.blockId["glass"]) && voxel != neighbor)) {
+            if (neighbor <= 0 || neighbor == 255 || (isTransparent(neighbor) && voxel != neighbor)) {
               // this voxel has no neighbor in this direction so we need a face.
               addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
             }
@@ -194,7 +203,7 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
                 voxelX + dir[0],
                 voxelY + dir[1],
                 voxelZ + dir[2]);
-            if (neighbor == 0) {
+            if (neighbor == 0 || neighbor == 255 || (isTransparent(neighbor) && voxel != neighbor)) {
               // this voxel has no neighbor in this direction so we need a face.
               addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
             }

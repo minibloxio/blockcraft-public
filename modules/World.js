@@ -709,11 +709,10 @@ module.exports = class World {
 
   static addItem(p, entity) {
     let added = false;
-    for (let t of p.toolbar) {
-      if (!t)
-        continue;
-      if (t.v == entity.v && t.class == entity.class) {
-        t.c += entity.amount || 1;
+    for (let slot of p.toolbar) {
+      if (!slot) continue;
+      if (slot.v == entity.v && slot.class == entity.class) {
+        slot.c += entity.amount || 1;
         added = true;
       }
     }
