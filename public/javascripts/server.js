@@ -24,6 +24,35 @@ function addMesh(geometry, material) {
 	return mesh;
 }
 
+function updateNameTag(p, options) {
+	if (!options) options = {};
+	let {blockSize} = world;
+
+	if (options.color) {
+		p.nameTag.material.color.set(options.color);
+	} else if (options.name) {
+		var name_geometry = new THREE.TextGeometry( p.name, {
+			font: textureManager.minecraft_font,
+			size: 3,
+			height: 0.5
+		});
+		name_geometry.center();
+
+		p.nameTag.geometry = name_geometry;
+	} else {
+		var name_geometry = new THREE.TextGeometry( p.name, {
+			font: textureManager.minecraft_font,
+			size: 3,
+			height: 0.5
+		});
+		name_geometry.center();
+
+		p.nameTag = new THREE.Mesh(name_geometry, new THREE.MeshBasicMaterial({color: options.color || 'white'}));
+		p.nameTag.material.transparent = true;
+		p.nameTag.position.y += blockSize*3/4;
+	}
+}
+
 function addPlayer(players, id) {
 	let {blockSize} = world;
 
@@ -74,15 +103,7 @@ function addPlayer(players, id) {
 	p.rightLeg.position.set(player.dim.armSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
 
 	// Add nametag
-	var name_geometry = new THREE.TextGeometry( p.name, {
-		font: textureManager.minecraft_font,
-		size: 3,
-		height: 0.5
-	});
-	name_geometry.center();
-
-	p.nameTag = new THREE.Mesh(name_geometry, new THREE.MeshBasicMaterial({color: 0xeeeeee}));
-	p.nameTag.position.y += blockSize *3/4;
+	updateNameTag(p);
 
 	// Create skeleton of head, body, arms, and legs
 	p.skeleton = new THREE.Group();
@@ -159,41 +180,47 @@ function updatePlayers(serverPlayers) {
 
 				p.entity.remove(p.nameTag)
 
-				var name_geometry = new THREE.TextGeometry( p.name, {
-					font: textureManager.minecraft_font,
-					size: 3,
-					height: 0.5
-				} );
-				name_geometry.center();
-
-				p.nameTag = new THREE.Mesh(name_geometry, new THREE.MeshBasicMaterial({color: 0xeeeeee}));
-				p.nameTag.castShadow = true;
-				p.nameTag.position.y += blockSize*3/4
-				p.entity.add(p.nameTag);
+				updateNameTag(p, {
+					name: p.name,
+				});
 			}
 		}
 	}
+}
+
+function updateBodyVisibility(p, visible) {
+	p.body.visible = visible;
+	p.leftArm.visible = visible;
+	p.rightArm.visible = visible;
+	p.leftLeg.visible = visible;
+	p.rightLeg.visible = visible;
 }
 
 function setPlayerGamemode(p, mode) {
 	p.mode = mode;
 
 	if (p.mode == "spectator" || p.mode == "camera") {
-		p.body.visible = false;
-		p.leftArm.visible = false;
-		p.leftLeg.visible = false;
-		p.rightArm.visible = false;
-		p.rightLeg.visible = false;
-
+		updateBodyVisibility(p, false);
 		updatePlayerColor(p.id, false, 0.5)
+		
+		p.nameTag.material.opacity = 0.5;
+		updateNameTag(p, {
+			color: 'grey',
+		})
 	} else {
-		p.body.visible = true;
-		p.leftArm.visible = true;
-		p.leftLeg.visible = true;
-		p.rightArm.visible = true;
-		p.rightLeg.visible = true;
-
+		updateBodyVisibility(p, true);
 		updatePlayerColor(p.id, false, 1)
+
+		p.nameTag.material.opacity = 1;
+		if (p.mode == "creative") {
+			updateNameTag(p, {
+				color: 'aqua',
+			})
+		} else if (p.mode == "survival") {
+			updateNameTag(p, {
+				color: 'white',
+			})
+		}
 	}
 }
 
