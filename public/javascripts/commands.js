@@ -71,6 +71,9 @@ let commandsInit = JSON.stringify({
         "hint": "<player> [reason] - Kicks the specified player (requires operator status)",
         "error": "Invalid player"
     },
+    "spawnpoint": {
+        "hint": "- Sets your spawnpoint to your current position",
+    },
 })
 let commands = JSON.parse(commandsInit);
 let prevCommands = [];

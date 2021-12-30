@@ -259,13 +259,13 @@ function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
   }
 }
 
+// Update the voxel geometry for a single cell
 function updateCellMesh(data) {
-  let {blockSize, cellSize} = world;
   let [opaqueGeometry, cellX, cellY, cellZ, cellId, transparentGeometry, forceUpdate] = data;
-  let mesh, meshT;
+  let meshO, meshT;
 
   if (cellIdToMesh[cellId]) {
-    mesh = cellIdToMesh[cellId][0];
+    meshO = cellIdToMesh[cellId][0];
     meshT = cellIdToMesh[cellId][1];
   } else if (cellIdToMesh[cellId]) {
     cellIdToMesh[cellId].length = 0;
@@ -274,49 +274,31 @@ function updateCellMesh(data) {
   }
 
   // OPAQUE TEXTURES
-  if (data) {
-    if (opaqueGeometry.positions.length > 0 || forceUpdate) {
-      const geometry = mesh ? mesh.geometry : new THREE.BufferGeometry();
-      setGeometry(geometry, opaqueGeometry);
+  if (opaqueGeometry.positions.length > 0 || forceUpdate) {
+    const geometry = meshO ? meshO.geometry : new THREE.BufferGeometry();
+    setGeometry(geometry, opaqueGeometry);
 
-      if (!mesh) {
-        mesh = new THREE.Mesh(geometry, textureManager.material);
-        mesh.name = cellId;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        cellIdToMesh[cellId][0] = mesh;
-        mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
-        mesh.matrixAutoUpdate = false;
-        mesh.updateMatrix();
-        scene.add(mesh);
-      }
+    if (!meshO) {
+      meshO = new THREE.Mesh(geometry, textureManager.material);
+      cellIdToMesh[cellId][0] = meshO;
+      setChunkMesh(cellX, cellY, cellZ, cellId, meshO);
     }
   }
 
   // TRANSPARENT TEXTURES
-  if (data) {
-    if (transparentGeometry.positions.length > 0 || forceUpdate) {
-      const geometry = meshT ? meshT.geometry : new THREE.BufferGeometry();
-      setGeometry(geometry, transparentGeometry);
+  if (transparentGeometry.positions.length > 0 || forceUpdate) {
+    const geometry = meshT ? meshT.geometry : new THREE.BufferGeometry();
+    setGeometry(geometry, transparentGeometry);
 
-      if (!meshT) {
-        meshT = new THREE.Mesh(geometry, textureManager.materialTransparent);
-        meshT.name = cellId;
-        meshT.castShadow = true;
-        meshT.receiveShadow = true;
-        cellIdToMesh[cellId][1] = meshT;
-        meshT.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
-        meshT.matrixAutoUpdate = false;
-        meshT.updateMatrix();
-        scene.add(meshT);
-
-        if (transparentGeometry.positions.length > 0) {
-        }
-      }
+    if (!meshT) {
+      meshT = new THREE.Mesh(geometry, textureManager.materialTransparent);
+      cellIdToMesh[cellId][1] = meshT;
+      setChunkMesh(cellX, cellY, cellZ, cellId, meshT);
     }
   }
 }
 
+// Set the geometry of the mesh
 function setGeometry(geometry, data) {
   const positionNumComponents = 3;
   geometry.setAttribute('position', new THREE.BufferAttribute(data.positions, positionNumComponents));
@@ -327,4 +309,16 @@ function setGeometry(geometry, data) {
   const indexNumComponents = 1;
   geometry.setIndex(new THREE.BufferAttribute(data.indices, indexNumComponents));
   geometry.computeBoundingSphere();
+}
+
+// Set the mesh in the chunk
+function setChunkMesh(cellX, cellY, cellZ, cellId, mesh) {
+  let {blockSize, cellSize} = world;
+  mesh.name = cellId;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mesh.position.set(cellX * cellSize * blockSize, cellY * cellSize * blockSize, cellZ * cellSize * blockSize);
+  mesh.matrixAutoUpdate = false;
+  mesh.updateMatrix();
+  scene.add(mesh);
 }
