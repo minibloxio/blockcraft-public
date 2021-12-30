@@ -80,6 +80,14 @@ let commandsInit = JSON.stringify({
     "home": {
         "hint": "- Teleports you to your home", 
     },
+    "msg": {
+        "hint": "<player> <message> - Sends a private message to the specified player",
+        "error": "Invalid player"
+    },
+    "whisper": {
+        "hint": "<player> <message> - Sends a private message to the specified player",
+        "error": "Invalid player"
+    },
 })
 let commands = JSON.parse(commandsInit);
 let prevCommands = [];
@@ -93,6 +101,8 @@ function updateHints() {
     commands.kill.hints = {};
     commands.setblock.hints = {};
     commands.give.hints = {};
+    commands.msg.hints = {};
+    commands.whisper.hints = {};
 
     for (let id in players) {
         commands.tp.hints[players[id].name] = "Teleport to " + players[id].name; // Update tp hint
@@ -100,6 +110,8 @@ function updateHints() {
         commands.deop.hints[players[id].name] = "Remove " + players[id].name + "'s operator status"; // Update deop hint
         commands.kick.hints[players[id].name] = "Kick " + players[id].name + " from the server"; // Update kick hint
         commands.kill.hints[players[id].name] = "Kill " + players[id].name; // Update kill hint
+        commands.msg.hints[players[id].name] = "Send a private message to " + players[id].name; // Update msg hint
+        commands.whisper.hints[players[id].name] = "Send a private message to " + players[id].name; // Update whisper hint
     }
     commands.op.hints[player.name] = "Make yourself an operator"; // Update op hint
     commands.deop.hints[player.name] = "Remove your operator status"; // Update deop hint
@@ -244,6 +256,9 @@ function giveCommandHint(msg, autocomplete) {
                     } else if (msg[0] == "kick") {
                         hintText += " " + msg[2] + " - Enter the reason for kicking " + hint;
                         return;
+                    } else if (msg[0] == "msg" || msg[0] == "whisper") {
+                        hintText += " " + msg.slice(2).join(" ") + " - Enter the message to send to " + hint;
+                        return;
                     }
                 }
             }
@@ -351,8 +366,8 @@ function checkCommand(msg) {
         setHome();
     } else if (msg[0] == "home") {
         goHome();
-    } else if (msg[0] == "spawnpoint") {
-        setSpawn();
+    } else if (msg[0] == "msg" || msg[0] == "whisper") {
+        messagePlayer(msg);
     } else if (msg[0] == "spawnpoint") {
         setSpawn();
     } else if (msg[0] == "spawnpoint") {
@@ -754,6 +769,48 @@ function goHome() {
         addChat({
             text: "Error: No home set",
             color: "red"
+        });
+    }
+}
+
+// Message a player
+function messagePlayer(msg) {   
+    msg.shift();
+    let target = msg[0];
+    msg.shift();
+
+    let message = msg.join(" ");
+    let playerId = null;
+
+    let exists = false;
+    if (target == player.name) {
+        exists = true;
+        playerId = socket.id;
+    }
+    for (let id in players) {
+        let p = players[id];
+        if (p.name == target) {
+            exists = true; 
+            playerId = id;
+            break;
+        }
+    }
+
+    if (!exists) {
+        addChat({
+            text: 'Error: No player found with name "' + target + '" to message',
+            color: "red"
+        });
+    } else if (message.length == 0) {
+        addChat({
+            text: 'Error: No message specified',
+            color: "red"
+        });
+    } else {
+        socket.emit('messagePlayer', {
+            id: playerId,
+            name: target,
+            message: message
         });
     }
 }

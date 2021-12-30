@@ -539,6 +539,17 @@ io.on('connection', function(socket_) {
 		}
 	})
 
+	socket.on('messagePlayer', function (data) {
+		if (players[socket.id]) {
+			logger.verbose("<"+players[socket.id].name+" whispers to " + players[data.id].name + "> " + data)
+			io.to(`${data.id}`).emit('message', {
+				name: players[socket.id].name + " whispers to you",
+				text: filter.clean(data.text),
+				color: "grey",
+			});
+		}
+	})
+
 	// COMMANDS
 
 	// Set the time of day
