@@ -49,6 +49,8 @@ function updateNameTag(p, options) {
 
 		p.nameTag = new THREE.Mesh(name_geometry, new THREE.MeshBasicMaterial({color: options.color || 'white'}));
 		p.nameTag.material.transparent = true;
+		p.nameTag.material.depthTest = false;
+		p.nameTag.material.dithering = true;
 		p.nameTag.position.y += blockSize*3/4;
 	}
 }
