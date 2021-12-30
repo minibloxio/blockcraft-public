@@ -1,5 +1,10 @@
 changelog = [
 	{
+		"date": "Dec 30, 2021",
+		"version": "0.31.0",
+		"changes": "Added /leave /op /deop /kill /kick /spawnpoint /sethome /home /msg /reply and /list commands| Added several new blocks| Added nametag colors specific to each gamemode| Usernames must now be alphabetical| Fixed issue where players shared texture materials"
+	},
+	{
 		"date": "Dec 28, 2021",
 		"version": "0.30.0",
 		"changes": "Added a chat profanity filter| Added /give /setblock /clear and /reload commands| Added god mode| Added stars rotation to the background| Added ability to teleport relative to the player by using ~| Added server region names, ping and uptime indicators on the server list| Optimized raycaster function to only check meshes within a certain distance| Optimized chunk generation on the server| Updated player models for spectators"
