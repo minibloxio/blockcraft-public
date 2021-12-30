@@ -28,17 +28,10 @@ function updateNameTag(p, options) {
 	if (!options) options = {};
 	let {blockSize} = world;
 
+	if (p.nameTag) p.entity.remove(p.nameTag);
+
 	if (options.color) {
 		p.nameTag.material.color.set(options.color);
-	} else if (options.name) {
-		var name_geometry = new THREE.TextGeometry( p.name, {
-			font: textureManager.minecraft_font,
-			size: 3,
-			height: 0.5
-		});
-		name_geometry.center();
-
-		p.nameTag.geometry = name_geometry;
 	} else {
 		var name_geometry = new THREE.TextGeometry( p.name, {
 			font: textureManager.minecraft_font,
@@ -53,6 +46,8 @@ function updateNameTag(p, options) {
 		p.nameTag.material.dithering = true;
 		p.nameTag.position.y += blockSize*3/4;
 	}
+
+	p.entity.add(p.nameTag);
 }
 
 function addPlayer(players, id) {
@@ -104,9 +99,6 @@ function addPlayer(players, id) {
 	p.rightLeg = addMesh(new THREE.BoxGeometry(player.dim.legSize, player.dim.legHeight, player.dim.legSize), leg.material)
 	p.rightLeg.position.set(player.dim.armSize*1/2, -blockSize*0.45-blockSize*0.75, 0);
 
-	// Add nametag
-	updateNameTag(p);
-
 	// Create skeleton of head, body, arms, and legs
 	p.skeleton = new THREE.Group();
 	p.skeleton.add(p.body);
@@ -131,6 +123,9 @@ function addPlayer(players, id) {
 
 	p.punchingT = 0;
 
+	// Add nametag
+	updateNameTag(p);
+
 	// Set gamemode
 	setPlayerGamemode(p, p.mode);
 }
@@ -153,13 +148,16 @@ function updatePlayers(serverPlayers) {
 			} else if (p.hp > 0) {
 				p.entity.visible = true;
 			}
-			// Update gamemode
-			if (p.mode != serverPlayers[id].mode) {
+
+			// Update gamemode / operator
+			if (p.mode != serverPlayers[id].mode || p.operator != serverPlayers[id].operator) {
+				p.operator = serverPlayers[id].operator;
+				updateNameTag(p);
 				setPlayerGamemode(p, serverPlayers[id].mode);
 			}
 
 			// Transfer data
-			let transferredValues = (({ ping, toolbar, walking, sneaking, punching, blocking, operator }) => ({ ping, toolbar, walking, sneaking, punching, blocking, operator }))(serverPlayers[id]);
+			let transferredValues = (({ ping, toolbar, walking, sneaking, punching, blocking }) => ({ ping, toolbar, walking, sneaking, punching, blocking }))(serverPlayers[id]);
 			Object.assign(p, transferredValues)
 
 			// Update player hand if necessary
@@ -180,11 +178,8 @@ function updatePlayers(serverPlayers) {
 			if (p.name != serverPlayers[id].name) {
 				p.name = serverPlayers[id].name;
 
-				p.entity.remove(p.nameTag)
-
-				updateNameTag(p, {
-					name: p.name,
-				});
+				updateNameTag(p); // Update name tag
+				setPlayerGamemode(p, p.mode); // Set gamemode
 			}
 		}
 	}
@@ -200,30 +195,33 @@ function updateBodyVisibility(p, visible) {
 
 function setPlayerGamemode(p, mode) {
 	p.mode = mode;
+	let color = "white";
 
 	if (p.mode == "spectator" || p.mode == "camera") {
 		updateBodyVisibility(p, false);
 		updatePlayerColor(p.id, false, 0.5)
 		
 		p.nameTag.material.opacity = 0.5;
-		updateNameTag(p, {
-			color: 'grey',
-		})
+		color = 'grey';
 	} else {
 		updateBodyVisibility(p, true);
 		updatePlayerColor(p.id, false, 1)
 
 		p.nameTag.material.opacity = 1;
 		if (p.mode == "creative") {
-			updateNameTag(p, {
-				color: 'aqua',
-			})
+			color = 'aqua';
 		} else if (p.mode == "survival") {
-			updateNameTag(p, {
-				color: 'white',
-			})
+			color = 'white';
 		}
 	}
+
+	if (p.operator) color = "red";
+
+	console.log(color);
+
+	updateNameTag(p, {
+		color: color,
+	})
 }
 
 function updatePlayer(p) {
