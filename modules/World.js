@@ -126,10 +126,14 @@ module.exports = class World {
 
     this.tick = data.tick;
 
+    // Load deltas
     this.cells = {};
     for (let cellId in data.deltas) {
       this.cellDeltas[cellId] = RLEdecode(data.deltas[cellId])
     }
+
+    // Load entities
+    this.entities = data.entities;
   }
 
   // Save world to file
@@ -146,7 +150,8 @@ module.exports = class World {
     let saveObject = {
       seed: this.seed,
       tick: this.tick,
-      deltas: deltas
+      deltas: deltas,
+      entities: this.entities,
     }
 
     let data = JSON.stringify(saveObject);
@@ -161,7 +166,7 @@ module.exports = class World {
         })
     });
 
-    this.purge(logger);
+    this.purge(logger); // Purge memory
 
 		let msg = "Successfully saved world in " + (Date.now()-t) + "ms";
 		logger.info(msg);

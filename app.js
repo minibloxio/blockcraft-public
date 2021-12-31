@@ -402,7 +402,7 @@ io.on('connection', function(socket_) {
 			let entityId = Function.randomString(5);
 			let entity = {
 				pos: {x: (data.x+0.5)*blockSize-blockSize/8, y: (data.y+0.5)*blockSize-blockSize/8, z: (data.z+0.5)*blockSize-blockSize/8},
-				vel: {x: Function.random(2, -2), y: blockSize*2, z: Function.random(2, -2)},
+				vel: {x: Function.random(5, -5), y: blockSize*2, z: Function.random(5, -5)},
 				acc: {x: 0, y: 0, z: 0},
 				type: "item",
 				class: "block",

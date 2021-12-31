@@ -214,7 +214,7 @@ class Inventory {
     }
 
     drawHoverBox(name, entity) {
-        if (this.selectedItem) return;
+        if (this.selectedItem || !name || !map[16]) return;
 
         let hoverBoxPadding = 10;
         let hoverBoxWidth = Math.max(ctx.measureText(name).width + hoverBoxPadding*2, 60);
