@@ -48,7 +48,7 @@ class Inventory {
     updateItem(block, i, type) {
         let {searchBlocks, searchItems, craftingGrid, currentRow} = this;
 
-        if (block == "creative") {
+        if (block == "creative") { // CREATIVE MODE
             i = i + currentRow*9;
             if (type == "left") { // Left click item
                 let entity = {}
@@ -104,6 +104,17 @@ class Inventory {
                         this.selectedItem = prevBlock;
                     }
                 }
+            } else if (type == "hover") {
+                let name = "";
+                if (i < searchBlocks.length) {
+                    name = searchBlocks[i];
+                } else if (i < searchBlocks.length+searchItems.length) {
+                    name = searchItems[i-searchBlocks.length]; 
+                }
+
+                //drawRectangle()
+
+                this.drawItem(mouse.x, mouse.y, selectedItem)
             }
         } else {
             if (type == "left") { // Left click item
@@ -540,6 +551,8 @@ class Inventory {
         } else {
             $("#search-input").hide();
         }
+
+        this.selectInventory("hover");
     }
 
     // Draw item in inventory
