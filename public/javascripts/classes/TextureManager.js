@@ -240,8 +240,8 @@ class TextureManager {
     mergeItemTextures(order) {
         let canvas = document.createElement("canvas");
         let ctx_ = canvas.getContext("2d");
-        canvas.width = 256;
-        canvas.height = 64;
+        canvas.width = world.tileTextureWidth;
+        canvas.height = world.tileTextureHeight;
       
         let index = 0;
         for (let item of order) {

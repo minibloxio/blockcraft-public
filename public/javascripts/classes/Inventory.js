@@ -314,6 +314,17 @@ class Inventory {
         return {xPos, yPos};
     }
 
+    // Scroll through inventory
+    scroll(dir) {
+        let numOfItems = this.searchBlocks.length + this.searchItems.length;
+        let maxScroll = Math.floor(numOfItems/9);
+
+        if(dir > 0) {
+			this.currentRow = Math.max(this.currentRow - 1, 0);
+		} else {
+			this.currentRow = Math.min(this.currentRow + 1, maxScroll);
+		}
+    }
 
     // Display inventory background
     displayInventoryBackground() {
@@ -415,13 +426,10 @@ class Inventory {
 
                         index++;
                     }
-                    // let offset = (blocks.length - currentRow*9)%9;
-                    // if (offset < 0) {
-                    // 	offset += 9;
-                    // 	index += offset;
-                    // }
+                    
+                     let offset = Math.max(0, currentRow*9-blocks.length);
                     let items = searchItems || world.itemOrder;
-                    for (let k = 0; k < items.length; k++) {
+                    for (let k = offset; k < items.length; k++) {
                         if (index >= 36) break;
 
                         let item = items[k];

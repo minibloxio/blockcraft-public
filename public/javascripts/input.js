@@ -334,13 +334,7 @@ $(document).bind('wheel', function(e) {
 	if (!initialized) return;
 
 	if (inventory.showInventory && player.mode == "creative")  {
-
-		if(scrollDelta > 0) {
-			inventory.currentRow = Math.max(inventory.currentRow - 1, 0);
-		} else {
-			inventory.currentRow = Math.min(inventory.currentRow + 1, 10);
-		}
-
+		inventory.scroll(scrollDelta > 0 ? 1 : -1);
 		return;
 	}
 

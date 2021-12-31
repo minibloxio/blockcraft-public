@@ -132,7 +132,14 @@ for (let color of colors) {
 	blockOrder.push("glass_" + color);
 }
 
-let itemOrder = ["stick", "wood_sword", "wood_pickaxe", "wood_axe", "wood_shovel", "bow", "arrow", "diamond"];
+let tools = ["pickaxe", "axe", "shovel", "sword"];
+let toolMat = ["wood", "stone", "iron", "gold", "diamond"];
+let itemOrder = ["stick", "bow", "arrow", "diamond", "apple", "bread", "carrot"];
+for (let mat of toolMat) {
+	for (let tool of tools) {
+		itemOrder.push(mat + "_" + tool);
+	}
+}
 
 let textures = {};
 fs.readdir(public + '/textures/blocks', function (err, data) {
