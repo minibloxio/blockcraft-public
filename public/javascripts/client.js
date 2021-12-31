@@ -88,7 +88,7 @@ socket.on('joinResponse', function (data) {
 	tick = new Ola(data.tick);
 
 	// Update item search
-	updateItemSearch();
+	inventory.updateItemSearch('');
 
 	initialized = true;
 	console.log("Successfully joined the server (" + data.info.region + ")");

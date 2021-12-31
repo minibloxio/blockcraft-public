@@ -677,7 +677,8 @@ class Player {
 						x: x,
 						y: y,
 						z: z,
-						t: item.v
+						t: item.v,
+						class: item.class
 					})
 					this.punching = Date.now();
 			    }

@@ -242,7 +242,7 @@ class ChunkManager {
 				delete this.currChunks[id];
 			}
 		}
-
+		
 		// Unload chunks based on loading rate
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToUnload[i];

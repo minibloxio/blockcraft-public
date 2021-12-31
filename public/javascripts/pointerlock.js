@@ -19,8 +19,8 @@ function enterPointerLock () {
 	$("#background-image").hide();
 	onWindowResize();
 
-	if (showInventory) {
-		showInventory = false;
+	if (inventory.showInventory) {
+		inventory.showInventory = false;
 	} else {
 		let name = $("#name-input").val();
 
@@ -34,7 +34,7 @@ function enterPointerLock () {
 }
 
 function exitPointerLock() {
-	if (!showInventory) {
+	if (!inventory.showInventory) {
 		blocker.style.display = 'block';
 		//element.requestPointerLock();
 	}
@@ -76,19 +76,19 @@ function initPointerLock() {
 			if (event.keyCode == 27 && player.controls.enabled)
 				document.exitPointerLock();
 
-			if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !showChatBar && loaded >= maxLoaded+1 && (player.controls.enabled || showInventory)) {
+			if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !showChatBar && loaded >= maxLoaded+1 && (player.controls.enabled || inventory.showInventory)) {
 				if (player.controls.enabled) {
-					showInventory = true;
-					inventory = JSON.parse(JSON.stringify(player.toolbar));
+					inventory.showInventory = true;
+					inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
 
 					document.exitPointerLock();
 				} else if (document.activeElement.id != "search-input") {
-					showInventory = false;
+					inventory.showInventory = false;
 					// Ask the browser to lock the pointer
 					element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 					element.requestPointerLock();
 
-					socket.emit('updateInventory', inventory);
+					socket.emit('updateInventory', inventory.inventory);
 				}
 			}
 
@@ -96,11 +96,11 @@ function initPointerLock() {
 				event.preventDefault();
 			
 		}).keyup(function (event) {
-			if (event.keyCode == 27 && showInventory) {
+			if (event.keyCode == 27 && inventory.showInventory) {
 				// Ask the browser to lock the pointer
 				element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 				element.requestPointerLock();
-				socket.emit('updateInventory', inventory);
+				socket.emit('updateInventory', inventory.inventory);
 			}
 		})
 	} else {

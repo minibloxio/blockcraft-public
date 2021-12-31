@@ -2,7 +2,7 @@
 $('html').mousedown(function(event) {
 	if (!initialized)
 		return;
-	if (!player.controls.enabled || showInventory)
+	if (!player.controls.enabled || inventory.showInventory)
 		return;
     switch (event.which) {
         case 1:
@@ -65,18 +65,18 @@ let mouseLeft, mouseRight = false;
 $("body").mousedown(function (e) {
 	if (!initialized)
 		return;
-	if (!showInventory)
+	if (!inventory.showInventory)
 		return;
 	switch (e.which) {
         case 1:
-		    selectInventory("left");
+		    inventory.selectInventory("left");
 		    mouseLeft = true;
             break;
         case 2:
             
             break;
         case 3:
-            selectInventory("right");
+            inventory.selectInventory("right");
             mouseRight = true;
             break;
         default:
@@ -85,7 +85,7 @@ $("body").mousedown(function (e) {
 }).mouseup(function (e) {
 	if (!initialized)
 		return;
-	if (!showInventory)
+	if (!inventory.showInventory)
 		return;
 	switch (e.which) {
         case 1:
@@ -105,9 +105,8 @@ $("body").mousedown(function (e) {
 $("body").dblclick(function () {
 	if (!initialized)
 		return;
-	selectInventory("double")
+	inventory.selectInventory("double")
 })
-
 
 var map = {};
 onkeydown = onkeyup = function(e){
@@ -322,7 +321,7 @@ document.addEventListener( 'keyup', onKeyUp, false );
 $(document).ready(function() {
 	$("#search-input").on("input", function() {
 		let search = $(this).val();
-		updateItemSearch(search);
+		inventory.updateItemSearch(search);
 	});
 });
 
@@ -330,18 +329,32 @@ $(document).ready(function() {
 var lastScrollTop = 0;
 let zoomLevel = 3
 $(document).bind('wheel', function(e) {
+	let scrollDelta = e.originalEvent.wheelDelta / 120;
+
 	if (!initialized) return;
+
+	if (inventory.showInventory && player.mode == "creative")  {
+
+		if(scrollDelta > 0) {
+			inventory.currentRow = Math.max(inventory.currentRow - 1, 0);
+		} else {
+			inventory.currentRow = Math.min(inventory.currentRow + 1, 10);
+		}
+
+		return;
+	}
+
 	if (!player.controls.enabled) return;
 
 	if (camera.enableZoom) {
-		if(e.originalEvent.wheelDelta / 120 > 0) {
+		if(scrollDelta > 0) {
 			zoomLevel = clamp(zoomLevel+0.2, -10, 10);
 	    } else {
 	        zoomLevel = clamp(zoomLevel-0.2, -10, 10);
 	    }
 	    camera.zoom = zoomLevel;
 	} else {
-		if(e.originalEvent.wheelDelta / 120 > 0) {
+		if(scrollDelta > 0) {
 	        player.currentSlot -= 1;
 	        if (player.currentSlot < 0)
 	        	player.currentSlot = 8;
@@ -354,7 +367,6 @@ $(document).bind('wheel', function(e) {
 });
 
 // Blur & Focus
-
 $(window).blur(function () {
 	inScreen = false;
 })

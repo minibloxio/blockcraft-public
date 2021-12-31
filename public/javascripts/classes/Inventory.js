@@ -1,0 +1,574 @@
+class Inventory {
+    constructor() {
+        // Inventory
+        this.showInventory = false;
+        this.blockWidth = 32;
+        this.boxSize = 40;
+        this.hotboxWidth = 60;
+        this.selectorWidth = 65;
+
+        this.selectedItem = undefined;
+        this.searchBlocks = undefined;
+        this.searchItems = undefined;
+        this.currentRow = 0;
+        this.inventory = [];
+        this.craftingGrid = [undefined, undefined, undefined, undefined];
+        this.craftingOutput = undefined;
+
+        // Toolbar
+        this.toolbarX = canvas.width/2-this.hotboxWidth*4;
+        this.toolbarSelectorX = canvas.width/2-this.hotboxWidth*3.5-2.5;
+    }
+
+    // Resize inventory
+    resize() {
+        let {hotboxWidth} = this;
+
+        canvas.width = $("html").innerWidth();
+        canvas.height = $("html").innerHeight();
+
+        this.toolbarX = canvas.width/2-hotboxWidth*4;
+        this.toolbarSelectorX = canvas.width/2-hotboxWidth*3.5-2.5;
+    }
+
+    // Check if mouse is within item frame
+    withinItemFrame(xPos, yPos) {
+
+        xPos -= 5;
+        yPos -= 5;
+
+        let {boxSize} = this;
+        return mouse.x > xPos && mouse.x < xPos + boxSize && mouse.y > yPos && mouse.y < yPos + boxSize;
+    }
+
+    // Update item in inventory
+    updateItem(block, i, type) {
+        let {searchBlocks, searchItems, craftingGrid, currentRow} = this;
+
+        if (block == "creative") {
+            i = i + currentRow*9;
+            if (type == "left") { // Left click item
+                let entity = {}
+                if (i < searchBlocks.length) {
+                    entity.class = "block";
+                    entity.c = map[16] ? 64 : 1;
+
+                    let block = world.blockId[searchBlocks[i]]; // Get block id
+                    entity.v = block;
+                } else if (i < searchBlocks.length+searchItems.length) {
+                    entity.class = "item";
+                    entity.c = map[16] ? 64 : 1;
+
+                    let item = world.itemId[searchItems[i-searchBlocks.length]]; // Get item id
+                    entity.v = item;
+                }
+                if (this.selectedItem == undefined ) {
+                    // Pick up item
+                    this.selectedItem = JSON.parse(JSON.stringify(entity));
+                } else if (this.selectedItem && this.selectedItem.c > 0) {
+                    // Switch or combine
+                    if (this.selectedItem.v == entity.v) {
+                        this.selectedItem.c += 1;
+                    } else {
+                        this.selectedItem = undefined;
+                    }
+                }
+            } else if (type == "right") { // Right click item
+                if (this.selectedItem == undefined && block[i] && block[i].c > 0) {
+                    // Split item stack
+                    this.selectedItem = {
+                        v: block[i].v,
+                        c: Math.ceil(block[i].c/2),
+                        class: block[i].class
+                    };
+                    block[i].c -= Math.ceil(block[i].c/2);
+                } else if (this.selectedItem && this.selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
+                    // Drop 1 item
+                    block[i] = {
+                        v: this.selectedItem.v, 
+                        c: 1,
+                        class: this.selectedItem.class
+                    };
+                    this.selectedItem.c -= 1;
+                } else if (this.selectedItem && this.selectedItem.c > 0 && block[i] && block[i].c > 0) {
+                    // Switch or combine
+                    if (block[i].v == this.selectedItem.v) {
+                        block[i].c += 1;
+                        this.selectedItem.c -= 1;
+                    } else {
+                        let prevBlock = JSON.parse(JSON.stringify(block[i]));
+                        block[i] = JSON.parse(JSON.stringify(this.selectedItem));
+                        this.selectedItem = prevBlock;
+                    }
+                }
+            }
+        } else {
+            if (type == "left") { // Left click item
+                if (this.selectedItem == undefined && block[i] && block[i].c > 0) {
+                    // Pick up item
+                    this.selectedItem = JSON.parse(JSON.stringify(block[i]));
+                    block[i] = undefined;
+                } else if (this.selectedItem && this.selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
+                    // Drop item
+                    block[i] = JSON.parse(JSON.stringify(this.selectedItem));
+                    this.selectedItem = undefined;
+                } else if (this.selectedItem && this.selectedItem.c > 0 && block[i] && block[i].c > 0 ) {
+                    // Switch or combine
+                    if (block[i].v == this.selectedItem.v) {
+                        block[i].c += this.selectedItem.c;
+                        this.selectedItem = undefined;
+                    } else {
+                        let prevBlock = JSON.parse(JSON.stringify(block[i]));
+                        block[i] = JSON.parse(JSON.stringify(this.selectedItem));
+                        this.selectedItem = prevBlock;
+                    }
+                }
+            } else if (type == "right") { // Right click item
+                if (this.selectedItem == undefined && block[i] && block[i].c > 0) {
+                    // Split item stack
+                    this.selectedItem = {
+                        v: block[i].v,
+                        c: Math.ceil(block[i].c/2),
+                        class: block[i].class
+                    };
+                    block[i].c -= Math.ceil(block[i].c/2);
+                } else if (this.selectedItem && this.selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
+                    // Drop 1 item
+                    block[i] = {
+                        v: this.selectedItem.v, 
+                        c: 1,
+                        class: this.selectedItem.class
+                    };
+                    this.selectedItem.c -= 1;
+                } else if (this.selectedItem && this.selectedItem.c > 0 && block[i] && block[i].c > 0) {
+                    // Switch or combine
+                    if (block[i].v == this.selectedItem.v) {
+                        block[i].c += 1;
+                        this.selectedItem.c -= 1;
+                    } else {
+                        let prevBlock = JSON.parse(JSON.stringify(block[i]));
+                        block[i] = JSON.parse(JSON.stringify(this.selectedItem));
+                        this.selectedItem = prevBlock;
+                    }
+                }
+            } else if (type == "double") { // Double click item
+                if (!block[i])
+                    return;
+
+                // Collect same item type
+                let total = block[i].c;
+                for (let j = 0; j < block.length; j++) {
+                    if (block[j] && block[j].v == block[i].v && i != j) {
+                        total += block[j].c;
+                        block[j] = undefined;
+                    }
+                }
+                for (let j = 0; j < craftingGrid.length; j++) {
+                    if (craftingGrid[j] && craftingGrid[j].v == block[i].v && i != j) {
+                        total += craftingGrid[j].c;
+                        craftingGrid[j] = undefined;
+                    }
+                }
+
+                this.selectedItem = {
+                    v: block[i].v, 
+                    c: total,
+                    class: block[i].class
+                }
+                block[i] = undefined;
+            }
+
+            if (this.selectedItem && this.selectedItem.c == 0) {
+                this.selectedItem = undefined;
+            }
+        }
+    }
+
+    // Select inventory item
+    selectInventory(type) {
+        let {hotboxWidth, craftingGrid, craftingOutput, blockWidth, boxSize} = this;
+
+        let width = 480;
+        let height = 600;
+
+        let startX = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2;
+        let startY = canvas.height/2+height/2;
+
+        for (let i = 0; i < 36; i++) {
+            let xPos = startX+(i%9)*hotboxWidth*8/9.1;
+            let yPos = startY-boxSize;
+
+            if (i > 8) yPos = startY-boxSize*5.5+hotboxWidth*Math.floor((i-9)/9);
+
+            if (this.withinItemFrame(xPos, yPos))
+                this.updateItem(this.inventory, i, type);
+        }
+
+        if (player.mode == "survival") {
+            for (let j = 0; j < 2; j++) {
+                for (let i = 0; i < 2; i++) {
+                    let xPos = startX+i*hotboxWidth*8/9.1+hotboxWidth*2;
+                    let yPos = startY-boxSize*10-1*hotboxWidth+(j)*hotboxWidth;
+
+                    if (this.withinItemFrame(xPos, yPos))
+                        this.updateItem(craftingGrid, i+j*2, type);
+                }
+            }
+
+            let block = craftingOutput;
+            let xPos = startX+hotboxWidth*5;
+            let yPos = startY-boxSize*10-hotboxWidth*0.5;
+
+            if (this.withinItemFrame(xPos, yPos)) {
+                if (this.selectedItem == undefined && block && block.c > 0) {
+                    this.selectedItem = JSON.parse(JSON.stringify(block));
+                    craftingOutput = undefined;
+                    this.updateCraftingOutput(true);
+                } else if (this.selectedItem && this.selectedItem.c > 0 && block && block.c > 0) {
+                    // Switch or combine
+                    if (block.v == this.selectedItem.v) {
+                        this.selectedItem.c += block.c;
+                        this.updateCraftingOutput(true);
+                    }
+                }
+            }
+
+            this.updateCraftingOutput();
+        } else if (player.mode == "creative") {
+            // Add background boxes
+            for (let j = 0; j < 4; j++) {
+                for (let i = 0; i < 9; i++) {
+                    let xPos = startX+i*hotboxWidth*8/9.1;
+                    let yPos = canvas.height/2-boxSize-(j)*hotboxWidth;
+
+                    if (this.withinItemFrame(xPos, yPos)) {
+                        this.updateItem("creative", i+(3-j)*9, type);
+                    }
+                }
+            }
+        }
+    }
+
+    // Update crafting output
+    updateCraftingOutput(remove) {
+        let {craftingGrid, craftingOutput} = this;
+
+        let grid = [undefined, undefined, undefined, undefined];
+        for (let i = 0; i < craftingGrid.length; i++) {
+            if (craftingGrid[i])
+                grid[i] = craftingGrid[i].v;
+        }
+
+        craftingOutput = undefined;
+        for (let r of recipes) {
+            if (r.check(grid)) {
+                if (remove) {
+                    for (let i = 0; i < craftingGrid.length; i++) {
+                        if (craftingGrid[i] && craftingGrid[i].v == r.grid[i]) {
+                            craftingGrid[i].c -= 1;
+                            if (craftingGrid[i].c == 0)
+                                craftingGrid[i] = undefined
+                        }
+                    }
+                } else {
+                    craftingOutput = JSON.parse(JSON.stringify(r.output));
+                }
+                return;
+            }
+        }
+    }
+
+    // Update item search
+    updateItemSearch(search) {
+        this.currentRow = 0;
+        if (!search || search == '') {
+            this.searchBlocks = world.blockOrder;
+            this.searchItems = world.itemOrder;
+        } else {
+            this.searchBlocks = [];
+            this.searchItems = [];
+            for (let block of world.blockOrder) {
+                if (block.search(search) > -1) {
+                    this.searchBlocks.push(block);
+                }
+            }
+            for (let item of world.itemOrder) {
+                if (item.search(search) > -1) {
+                    this.searchItems.push(item);
+                }
+            }
+        }
+    }
+
+    // Get position of item
+    getItemPos(index) {
+        let {hotboxWidth, blockWidth, boxSize} = this;
+
+        let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(index%9)*hotboxWidth*8/9.1;
+        let yPos = canvas.height/2-boxSize*4+hotboxWidth*Math.floor((index-9)/9);
+
+        // Floor xPos, yPos
+        xPos = Math.floor(xPos);
+        yPos = Math.floor(yPos);
+
+        return {xPos, yPos};
+    }
+
+
+    // Display inventory background
+    displayInventoryBackground() {
+        let {searchBlocks, searchItems, craftingOutput, hotboxWidth, blockWidth, boxSize, currentRow} = this;
+        
+        $("#search-input").hide();
+
+        let width = 480;
+        let height = 600;
+        let padding = 10;
+        let margin = 5;
+
+        let startX = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2-margin;
+        let startY = canvas.height/2+height/2-margin;
+
+        // Draw background
+        drawRectangle(0, 0, canvas.width, canvas.height, "rgba(0, 0, 0, 0.5)")
+        drawRect(canvas.width/2, canvas.height/2, width, height, 0, "lightgrey")
+        let title = player.mode == "survival" ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode"
+        drawText(title, canvas.width/2, canvas.height/2-height/2+padding, "25px Minecraft-Regular", "grey", "center", "top")
+
+        // Add background boxes
+        for (let j = 0; j < 4; j++) {
+            for (let i = 0; i < 9; i++) {
+                let xPos = startX+i*hotboxWidth*8/9.1;
+                let yPos = startY-boxSize-j*hotboxWidth;
+
+                drawRectangle(xPos,yPos,boxSize,boxSize,"grey")
+            }
+        }
+        
+        if (player.mode == "survival") { // SURVIVAL MODE
+            // Add inventory background boxes
+            for (let j = 0; j < 4; j++) {
+                for (let i = 0; i < 9; i++) {
+                    let xPos = startX+i*hotboxWidth*8/9.1;
+                    let yPos = startY-boxSize-j*hotboxWidth;
+
+                    drawRectangle(xPos,yPos,boxSize,boxSize,"grey")
+                }
+            }
+            // Add crafting grid background boxes
+            for (let j = 0; j < 2; j++) {
+                for (let i = 0; i < 2; i++) {
+                    let xPos = startX+i*hotboxWidth*8/9.1+hotboxWidth*2;
+                    let yPos = startY-boxSize*10-j*hotboxWidth;
+
+                    drawRectangle(xPos,yPos,boxSize,boxSize,"grey")
+                }
+            }
+
+            // Add crafting output background box
+            let xPos = startX+hotboxWidth*5;
+            let yPos = startY-boxSize*10-hotboxWidth*0.5;
+            drawRectangle(
+                xPos,
+                yPos,
+                boxSize,
+                boxSize,
+                "grey"
+            )
+            this.drawItem(xPos, yPos, craftingOutput);
+        } else if (player.mode == "creative") { // CREATIVE MODE
+            $("#search-input").show();
+            $("#search-input").css("top", canvas.height/2-height/2+padding*2);
+            $("#search-input").css("left", canvas.width/2-hotboxWidth*4+padding);
+            $("#search-input").css("width", width-2.5*padding);
+            
+            // Add background boxes
+            for (let j = 0; j < 4; j++) {
+                for (let i = 0; i < 9; i++) {
+                    let xPos = startX+i*hotboxWidth*8/9.1;
+                    let yPos = canvas.height/2-boxSize-j*hotboxWidth-5;
+
+                    // Floor xPos and yPos
+                    xPos = Math.floor(xPos);
+                    yPos = Math.floor(yPos);
+
+                    drawRectangle(xPos,yPos,boxSize,boxSize,"grey")
+
+                    // Draw items in inventory
+                    let index = 0;
+                    let blocks = searchBlocks || world.blockOrder;
+                    for (let k = currentRow*9; k < blocks.length; k++) {
+                        if (index >= 36) break;
+
+                        let block = blocks[k];
+
+                        let voxel = world.blockId[block];
+                        if (!voxel) continue;
+
+                        let {xPos, yPos} = this.getItemPos(index);
+
+                        this.drawItem(xPos, yPos, {
+                            v: voxel,
+                            c: "∞",
+                            class: "block"
+                        });
+
+                        index++;
+                    }
+                    // let offset = (blocks.length - currentRow*9)%9;
+                    // if (offset < 0) {
+                    // 	offset += 9;
+                    // 	index += offset;
+                    // }
+                    let items = searchItems || world.itemOrder;
+                    for (let k = 0; k < items.length; k++) {
+                        if (index >= 36) break;
+
+                        let item = items[k];
+                        let voxel = world.itemId[item];
+
+                        if (!voxel) continue;
+
+                        let {xPos, yPos} = this.getItemPos(index);
+
+                        this.drawItem(xPos, yPos, {
+                            v: voxel,
+                            c: "∞",
+                            class: "item"
+                        });
+
+                        index++;
+                    }
+                }
+            }
+        }
+    }
+
+    // Display inventory
+    displayInventory() {
+        let {hotboxWidth, showInventory, blockWidth, boxSize, inventory, craftingGrid, selectedItem} = this;
+
+        if (showInventory) {
+            ctx.imageSmoothingEnabled = false;
+            this.displayInventoryBackground();
+            let width = 480;
+            let height = 600;
+
+            let startX = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2;
+            let startY = canvas.height/2+height/2;
+
+            // Draw items in crafting grid
+            for (let j = 0; j < 2; j++) {
+                for (let i = 0; i < 2; i++) {
+                    let block = craftingGrid[i+j*2];
+
+                    if (!block || block.c == 0)
+                        continue;
+
+                    let xPos = startX+i*hotboxWidth*8/9.1+hotboxWidth*2;
+                    let yPos = startY-boxSize*10-1*hotboxWidth+(j)*hotboxWidth;
+
+                    this.drawItem(xPos, yPos, block);
+                }
+            }
+
+            // Draw items in inventory
+            for (let i = 0; i < inventory.length; i++) {
+                let block = inventory[i];
+                if (block && block.c > 0) {
+                    let xPos = startX+(i%9)*hotboxWidth*8/9.1;
+                    let yPos = startY-boxSize;
+                    if (i > 8) {
+                        yPos = startY-boxSize*5.5+hotboxWidth*Math.floor((i-9)/9);
+                    }
+
+                    this.drawItem(xPos, yPos, block);
+                }
+            }
+
+            // Draw selected item
+            if (selectedItem && selectedItem.c > 0) {
+                this.drawItem(mouse.x, mouse.y, selectedItem)
+            }
+            
+        } else {
+            $("#search-input").hide();
+        }
+    }
+
+    // Draw item in inventory
+    drawItem(xPos, yPos, entity) {
+        if (!entity) return;
+
+        let {blockWidth} = this;
+
+        // Floor xPos and yPos
+        xPos = Math.floor(xPos);
+        yPos = Math.floor(yPos);
+
+        let index = entity.v-1;
+        let atlas = textureManager.getTextureAtlas(entity.class);
+        
+        ctx.drawImage(atlas, 
+            index*16, 0, 
+            16, 16, 
+            xPos, 
+            yPos, 
+            blockWidth, blockWidth
+        );
+        drawText(entity.c, 
+            xPos+blockWidth+2,
+            yPos+blockWidth+5, 
+            "20px Minecraft-Regular", "white", "right", "bottom", 1, true
+        );
+    }
+
+    // Display toolbar
+    displayToolbar() {
+        if (!initialized || !player.toolbar) return;
+        if (player.mode == "spectator" || player.mode == "camera") return;
+
+        let {toolbarX, toolbarSelectorX, hotboxWidth, selectorWidth, showInventory, blockWidth} = this;
+
+        drawImageTopLeft(
+            toolbar, 
+            toolbarX, 
+            canvas.height-hotboxWidth-10, 
+            hotboxWidth*8, 
+            hotboxWidth
+        );
+        drawImage(
+            toolbar_selector, 
+            toolbarSelectorX+(player.currentSlot*hotboxWidth)*(8/9), 
+            canvas.height-hotboxWidth/2-10, 
+            selectorWidth/2, 
+            selectorWidth/2
+        );
+
+        for (let i = 0; i < 9; i++) {
+            let entity = player.toolbar[i];
+            if (showInventory)
+                entity = this.inventory[i];
+            if (entity && entity.c > 0) {
+                let index = entity.v-1;
+                let atlas = textureManager.getTextureAtlas(entity.class);
+
+                let xPos = toolbarX+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1;
+                let yPos = canvas.height-hotboxWidth+(hotboxWidth-blockWidth)/8;
+
+                ctx.drawImage(atlas, 
+                    index*16, 0, 16, 16, 
+                    xPos, 
+                    yPos, 
+                    blockWidth, blockWidth
+                );
+                drawText(entity.c, 
+                    xPos+blockWidth+2,
+                    yPos+blockWidth+5, 
+                    "20px Minecraft-Regular", "white", "right", "bottom", 1, true
+                );
+            }
+        }
+    }
+
+}

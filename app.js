@@ -363,7 +363,7 @@ io.on('connection', function(socket_) {
 			for (let t of players[socket.id].toolbar) {
 				if (!t)
 					continue;
-				if (t.v == data.t) {
+				if (t.v == data.t && t.class == data.class) {
 					t.c = Math.max(0, t.c-1);
 				}		
 			}
