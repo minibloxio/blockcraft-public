@@ -359,8 +359,8 @@ function displayPlayerTab() {
 }
 
 function updateHUD() {
-	if (Date.now()-hud.time < hud.updateInterval) return;
-	hud.time = Date.now();
+	// if (Date.now()-hud.time < hud.updateInterval) return;
+	// hud.time = Date.now();
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	if (!initialized) return;

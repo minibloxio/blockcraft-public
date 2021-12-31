@@ -254,7 +254,7 @@ function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
 
   voxelWorkers[voxelWorkerIndex].postMessage(cells)
   voxelWorkerIndex += 1;
-  if (voxelWorkerIndex == voxelWorkers.length) {
+  if (voxelWorkerIndex >= game.numOfVoxelWorkers) {
     voxelWorkerIndex = 0;
   }
 }

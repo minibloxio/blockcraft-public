@@ -14,11 +14,11 @@ const options = {
 }
 
 // Create HTTPS server
-const server = https.createServer(options, app);
+const httpsServer = https.createServer(options, app);
 const path = require('path');
 const readline = require('readline'); // Command line input
 const { Server } = require("socket.io");
-const io = new Server(server, {
+const io = new Server(httpsServer, {
 	cors: {
 	  origin: "*",
 	  methods: ["GET", "POST"]
@@ -36,12 +36,13 @@ const worker = new Worker('./worker.js');
 // Import server modules
 const Function = require('./modules/Function.js');
 const World = require('./modules/World.js');
+const GameServer = require('./modules/Server.js');
 const SimplexNoise = require('simplex-noise'),
     simplex = new SimplexNoise(Math.random)
 var filter = require('leo-profanity')
 
 // Listen to server port
-server.listen(serverPort, function () {
+httpsServer.listen(serverPort, function () {
 	logger.info('Started an https server on port ' + serverPort);
 })
 
@@ -123,76 +124,7 @@ const logger = createLogger({
 	]
 });
 
-// Get textures
-let colors = ["black", "blue", "brown", "cyan", "gray", "green", "light_blue", "lime", "magenta", "orange", "pink", "purple", "red", "silver", "white", "yellow"];
-let stoneTypes = ["granite", "andesite", "diorite"];
-let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white", "stonebrick", "stonebrick_carved", "stonebrick_cracked", "stonebrick_mossy", "furnace", "hay_block", "tnt", "cake", "hardened_clay", "coarse_dirt", "brown_mushroom_block", "red_mushroom_block", "mushroom_stem", "mycelium"];
-
-for (let color of colors) {
-	blockOrder.push("wool_colored_" + color);
-	blockOrder.push("glass_" + color);
-	blockOrder.push("hardened_clay_stained_" + color);
-}
-
-for (let stoneType of stoneTypes) {
-	blockOrder.push("stone_" + stoneType);
-	blockOrder.push("stone_" + stoneType+ "_smooth");
-}
-
-let tools = ["pickaxe", "axe", "shovel", "sword"];
-let toolMat = ["wood", "stone", "iron", "gold", "diamond"];
-let foods = ["beef", "chicken", "porkchop", "mutton", "rabbit"];
-let itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball",  "flint", "flint_and_steel", "brick", "glowstone_dust", "snowball", "sign"];
-for (let mat of toolMat) {
-	for (let tool of tools) {
-		itemOrder.push(mat + "_" + tool);
-	}
-}
-for (let food of foods) {
-	itemOrder.push(food+"_raw");
-	itemOrder.push(food+"_cooked");
-}
-
-let blockId = {};
-for (let i = 0; i < blockOrder.length; i++) {
-	blockId[blockOrder[i]] = i+1;
-}
-
-let itemId = {};
-for (let i = 0; i < itemOrder.length; i++) {
-	itemId[itemOrder[i]] = i+1;
-}
-
-let textures = {};
-fs.readdir(public + '/textures/blocks', function (err, data) {
-	if (err) console.log(err);
-	textures["blocks"] = data;
-})
-fs.readdir(public + '/textures/items', function (err, data) {
-	if (err) console.log(err);
-	textures["items"] = data;
-})
-textures.blockOrder = blockOrder;
-textures.itemOrder = itemOrder;
-textures.tileSize = 16;
-textures.tileTextureWidth = 2048;
-textures.tileTextureHeight = 64;
-
-function getEntity(name, count) {
-	if (blockId[name]) {
-		return {
-			v: blockId[name],
-			c: count || 1,
-			class: "block"
-		}
-	} else if (itemId[name]) {
-		return {
-			v: itemId[name],
-			c: count || 1,
-			class: "item"
-		}
-	}
-}
+let server = new GameServer();
 
 // Players
 var players = {};
@@ -200,11 +132,11 @@ var players = {};
 // Setup world
 const world = new World();
 world.init({
-	blockOrder: blockOrder, 
-	itemOrder: itemOrder
+	blockOrder: server.blockOrder, 
+	itemOrder: server.itemOrder
 });
 
-worker.postMessage({cmd: "setup", blockOrder, itemOrder});
+worker.postMessage({cmd: "setup", blockOrder: server.blockOrder, itemOrder: server.itemOrder});
 
 const startTime = Date.now();
 var updatedBlocks = [];
@@ -268,7 +200,7 @@ io.on('connection', function(socket_) {
 	})
 
 	// Transmit texture info to client
-	socket.emit('textureData', textures);
+	socket.emit('textureData', server.textures);
 
 	// Join request from the client
 	socket.on('join', function (data) {
@@ -283,11 +215,13 @@ io.on('connection', function(socket_) {
 			hp: 10,
 			dead: false,
 			toolbar: [
-				getEntity("wood_sword"), 
-				getEntity("wood_pickaxe"), 
-				getEntity("wood_axe"), 
-				getEntity("bow"), 
-				getEntity("arrow", 64),
+				server.getEntity("wood_sword"), 
+				server.getEntity("wood_pickaxe"), 
+				server.getEntity("wood_axe"), 
+				server.getEntity("bow"), 
+				server.getEntity("arrow", 64),
+				server.getEntity("crafting_table"),
+				server.getEntity("wood", 64),
 			],
 			walking: false,
 			sneaking: false,

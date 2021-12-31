@@ -15,6 +15,14 @@ let rleWorker;
 let voxelWorkers = [];
 voxelWorkerIndex = 0;
 
+// Game information
+let game = {
+	fps: getCookie("FPS") || 60,
+	packetDelay: 16,
+	lastPacket: Date.now(),
+	numOfVoxelWorkers: 2,
+}
+
 // Initialize game
 function init() {
 	let t = Date.now();
@@ -50,7 +58,7 @@ function initWorkers() {
 	})
 
 	// Voxel geometry workers
-	for (let i = 0; i < 1; i++) { 
+	for (let i = 0; i < 4; i++) { 
 		voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
 		voxelWorkers[i].addEventListener('message', async (e) => {
 			await chunkManager.processChunks(e.data, "voxel");
@@ -127,11 +135,6 @@ function initRenderer() {
 // Game loop
 let elasped, delta;
 let then = performance.now();
-let game = {
-	fps: getCookie("FPS") || 60,
-	packetDelay: 16,
-	lastPacket: Date.now(),
-}
 function animate() {
 	requestAnimationFrame( animate );
 	

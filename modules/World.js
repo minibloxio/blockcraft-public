@@ -133,7 +133,7 @@ module.exports = class World {
     }
 
     // Load entities
-    this.entities = data.entities;
+    this.entities = data.entities || {};
   }
 
   // Save world to file

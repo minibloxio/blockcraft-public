@@ -93,8 +93,6 @@ class TextureManager {
         let self = this;
         let t = Date.now();
         console.log("Loading textures...");
-
-        this.blockOrder = data.blockOrder;
         
         this.loadBlockImages(data.blocks, data.blockOrder)
         this.loadItemImages(data.items, data.itemOrder);
