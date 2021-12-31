@@ -439,51 +439,53 @@ class Inventory {
 
                     drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey")
                     drawRectangle(xPos,yPos,boxSize,boxSize,backgroundBoxColor)
-                    
-                    // Draw items in inventory
-                    let index = 0;
-                    let blocks = searchBlocks || world.blockOrder;
-                    for (let k = currentRow*9; k < blocks.length; k++) {
-                        if (index >= 36) break;
-
-                        let block = blocks[k];
-
-                        let voxel = world.blockId[block];
-                        if (!voxel) continue;
-
-                        let {xPos, yPos} = this.getItemPos(index);
-
-                        this.drawItem(xPos, yPos, {
-                            v: voxel,
-                            c: "∞",
-                            class: "block"
-                        });
-
-
-                        index++;
-                    }
-                    
-                    let offset = Math.max(0, currentRow*9-blocks.length);
-                    let items = searchItems || world.itemOrder;
-                    for (let k = offset; k < items.length; k++) {
-                        if (index >= 36) break;
-
-                        let item = items[k];
-                        let voxel = world.itemId[item];
-
-                        if (!voxel) continue;
-
-                        let {xPos, yPos} = this.getItemPos(index);
-
-                        this.drawItem(xPos, yPos, {
-                            v: voxel,
-                            c: "∞",
-                            class: "item"
-                        });
-
-                        index++;
-                    }
                 }
+            }
+
+            // Draw items in inventory
+            let index = 0;
+            let blocks = searchBlocks || world.blockOrder;
+            for (let k = currentRow*9; k < blocks.length; k++) {
+                if (index >= 36) {
+                    break;
+                }
+
+                let block = blocks[k];
+
+                let voxel = world.blockId[block];
+                if (!voxel) continue;
+
+                let {xPos, yPos} = this.getItemPos(index);
+
+                this.drawItem(xPos, yPos, {
+                    v: voxel,
+                    c: "∞",
+                    class: "block"
+                });
+
+
+                index++;
+            }
+            
+            let offset = Math.max(0, currentRow*9-blocks.length);
+            let items = searchItems || world.itemOrder;
+            for (let k = offset; k < items.length; k++) {
+                if (index >= 36) break;
+
+                let item = items[k];
+                let voxel = world.itemId[item];
+
+                if (!voxel) continue;
+
+                let {xPos, yPos} = this.getItemPos(index);
+
+                this.drawItem(xPos, yPos, {
+                    v: voxel,
+                    c: "∞",
+                    class: "item"
+                });
+
+                index++;
             }
         }
     }
