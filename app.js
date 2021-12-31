@@ -300,11 +300,11 @@ io.on('connection', function(socket_) {
 			fps: 0,
 		}
 
-		// Add random items to player's inventory
-		for (let i = 0; i < 30; i++) {
-			let item = getEntity("diamond_block", Math.floor(Math.random()*64));
-			players[socket.id].toolbar.push(item);
-		}
+		// // Add random items to player's inventory
+		// for (let i = 0; i < 30; i++) {
+		// 	let item = getEntity("wood", Math.floor(Math.random()*64));
+		// 	players[socket.id].toolbar.push(item);
+		// }
 
 		// Set name
 		if (data && data.name) {
