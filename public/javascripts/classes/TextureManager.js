@@ -66,6 +66,8 @@ class TextureManager {
             "bookshelf": ["bookshelf", "planks_oak", "planks_oak"],
             "furnace": ["furnace_front_off", "furnace_side", "furnace_top"],
             "hay_block": ["hay_block_side", "hay_block_top", "hay_block_top"],
+            "cake": ["cake_side", "cake_bottom", "cake_top"],
+            "tnt": ["tnt_side", "tnt_bottom", "tnt_top"],
         }
 
         this.blockFaces = {};

@@ -125,11 +125,12 @@ const logger = createLogger({
 
 // Get textures
 let colors = ["black", "blue", "brown", "cyan", "gray", "green", "light_blue", "lime", "magenta", "orange", "pink", "purple", "red", "silver", "white", "yellow"];
-let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white", "stonebrick", "stonebrick_carved", "stonebrick_cracked", "stonebrick_mossy", "furnace", "hay_block"];
+let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white", "stonebrick", "stonebrick_carved", "stonebrick_cracked", "stonebrick_mossy", "furnace", "hay_block", "tnt", "cake", "hardened_clay"];
 
 for (let color of colors) {
 	blockOrder.push("wool_colored_" + color);
 	blockOrder.push("glass_" + color);
+	blockOrder.push("hardened_clay_stained_" + color);
 }
 
 let tools = ["pickaxe", "axe", "shovel", "sword"];
@@ -385,7 +386,7 @@ io.on('connection', function(socket_) {
 		updatedBlocks.push(data);
 
 		// Add item entity if block is mined
-		if (data.t == 0) {
+		if (data.t == 0 && players[socket.id].mode == "survival") {
 			let entityId = Function.randomString(5);
 			let entity = {
 				pos: {x: (data.x+0.5)*blockSize-blockSize/8, y: (data.y+0.5)*blockSize-blockSize/8, z: (data.z+0.5)*blockSize-blockSize/8},
