@@ -7,6 +7,7 @@ class Inventory {
         this.boxSize = 48;
         this.hotboxWidth = 60;
         this.selectorWidth = 65;
+        this.boxRatio = 8/9.1;
 
         this.selectedItem = undefined;
         this.searchBlocks = undefined;
@@ -237,10 +238,10 @@ class Inventory {
         let startY = this.halfH+height/2;
 
         for (let i = 0; i < 36; i++) {
-            let xPos = startX+(i%9)*hotboxWidth*8/9.1;
+            let xPos = startX+(i%9)*hotboxWidth*this.boxRatio;
             let yPos = startY-boxSize;
 
-            if (i > 8) yPos = startY-boxSize-hotboxWidth*3+hotboxWidth*Math.floor((i-9)/9);
+            if (i > 8) yPos = startY-boxSize-hotboxWidth*3*this.boxRatio+hotboxWidth*Math.floor((i-9)/9)*this.boxRatio-8;
 
             if (this.withinItemFrame(xPos, yPos))
                 this.updateItem(this.inventory, i, type);
@@ -249,7 +250,7 @@ class Inventory {
         if (player.mode == "survival") {
             for (let j = 0; j < 2; j++) {
                 for (let i = 0; i < 2; i++) {
-                    let xPos = startX+i*hotboxWidth*8/9.1+hotboxWidth*2;
+                    let xPos = startX+i*hotboxWidth*this.boxRatio+hotboxWidth*2;
                     let yPos = startY-boxSize*10-1*hotboxWidth+(j)*hotboxWidth;
 
                     if (this.withinItemFrame(xPos, yPos))
@@ -280,8 +281,8 @@ class Inventory {
             // Add background boxes
             for (let j = 0; j < 4; j++) {
                 for (let i = 0; i < 9; i++) {
-                    let xPos = startX+i*hotboxWidth*8/9.1;
-                    let yPos = this.halfH-boxSize-(j)*hotboxWidth;
+                    let xPos = startX+i*hotboxWidth*this.boxRatio;
+                    let yPos = this.halfH-boxSize-(j)*hotboxWidth*this.boxRatio;
 
                     if (this.withinItemFrame(xPos, yPos)) {
                         this.updateItem("creative", i+(3-j)*9, type);
@@ -358,8 +359,8 @@ class Inventory {
     getItemPos(index) {
         let {hotboxWidth, blockWidth, boxSize} = this;
 
-        let xPos = this.halfW-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(index%9)*hotboxWidth*8/9.1;
-        let yPos = this.halfH-boxSize-hotboxWidth*2+Math.floor((index-9)/9)*hotboxWidth;
+        let xPos = this.halfW-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(index%9)*hotboxWidth*this.boxRatio;
+        let yPos = this.halfH-boxSize-hotboxWidth*2*this.boxRatio+Math.floor((index-9)/9)*hotboxWidth*this.boxRatio;
 
         // Floor xPos, yPos
         xPos = Math.floor(xPos);
@@ -394,8 +395,9 @@ class Inventory {
         // Add background boxes
         for (let j = 0; j < 4; j++) {
             for (let i = 0; i < 9; i++) {
-                let xPos = startX+i*hotboxWidth*8/9.1;
-                let yPos = startY-boxSize-j*hotboxWidth;
+                let xPos = startX+i*hotboxWidth*this.boxRatio;
+                let yPos = startY-boxSize-j*hotboxWidth*this.boxRatio;
+                if (j!=0) yPos -= 8;
 
                 // Floor xPos, yPos
                 xPos = Math.floor(xPos);
@@ -407,24 +409,10 @@ class Inventory {
         }
         
         if (player.mode == "survival") { // SURVIVAL MODE
-            // Add inventory background boxes
-            for (let j = 0; j < 4; j++) {
-                for (let i = 0; i < 9; i++) {
-                    let xPos = startX+i*hotboxWidth*8/9.1;
-                    let yPos = startY-boxSize-j*hotboxWidth;
-
-                    // Floor xPos and yPos
-                    xPos = Math.floor(xPos);
-                    yPos = Math.floor(yPos);
-
-                    drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey")
-                    drawRectangle(xPos,yPos,boxSize,boxSize,backgroundBoxColor)
-                }
-            }
             // Add crafting grid background boxes
             for (let j = 0; j < 2; j++) {
                 for (let i = 0; i < 2; i++) {
-                    let xPos = startX+i*hotboxWidth*8/9.1+hotboxWidth*2;
+                    let xPos = startX+i*hotboxWidth*this.boxRatio+hotboxWidth*2;
                     let yPos = startY-boxSize*10-j*hotboxWidth;
 
                     // Floor xPos and yPos
@@ -450,7 +438,7 @@ class Inventory {
         } else if (player.mode == "creative") { // CREATIVE MODE
             // SCROLLBAR
             let scrollMargin = 2;
-            let scrollHeight = boxSize+3*hotboxWidth-scrollMargin*2;
+            let scrollHeight = boxSize+3*hotboxWidth*this.boxRatio-scrollMargin*2;
             let maxScroll = Math.floor((searchBlocks.length+searchItems.length)/9)-2;
             maxScroll = Math.max(maxScroll, 1);
 
@@ -477,8 +465,8 @@ class Inventory {
             // Add background boxes
             for (let j = 0; j < 4; j++) {
                 for (let i = 0; i < 9; i++) {
-                    let xPos = startX+i*hotboxWidth*8/9.1;
-                    let yPos = this.halfH-boxSize-j*hotboxWidth-5;
+                    let xPos = startX+i*hotboxWidth*this.boxRatio;
+                    let yPos = this.halfH-boxSize-j*hotboxWidth*this.boxRatio-5;
 
                     // Floor xPos and yPos
                     xPos = Math.floor(xPos);
@@ -509,7 +497,6 @@ class Inventory {
                     c: "∞",
                     class: "block"
                 });
-
 
                 index++;
             }
@@ -558,7 +545,7 @@ class Inventory {
                     if (!block || block.c == 0)
                         continue;
 
-                    let xPos = startX+i*hotboxWidth*8/9.1+hotboxWidth*2;
+                    let xPos = startX+i*hotboxWidth*this.boxRatio+hotboxWidth*2;
                     let yPos = startY-boxSize*10-1*hotboxWidth+(j)*hotboxWidth;
 
                     this.drawItem(xPos, yPos, block);
@@ -569,10 +556,10 @@ class Inventory {
             for (let i = 0; i < inventory.length; i++) {
                 let block = inventory[i];
                 if (block && block.c > 0) {
-                    let xPos = startX+(i%9)*hotboxWidth*8/9.1;
+                    let xPos = startX+(i%9)*hotboxWidth*this.boxRatio;
                     let yPos = startY-boxSize;
                     if (i > 8) {
-                        yPos = startY-boxSize-hotboxWidth*3+hotboxWidth*Math.floor((i-9)/9);
+                        yPos = startY-boxSize-hotboxWidth*3*this.boxRatio+hotboxWidth*Math.floor((i-9)/9)*this.boxRatio-8;
                     }
 
                     this.drawItem(xPos, yPos, block);
@@ -652,7 +639,7 @@ class Inventory {
                 let index = entity.v-1;
                 let atlas = textureManager.getTextureAtlas(entity.class);
 
-                let xPos = toolbarX+(hotboxWidth-blockWidth)/2+i*hotboxWidth*8/9.1;
+                let xPos = toolbarX+(hotboxWidth-blockWidth)/2+i*hotboxWidth*this.boxRatio;
                 let yPos = canvas.height-hotboxWidth+(hotboxWidth-blockWidth)/8;
 
                 ctx.drawImage(atlas, 
