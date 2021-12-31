@@ -2,6 +2,7 @@ class Inventory {
     constructor() {
         // Inventory
         this.showInventory = false;
+        this.canShowInventory = true;
         this.blockWidth = 32;
         this.boxSize = 40;
         this.hotboxWidth = 60;
@@ -317,7 +318,7 @@ class Inventory {
     // Scroll through inventory
     scroll(dir) {
         let numOfItems = this.searchBlocks.length + this.searchItems.length;
-        let maxScroll = Math.floor(numOfItems/9);
+        let maxScroll = Math.floor(numOfItems/9)-3;
 
         if(dir > 0) {
 			this.currentRow = Math.max(this.currentRow - 1, 0);
@@ -388,6 +389,19 @@ class Inventory {
             )
             this.drawItem(xPos, yPos, craftingOutput);
         } else if (player.mode == "creative") { // CREATIVE MODE
+            // SCROLLBAR
+            let scrollMargin = 10;
+            let scrollHeight = boxSize+3*hotboxWidth-scrollMargin*2;
+            let maxScroll = Math.floor((searchBlocks.length+searchItems.length)/9)-2;
+            maxScroll = Math.max(maxScroll, 1);
+
+            // Draw scroll bar area
+            drawRectangle(canvas.width/2+width/2, canvas.height/2-height/2, 40, height, "lightgrey")
+            // Draw scroll bar background
+            drawRectangle(canvas.width/2+width/2+5, canvas.height/2-scrollHeight-scrollMargin*2-margin, 30, scrollHeight+scrollMargin*2, "grey")
+            // Draw scroll bar thumb
+            drawRectangle(canvas.width/2+width/2+10, canvas.height/2-scrollHeight-margin-scrollMargin+currentRow*scrollHeight/maxScroll, 20, scrollHeight/maxScroll, "lightgrey")
+
             $("#search-input").show();
             $("#search-input").css("top", canvas.height/2-height/2+padding*2);
             $("#search-input").css("left", canvas.width/2-hotboxWidth*4+padding);

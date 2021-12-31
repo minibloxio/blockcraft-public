@@ -141,6 +141,16 @@ for (let mat of toolMat) {
 	}
 }
 
+let blockId = {};
+for (let i = 0; i < blockOrder.length; i++) {
+	blockId[blockOrder[i]] = i+1;
+}
+
+let itemId = {};
+for (let i = 0; i < itemOrder.length; i++) {
+	itemId[itemOrder[i]] = i+1;
+}
+
 let textures = {};
 fs.readdir(public + '/textures/blocks', function (err, data) {
 	textures["blocks"] = data;
@@ -153,6 +163,22 @@ textures.itemOrder = itemOrder;
 textures.tileSize = 16;
 textures.tileTextureWidth = 2048;
 textures.tileTextureHeight = 64;
+
+function getEntity(name, count) {
+	if (blockId[name]) {
+		return {
+			v: blockId[name],
+			c: count || 1,
+			class: "block"
+		}
+	} else if (itemId[name]) {
+		return {
+			v: itemId[name],
+			c: count || 1,
+			class: "item"
+		}
+	}
+}
 
 // Players
 var players = {};
@@ -243,11 +269,11 @@ io.on('connection', function(socket_) {
 			hp: 10,
 			dead: false,
 			toolbar: [
-				{v: 2, c: 1, class: "item"}, 
-				{v: 3, c: 1, class: "item"}, 
-				{v: 4, c: 1, class: "item"}, 
-				{v: 6, c: 1, class: "item"}, 
-				{v: 7, c: 64, class: "item"},
+				getEntity("wood_sword"), 
+				getEntity("wood_pickaxe"), 
+				getEntity("wood_axe"), 
+				getEntity("bow"), 
+				getEntity("arrow", 64),
 			],
 			walking: false,
 			sneaking: false,

@@ -311,7 +311,15 @@ class Player {
 		let blockingSpeed = 10;
 		if (hand && hand.class == "item" && hand.c > 0) {
 			// Blocking
-			if (hand.v == 2) {
+			let swords = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
+			let isSword = false;
+			for (let sword of swords) {
+				if (world.itemId[sword] == hand.v) {
+					isSword = true;
+					break;
+				}
+			}
+			if (isSword) {
 				this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed*delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed*delta);
 			} else {
 				this.key.rightClick = false;

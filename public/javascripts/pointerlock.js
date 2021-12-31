@@ -77,8 +77,10 @@ function initPointerLock() {
 				document.exitPointerLock();
 
 			if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !showChatBar && loaded >= maxLoaded+1 && (player.controls.enabled || inventory.showInventory)) {
-				if (player.controls.enabled) {
+
+				if (player.controls.enabled && inventory.canShowInventory) {
 					inventory.showInventory = true;
+					inventory.canShowInventory = false;
 					inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
 
 					document.exitPointerLock();
@@ -90,6 +92,7 @@ function initPointerLock() {
 
 					socket.emit('updateInventory', inventory.inventory);
 				}
+
 			}
 
 			if (event.keyCode == 9)
@@ -102,6 +105,8 @@ function initPointerLock() {
 				element.requestPointerLock();
 				socket.emit('updateInventory', inventory.inventory);
 			}
+			
+			inventory.canShowInventory = true;
 		})
 	} else {
 		console.error("PointerLock is not supported on this browser")

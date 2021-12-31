@@ -117,6 +117,7 @@ onkeydown = onkeyup = function(e){
 var onKeyDown = function ( event ) {
 	if (!initialized) return;
 	
+	// CHAT INPUT
 	if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && showChatFlag) {
 		showChatFlag = false;
     	showChatBar = !showChatBar;
@@ -145,9 +146,17 @@ var onKeyDown = function ( event ) {
 	}
 	//  else if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && !showChatFlag) {
 
+	// CREATIVE MENU CONTROLS
+	if (event.keyCode == 38 ) {
+		inventory.scroll(1);
+	} else if (event.keyCode == 40) {
+		inventory.scroll(-1);
+	}
+
 	if (!initialized || !player.controls.enabled || showChatBar)
 		return;
-
+	
+	// GAME CONTROLS
 	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
 		switch ( keymap[event.keyCode][0] ) {
 			case "Attack":
@@ -158,20 +167,15 @@ var onKeyDown = function ( event ) {
 			player.key.rightClick = Date.now();
 			break;
 			case "Move Forward":
-			player.key.forward = 1;
-			break;
+			player.key.forward = 1;break;
 			case "Move Left":
-			player.key.left = 1; 
-			break;
+			player.key.left = 1;break;
 			case "Move Backward":
-			player.key.backward = -1;
-			break;
+			player.key.backward = -1;break;
 			case "Move Right":
-			player.key.right = -1;
-			break;
+			player.key.right = -1;break;
 			case "Jump":
-			player.key.up = -1;
-			break;
+			player.key.up = -1;break;
 			case "Sprint":
 			player.key.sprint = true;
 			break;
@@ -209,39 +213,31 @@ var onKeyDown = function ( event ) {
 			showPlayerTab = true;
 			break;
 			case "Slot 1":
-			player.currentSlot = 0;
-			break;
+			player.currentSlot = 0;break;
 			case "Slot 2":
-			player.currentSlot = 1;
-			break;
+			player.currentSlot = 1;break;
 			case "Slot 3":
-			player.currentSlot = 2;
-			break;
+			player.currentSlot = 2;break;
 			case "Slot 4":
-			player.currentSlot = 3;
-			break;
+			player.currentSlot = 3;break;
 			case "Slot 5":
-			player.currentSlot = 4;
-			break;
+			player.currentSlot = 4;break;
 			case "Slot 6":
-			player.currentSlot = 5;
-			break;
+			player.currentSlot = 5;break;
 			case "Slot 7":
-			player.currentSlot = 6;
-			break;
+			player.currentSlot = 6;break;
 			case "Slot 8":
-			player.currentSlot = 7;
-			break;
+			player.currentSlot = 7;break;
 			case "Slot 9":
-			player.currentSlot = 8;
-			break;
+			player.currentSlot = 8;break;
 		}
 	}
 };
 
 var onKeyUp = function ( event ) {
-	hintText = "";
 
+	// CHAT INPUT
+	hintText = "";
 	if ([13].indexOf(event.keyCode) > -1) {
 		showChatFlag = true;
 		return;
@@ -257,7 +253,9 @@ var onKeyUp = function ( event ) {
 
 	if (!initialized) return;
 
-	// Update keymap
+	// CREATIVE MENU CONTROLS
+
+	// GAME CONTROLS
 	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
 		switch ( keymap[event.keyCode][0] ) {
 			case "Attack":
