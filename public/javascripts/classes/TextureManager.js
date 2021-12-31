@@ -64,6 +64,8 @@ class TextureManager {
             "planks": "planks_oak",
             "sandstone": ["sandstone_normal", "sandstone_bottom", "sandstone_top"],
             "bookshelf": ["bookshelf", "planks_oak", "planks_oak"],
+            "furnace": ["furnace_front_off", "furnace_side", "furnace_top"],
+            "hay_block": ["hay_block_side", "hay_block_top", "hay_block_top"],
         }
 
         this.blockFaces = {};
@@ -200,7 +202,7 @@ class TextureManager {
         let index = 0;
         for (let entity of order) {
             let b = entities[entity];
-            if (b instanceof Array) {
+            if (b instanceof Array && b.length == 3) {
                 for (let i = 0; i < 3; i++) {
                     ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)
                 }

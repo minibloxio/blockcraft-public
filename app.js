@@ -125,7 +125,7 @@ const logger = createLogger({
 
 // Get textures
 let colors = ["black", "blue", "brown", "cyan", "gray", "green", "light_blue", "lime", "magenta", "orange", "pink", "purple", "red", "silver", "white", "yellow"];
-let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white"];
+let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white", "stonebrick", "stonebrick_carved", "stonebrick_cracked", "furnace", "hay_block"];
 
 for (let color of colors) {
 	blockOrder.push("wool_colored_" + color);
@@ -366,7 +366,7 @@ io.on('connection', function(socket_) {
 			}
 			world.entities[entityId] = entity;
 			newEntities.push(entity)
-		} else if (data.t > 0 && !data.cmd) { // Remove from player inventory if block is placed
+		} else if (data.t > 0 && !data.cmd && players[socket.id].mode == "survival") { // Remove from player inventory if block is placed
 			for (let t of players[socket.id].toolbar) {
 				if (!t)
 					continue;

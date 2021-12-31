@@ -191,7 +191,6 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
               // this voxel has no neighbor in this direction so we need a face.
               addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
             }
-
           }
         }
         
