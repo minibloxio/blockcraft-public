@@ -125,7 +125,8 @@ const logger = createLogger({
 
 // Get textures
 let colors = ["black", "blue", "brown", "cyan", "gray", "green", "light_blue", "lime", "magenta", "orange", "pink", "purple", "red", "silver", "white", "yellow"];
-let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white", "stonebrick", "stonebrick_carved", "stonebrick_cracked", "stonebrick_mossy", "furnace", "hay_block", "tnt", "cake", "hardened_clay"];
+let stoneTypes = ["granite", "andesite", "diorite"];
+let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white", "stonebrick", "stonebrick_carved", "stonebrick_cracked", "stonebrick_mossy", "furnace", "hay_block", "tnt", "cake", "hardened_clay", "coarse_dirt"];
 
 for (let color of colors) {
 	blockOrder.push("wool_colored_" + color);
@@ -133,10 +134,15 @@ for (let color of colors) {
 	blockOrder.push("hardened_clay_stained_" + color);
 }
 
+for (let stoneType of stoneTypes) {
+	blockOrder.push("stone_" + stoneType);
+	blockOrder.push("stone_" + stoneType+ "_smooth");
+}
+
 let tools = ["pickaxe", "axe", "shovel", "sword"];
 let toolMat = ["wood", "stone", "iron", "gold", "diamond"];
 let foods = ["beef", "chicken", "porkchop", "mutton", "rabbit"];
-let itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat"];
+let itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball", "flint", "flint_and_steel", "glowstone_dust", "snowball"];
 for (let mat of toolMat) {
 	for (let tool of tools) {
 		itemOrder.push(mat + "_" + tool);
