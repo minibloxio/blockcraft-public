@@ -449,7 +449,7 @@ class Inventory {
             this.drawItem(xPos, yPos, craftingOutput);
         } else if (player.mode == "creative") { // CREATIVE MODE
             // SCROLLBAR
-            let scrollMargin = 5;
+            let scrollMargin = 2;
             let scrollHeight = boxSize+3*hotboxWidth-scrollMargin*2;
             let maxScroll = Math.floor((searchBlocks.length+searchItems.length)/9)-2;
             maxScroll = Math.max(maxScroll, 1);
@@ -459,7 +459,15 @@ class Inventory {
             // Draw scroll bar background
             drawRectangle(this.halfW+width/2+5, this.halfH-scrollHeight-scrollMargin*2-margin, 30, scrollHeight+scrollMargin*2, "grey")
             // Draw scroll bar thumb
-            drawRectangle(this.halfW+width/2+10, this.halfH-scrollHeight-margin-scrollMargin+currentRow*scrollHeight/maxScroll, 20, scrollHeight/maxScroll, "lightgrey")
+            drawRectangle(this.halfW+width/2+7, this.halfH-scrollHeight-margin-scrollMargin+currentRow*scrollHeight/maxScroll, 26, scrollHeight/maxScroll, "lightgrey")
+
+            // Move scroll bar
+            if (mouse.x > this.halfW+width/2 && mouse.x < this.halfW+width/2+40 && mouse.y > this.halfH-height/2 && mouse.y < this.halfH-height/2+height) {
+                if (mouseLeft) {
+                    let scrollBarY = clamp(mouse.y-(this.halfH-scrollHeight-scrollMargin), 0, scrollHeight+scrollMargin*2);
+                    this.currentRow = Math.min(maxScroll-1, Math.floor(scrollBarY/(scrollHeight+scrollMargin*2)*(maxScroll)));
+                }
+            }
 
             $("#search-input").show();
             $("#search-input").css("top", this.halfH-height/2+padding*2);
