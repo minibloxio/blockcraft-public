@@ -219,6 +219,14 @@ function getLines(ctx, text, maxWidth, color, opacity) {
 // Display player health
 function displayPlayerHealth() {
 	if (!initialized) return;
+
+	if (player && player.hp <= 0) { // Player is dead
+		drawRectangle(0, 0, canvas.width, canvas.height, "red", {alpha: 0.5});
+
+		drawText("You Died!", canvas.width/2, canvas.height/3, "100px Minecraft-Regular", "white", "center", "middle")
+		drawText("Press R to respawn.", canvas.width/2, canvas.height*2/3, "50px Minecraft-Regular", "white", "center", "middle")
+	}
+
 	if (player.mode != "survival") return;
 
 	if (player && player.hp > 0) {
@@ -250,11 +258,6 @@ function displayPlayerHealth() {
 				heartUp = false;
 			}
 		}
-	} else {
-		drawRectangle(0, 0, canvas.width, canvas.height, "red", {alpha: 0.5});
-
-		drawText("You Died!", canvas.width/2, canvas.height/3, "100px Minecraft-Regular", "white", "center", "middle")
-		drawText("Press R to respawn.", canvas.width/2, canvas.height*2/3, "50px Minecraft-Regular", "white", "center", "middle")
 	}
 }
 

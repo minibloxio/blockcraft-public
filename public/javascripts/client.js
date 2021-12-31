@@ -96,7 +96,6 @@ socket.on('joinResponse', function (data) {
 
 // Load textures
 socket.on('textureData', function (data) {
-	console.log(data);
 	if (loaded < maxLoaded) {
 		world.tileSize = data.tileSize;
 		world.tileTextureWidth = data.tileTextureWidth;

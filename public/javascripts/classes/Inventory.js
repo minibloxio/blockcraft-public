@@ -513,7 +513,6 @@ class Inventory {
         let {hotboxWidth, showInventory, blockWidth, boxSize, inventory, craftingGrid, selectedItem} = this;
 
         if (showInventory) {
-            ctx.imageSmoothingEnabled = false;
             this.displayInventoryBackground();
 
             if (player.mode == "survival") {
@@ -585,6 +584,7 @@ class Inventory {
         if (player.mode == "spectator" || player.mode == "camera") return;
 
         let {toolbarX, toolbarSelectorX, hotboxWidth, selectorWidth, showInventory} = this;
+        ctx.imageSmoothingEnabled = false;
 
         let blockWidth = 32;
 

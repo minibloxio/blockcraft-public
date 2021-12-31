@@ -178,9 +178,49 @@ worker.on('message', (data) => {
 	io.to(socketId).emit('receiveChunk', receivedChunks);
 })
 
+// Get date
+let date = new Date();
+function getDate() {
+	return date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate();
+}
+
+// Server logging
+let log_path = __dirname + '/logs/server.json';
+let log = {};
+fs.readFile(log_path, function (err, data) {
+	if (err) {
+		logger.warn("Unable to load log file from", log_path)
+		logger.warn("Creating new log...")
+
+		log[getDate()] = {
+			ips: [],
+			connectionsRaw: 0,
+			connections: 0,
+			blocksMined: 0,
+			blocksPlaced: 0,
+		}
+		return;
+	}
+
+	log = JSON.parse(data);
+})
+
+function saveToLog() {
+	let data = JSON.stringify(log);
+	fs.writeFile(log_path, data, function (err) {
+        if (err) throw err;  
+    });
+}
+
 // Server-client connection architecture
 io.on('connection', function(socket_) {
 	let socket = socket_;
+	var address = socket.handshake.address.slice(7);
+	if (!log[getDate()].ips.includes(address)) {
+		log[getDate()].ips.push(address);
+	}
+	log[getDate()].connectionsRaw++;
+	saveToLog();
 
 	// Server info request
 	socket.on('serverInfoRequest', function (data) {
@@ -285,6 +325,9 @@ io.on('connection', function(socket_) {
 			},
 			info: config,
 		});
+
+		// Log player connection
+		log[getDate()].connections++;
 	})
 
 	// Update player info
@@ -323,16 +366,18 @@ io.on('connection', function(socket_) {
 
 	// World functionality
 	socket.on('setBlock', function (data) {
-		if (!players[socket.id]) return;
+		let player = players[socket.id];
+		if (!player) return;
 
 		let {blockSize} = world;
-		// Update server world
-		if (!data.cmd) players[socket.id].punching = true;
+
+		// Update punching status
+		if (!data.cmd) player.punching = true;
 		world.setVoxel(data.x, data.y, data.z, data.t, true, true);
 		updatedBlocks.push(data);
-
-		// Add item entity if block is mined
-		if (data.t == 0 && players[socket.id].mode == "survival") {
+		
+		// Check if block is being broken or placed
+		if (data.t == 0 && player.mode == "survival") { // BLOCK MINED
 			let entityId = Function.randomString(5);
 			let entity = {
 				pos: {x: (data.x+0.5)*blockSize-blockSize/8, y: (data.y+0.5)*blockSize-blockSize/8, z: (data.z+0.5)*blockSize-blockSize/8},
@@ -346,8 +391,9 @@ io.on('connection', function(socket_) {
 			}
 			world.entities[entityId] = entity;
 			newEntities.push(entity)
-		} else if (data.t > 0 && !data.cmd && players[socket.id].mode == "survival") { // Remove from player inventory if block is placed
-			for (let t of players[socket.id].toolbar) {
+		} else if (data.t > 0 && !data.cmd && player.mode == "survival") { // BLOCK PLACED
+			// Remove item from toolbar
+			for (let t of player.toolbar) {
 				if (!t)
 					continue;
 				if (t.v == data.t && t.class == data.class) {
@@ -358,11 +404,12 @@ io.on('connection', function(socket_) {
 	})
 
 	socket.on('dropItem', function (data) {
-		if (!players[socket.id]) return;
+		let player = players[socket.id];
+		if (!player) return;
 
 		let {blockSize} = world;
-		players[socket.id].pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
-		for (let t of players[socket.id].toolbar) {
+		player.pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
+		for (let t of player.toolbar) {
 			if (!t)
 				continue;
 			if (t.v == data.v && t.class == data.class) {
@@ -430,25 +477,28 @@ io.on('connection', function(socket_) {
 
 	// Update player inventory
 	socket.on('updateInventory', function (data) {
-		if (!players[socket.id]) return;
-		players[socket.id].toolbar = data;
+		let player = players[socket.id];
+		if (!player) return;
+		player.toolbar = data;
 	})
 
 	// Player interactivity
 	socket.on('respawn', function () {
-		if (!players[socket.id]) return;
+		let player = players[socket.id];
+		if (!player) return;
 
-		if (players[socket.id]) {
-			players[socket.id].hp = 10;
-			players[socket.id].dead = false;
+		if (player) {
+			player.hp = 10;
+			player.dead = false;
 		}
 	})
 
 	// Receive player punch event
 	socket.on('punchPlayer', function (data) {
-		if (!players[socket.id]) return;
+		let player = players[socket.id];
+		if (!player) return;
 
-		if (players[data.id] && players[socket.id] && !players[socket.id].dead && players[data.id].mode == "survival") {
+		if (players[data.id] && player && !player.dead && players[data.id].mode == "survival") {
 			let dmg = 0.5;
 
 			let entity = data.curr;
@@ -464,7 +514,7 @@ io.on('connection', function(socket_) {
 			}
 
 			players[data.id].hp -= data.crit ? dmg*1.5 : dmg;
-			players[data.id].dmgType = players[socket.id].name;
+			players[data.id].dmgType = player.name;
 			io.to(`${data.id}`).emit('knockback', data)
 			io.volatile.emit('punch', data.id);
 		}
@@ -472,22 +522,24 @@ io.on('connection', function(socket_) {
 
 	// Take player damage if in survival mode
 	socket.on('takeDamage', function (data) {
-		if (!players[socket.id]) return;
+		let player = players[socket.id];
+		if (!player) return;
 
-		if (players[socket.id].mode == "survival") {
-			players[socket.id].hp -= data.dmg;
-			players[socket.id].dmgType = data.type;
+		if (player.mode == "survival") {
+			player.hp -= data.dmg;
+			player.dmgType = data.type;
 		}
 	})
 
 	// Fire server-side arrow
 	socket.on('fireArrow', function (data) {
-		if (!players[socket.id]) return;
+		let player = players[socket.id];
+		if (!player) return;
 
 		let {blockSize} = world;
-		players[socket.id].pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
+		player.pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
 
-		for (let t of players[socket.id].toolbar) {
+		for (let t of player.toolbar) {
 			if (t && t.v == world.itemId["arrow"] && t.c > 0) {
 				t.c = Math.max(0, t.c-1);
 				break;
@@ -516,39 +568,42 @@ io.on('connection', function(socket_) {
 
 	// Chat
 	socket.on('message', function (data) {
-		if (players[socket.id]) {
-			logger.verbose("<"+players[socket.id].name+"> " + data)
-			io.emit('messageAll', {
-				name: players[socket.id].name,
-				text: filter.clean(data),
-			});
-		}
+		let player = players[socket.id];
+		if (!player) return;
+
+		logger.verbose("<"+player.name+"> " + data)
+		io.emit('messageAll', {
+			name: player.name,
+			text: filter.clean(data),
+		});
 	})
 
 	socket.on('messagePlayer', function (data) {
-		if (players[socket.id]) {
-			logger.verbose("<"+players[socket.id].name+" whispers to " + players[data.id].name + "> " + data)
-			io.to(`${data.id}`).emit('message', {
-				type: "whisper",
-				id: socket.id,
-				name: players[socket.id].name + " whispers to you",
-				text: filter.clean(data.text),
-				color: "grey",
-			});
-		}
+		let player = players[socket.id];
+		if (!player) return;
+		
+		logger.verbose("<"+player.name+" whispers to " + players[data.id].name + "> " + data)
+		io.to(`${data.id}`).emit('message', {
+			type: "whisper",
+			id: socket.id,
+			name: player.name + " whispers to you",
+			text: filter.clean(data.text),
+			color: "grey",
+		});
 	})
 
 	socket.on('replyPlayer', function (data) {
-		if (players[socket.id]) {
-			logger.verbose("<"+players[socket.id].name+" replies to " + players[data.id].name + "> " + data)
-			io.to(`${data.id}`).emit('message', {
-				type: "whisper",
-				id: socket.id,
-				name: players[socket.id].name + " replies to you",
-				text: filter.clean(data.text),
-				color: "grey",
-			});
-		}
+		let player = players[socket.id];
+		if (!player) return;
+		
+		logger.verbose("<"+player.name+" replies to " + players[data.id].name + "> " + data)
+		io.to(`${data.id}`).emit('message', {
+			type: "whisper",
+			id: socket.id,
+			name: player.name + " replies to you",
+			text: filter.clean(data.text),
+			color: "grey",
+		});
 	})
 
 	// COMMANDS
@@ -718,6 +773,7 @@ setInterval(function () {
 
 		let path =  __dirname + '/saves/test.json';
   		world.saveToFile(fs, io, path, logger);
+		saveToLog();
 	}
 
 	world.update(dt/1000, players, newEntities, io);
