@@ -208,8 +208,6 @@ class TextureManager {
         let index = 0;
         for (let entity of order) {
             let b = entities[entity];
-
-            console.log(b);
             if (b instanceof Array) {
                 for (let i = 0; i < 3; i++) {
                     ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)

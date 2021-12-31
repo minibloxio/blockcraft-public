@@ -142,7 +142,7 @@ for (let stoneType of stoneTypes) {
 let tools = ["pickaxe", "axe", "shovel", "sword"];
 let toolMat = ["wood", "stone", "iron", "gold", "diamond"];
 let foods = ["beef", "chicken", "porkchop", "mutton", "rabbit"];
-let itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball", "flint", "flint_and_steel", "glowstone_dust", "snowball"];
+let itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball",  "flint", "flint_and_steel", "brick", "glowstone_dust", "snowball", "sign"];
 for (let mat of toolMat) {
 	for (let tool of tools) {
 		itemOrder.push(mat + "_" + tool);
@@ -298,6 +298,12 @@ io.on('connection', function(socket_) {
 			connected: false,
 			mode: "survival",
 			fps: 0,
+		}
+
+		// Add random items to player's inventory
+		for (let i = 0; i < 30; i++) {
+			let item = getEntity("wood", Math.floor(Math.random()*64));
+			players[socket.id].toolbar.push(item);
 		}
 
 		// Set name

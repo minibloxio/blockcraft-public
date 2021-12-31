@@ -3,8 +3,8 @@ class Inventory {
         // Inventory
         this.showInventory = false;
         this.canShowInventory = true;
-        this.blockWidth = 32;
-        this.boxSize = 40;
+        this.blockWidth = 39;
+        this.boxSize = 48;
         this.hotboxWidth = 60;
         this.selectorWidth = 65;
 
@@ -17,8 +17,8 @@ class Inventory {
         this.craftingOutput = undefined;
 
         // Toolbar
-        this.toolbarX = canvas.width/2-this.hotboxWidth*4;
-        this.toolbarSelectorX = canvas.width/2-this.hotboxWidth*3.5-2.5;
+        this.toolbarX = this.halfW-this.hotboxWidth*4;
+        this.toolbarSelectorX = this.halfW-this.hotboxWidth*3.5-2.5;
     }
 
     // Resize inventory
@@ -28,13 +28,15 @@ class Inventory {
         canvas.width = $("html").innerWidth();
         canvas.height = $("html").innerHeight();
 
-        this.toolbarX = canvas.width/2-hotboxWidth*4;
-        this.toolbarSelectorX = canvas.width/2-hotboxWidth*3.5-2.5;
+        this.halfW = canvas.width/2;
+        this.halfH = canvas.height/2;
+
+        this.toolbarX = this.halfW-hotboxWidth*4;
+        this.toolbarSelectorX = this.halfW-hotboxWidth*3.5-2.5;
     }
 
     // Check if mouse is within item frame
     withinItemFrame(xPos, yPos) {
-
         xPos -= 5;
         yPos -= 5;
 
@@ -192,14 +194,14 @@ class Inventory {
         let width = 480;
         let height = 600;
 
-        let startX = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2;
-        let startY = canvas.height/2+height/2;
+        let startX = this.halfW-hotboxWidth*4+(hotboxWidth-blockWidth)/2;
+        let startY = this.halfH+height/2;
 
         for (let i = 0; i < 36; i++) {
             let xPos = startX+(i%9)*hotboxWidth*8/9.1;
             let yPos = startY-boxSize;
 
-            if (i > 8) yPos = startY-boxSize*5.5+hotboxWidth*Math.floor((i-9)/9);
+            if (i > 8) yPos = startY-boxSize-hotboxWidth*3+hotboxWidth*Math.floor((i-9)/9);
 
             if (this.withinItemFrame(xPos, yPos))
                 this.updateItem(this.inventory, i, type);
@@ -240,7 +242,7 @@ class Inventory {
             for (let j = 0; j < 4; j++) {
                 for (let i = 0; i < 9; i++) {
                     let xPos = startX+i*hotboxWidth*8/9.1;
-                    let yPos = canvas.height/2-boxSize-(j)*hotboxWidth;
+                    let yPos = this.halfH-boxSize-(j)*hotboxWidth;
 
                     if (this.withinItemFrame(xPos, yPos)) {
                         this.updateItem("creative", i+(3-j)*9, type);
@@ -301,20 +303,6 @@ class Inventory {
         }
     }
 
-    // Get position of item
-    getItemPos(index) {
-        let {hotboxWidth, blockWidth, boxSize} = this;
-
-        let xPos = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(index%9)*hotboxWidth*8/9.1;
-        let yPos = canvas.height/2-boxSize*4+hotboxWidth*Math.floor((index-9)/9);
-
-        // Floor xPos, yPos
-        xPos = Math.floor(xPos);
-        yPos = Math.floor(yPos);
-
-        return {xPos, yPos};
-    }
-
     // Scroll through inventory
     scroll(dir) {
         let numOfItems = this.searchBlocks.length + this.searchItems.length;
@@ -327,6 +315,20 @@ class Inventory {
 		}
     }
 
+    // Get position of item
+    getItemPos(index) {
+        let {hotboxWidth, blockWidth, boxSize} = this;
+
+        let xPos = this.halfW-hotboxWidth*4+(hotboxWidth-blockWidth)/2+(index%9)*hotboxWidth*8/9.1;
+        let yPos = this.halfH-boxSize-hotboxWidth*2+Math.floor((index-9)/9)*hotboxWidth;
+
+        // Floor xPos, yPos
+        xPos = Math.floor(xPos);
+        yPos = Math.floor(yPos);
+
+        return {xPos, yPos};
+    }
+
     // Display inventory background
     displayInventoryBackground() {
         let {searchBlocks, searchItems, craftingOutput, hotboxWidth, blockWidth, boxSize, currentRow} = this;
@@ -337,15 +339,18 @@ class Inventory {
         let height = 600;
         let padding = 10;
         let margin = 5;
+        let outline = 1;
 
-        let startX = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2-margin;
-        let startY = canvas.height/2+height/2-margin;
+        let backgroundBoxColor = "#ADADAD";
+
+        let startX = this.halfW-hotboxWidth*4+(hotboxWidth-blockWidth)/2-margin;
+        let startY = this.halfH+height/2-margin;
 
         // Draw background
         drawRectangle(0, 0, canvas.width, canvas.height, "rgba(0, 0, 0, 0.5)")
-        drawRect(canvas.width/2, canvas.height/2, width, height, 0, "lightgrey")
+        drawRect(this.halfW, this.halfH, width, height, 0, "lightgrey")
         let title = player.mode == "survival" ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode"
-        drawText(title, canvas.width/2, canvas.height/2-height/2+padding, "25px Minecraft-Regular", "grey", "center", "top")
+        drawText(title, this.halfW, this.halfH-height/2+padding, "25px Minecraft-Regular", "grey", "center", "top")
 
         // Add background boxes
         for (let j = 0; j < 4; j++) {
@@ -353,7 +358,12 @@ class Inventory {
                 let xPos = startX+i*hotboxWidth*8/9.1;
                 let yPos = startY-boxSize-j*hotboxWidth;
 
-                drawRectangle(xPos,yPos,boxSize,boxSize,"grey")
+                // Floor xPos, yPos
+                xPos = Math.floor(xPos);
+                yPos = Math.floor(yPos);
+
+                drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey")
+                drawRectangle(xPos,yPos,boxSize,boxSize,backgroundBoxColor)
             }
         }
         
@@ -364,7 +374,12 @@ class Inventory {
                     let xPos = startX+i*hotboxWidth*8/9.1;
                     let yPos = startY-boxSize-j*hotboxWidth;
 
-                    drawRectangle(xPos,yPos,boxSize,boxSize,"grey")
+                    // Floor xPos and yPos
+                    xPos = Math.floor(xPos);
+                    yPos = Math.floor(yPos);
+
+                    drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey")
+                    drawRectangle(xPos,yPos,boxSize,boxSize,backgroundBoxColor)
                 }
             }
             // Add crafting grid background boxes
@@ -373,52 +388,58 @@ class Inventory {
                     let xPos = startX+i*hotboxWidth*8/9.1+hotboxWidth*2;
                     let yPos = startY-boxSize*10-j*hotboxWidth;
 
-                    drawRectangle(xPos,yPos,boxSize,boxSize,"grey")
+                    // Floor xPos and yPos
+                    xPos = Math.floor(xPos);
+                    yPos = Math.floor(yPos);
+
+                    drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey")
+                    drawRectangle(xPos,yPos,boxSize,boxSize,backgroundBoxColor)
                 }
             }
 
             // Add crafting output background box
             let xPos = startX+hotboxWidth*5;
             let yPos = startY-boxSize*10-hotboxWidth*0.5;
-            drawRectangle(
-                xPos,
-                yPos,
-                boxSize,
-                boxSize,
-                "grey"
-            )
+
+            // Floor xPos and yPos
+            xPos = Math.floor(xPos);
+            yPos = Math.floor(yPos);
+
+            drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey")
+            drawRectangle(xPos,yPos,boxSize,boxSize,backgroundBoxColor)
             this.drawItem(xPos, yPos, craftingOutput);
         } else if (player.mode == "creative") { // CREATIVE MODE
             // SCROLLBAR
-            let scrollMargin = 10;
+            let scrollMargin = 5;
             let scrollHeight = boxSize+3*hotboxWidth-scrollMargin*2;
             let maxScroll = Math.floor((searchBlocks.length+searchItems.length)/9)-2;
             maxScroll = Math.max(maxScroll, 1);
 
             // Draw scroll bar area
-            drawRectangle(canvas.width/2+width/2, canvas.height/2-height/2, 40, height, "lightgrey")
+            drawRectangle(this.halfW+width/2, this.halfH-height/2, 40, height, "lightgrey")
             // Draw scroll bar background
-            drawRectangle(canvas.width/2+width/2+5, canvas.height/2-scrollHeight-scrollMargin*2-margin, 30, scrollHeight+scrollMargin*2, "grey")
+            drawRectangle(this.halfW+width/2+5, this.halfH-scrollHeight-scrollMargin*2-margin, 30, scrollHeight+scrollMargin*2, "grey")
             // Draw scroll bar thumb
-            drawRectangle(canvas.width/2+width/2+10, canvas.height/2-scrollHeight-margin-scrollMargin+currentRow*scrollHeight/maxScroll, 20, scrollHeight/maxScroll, "lightgrey")
+            drawRectangle(this.halfW+width/2+10, this.halfH-scrollHeight-margin-scrollMargin+currentRow*scrollHeight/maxScroll, 20, scrollHeight/maxScroll, "lightgrey")
 
             $("#search-input").show();
-            $("#search-input").css("top", canvas.height/2-height/2+padding*2);
-            $("#search-input").css("left", canvas.width/2-hotboxWidth*4+padding);
+            $("#search-input").css("top", this.halfH-height/2+padding*2);
+            $("#search-input").css("left", this.halfW-hotboxWidth*4+padding);
             $("#search-input").css("width", width-2.5*padding);
             
             // Add background boxes
             for (let j = 0; j < 4; j++) {
                 for (let i = 0; i < 9; i++) {
                     let xPos = startX+i*hotboxWidth*8/9.1;
-                    let yPos = canvas.height/2-boxSize-j*hotboxWidth-5;
+                    let yPos = this.halfH-boxSize-j*hotboxWidth-5;
 
                     // Floor xPos and yPos
                     xPos = Math.floor(xPos);
                     yPos = Math.floor(yPos);
 
-                    drawRectangle(xPos,yPos,boxSize,boxSize,"grey")
-
+                    drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey")
+                    drawRectangle(xPos,yPos,boxSize,boxSize,backgroundBoxColor)
+                    
                     // Draw items in inventory
                     let index = 0;
                     let blocks = searchBlocks || world.blockOrder;
@@ -438,10 +459,11 @@ class Inventory {
                             class: "block"
                         });
 
+
                         index++;
                     }
                     
-                     let offset = Math.max(0, currentRow*9-blocks.length);
+                    let offset = Math.max(0, currentRow*9-blocks.length);
                     let items = searchItems || world.itemOrder;
                     for (let k = offset; k < items.length; k++) {
                         if (index >= 36) break;
@@ -476,8 +498,8 @@ class Inventory {
             let width = 480;
             let height = 600;
 
-            let startX = canvas.width/2-hotboxWidth*4+(hotboxWidth-blockWidth)/2;
-            let startY = canvas.height/2+height/2;
+            let startX = this.halfW-hotboxWidth*4+(hotboxWidth-blockWidth)/2;
+            let startY = this.halfH+height/2;
 
             // Draw items in crafting grid
             for (let j = 0; j < 2; j++) {
@@ -501,7 +523,7 @@ class Inventory {
                     let xPos = startX+(i%9)*hotboxWidth*8/9.1;
                     let yPos = startY-boxSize;
                     if (i > 8) {
-                        yPos = startY-boxSize*5.5+hotboxWidth*Math.floor((i-9)/9);
+                        yPos = startY-boxSize-hotboxWidth*3+hotboxWidth*Math.floor((i-9)/9);
                     }
 
                     this.drawItem(xPos, yPos, block);
@@ -550,7 +572,9 @@ class Inventory {
         if (!initialized || !player.toolbar) return;
         if (player.mode == "spectator" || player.mode == "camera") return;
 
-        let {toolbarX, toolbarSelectorX, hotboxWidth, selectorWidth, showInventory, blockWidth} = this;
+        let {toolbarX, toolbarSelectorX, hotboxWidth, selectorWidth, showInventory} = this;
+
+        let blockWidth = 32;
 
         drawImageTopLeft(
             toolbar, 
