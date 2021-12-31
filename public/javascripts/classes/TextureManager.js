@@ -68,6 +68,10 @@ class TextureManager {
             "hay_block": ["hay_block_side", "hay_block_top", "hay_block_top"],
             "cake": ["cake_side", "cake_bottom", "cake_top"],
             "tnt": ["tnt_side", "tnt_bottom", "tnt_top"],
+            "mycelium": ["mycelium_side", "dirt", "mycelium_top"],
+            "brown_mushroom_block": "mushroom_block_skin_brown",
+            "red_mushroom_block": "mushroom_block_skin_red",
+            "mushroom_stem": ["mushroom_block_skin_stem", "mushroom_block_inside", "mushroom_block_inside"],
         }
 
         this.blockFaces = {};
@@ -204,6 +208,8 @@ class TextureManager {
         let index = 0;
         for (let entity of order) {
             let b = entities[entity];
+
+            console.log(b);
             if (b instanceof Array) {
                 for (let i = 0; i < 3; i++) {
                     ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)
