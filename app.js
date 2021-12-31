@@ -125,7 +125,7 @@ const logger = createLogger({
 
 // Get textures
 let colors = ["black", "blue", "brown", "cyan", "gray", "green", "light_blue", "lime", "magenta", "orange", "pink", "purple", "red", "silver", "white", "yellow"];
-let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white", "stonebrick", "stonebrick_carved", "stonebrick_cracked", "furnace", "hay_block"];
+let blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "wood", "leaves", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white", "stonebrick", "stonebrick_carved", "stonebrick_cracked", "stonebrick_mossy", "furnace", "hay_block"];
 
 for (let color of colors) {
 	blockOrder.push("wool_colored_" + color);
@@ -134,11 +134,16 @@ for (let color of colors) {
 
 let tools = ["pickaxe", "axe", "shovel", "sword"];
 let toolMat = ["wood", "stone", "iron", "gold", "diamond"];
-let itemOrder = ["stick", "bow", "arrow", "diamond", "apple", "bread", "carrot"];
+let foods = ["beef", "chicken", "porkchop", "mutton", "rabbit"];
+let itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat"];
 for (let mat of toolMat) {
 	for (let tool of tools) {
 		itemOrder.push(mat + "_" + tool);
 	}
+}
+for (let food of foods) {
+	itemOrder.push(food+"_raw");
+	itemOrder.push(food+"_cooked");
 }
 
 let blockId = {};
@@ -153,9 +158,11 @@ for (let i = 0; i < itemOrder.length; i++) {
 
 let textures = {};
 fs.readdir(public + '/textures/blocks', function (err, data) {
+	if (err) console.log(err);
 	textures["blocks"] = data;
 })
 fs.readdir(public + '/textures/items', function (err, data) {
+	if (err) console.log(err);
 	textures["items"] = data;
 })
 textures.blockOrder = blockOrder;

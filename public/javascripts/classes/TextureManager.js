@@ -247,15 +247,15 @@ class TextureManager {
       
         let index = 0;
         for (let item of order) {
-          let b = this.items[item];
-          if (b instanceof Array) {
-            for (let i = 0; i < b.length; i++) {
-              ctx_.drawImage(this.itemFaces[b[i]].image, index*16, i*16)
+            let b = this.items[item];
+            if (b instanceof Array) {
+                for (let i = 0; i < b.length; i++) {
+                ctx_.drawImage(this.itemFaces[b[i]].image, index*16, i*16)
+                }
+            } else {
+                ctx_.drawImage(this.itemFaces[item].image, index*16, 0)
             }
-          } else {
-            ctx_.drawImage(this.itemFaces[item].image, index*16, 0)
-          }
-          index++;
+            index++;
         }
       
         canvas = TextureManager.makeCanvasPowerOfTwo(canvas);
