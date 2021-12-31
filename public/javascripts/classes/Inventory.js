@@ -106,15 +106,18 @@ class Inventory {
                 }
             } else if (type == "hover") {
                 let name = "";
+                let entity = {};
                 if (i < searchBlocks.length) {
                     name = searchBlocks[i];
+                    entity.v = world.blockId[name];
+                    entity.class = "block";
                 } else if (i < searchBlocks.length+searchItems.length) {
                     name = searchItems[i-searchBlocks.length]; 
+                    entity.v = world.itemId[name];
+                    entity.class = "item";
                 }
-
-                //drawRectangle()
-
-                this.drawItem(mouse.x, mouse.y, selectedItem)
+                
+                this.drawHoverBox(name, entity);
             }
         } else {
             if (type == "left") { // Left click item
@@ -190,12 +193,37 @@ class Inventory {
                     class: block[i].class
                 }
                 block[i] = undefined;
+            } else if (type == "hover") {
+                let name = "";
+                let entity = block[i];
+                if (entity) {
+                    if (entity.class == "block") {
+                        name = world.blockOrder[entity.v-1];
+                    } else if (entity.class == "item") {
+                        name = world.itemOrder[entity.v-1];
+                    }
+                    
+                    this.drawHoverBox(name, entity);
+                }
             }
 
             if (this.selectedItem && this.selectedItem.c == 0) {
                 this.selectedItem = undefined;
             }
         }
+    }
+
+    drawHoverBox(name, entity) {
+        if (this.selectedItem) return;
+
+        let hoverBoxPadding = 10;
+        let hoverBoxWidth = Math.max(ctx.measureText(name).width + hoverBoxPadding*2, 60);
+        let hoverBoxHeight = 90;
+        let direction = mouse.y>this.halfH ? 1 : 0;
+        drawRectangle(mouse.x-hoverBoxWidth, mouse.y-hoverBoxHeight*direction, hoverBoxWidth, hoverBoxHeight, "rgba(0, 0, 0, 0.5");
+
+        drawText(name, mouse.x-hoverBoxWidth/2, mouse.y-hoverBoxHeight*direction+hoverBoxPadding, "white", "25px Minecraft-Regular", "center", "top");
+        this.drawItem(mouse.x-hoverBoxWidth/2-this.blockWidth/2, mouse.y-hoverBoxHeight*direction+hoverBoxPadding+30, entity)
     }
 
     // Select inventory item
@@ -575,11 +603,13 @@ class Inventory {
             yPos, 
             blockWidth, blockWidth
         );
-        drawText(entity.c, 
-            xPos+blockWidth+2,
-            yPos+blockWidth+5, 
-            "20px Minecraft-Regular", "white", "right", "bottom", 1, true
-        );
+        if (entity.c) {
+            drawText(entity.c, 
+                xPos+blockWidth+2,
+                yPos+blockWidth+5, 
+                "20px Minecraft-Regular", "white", "right", "bottom", 1, true
+            );
+        }
     }
 
     // Display toolbar
