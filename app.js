@@ -257,7 +257,7 @@ io.on('connection', function (socket_) {
 
 		// Send update to everyone
 		io.emit('addPlayer', player)
-		let text = player.name + " has joined the server with ip " + address;
+		let text = player.name + " has joined the server";
 		logger.info(text)
 
 		io.emit('messageAll', {
