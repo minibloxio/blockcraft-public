@@ -13,6 +13,23 @@ class Recipe {
 	check(grid) {
 		return JSON.stringify(this.grid)==JSON.stringify(grid);
 	}
+
+	static reduce(grid) {
+		let newGrid = [];
+		for (let i = 0; i < grid.length; i++) {
+			let row = grid[i];
+			let newRow = [];
+			for (let j = 0; j < row.length; j++) {
+				let cell = row[j];
+				if (cell.c > 0) {
+					newRow.push(cell);
+				}
+			}
+			newGrid.push(newRow);
+		}
+		console.log(newGrid);
+		return newGrid;
+	}
 }
 
 function initRecipes() {

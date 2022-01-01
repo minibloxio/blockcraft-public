@@ -49,16 +49,17 @@ class Inventory {
 
         if (showCraftingTable) {
             for (let i = 0; i < craftingTableGrid.length; i++) {
-                if (craftingGrid[i])
-                    grid[i] = craftingGrid[i].v;
+                if (craftingTableGrid[i])
+                    grid[i] = craftingTableGrid[i].v;
             }
+            console.log(craftingTableGrid);
         } else {
             for (let i = 0; i < craftingGrid.length; i++) {
                 if (craftingGrid[i])
                     grid[i] = craftingGrid[i].v;
             }
-        }   
-        
+            console.log(craftingGrid);
+        }
 
         this.craftingOutput = undefined;
         for (let r of recipes) {
@@ -315,7 +316,7 @@ class Inventory {
                 }
             }
 
-            this.updateCraftingOutput();
+            if (type != "hover") this.updateCraftingOutput();
         } else if (player.mode == "creative") {
             // Add background boxes
             for (let j = 0; j < 4; j++) {
