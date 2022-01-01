@@ -4,6 +4,8 @@ const public_path = __dirname + '/../public/';
 module.exports = class World {
     constructor(options) {
 
+        this.startTime = Date.now();
+
         this.textures = {};
         this.blockOrder = [];
         this.itemOrder = [];
@@ -65,6 +67,7 @@ module.exports = class World {
         this.textures.tileTextureHeight = 64;
     }
 
+    // Get entity by name
     getEntity(name, count) {
         if (this.blockId[name]) {
             return {
@@ -78,6 +81,54 @@ module.exports = class World {
                 c: count || 1,
                 class: "item"
             }
+        }
+    }
+
+    // Add player
+    addPlayer(id, data) {
+        if (!data) data = {};
+
+        return {
+			id: id,
+			name: data.name || ("Player"+Math.floor(Math.random()*9999)),
+			pos: {x: 0,y: 0,z: 0},
+			vel: {x: 0,y: 0,z: 0},
+			rot: {x: 0,y: 0,z: 0},
+			dir: {x: 0,y: 0,z: 0},
+			hp: 10,
+			dead: false,
+			toolbar: [
+				this.getEntity("wood_sword"), 
+				this.getEntity("wood_pickaxe"), 
+				this.getEntity("wood_axe"), 
+				this.getEntity("bow"), 
+				this.getEntity("arrow", 64),
+				this.getEntity("crafting_table"),
+				this.getEntity("wood", 64),
+			],
+			walking: false,
+			sneaking: false,
+			punching: false,
+			currSlot: 0,
+			pickupDelay: Date.now(),
+			ping: [],
+			connected: true,
+			mode: "survival",
+			fps: 0,
+		}
+    }
+
+    // Add entity
+    addEntity(id, data) {
+        return {
+            pos: data.pos,
+            vel: data.vel,
+            acc: {x: 0, y: 0, z: 0},
+            type: "item",
+            class: data.class || "block",
+            v: data.v,
+            id: id,
+            t: Date.now()
         }
     }
 }

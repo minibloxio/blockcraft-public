@@ -20,8 +20,8 @@ const readline = require('readline'); // Command line input
 const { Server } = require("socket.io");
 const io = new Server(httpsServer, {
 	cors: {
-	  origin: "*",
-	  methods: ["GET", "POST"]
+		origin: "*",
+		methods: ["GET", "POST"]
 	}
 });
 
@@ -38,7 +38,7 @@ const Function = require('./modules/Function.js');
 const World = require('./modules/World.js');
 const GameServer = require('./modules/Server.js');
 const SimplexNoise = require('simplex-noise'),
-    simplex = new SimplexNoise(Math.random)
+	simplex = new SimplexNoise(Math.random)
 var filter = require('leo-profanity')
 
 // Listen to server port
@@ -47,14 +47,13 @@ httpsServer.listen(serverPort, function () {
 })
 
 // Send CORS header
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
 	res.header("Cross-Origin-Embedder-Policy", "require-corp");
 	res.header("Cross-Origin-Opener-Policy", "same-origin");
 	next();
 });
 
 // Serve static files
-const public = __dirname + '/public/';
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/*', function (req, res, next) {
 	res.redirect('/')
@@ -63,67 +62,61 @@ app.use('/*', function (req, res, next) {
 
 // Server input commands
 const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
+	input: process.stdin,
+	output: process.stdout
 });
 
-// Command line input
 rl.on('line', (input) => {
-  	if (input === 'refresh') { // Refresh all clients
-  		io.emit('refresh');
-  	} else if (input === 'save') {
-  		let path =  __dirname + '/saves/test.json';
-  		world.saveToFile(fs, io, path, logger);
-  	} else if (input === 'purge') {
+	if (input === 'refresh') { // Refresh all clients
+		io.emit('refresh');
+	} else if (input === 'save') {
+		let path = __dirname + '/saves/test.json';
+		world.saveToFile(fs, io, path, logger);
+		saveToLog();
+	} else if (input === 'purge') {
 		world.purge(); // Purge all chunks
-	} else if (input) {
-  		io.emit('messageAll', {
-			text: "[Server] " + input,
+	} else if (input) { // Message to all clients
+		io.emit('messageAll', {
+			name: 'Server',
+			text: input,
 			color: "cyan"
 		});
-  	}
+	}
 });
 
 // Server logging
 const { createLogger, format, transports } = require('winston');
+const e = require('express');
 const { combine, timestamp, printf, colorize, align } = format;
 
 const myFormat = printf(({ level, message, timestamp }) => {
-  return `[${timestamp}] ${level}: ${message}`;
+	return `[${timestamp}] ${level}: ${message}`;
 });
 
 const logger = createLogger({
 	transports: [
 		new transports.Console({
 			format: combine(
-				timestamp({format:'MM-DD-YYYY HH:mm:ss'}),
+				timestamp({ format: 'MM-DD-YYYY HH:mm:ss' }),
 				align(),
 				colorize(),
 				myFormat,
 			),
 			level: "silly",
 		}),
-		new transports.File({ 
+		new transports.File({
 			filename: 'logs/server.log',
 			format: combine(
-				timestamp({format:'MM-DD-YYYY HH:mm:ss'}),
+				timestamp({ format: 'MM-DD-YYYY HH:mm:ss' }),
 				align(),
 				myFormat,
 			),
 			level: "verbose",
-		}),
-		new transports.File({ 
-			filename: 'logs/error.log',
-			format: combine(
-				timestamp({format:'MM-DD-YYYY HH:mm:ss'}),
-				align(),
-				myFormat,
-			),
-			level: "error",
 		})
 	]
 });
 
+// Init server
 let server = new GameServer();
 
 // Players
@@ -132,13 +125,12 @@ var players = {};
 // Setup world
 const world = new World();
 world.init({
-	blockOrder: server.blockOrder, 
+	blockOrder: server.blockOrder,
 	itemOrder: server.itemOrder
 });
 
-worker.postMessage({cmd: "setup", blockOrder: server.blockOrder, itemOrder: server.itemOrder});
+worker.postMessage({ cmd: "setup", blockOrder: server.blockOrder, itemOrder: server.itemOrder });
 
-const startTime = Date.now();
 var updatedBlocks = [];
 var newEntities = [];
 
@@ -157,14 +149,14 @@ fs.readFile(save_path, function (err, data) {
 
 	let saveFile = JSON.parse(data)
 	world.loadSaveFile(saveFile)
-	worker.postMessage({cmd: "seed", seed: saveFile.seed});
+	worker.postMessage({ cmd: "seed", seed: saveFile.seed });
 
-  	logger.info("World successfully loaded in " + (Date.now()-t) + "ms");
+	logger.info("World successfully loaded in " + (Date.now() - t) + "ms");
 })
 
 // Worker process
 worker.on('message', (data) => {
-	let {socketId, chunks} = data;
+	let { socketId, chunks } = data;
 
 	let receivedChunks = [];
 
@@ -181,39 +173,52 @@ worker.on('message', (data) => {
 // Get date
 let date = new Date();
 function getDate() {
-	return date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate();
+	return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
 }
 
 // Server logging
 let log_path = __dirname + '/logs/server.json';
 let log = {};
 fs.readFile(log_path, function (err, data) {
+	let logFormat = {
+		ips: [],
+		players: {},
+		connectionsRaw: 0,
+		connections: 0,
+		blocksMined: 0,
+		blocksPlaced: 0,
+		chunksRequested: 0,
+		respawns: 0,
+		messagesSent: 0,
+		playersKilled: 0,
+
+	}
+
 	if (err) {
 		logger.warn("Unable to load log file from", log_path)
 		logger.warn("Creating new log...")
 
-		log[getDate()] = {
-			ips: [],
-			connectionsRaw: 0,
-			connections: 0,
-			blocksMined: 0,
-			blocksPlaced: 0,
-		}
+		log[getDate()] = logFormat;
 		return;
 	}
 
 	log = JSON.parse(data);
+	for (let stat in logFormat) {
+		if (log[getDate()][stat] === undefined) {
+			log[getDate()][stat] = logFormat[stat];
+		}
+	}
 })
 
 function saveToLog() {
 	let data = JSON.stringify(log);
 	fs.writeFile(log_path, data, function (err) {
-        if (err) throw err;  
-    });
+		if (err) throw err;
+	});
 }
 
 // Server-client connection architecture
-io.on('connection', function(socket_) {
+io.on('connection', function (socket_) {
 	let socket = socket_;
 	var address = socket.handshake.address.slice(7);
 	if (!log[getDate()].ips.includes(address)) {
@@ -233,7 +238,7 @@ io.on('connection', function(socket_) {
 			ping: data,
 			players: playerInfo,
 			region: config.region,
-			uptime: Date.now() - startTime,
+			uptime: Date.now() - server.startTime,
 			link: config.link,
 		}
 		socket.emit('serverInfoResponse', info);
@@ -245,33 +250,16 @@ io.on('connection', function(socket_) {
 	// Join request from the client
 	socket.on('join', function (data) {
 		// Set player object
-		players[socket.id] = {
-			id: socket.id,
-			name: "Player"+Math.floor(Math.random()*9999),
-			pos: {x: 0,y: 0,z: 0},
-			vel: {x: 0,y: 0,z: 0},
-			rot: {x: 0,y: 0,z: 0},
-			dir: {x: 0,y: 0,z: 0},
-			hp: 10,
-			dead: false,
-			toolbar: [
-				server.getEntity("wood_sword"), 
-				server.getEntity("wood_pickaxe"), 
-				server.getEntity("wood_axe"), 
-				server.getEntity("bow"), 
-				server.getEntity("arrow", 64),
-				server.getEntity("crafting_table"),
-				server.getEntity("wood", 64),
-			],
-			walking: false,
-			sneaking: false,
-			punching: false,
-			currSlot: 0,
-			pickupDelay: Date.now(),
-			ping: [],
-			connected: false,
-			mode: "survival",
-			fps: 0,
+		players[socket.id] = server.addPlayer(socket.id, data);
+
+		let player = players[socket.id];
+
+		// Log player connection
+		log[getDate()].connections++;
+		if (!log[getDate()].players[player.name]) {
+			log[getDate()].players[player.name] = 1
+		} else {
+			log[getDate()].players[player.name]++;
 		}
 
 		// // Add random items to player's inventory
@@ -280,21 +268,14 @@ io.on('connection', function(socket_) {
 		// 	players[socket.id].toolbar.push(item);
 		// }
 
-		// Set name
-		if (data && data.name) {
-			players[socket.id].name = data.name;
-		}
-
-		players[socket.id].connected = true;
-		
 		// Send update to everyone
-		io.emit('addPlayer', players[socket.id])
-		let text = players[socket.id].name + " has joined the server";
+		io.emit('addPlayer', player)
+		let text = player.name + " has joined the server";
 		logger.info(text)
 
 		io.emit('messageAll', {
-			text: players[socket.id].name + " has joined the server", 
-			color:"yellow"
+			text: text,
+			color: "yellow"
 		})
 
 		// Determine spawn position
@@ -302,12 +283,12 @@ io.on('connection', function(socket_) {
 		let randomX = Function.random(-maxSpawnDistance, maxSpawnDistance);
 		let randomZ = Function.random(-maxSpawnDistance, maxSpawnDistance);
 
-		let groundHeight = world.buildHeight*world.blockSize; // Set high so the first player can load the chunks underneath
+		let groundHeight = world.buildHeight * world.blockSize; // Set high so the first player can load the chunks underneath
 		// Determine ground level
 		if (world.buildHeight) {
 			for (let i = world.buildHeight; i > 0; i--) {
 				if (world.getVoxel(randomX, i, randomZ) > 0) { // Non-air block, can spawn here
-					groundHeight = i*world.blockSize+1.8; // Account for player height
+					groundHeight = i * world.blockSize + 1.8; // Account for player height
 					break;
 				}
 			}
@@ -316,32 +297,30 @@ io.on('connection', function(socket_) {
 		// Send server data to client (world data, online players)
 		socket.emit('joinResponse', {
 			serverPlayers: players,
-			world: Object.assign({}, world, {cells: {}, cellDeltas: undefined}),
+			world: Object.assign({}, world, { cells: {}, cellDeltas: undefined }),
 			tick: world.tick,
 			startPos: {
-				x: randomX*world.blockSize,
+				x: randomX * world.blockSize,
 				y: groundHeight,
-				z: randomZ*world.blockSize
+				z: randomZ * world.blockSize
 			},
 			info: config,
 		});
-
-		// Log player connection
-		log[getDate()].connections++;
 	})
 
 	// Update player info
 	socket.on('playerInfo', function (data) {
-		if (players[socket.id] && data.name != players[socket.id].name && data.name) { // Check for validity
-			let text = players[socket.id].name + " changed their name to " + data.name;
-			logger.info(text);
-			io.emit('messageAll', {
-				name: "Server",
-				text: text,
-				color: "aqua"
-			});
-			players[socket.id].name = data.name;
-		}
+		let player = players[socket.id];
+		if (!player || data.name == player.name || !data.name) return; // Player not found or name is the same
+
+		let text = player.name + " changed their name to " + data.name;
+		logger.info(text);
+		io.emit('messageAll', {
+			name: "Server",
+			text: text,
+			color: "aqua"
+		});
+		player.name = data.name;
 	})
 
 	// Receive packet from the client
@@ -359,7 +338,7 @@ io.on('connection', function(socket_) {
 			return;
 
 		// Update ping
-		players[socket.id].ping.push(Date.now()-tick);
+		players[socket.id].ping.push(Date.now() - tick);
 		if (players[socket.id].ping.length > 30)
 			players[socket.id].ping.shift();
 	})
@@ -369,37 +348,34 @@ io.on('connection', function(socket_) {
 		let player = players[socket.id];
 		if (!player) return;
 
-		let {blockSize} = world;
+		let { blockSize } = world;
 
 		// Update punching status
 		if (!data.cmd) player.punching = true;
 		world.setVoxel(data.x, data.y, data.z, data.t, true, true);
 		updatedBlocks.push(data);
-		
+
 		// Check if block is being broken or placed
 		if (data.t == 0 && player.mode == "survival") { // BLOCK MINED
+			// Add block as server-side entity
 			let entityId = Function.randomString(5);
-			let entity = {
-				pos: {x: (data.x+0.5)*blockSize-blockSize/8, y: (data.y+0.5)*blockSize-blockSize/8, z: (data.z+0.5)*blockSize-blockSize/8},
-				vel: {x: Function.random(5, -5), y: blockSize*2, z: Function.random(5, -5)},
-				acc: {x: 0, y: 0, z: 0},
-				type: "item",
-				class: "block",
-				v: data.v,
-				id: entityId,
-				t: Date.now()
-			}
-			world.entities[entityId] = entity;
-			newEntities.push(entity)
+			data.pos = { x: (data.x + 0.5) * blockSize - blockSize / 8, y: (data.y + 0.5) * blockSize - blockSize / 8, z: (data.z + 0.5) * blockSize - blockSize / 8 };
+			data.vel = { x: Function.random(5, -5), y: blockSize * 2, z: Function.random(5, -5) };
+			world.entities[entityId] = server.addEntity(entityId, data)
+			newEntities.push(world.entities[entityId])
+
+			log[getDate()].blocksMined = (log[getDate()].blocksMined + 1) || 1;
 		} else if (data.t > 0 && !data.cmd && player.mode == "survival") { // BLOCK PLACED
 			// Remove item from toolbar
 			for (let t of player.toolbar) {
 				if (!t)
 					continue;
 				if (t.v == data.t && t.class == data.class) {
-					t.c = Math.max(0, t.c-1);
-				}		
+					t.c = Math.max(0, t.c - 1);
+				}
 			}
+
+			log[getDate()].blocksPlaced = (log[getDate()].blocksPlaced + 1) || 1;
 		}
 	})
 
@@ -407,27 +383,20 @@ io.on('connection', function(socket_) {
 		let player = players[socket.id];
 		if (!player) return;
 
-		let {blockSize} = world;
+		let { blockSize } = world;
 		player.pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
 		for (let t of player.toolbar) {
 			if (!t)
 				continue;
 			if (t.v == data.v && t.class == data.class) {
-				t.c = Math.max(0, t.c-1);
+				t.c = Math.max(0, t.c - 1);
 
+				// Add item as server-side entity
 				let entityId = Function.randomString(5);
-				let entity = {
-					pos: {x: data.x, y: data.y, z: data.z},
-					vel: {x: data.dir.x*blockSize*3, y: blockSize*2, z: data.dir.z*blockSize*3},
-					acc: {x: 0, y: 0, z: 0},
-					type: "item",
-					class: data.class,
-					v: data.v,
-					id: entityId,
-					t: Date.now()
-				}
-				world.entities[entityId] = entity;
-				newEntities.push(entity)
+				data.pos = { x: data.x, y: data.y, z: data.z };
+				data.vel = { x: data.dir.x * blockSize * 3, y: blockSize * 2, z: data.dir.z * blockSize * 3 };
+				world.entities[entityId] = server.addEntity(entityId, data);
+				newEntities.push(world.entities[entityId])
 
 				break;
 			}
@@ -443,7 +412,7 @@ io.on('connection', function(socket_) {
 			let id = `${chunk.x},${chunk.y},${chunk.z}`
 			let cell = world.cells[id];
 			if (!cell) {
-				
+
 				let cellSizeCubed = Math.pow(world.cellSize, 3);
 				world.cells[id] = new Uint8Array(new SharedArrayBuffer(cellSizeCubed));
 
@@ -470,9 +439,11 @@ io.on('connection', function(socket_) {
 			}
 		}
 
-		worker.postMessage({cmd: "generateChunks", socketId: socket.id, chunkData: chunksToGenerate});
+		worker.postMessage({ cmd: "generateChunks", socketId: socket.id, chunkData: chunksToGenerate });
 
 		socket.emit('receiveChunk', chunksToSend);
+
+		log[getDate()].chunksRequested = (log[getDate()].chunksRequested + 1) || 1;
 	})
 
 	// Update player inventory
@@ -491,6 +462,8 @@ io.on('connection', function(socket_) {
 			player.hp = 10;
 			player.dead = false;
 		}
+
+		log[getDate()].respawns = (log[getDate()].respawns + 1) || 1;
 	})
 
 	// Receive player punch event
@@ -513,7 +486,7 @@ io.on('connection', function(socket_) {
 				data.force /= 2;
 			}
 
-			players[data.id].hp -= data.crit ? dmg*1.5 : dmg;
+			players[data.id].hp -= data.crit ? dmg * 1.5 : dmg;
 			players[data.id].dmgType = player.name;
 			io.to(`${data.id}`).emit('knockback', data)
 			io.volatile.emit('punch', data.id);
@@ -536,22 +509,22 @@ io.on('connection', function(socket_) {
 		let player = players[socket.id];
 		if (!player) return;
 
-		let {blockSize} = world;
+		let { blockSize } = world;
 		player.pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
 
 		for (let t of player.toolbar) {
 			if (t && t.v == world.itemId["arrow"] && t.c > 0) {
-				t.c = Math.max(0, t.c-1);
+				t.c = Math.max(0, t.c - 1);
 				break;
 			}
 		}
 
 		let entityId = Function.randomString(5);
-		let force = blockSize*10*data.force;
+		let force = blockSize * 10 * data.force;
 		let entity = {
-			pos: {x: data.x, y: data.y, z: data.z},
-			vel: {x: data.dir.x*force, y: data.dir.y*force, z: data.dir.z*force},
-			acc: {x: 0, y: 0, z: 0},
+			pos: { x: data.x, y: data.y, z: data.z },
+			vel: { x: data.dir.x * force, y: data.dir.y * force, z: data.dir.z * force },
+			acc: { x: 0, y: 0, z: 0 },
 			force: data.force,
 			lethal: true,
 			type: "item",
@@ -571,18 +544,20 @@ io.on('connection', function(socket_) {
 		let player = players[socket.id];
 		if (!player) return;
 
-		logger.verbose("<"+player.name+"> " + data)
+		logger.verbose("<" + player.name + "> " + data)
 		io.emit('messageAll', {
 			name: player.name,
 			text: filter.clean(data),
 		});
+
+		log[getDate()].messagesSent = (log[getDate()].messagesSent + 1) || 1;
 	})
 
 	socket.on('messagePlayer', function (data) {
 		let player = players[socket.id];
 		if (!player) return;
-		
-		logger.verbose("<"+player.name+" whispers to " + players[data.id].name + "> " + data)
+
+		logger.verbose("<" + player.name + " whispers to " + players[data.id].name + "> " + data)
 		io.to(`${data.id}`).emit('message', {
 			type: "whisper",
 			id: socket.id,
@@ -590,13 +565,15 @@ io.on('connection', function(socket_) {
 			text: filter.clean(data.text),
 			color: "grey",
 		});
+
+		log[getDate()].messagesSent = (log[getDate()].messagesSent + 1) || 1;
 	})
 
 	socket.on('replyPlayer', function (data) {
 		let player = players[socket.id];
 		if (!player) return;
-		
-		logger.verbose("<"+player.name+" replies to " + players[data.id].name + "> " + data)
+
+		logger.verbose("<" + player.name + " replies to " + players[data.id].name + "> " + data)
 		io.to(`${data.id}`).emit('message', {
 			type: "whisper",
 			id: socket.id,
@@ -604,13 +581,15 @@ io.on('connection', function(socket_) {
 			text: filter.clean(data.text),
 			color: "grey",
 		});
+
+		log[getDate()].messagesSent = (log[getDate()].messagesSent + 1) || 1;
 	})
 
 	// COMMANDS
 
 	// Set the time of day
 	socket.on('settime', function (data) {
-		let text = "<"+players[socket.id].name+"> set the time to " + data;
+		let text = "<" + players[socket.id].name + "> set the time to " + data;
 		logger.info(text)
 		world.tick = data;
 	})
@@ -659,7 +638,7 @@ io.on('connection', function(socket_) {
 			});
 		}
 	})
-	
+
 	// Kick player from server
 	socket.on('kickPlayer', function (data) {
 		if (!players[socket.id]) return;
@@ -729,7 +708,7 @@ setInterval(function () {
 	if (world.tick % 100 == 0) {
 		for (let id in players) {
 			if (players[id].hp > 0)
-				players[id].hp = Math.min(players[id].hp+0.5, 10);
+				players[id].hp = Math.min(players[id].hp + 0.5, 10);
 		}
 	}
 
@@ -749,8 +728,10 @@ setInterval(function () {
 			logger.info(txt);
 
 			io.emit('messageAll', {
-	            text: txt
-          	})
+				text: txt
+			})
+
+			log[getDate()].playersKilled = (log[getDate()].messagesSent + 1) || 1;
 		}
 	}
 
@@ -759,24 +740,24 @@ setInterval(function () {
 	let autosaveWarning = 1000 * 10; // 10 seconds
 	if (Date.now() - autosaveTimer > autosaveInterval - 1000 * 10 && autosaveWarningFlag) {
 		autosaveWarningFlag = false;
-		let txt = "Server will auto save in " + parseInt(autosaveWarning/1000) + " s";
-          io.emit('messageAll', {
-            text: txt,
-            color: "purple",
-            discard: true
-        })
+		let txt = "Server will auto save in " + parseInt(autosaveWarning / 1000) + " s";
+		io.emit('messageAll', {
+			text: txt,
+			color: "purple",
+			discard: true
+		})
 	}
-	
+
 	if (Date.now() - autosaveTimer > autosaveInterval) {
 		autosaveTimer = Date.now();
 		autosaveWarningFlag = true;
 
-		let path =  __dirname + '/saves/test.json';
-  		world.saveToFile(fs, io, path, logger);
+		let path = __dirname + '/saves/test.json';
+		world.saveToFile(fs, io, path, logger);
 		saveToLog();
 	}
 
-	world.update(dt/1000, players, newEntities, io);
+	world.update(dt / 1000, players, newEntities, io);
 
 	// Send updated data to client
 	io.emit('update', {
