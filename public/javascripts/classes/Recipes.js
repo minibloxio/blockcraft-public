@@ -16,6 +16,10 @@ class Recipe {
 }
 
 function initRecipes() {
+	// Recipes
+
+
+	// Old recipes
 	recipes.push(new Recipe("block", 4, world.blockId["planks"], [world.blockId["wood"], undefined, undefined, undefined]));
 	recipes.push(new Recipe("block", 4, world.blockId["planks"], [undefined, world.blockId["wood"], undefined, undefined]));
 	recipes.push(new Recipe("block", 4, world.blockId["planks"], [undefined, undefined, world.blockId["wood"], undefined]));

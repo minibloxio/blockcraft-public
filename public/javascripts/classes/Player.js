@@ -665,6 +665,7 @@ class Player {
 				inventory.showInventory = true;
 				inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
 				document.exitPointerLock();
+				this.punching = Date.now();
 				return;
 			}
 
