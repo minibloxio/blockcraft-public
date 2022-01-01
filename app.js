@@ -182,7 +182,7 @@ function getDate() {
 let log_path = __dirname + '/logs/server.json';
 let sessions = {};
 fs.readFile(log_path, function (err, data) {
-	if (err || Object.keys(sessions).length === 0) {
+	if (err) {
 		logger.warn("Unable to load log file from " + log_path)
 		logger.warn("Creating new log...")
 		return;
@@ -214,13 +214,7 @@ function addLog(id, stat, value) {
 // Server-client connection architecture
 io.on('connection', function (socket_) {
 	let socket = socket_;
-	var address = socket.handshake.address.slice(7);
-
-	addLog(socket.id, "ip", address);
-	addLog(socket.id, "tc", Date.now()); // Time connected
-	saveToLog();
-	console.log(address);
-	console.log(socket.client.request.headers);
+	var address = socket.client.request.headers['cf-connecting-ip'] || socket.client.request.headers['x-real-ip'] || socket.client.request.headers['host'];
 
 	// Server info request
 	socket.on('serverInfoRequest', function (data) {
@@ -250,8 +244,10 @@ io.on('connection', function (socket_) {
 		let player = players[socket.id];
 
 		// Log player connection
-
+		addLog(socket.id, "ip", address);
+		addLog(socket.id, "tc", Date.now()); // Time connected
 		addLog(socket.id, "n", player.name);
+		saveToLog();
 
 		// // Add random items to player's inventory
 		// for (let i = 0; i < 30; i++) {
@@ -681,9 +677,9 @@ io.on('connection', function (socket_) {
 		if (players[socket.id] && players[socket.id].connected) {
 			let text = players[socket.id].name + " has left the server";
 			logger.info(text)
+			addLog(socket.id, "td", Date.now());
 		}
 		io.emit('removePlayer', socket.id);
-		addLog(socket.id, "td", Date.now());
 		delete players[socket.id];
 	});
 });
