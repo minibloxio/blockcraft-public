@@ -196,7 +196,7 @@ function drawText(text, x, y, font, color, align, baseline, alpha, stroke) {
 	ctx.globalAlpha = alpha || 1;
 	ctx.textBaseline = options.baseline || baseline || "default";
     if (stroke) {
-        ctx.strokeStyle = 'black';
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
         ctx.lineWidth = 2;
         ctx.strokeText(text, x+1, y+1);
     }

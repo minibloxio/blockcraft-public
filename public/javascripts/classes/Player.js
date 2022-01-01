@@ -654,15 +654,29 @@ class Player {
 		// Place a block
 		if (this.closest.point && this.place) {
 
-			let x = Math.floor((this.closest.point.x+this.closest.face.normal.x)/blockSize);
-			let y = Math.floor((this.closest.point.y+this.closest.face.normal.y)/blockSize);
-			let z = Math.floor((this.closest.point.z+this.closest.face.normal.z)/blockSize);
+			let x = Math.floor((this.closest.point.x-this.closest.face.normal.x)/blockSize);
+			let y = Math.floor((this.closest.point.y-this.closest.face.normal.y)/blockSize);
+			let z = Math.floor((this.closest.point.z-this.closest.face.normal.z)/blockSize);
+
+			let voxel = world.getVoxel(x, y, z);
+
+			if (world.blockOrder[voxel-1] == "crafting_table") {
+				inventory.showCraftingTable = true;
+				inventory.showInventory = true;
+				inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
+				document.exitPointerLock();
+				return;
+			}
+
+			x = Math.floor((this.closest.point.x+this.closest.face.normal.x)/blockSize);
+			y = Math.floor((this.closest.point.y+this.closest.face.normal.y)/blockSize);
+			z = Math.floor((this.closest.point.z+this.closest.face.normal.z)/blockSize);
 
 			if (y > world.buildHeight) // Exceeds build limit
 				return;
 
 			let item = this.getCurrItem();
-			let voxel = world.getVoxel(x, y, z);;
+			voxel = world.getVoxel(x, y, z);
 			if (item && item.v > 0 && item.c > 0 && item.class == "block" && voxel <= 1) { // Place a block, not air or water
 				world.setVoxel(x, y, z, item.v);
 
@@ -1063,7 +1077,7 @@ class Player {
 		}
 		this.hp = data.hp;
 		if (this.hp <= 0) { // Add client death message
-
+			
 		}
 
 		this.name = data.name;

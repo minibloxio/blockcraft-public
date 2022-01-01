@@ -30,7 +30,7 @@ let socket = io({
 let loaded = 0;
 let loadedAnimate = new Ola(0);
 let maxLoaded = 4;
-let maxChunks = 20; // Chunks need to be loaded before pointerlock can be enabled
+let maxChunks = 0; // Chunks need to be loaded before pointerlock can be enabled
 
 let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com", "https://ap-southeast.victorwei.com"] // Request this from the auth server
 let serverNames = {

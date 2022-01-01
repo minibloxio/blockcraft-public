@@ -180,7 +180,7 @@ function updateClient(data) {
 	let updatedBlocks = data.updatedBlocks;
 	for (let block of updatedBlocks) {
 		world.setVoxel(block.x, block.y, block.z, block.t);
-		updateVoxelGeometry(block.x, block.y, block.z, true); // Update if in different chunk?
+		updateVoxelGeometry(block.x, block.y, block.z, true, true); // Update if in different chunk?
 	}
 
 	// Add new entities

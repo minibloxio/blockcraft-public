@@ -433,6 +433,12 @@ function displayTutorial() {
         text: "Press E to open your inventory and crafting menu"
     })
     addChat({
+        text: "Press R to reset your position to your spawn point"
+    })
+    addChat({
+        text: "Press F to fly in creative mode"
+    })
+    addChat({
         text: "------------------"
     })
 }

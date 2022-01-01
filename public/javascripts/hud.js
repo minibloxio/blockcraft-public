@@ -164,7 +164,7 @@ function displayChat() {
 
 	// Draw chat messages
 	for (let i = 0; i < lines.length; i++) {
-		drawText(lines[i].text, 10, canvas.height-yOffset-10-i*msgHeight, fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity);
+		drawText(lines[i].text, 10, canvas.height-yOffset-10-i*msgHeight, fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity, 1, true);
 	}
 	ctx.restore();
 

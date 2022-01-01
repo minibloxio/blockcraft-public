@@ -21,6 +21,7 @@ function enterPointerLock () {
 
 	if (inventory.showInventory) {
 		inventory.showInventory = false;
+		inventory.showCraftingTable = false;
 	} else {
 		let name = $("#name-input").val();
 
@@ -81,11 +82,11 @@ function initPointerLock() {
 				if (player.controls.enabled && inventory.canShowInventory) {
 					inventory.showInventory = true;
 					inventory.canShowInventory = false;
+					inventory.showCraftingTable = false;
 					inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
 
 					document.exitPointerLock();
 				} else if (document.activeElement.id != "search-input") {
-					inventory.showInventory = false;
 					// Ask the browser to lock the pointer
 					element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 					element.requestPointerLock();
