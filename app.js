@@ -178,53 +178,45 @@ function getDate() {
 
 // Server logging
 let log_path = __dirname + '/logs/server.json';
-let log = {};
+let sessions = {};
 fs.readFile(log_path, function (err, data) {
-	let logFormat = {
-		ips: [],
-		players: {},
-		connectionsRaw: 0,
-		connections: 0,
-		blocksMined: 0,
-		blocksPlaced: 0,
-		chunksRequested: 0,
-		respawns: 0,
-		messagesSent: 0,
-		playersKilled: 0,
+	let sessions = JSON.parse(data);
 
-	}
-
-	if (err) {
-		logger.warn("Unable to load log file from", log_path)
+	if (err || Object.keys(sessions).length === 0) {
+		logger.warn("Unable to load log file from " + log_path)
 		logger.warn("Creating new log...")
-
-		log[getDate()] = logFormat;
 		return;
-	}
-
-	log = JSON.parse(data);
-	for (let stat in logFormat) {
-		if (log[getDate()][stat] === undefined) {
-			log[getDate()][stat] = logFormat[stat];
-		}
 	}
 })
 
 function saveToLog() {
-	let data = JSON.stringify(log);
+	let data = JSON.stringify(sessions);
 	fs.writeFile(log_path, data, function (err) {
 		if (err) throw err;
 	});
+}
+
+function addLog(id, stat, value) {
+	if (sessions[id] === undefined) {
+		sessions[id] = {
+			d: getDate(), // Date
+			s: {}
+		}
+	}
+
+	if (sessions[id].s[stat] === undefined) {
+		sessions[id].s[stat] = value || 0;
+	}
+	if (Number.isInteger(sessions[id].s[stat])) sessions[id].s[stat]++;
 }
 
 // Server-client connection architecture
 io.on('connection', function (socket_) {
 	let socket = socket_;
 	var address = socket.handshake.address.slice(7);
-	if (!log[getDate()].ips.includes(address)) {
-		log[getDate()].ips.push(address);
-	}
-	log[getDate()].connectionsRaw++;
+
+	addLog(socket.id, "ip", address);
+	addLog(socket.id, "tc", Date.now()); // Time connected
 	saveToLog();
 
 	// Server info request
@@ -255,12 +247,8 @@ io.on('connection', function (socket_) {
 		let player = players[socket.id];
 
 		// Log player connection
-		log[getDate()].connections++;
-		if (!log[getDate()].players[player.name]) {
-			log[getDate()].players[player.name] = 1
-		} else {
-			log[getDate()].players[player.name]++;
-		}
+
+		addLog(socket.id, "n", player.name);
 
 		// // Add random items to player's inventory
 		// for (let i = 0; i < 30; i++) {
@@ -270,7 +258,7 @@ io.on('connection', function (socket_) {
 
 		// Send update to everyone
 		io.emit('addPlayer', player)
-		let text = player.name + " has joined the server";
+		let text = player.name + " has joined the server with ip " + address;
 		logger.info(text)
 
 		io.emit('messageAll', {
@@ -321,6 +309,9 @@ io.on('connection', function (socket_) {
 			color: "aqua"
 		});
 		player.name = data.name;
+
+		// Update log
+		addLog(socket.id, "n", player.name);
 	})
 
 	// Receive packet from the client
@@ -364,7 +355,7 @@ io.on('connection', function (socket_) {
 			world.entities[entityId] = server.addEntity(entityId, data)
 			newEntities.push(world.entities[entityId])
 
-			log[getDate()].blocksMined = (log[getDate()].blocksMined + 1) || 1;
+			addLog(socket.id, "bm"); // Block mined
 		} else if (data.t > 0 && !data.cmd && player.mode == "survival") { // BLOCK PLACED
 			// Remove item from toolbar
 			for (let t of player.toolbar) {
@@ -375,7 +366,7 @@ io.on('connection', function (socket_) {
 				}
 			}
 
-			log[getDate()].blocksPlaced = (log[getDate()].blocksPlaced + 1) || 1;
+			addLog(socket.id, "bp"); // Block placed
 		}
 	})
 
@@ -443,7 +434,7 @@ io.on('connection', function (socket_) {
 
 		socket.emit('receiveChunk', chunksToSend);
 
-		log[getDate()].chunksRequested = (log[getDate()].chunksRequested + 1) || 1;
+		addLog(socket.id, "cr"); // Chunk request
 	})
 
 	// Update player inventory
@@ -463,7 +454,7 @@ io.on('connection', function (socket_) {
 			player.dead = false;
 		}
 
-		log[getDate()].respawns = (log[getDate()].respawns + 1) || 1;
+		addLog(socket.id, "r"); // Respawn
 	})
 
 	// Receive player punch event
@@ -550,7 +541,7 @@ io.on('connection', function (socket_) {
 			text: filter.clean(data),
 		});
 
-		log[getDate()].messagesSent = (log[getDate()].messagesSent + 1) || 1;
+		addLog(socket.id, "ms"); // Messages sent
 	})
 
 	socket.on('messagePlayer', function (data) {
@@ -566,7 +557,7 @@ io.on('connection', function (socket_) {
 			color: "grey",
 		});
 
-		log[getDate()].messagesSent = (log[getDate()].messagesSent + 1) || 1;
+		addLog(socket.id, "ms");
 	})
 
 	socket.on('replyPlayer', function (data) {
@@ -582,7 +573,7 @@ io.on('connection', function (socket_) {
 			color: "grey",
 		});
 
-		log[getDate()].messagesSent = (log[getDate()].messagesSent + 1) || 1;
+		addLog(socket.id, "ms");
 	})
 
 	// COMMANDS
@@ -689,6 +680,7 @@ io.on('connection', function (socket_) {
 			logger.info(text)
 		}
 		io.emit('removePlayer', socket.id);
+		addLog(socket.id, "td", Date.now());
 		delete players[socket.id];
 	});
 });
@@ -731,7 +723,7 @@ setInterval(function () {
 				text: txt
 			})
 
-			log[getDate()].playersKilled = (log[getDate()].messagesSent + 1) || 1;
+			addLog(id, "d"); // Deaths
 		}
 	}
 
