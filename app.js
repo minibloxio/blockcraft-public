@@ -180,12 +180,12 @@ function getDate() {
 let log_path = __dirname + '/logs/server.json';
 let sessions = {};
 fs.readFile(log_path, function (err, data) {
-	sessions = JSON.parse(data);
 	if (err || Object.keys(sessions).length === 0) {
 		logger.warn("Unable to load log file from " + log_path)
 		logger.warn("Creating new log...")
 		return;
 	}
+	sessions = JSON.parse(data);
 })
 
 function saveToLog() {
