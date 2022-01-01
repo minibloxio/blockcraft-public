@@ -20,7 +20,7 @@ let game = {
 	fps: getCookie("FPS") || 60,
 	packetDelay: 16,
 	lastPacket: Date.now(),
-	numOfVoxelWorkers: 1,
+	numOfVoxelWorkers: 2,
 }
 
 // Initialize game

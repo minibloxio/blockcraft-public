@@ -25,7 +25,7 @@ self.addEventListener('message', e => {
   }
 });
 
-let faces = [
+const faces = [
   { // left
     uvRow: 0,
     dir: [ -1,  0,  0, ],
@@ -151,13 +151,20 @@ function isTransparent(voxel) {
   }
 }
 
+
+const positions = [];
+const normals = [];
+const uvs = [];
+const indices = [];
+
 function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
 
+  positions.length = 0;
+  normals.length = 0;
+  uvs.length = 0;
+  indices.length = 0;
+
   const {cellSize} = world;
-  const positions = [];
-  const normals = [];
-  const uvs = [];
-  const indices = [];
   const startX = cellX * cellSize;
   const startY = cellY * cellSize;
   const startZ = cellZ * cellSize;
@@ -212,10 +219,10 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
     }
   }
 
-  let positionBuffer = new Float32Array(new SharedArrayBuffer(positions.length*4));
-  let normalBuffer = new Float32Array(new SharedArrayBuffer(normals.length*4));
-  let uvBuffer = new Float32Array(new SharedArrayBuffer(uvs.length*4));
-  let indexBuffer = new Uint16Array(new SharedArrayBuffer(indices.length*2));
+  let positionBuffer = new Float32Array(new ArrayBuffer(positions.length*4));
+  let normalBuffer = new Float32Array(new ArrayBuffer(normals.length*4));
+  let uvBuffer = new Float32Array(new ArrayBuffer(uvs.length*4));
+  let indexBuffer = new Uint16Array(new ArrayBuffer(indices.length*2));
 
   positionBuffer.set(positions);
   normalBuffer.set(normals);

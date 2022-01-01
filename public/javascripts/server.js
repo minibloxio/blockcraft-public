@@ -325,6 +325,8 @@ function updatePlayer(p) {
 
 // Update player color
 function updatePlayerColor(id, color, opacity) {
+	if (!players[id]) return;
+	
 	for (let a of players[id].skeleton.children) {
 		if (a.type == "Mesh") {
 			for (let material of a.material) {
