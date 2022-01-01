@@ -115,7 +115,6 @@ socket.on('addPlayer', function (data) {
 	// Add to players
 	if (data.id != socket.id) { // Check if not own player
 		players[data.id] = data;
-		console.log(data);
 
 		addPlayer(players, data.id);
 	}

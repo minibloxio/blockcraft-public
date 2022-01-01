@@ -56,6 +56,8 @@ app.use(function (req, res, next) {
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/*', function (req, res, next) {
+	let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+	console.log(ip);
 	res.redirect('/')
 	next()
 })
@@ -217,6 +219,8 @@ io.on('connection', function (socket_) {
 	addLog(socket.id, "ip", address);
 	addLog(socket.id, "tc", Date.now()); // Time connected
 	saveToLog();
+	console.log(address);
+	console.log(socket.client.request.headers);
 
 	// Server info request
 	socket.on('serverInfoRequest', function (data) {
