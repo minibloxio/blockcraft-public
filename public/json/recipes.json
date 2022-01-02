@@ -111,5 +111,55 @@ recipes = [
             [null, "stick", null],
             [null, "stick", null]
         ],
+    },
+    {
+        "output": "wood_axe",
+        "count": 1,
+        "mirrored": true,
+        "grid": [
+            ["planks", "planks"],
+            ["stick", "planks"],
+            ["stick", null]
+        ],
+    },
+    {
+        "output": "stone_axe",
+        "count": 1,
+        "mirrored": true,
+        "grid": [
+            ["cobblestone", "cobblestone"],
+            ["stick", "cobblestone"],
+            ["stick", null]
+        ],
+    },
+    {
+        "output": "iron_axe",
+        "count": 1,
+        "mirrored": true,
+        "grid": [
+            ["iron_ingot", "iron_ingot"],
+            ["stick", "iron_ingot"],
+            ["stick", null]
+        ],
+    },
+    {
+        "output": "gold_axe",
+        "count": 1,
+        "mirrored": true,
+        "grid": [
+            ["gold_axe", "gold_axe"],
+            ["stick", "gold_axe"],
+            ["stick", null]
+        ],
+    },
+    {
+        "output": "diamond_axe",
+        "count": 1,
+        "mirrored": true,
+        "grid": [
+            ["diamond", "diamond"],
+            ["stick", "diamond"],
+            ["stick", null]
+        ],
     }
 ];

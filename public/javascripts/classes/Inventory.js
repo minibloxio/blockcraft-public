@@ -91,6 +91,46 @@ class Inventory {
         }
     }
 
+    // Check recipe at position
+    checkRecipe(recipe, grid, rows, columns, i, j, size, mirrored) {
+        let same = true;
+        let recipeSize = 0;
+        
+        // Loop through recipe grid
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < columns; c++) {
+                let colIndex = mirrored ? columns-c-1 : c;
+                let recipeItem = recipe.grid[r][colIndex];
+                if (recipeItem) recipeSize++;
+                let entity = grid[(j+c)+(i+r)*(size-1)];
+
+                let craftingItem = undefined;
+                if (entity && entity.class=="item") {
+                    craftingItem = world.itemOrder[entity.v-1];
+                } else if (entity && entity.class=="block") {
+                    craftingItem = world.blockOrder[entity.v-1];
+                }
+                if (craftingItem != recipeItem) {
+                    same = false;
+                    break;
+                }
+            }
+            if (!same) {
+                break;
+            }
+        }
+        return {same, recipeSize};
+    }
+
+    // Add recipe to possible outputs
+    addRecipe(recipe, recipeSize, outputs) {
+        outputs.push({
+            name: recipe.output,
+            count: recipe.count,
+            size: recipeSize
+        })
+    }
+
     // Update crafting output
     updateCraftingOutput(remove) {
         let {craftingGrid, craftingTableGrid, showCraftingTable} = this;
@@ -117,38 +157,18 @@ class Inventory {
             let foundRecipe = false;
             for (let i = 0; i < size-rows; i++) {
                 for (let j = 0; j < size-columns; j++) {
-                    let same = true;
-                    let recipeSize = 0;
-                    
-                    // Loop through recipe grid
-                    for (let r = 0; r < rows; r++) {
-                        for (let c = 0; c < columns; c++) {
-                            let recipeItem = recipe.grid[r][c];
-                            if (recipeItem) recipeSize++;
-                            let entity = grid[(j+c)+(i+r)*(size-1)];
-
-                            let craftingItem = undefined;
-                            if (entity && entity.class=="item") {
-                                craftingItem = world.itemOrder[entity.v-1];
-                            } else if (entity && entity.class=="block") {
-                                craftingItem = world.blockOrder[entity.v-1];
-                            }
-                            if (craftingItem != recipeItem) {
-                                same = false;
-                                break;
-                            }
-                        }
-                        if (!same) {
-                            break;
-                        }
+                    var {same, recipeSize} = this.checkRecipe(recipe, grid, rows, columns, i, j, size);
+                    if (same) {
+                        this.addRecipe(recipe, recipeSize, outputs);
+                        foundRecipe = true;
+                        break;
                     }
 
+                    if (!recipe.mirrored) continue;
+
+                    var {same, recipeSize} = this.checkRecipe(recipe, grid, rows, columns, i, j, size, true);
                     if (same) {
-                        outputs.push({
-                            name: recipe.output,
-                            count: recipe.count,
-                            size: recipeSize
-                        })
+                        this.addRecipe(recipe, recipeSize, outputs);
                         foundRecipe = true;
                         break;
                     }
