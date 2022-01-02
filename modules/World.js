@@ -643,52 +643,53 @@ module.exports = class World {
 
     for (let id in players) {
       let p = players[id];
+      if (p.showInventory || p.pickupDelay > Date.now()) continue;
 
-      if (p.pickupDelay < Date.now()) { // Pick up item
-        let dir = {x: (p.pos.x-entity.pos.x), y: (p.pos.y-blockSize-(entity.pos.y)), z: (p.pos.z-entity.pos.z)}
-        let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
+      // Pick up item
 
-        // Add to player if within a block distance
-        if (dist < blockSize) {
-          if (entity.v == this.itemId["arrow"] && entity.class == "item" && entity.lethal && !entity.onObject && !players[id].blocking) { // Arrow hit
+      let dir = {x: (p.pos.x-entity.pos.x), y: (p.pos.y-blockSize-(entity.pos.y)), z: (p.pos.z-entity.pos.z)}
+      let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
 
-            players[id].hp -= entity.force;
-            if (players[entity.playerId])
-              players[id].dmgType = players[entity.playerId].name;
-            entity.force *= 300
-            entity.dir = entity.vel;
-            io.to(`${id}`).emit('knockback', entity)
-            io.emit('punch', id);
+      // Add to player if within a block distance
+      if (dist < blockSize) {
+        if (entity.v == this.itemId["arrow"] && entity.class == "item" && entity.lethal && !entity.onObject && !players[id].blocking) { // Arrow hit
 
-            // Remove the item from world
-            newEntities.push({
-              type: "remove_item",
-              id: entity.id,
-              v: entity.v,
-              class: entity.class
-            })
-            delete this.entities[entity_id];
-          } else {
-            // Add item to player's inventory if item already exists in inventory
-            World.addItem(p, entity);
+          players[id].hp -= entity.force;
+          if (players[entity.playerId])
+            players[id].dmgType = players[entity.playerId].name;
+          entity.force *= 300
+          entity.dir = entity.vel;
+          io.to(`${id}`).emit('knockback', entity)
+          io.emit('punch', id);
 
-            // Remove the item from world
-            newEntities.push({
-              type: "remove_item",
-              id: entity.id,
-              v: entity.v,
-              class: entity.class
-            })
-            delete this.entities[entity_id];
-          }
+          // Remove the item from world
+          newEntities.push({
+            type: "remove_item",
+            id: entity.id,
+            v: entity.v,
+            class: entity.class
+          })
+          delete this.entities[entity_id];
+        } else {
+          // Add item to player's inventory if item already exists in inventory
+          World.addItem(p, entity);
+
+          // Remove the item from world
+          newEntities.push({
+            type: "remove_item",
+            id: entity.id,
+            v: entity.v,
+            class: entity.class
+          })
+          delete this.entities[entity_id];
         }
+      }
 
-        if (dist < blockSize*2.5 && (entity.v != this.itemId["arrow"] || entity.onObject)) { // Pull when 2 blocks away
-          
-          entity.acc.x = dir.x * 2 * blockSize;
-          entity.acc.y = dir.y * 2 * blockSize;
-          entity.acc.z = dir.z * 2 * blockSize;
-        }
+      if (dist < blockSize*2.5 && (entity.v != this.itemId["arrow"] || entity.onObject)) { // Pull when 2 blocks away
+        
+        entity.acc.x = dir.x * 2 * blockSize;
+        entity.acc.y = dir.y * 2 * blockSize;
+        entity.acc.z = dir.z * 2 * blockSize;
       }
     }
 

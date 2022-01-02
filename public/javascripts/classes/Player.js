@@ -1082,22 +1082,19 @@ class Player {
 	}
 
 	updateClient(data) {
-		console.log(data);
 		if (data && data.hp > this.hp) {
 			heartUp = true;
 		}
-		this.hp = data.hp;
-		if (this.hp <= 0) { // Add client death message
-			
-		}
 
+		// Update server-side data
+		this.hp = data.hp;
 		this.name = data.name;
 		this.ping = data.ping;
 		this.toolbar = data.toolbar;
 		this.operator = data.operator;
 	}
 
-	update(delta, world) {
+	update(delta) {
 		if (player.hp <= 0 || !initialized || !joined || !isState("inGame")) return;
 
 		if (Date.now() - this.lastRaycast > 100) {

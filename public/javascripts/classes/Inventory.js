@@ -78,12 +78,19 @@ class Inventory {
         }
     }
 
+    // Check if mouse is within inventory
+    withinInventory() {
+        let {width, height, halfW, halfH} = this;
+
+        return mouse.x > halfW - width/2 && mouse.x < halfW + width/2 && mouse.y > halfH - height/2 && mouse.y < halfH + height/2;
+    }
+
     // Check if mouse is within item frame
-    withinItemFrame(xPos, yPos) {
+    withinItemFrame(xPos, yPos, inInventory) {
+        let {boxSize} = this;
+
         xPos -= this.margin;
         yPos -= this.margin;
-
-        let {boxSize} = this;
         return mouse.x > xPos && mouse.x < xPos + boxSize && mouse.y > yPos && mouse.y < yPos + boxSize;
     }
 
@@ -260,6 +267,15 @@ class Inventory {
     selectInventory(type) {
         let {craftingGrid, craftingTableGrid, showCraftingTable, craftingOutput} = this;
 
+        // Check if click is within inventory
+        if (type != "hover" && !this.withinInventory()) {
+            if (type == "left") { // Drop all items from hand
+                this.selectedItem = undefined;
+            } else if (type == "right") { // Drop one item from hand
+                this.selectedItem = undefined;
+            }
+        }
+
         // Select from inventory
         for (let i = 0; i < 36; i++) {
             let {xPos, yPos} = this.getPos("inventory", i);
@@ -427,7 +443,7 @@ class Inventory {
         // Draw background
         drawRectangle(0, 0, canvas.width, canvas.height, "rgba(0, 0, 0, 0.5)")
         drawRect(this.halfW, this.halfH, width, height, 0, "lightgrey")
-        let title = player.mode == "survival" ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode"
+        let title = (player.mode == "survival" || showCraftingTable) ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode"
         drawText(title, this.halfW, this.halfH-height/2+padding, "25px Minecraft-Regular", "grey", "center", "top")
 
         // Add background boxes

@@ -115,6 +115,7 @@ module.exports = class World {
 			connected: true,
 			mode: "survival",
 			fps: 0,
+            showInventory: false,
 		}
     }
 

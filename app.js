@@ -374,7 +374,7 @@ io.on('connection', function (socket_) {
 		if (!player) return;
 
 		let { blockSize } = world;
-		player.pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
+		let droppedItems = false;
 
 		for (let item of data) {
 			if (item.force) {
@@ -383,11 +383,11 @@ io.on('connection', function (socket_) {
 				item.vel = { x: item.dir.x * blockSize * 3, y: blockSize * 2, z: item.dir.z * blockSize * 3 };
 				world.entities[entityId] = server.addEntity(entityId, item);
 				newEntities.push(world.entities[entityId]);
+				droppedItems = true;
 				continue;
 			}
 			for (let t of player.toolbar) {
-				if (!t)
-					continue;
+				if (!t) continue;
 				if (t.v == item.v && t.class == item.class) {
 					t.c = Math.max(0, t.c - item.c);
 
@@ -397,11 +397,13 @@ io.on('connection', function (socket_) {
 					item.vel = { x: item.dir.x * blockSize * 3, y: blockSize * 2, z: item.dir.z * blockSize * 3 };
 					world.entities[entityId] = server.addEntity(entityId, item);
 					newEntities.push(world.entities[entityId])
-
+					droppedItems = true;
 					break;
 				}
 			}
 		}
+
+		if (droppedItems) player.pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
 	})
 
 	// Request chunk

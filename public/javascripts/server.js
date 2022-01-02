@@ -14,6 +14,7 @@ function sendPacket() {
 			currSlot: player.currentSlot,
 			mode: player.mode,
 			fps: round(stats.fps, 1),
+			showInventory: inventory.showInventory,
 		});
 	}
 }
