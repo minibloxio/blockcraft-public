@@ -176,7 +176,7 @@ class Stage {
 				this.generateClouds("remove")
 		}
 
-		// Update clouds
+		// Update clouds (MEMORY INTENSIVE)
 		let renderDistance = blockSize*world.cellSize*chunkManager.renderDistance;
 		for (let cloud of this.clouds) {
 			cloud.position.add(new THREE.Vector3(0.3, 0, 0))

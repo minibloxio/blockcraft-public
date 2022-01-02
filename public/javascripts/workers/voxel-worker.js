@@ -14,11 +14,11 @@ self.addEventListener('message', e => {
     result.length = 0;
 
     for (let cell of cells) {
-      let [cellX, cellY, cellZ, cellId, forceUpdate] = cell;
+      let [cellX, cellY, cellZ, forceUpdate] = cell;
       let geometryData = generateGeometryDataForCell(cellX, cellY, cellZ, world);
       let geometryDataT = generateGeometryDataForCell(cellX, cellY, cellZ, world, true);
 
-      result.push([geometryData, cellX, cellY, cellZ, cellId, geometryDataT, forceUpdate]);
+      result.push([geometryData, cellX, cellY, cellZ, geometryDataT, forceUpdate]);
     }
 
     self.postMessage(result);
@@ -146,13 +146,8 @@ let transparentBlocks = ["water", "glass", "ice", "glass_black", "glass_blue", "
 
 // Check if is transparent
 function isTransparent(voxel) {
-  for (let block of transparentBlocks) {
-    if (world.blockId[block] == voxel) return true;
-  }
+  return transparentBlocks.includes(world.blockOrder[voxel-1]);
 }
-
-
-
 
 function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
 

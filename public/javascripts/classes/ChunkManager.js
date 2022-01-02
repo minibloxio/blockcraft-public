@@ -161,7 +161,7 @@ class ChunkManager {
 			}
 		} else if (type == "voxel") {
 			for (let i = 0; i < data.length; i++) {
-				if (data[6]) chunkManager.chunksToRender.unshift(data[i]); // Prioritize chunks
+				if (data[5]) chunkManager.chunksToRender.unshift(data[i]); // Prioritize chunks
 				else chunkManager.chunksToRender.push(data[i]);
 			}
 		}
@@ -173,23 +173,10 @@ class ChunkManager {
 
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToLoad[i];
-			if (chunk) {
-				
-				let canBeLoaded = true;
-				// let dir = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-				// for (let d of dir) {
-				// 	let cellId = (chunk.x+d[0]) + "," + (chunk.y) + "," + (chunk.z+d[1]);
-				// 	if (!world.cells[cellId]) { 
-				// 		canBeLoaded = false;
-				// 		break;
-				// 	}
-				// }
-				
-				if (canBeLoaded) {
-					updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
-					this.chunksToLoad.splice(i, 1);
-				}
-			}
+			if (!chunk) continue;
+
+			updateVoxelGeometry(chunk.x*cellSize, chunk.y*cellSize, chunk.z*cellSize);
+			this.chunksToLoad.splice(i, 1);
 		}
 	}
 
@@ -197,16 +184,16 @@ class ChunkManager {
 		// Render chunks based on render rate
 		for (var i = 0; i < this.chunkLoadingRate; i++) {
 			let chunk = this.chunksToRender[i];
-			if (chunk) {
-				let chunkX = chunk[1];
-				let chunkZ = chunk[3];
-				this.currChunks[`${chunkX},${chunkZ}`] = [chunkX, chunkZ];
-				updateCellMesh(chunk, true)
-				this.chunksToRender.splice(i, 1);
-			}	
+			if (!chunk) continue;
+
+			let chunkX = chunk[1];
+			let chunkZ = chunk[3];
+			this.currChunks[`${chunkX},${chunkZ}`] = [chunkX, chunkZ];
+			updateCellMesh(chunk, true)
+			this.chunksToRender.splice(i, 1);
 		}
 	}
-
+	
 	unloadChunks(all) { // OPTIMIZE
 		if (all) { // Completely unload all chunks
 			this.chunksToRequest.length = 0;
@@ -270,7 +257,6 @@ class ChunkManager {
 			if (Object.keys(cellIdToMesh).length == 0 || this.chunksToUnload.length == 0) {
 				this.reloading = false;
 			}
-
 		}
 
 		this.chunksToRequest.length = 0;

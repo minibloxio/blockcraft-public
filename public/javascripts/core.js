@@ -173,7 +173,7 @@ function animate() {
 
 	composer.render( scene, camera );
 	
-	updateHUD();
+	updateHUD(); // Update the HUD
 
 	prevTime = time;
 }

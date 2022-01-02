@@ -369,7 +369,7 @@ io.on('connection', function (socket_) {
 		}
 	})
 
-	socket.on('dropItem', function (data) {
+	socket.on('dropItems', function (data) {
 		let player = players[socket.id];
 		if (!player) return;
 

@@ -4,6 +4,7 @@ Provides pointer lock functionality and the ability to connect to the game serve
 
 */
 
+// Request pointer lock
 function requestPointerLock() {
 	if (loaded >= maxLoaded) {
 		// Ask the browser to lock the pointer
@@ -13,6 +14,7 @@ function requestPointerLock() {
 	}
 }
 
+// Get item entity
 function getItemEntity(player, item, dropDir) {
 	return {
 		force: true,
@@ -26,14 +28,15 @@ function getItemEntity(player, item, dropDir) {
 	}
 }
 
-function getDroppedItems(items) {
+// Get dropped items
+function getDroppedItems(items, count) {
 	if (!items) return [];
 
 	let droppedItems = [];
 	let dropDir = player.getDropDir();
 	for (let item of items) {
 		if (!item) continue;
-		for (let i = 0; i < item.c; i++) {
+		for (let i = 0; i < (count || item.c); i++) {
 			droppedItems.push(getItemEntity(player, item, dropDir));
 		}
 	}
@@ -41,6 +44,7 @@ function getDroppedItems(items) {
 	return droppedItems;
 }
 
+// Enter pointer lock
 function enterPointerLock () {
 	player.controls.enabled = true;
 	blocker.style.display = 'none';
@@ -48,7 +52,6 @@ function enterPointerLock () {
 	onWindowResize();
 
 	if (inventory.showInventory) { // Return to game from inventory
-
 		
 		let droppedItems = [];
 		if (inventory.showCraftingTable) { // Drop items in crafting table grid
@@ -62,7 +65,7 @@ function enterPointerLock () {
 		inventory.selectedItem = null;
 		droppedItems.force = true;
 
-		socket.emit('dropItem', droppedItems);
+		socket.emit('dropItems', droppedItems);
 		
 		inventory.craftingOutput = undefined;
 		inventory.showInventory = false;
@@ -145,7 +148,7 @@ function initPointerLock() {
 				event.preventDefault();
 			
 		}).keyup(function (event) {
-			if (event.keyCode == 27 && inventory.showInventory) {
+			if (event.keyCode == 27 && inventory.showInventory) { // Escape key
 				// Ask the browser to lock the pointer
 				element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 				element.requestPointerLock();

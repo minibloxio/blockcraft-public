@@ -246,7 +246,13 @@ function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
       const cellY = Math.floor(oy / cellSize);
       const cellZ = Math.floor(oz / cellSize);
 
-      cells.push([cellX, cellY, cellZ, cellId, forceUpdate]);
+      let cell = new Int8Array(4); // Int8 is enough for now (max of 256 chunk radius)
+      cell[0] = cellX;
+      cell[1] = cellY;
+      cell[2] = cellZ;
+      cell[3] = forceUpdate ? 1 : 0;
+
+      cells.push(cell);
     }
 
     if (!neighbor) break;
@@ -257,12 +263,15 @@ function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
   if (voxelWorkerIndex >= game.numOfVoxelWorkers) {
     voxelWorkerIndex = 0;
   }
+
 }
 
 // Update the voxel geometry for a single cell
 function updateCellMesh(data) {
-  let [opaqueGeometry, cellX, cellY, cellZ, cellId, transparentGeometry, forceUpdate] = data;
+  let [opaqueGeometry, cellX, cellY, cellZ, transparentGeometry, forceUpdate] = data;
   let meshO, meshT;
+
+  let cellId = cellX + "," + cellY + "," + cellZ;
 
   if (cellIdToMesh[cellId]) {
     meshO = cellIdToMesh[cellId][0];

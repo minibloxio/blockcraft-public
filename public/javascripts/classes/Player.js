@@ -235,8 +235,7 @@ class Player {
 
 	getCurrItem() {
 		let item = this.toolbar[this.currentSlot];
-		if (item && item.c > 0)
-			return item;
+		if (item && item.c > 0) return item;
 	}
 
 	updateHand(item) {
@@ -740,9 +739,8 @@ class Player {
 				class: item.class,
 				dir: {x: dropDir.x, z: dropDir.y}
 			}
-			console.log(droppedItem)
 
-			socket.emit('dropItem', [droppedItem]);
+			socket.emit('dropItems', [droppedItem]);
 
 			this.drop = false;
 		}
@@ -1091,6 +1089,7 @@ class Player {
 		this.name = data.name;
 		this.ping = data.ping;
 		this.toolbar = data.toolbar;
+		this.inventory = data.toolbar;
 		this.operator = data.operator;
 	}
 

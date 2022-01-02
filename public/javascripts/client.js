@@ -79,6 +79,7 @@ socket.on('joinResponse', function (data) {
 	    blockSize: world.blockSize,
 	    blockUVS: world.blockUVS,
 	    blockId: world.blockId,
+		blockOrder: world.blockOrder,
 	    cells: world.cells,
 	};
 

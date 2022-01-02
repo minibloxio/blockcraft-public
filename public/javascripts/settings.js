@@ -165,7 +165,7 @@ function addVideoControls() {
 
     addSwitchControl("Statistics", "stats", false, hud, "showStats")
     addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow")
-    addSwitchControl("Clouds", "cloud", true, stage, "showClouds", "generate")
+    addSwitchControl("Clouds", "cloud", false, stage, "showClouds", "generate")
     addSwitchControl("Stars", "stars", true, stage.stars, "visible")
     addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov")
 

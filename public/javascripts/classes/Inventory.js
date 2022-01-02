@@ -265,14 +265,21 @@ class Inventory {
 
     // Select inventory item
     selectInventory(type) {
+        if (!this.showInventory) return;
+
         let {craftingGrid, craftingTableGrid, showCraftingTable, craftingOutput} = this;
 
         // Check if click is within inventory
         if (type != "hover" && !this.withinInventory()) {
             if (type == "left") { // Drop all items from hand
+                socket.emit('dropItems', getDroppedItems([this.selectedItem]));
+               
                 this.selectedItem = undefined;
             } else if (type == "right") { // Drop one item from hand
-                this.selectedItem = undefined;
+                socket.emit('dropItems', getDroppedItems([this.selectedItem], 1));
+                if (this.selectedItem.c > 0) { // Remove one item
+                    this.selectedItem.c -= 1;
+                }
             }
         }
 
@@ -343,6 +350,8 @@ class Inventory {
                 }
             }
         }
+        
+        if (type != "hover") socket.emit('updateInventory', inventory.inventory);
     }
 
     // Update item search
