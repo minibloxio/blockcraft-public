@@ -13,16 +13,61 @@ function requestPointerLock() {
 	}
 }
 
+function getItemEntity(player, item, dropDir) {
+	return {
+		force: true,
+		v: item.v,
+		c: 1,
+		x: player.position.x,
+		y: player.position.y-8,
+		z: player.position.z,
+		class: item.class,
+		dir: {x: dropDir.x, z: dropDir.y}
+	}
+}
+
+function getDroppedItems(items) {
+	if (!items) return [];
+
+	let droppedItems = [];
+	let dropDir = player.getDropDir();
+	for (let item of items) {
+		if (!item) continue;
+		for (let i = 0; i < item.c; i++) {
+			droppedItems.push(getItemEntity(player, item, dropDir));
+		}
+	}
+
+	return droppedItems;
+}
+
 function enterPointerLock () {
 	player.controls.enabled = true;
 	blocker.style.display = 'none';
 	$("#background-image").hide();
 	onWindowResize();
 
-	if (inventory.showInventory) {
+	if (inventory.showInventory) { // Return to game from inventory
+
+		
+		let droppedItems = [];
+		if (inventory.showCraftingTable) { // Drop items in crafting table grid
+			droppedItems = getDroppedItems(inventory.craftingTableGrid);
+			inventory.craftingTableGrid.length = 0;
+		} else { // Drop items in crafting grid
+			droppedItems = getDroppedItems(inventory.craftingGrid);
+			inventory.craftingGrid.length = 0;
+		}
+		droppedItems = droppedItems.concat(getDroppedItems([inventory.selectedItem])); // Drop items in hand
+		inventory.selectedItem = null;
+		droppedItems.force = true;
+
+		socket.emit('dropItem', droppedItems);
+		
+		inventory.craftingOutput = undefined;
 		inventory.showInventory = false;
 		inventory.showCraftingTable = false;
-	} else {
+	} else { // Return to game from chat
 		let name = $("#name-input").val();
 
 		if (name && getCookie("Name") != name)

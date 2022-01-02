@@ -152,17 +152,14 @@ function isTransparent(voxel) {
 }
 
 
-const positions = [];
-const normals = [];
-const uvs = [];
-const indices = [];
+
 
 function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
 
-  positions.length = 0;
-  normals.length = 0;
-  uvs.length = 0;
-  indices.length = 0;
+  const positions = [];
+  const normals = [];
+  const uvs = [];
+  const indices = [];
 
   const {cellSize} = world;
   const startX = cellX * cellSize;

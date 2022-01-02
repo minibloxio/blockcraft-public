@@ -52,13 +52,11 @@ class Inventory {
                 if (craftingTableGrid[i])
                     grid[i] = craftingTableGrid[i].v;
             }
-            console.log(craftingTableGrid);
         } else {
             for (let i = 0; i < craftingGrid.length; i++) {
                 if (craftingGrid[i])
                     grid[i] = craftingGrid[i].v;
             }
-            console.log(craftingGrid);
         }
 
         this.craftingOutput = undefined;
@@ -533,7 +531,6 @@ class Inventory {
             index = this.drawItems(items, offset, "item", index);
         }
     }
-    
 
     // Display inventory
     displayInventory() {

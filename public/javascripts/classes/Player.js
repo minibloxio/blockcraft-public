@@ -305,7 +305,6 @@ class Player {
 		if (this.mode == "spectator" || this.mode == "camera") return;
 
 		this.punchT = (Date.now()-this.punching)/120; // Punching
-
 		
 		let hand = this.getCurrItem();
 		let blockingSpeed = 10;
@@ -666,6 +665,8 @@ class Player {
 				inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
 				document.exitPointerLock();
 				this.punching = Date.now();
+				this.place = false;
+				this.key.rightClick = 0;
 				return;
 			}
 
@@ -711,6 +712,13 @@ class Player {
 		}
 	}
 
+	getDropDir() {
+		let dropDir = this.camera.getWorldDirection(new THREE.Vector3());
+		dropDir = new Vector(dropDir.x, dropDir.z);
+		dropDir.normalize();
+		return dropDir;
+	}
+
 	dropItem() {
 		if (!this.allowDrop || !player.controls.enabled || showChatBar) {
 			this.allowDrop = false; 
@@ -720,19 +728,21 @@ class Player {
 		this.allowDrop = false;
 		let item = this.getCurrItem();
 		if (item && item.c > 0) {
-			let dropDir = this.camera.getWorldDirection(new THREE.Vector3());
-			dropDir = new Vector(dropDir.x, dropDir.z);
-			dropDir.normalize();
+			let dropDir = this.getDropDir();
 
-			socket.emit('dropItem', {
+			let droppedItem = {
 				type: item.type,
 				v: item.v,
+				c: 1,
 				x: this.position.x,
 				y: this.position.y-8,
 				z: this.position.z,
 				class: item.class,
 				dir: {x: dropDir.x, z: dropDir.y}
-			});
+			}
+			console.log(droppedItem)
+
+			socket.emit('dropItem', [droppedItem]);
 
 			this.drop = false;
 		}
@@ -1058,21 +1068,21 @@ class Player {
 		if (this.blocking && this.key.sneak && !this.fly && this.onObject)
 			this.speed = 0.3;
 
-		/*// Change camera fov when sprinting
-		if (this.speed <= 2 || this.distanceMoved < 1.5) {
+		// Change camera fov when sprinting
+		if ((this.speed <= 2 || this.distanceMoved < 1.5) && camera.dynFov) {
 			if (camera.fov > 75) {
-				camera.fov -= 0.3;
+				camera.fov -= delta*100;
 			}
-		} else if (this.distanceMoved > 1.5) {
-			if (camera.fov < 80) {
-				camera.fov += 0.3;
+		} else if (this.distanceMoved > 7 && camera.dynFov) {
+			if (camera.fov < 90) {
+				camera.fov += delta*100;
 			}
 		}
-		*/
 		camera.updateProjectionMatrix();
 	}
 
 	updateClient(data) {
+		console.log(data);
 		if (data && data.hp > this.hp) {
 			heartUp = true;
 		}

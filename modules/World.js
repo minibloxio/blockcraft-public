@@ -583,7 +583,6 @@ module.exports = class World {
   }
   
   update(dt, players, newEntities, io) {
-  	const {blockSize} = this;
   	// Update entities
   	for (let entity_id in this.entities) {
   		let entity = this.entities[entity_id];
@@ -709,11 +708,13 @@ module.exports = class World {
 
   static addItem(p, entity) {
     let added = false;
+    // Add item to player's inventory if item already exists in inventory
     for (let slot of p.toolbar) {
       if (!slot) continue;
       if (slot.v == entity.v && slot.class == entity.class) {
         slot.c += entity.amount || 1;
         added = true;
+        return;
       }
     }
 
@@ -731,7 +732,7 @@ module.exports = class World {
           break;
         }
       }
-
+      
       if (!filled) {
         p.toolbar.push({
           v: entity.v,

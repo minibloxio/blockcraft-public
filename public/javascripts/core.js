@@ -58,7 +58,7 @@ function initWorkers() {
 	})
 
 	// Voxel geometry workers
-	for (let i = 0; i < 4; i++) { 
+	for (let i = 0; i < game.numOfVoxelWorkers; i++) { 
 		voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
 		voxelWorkers[i].addEventListener('message', async (e) => {
 			await chunkManager.processChunks(e.data, "voxel");

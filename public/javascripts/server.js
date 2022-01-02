@@ -132,6 +132,7 @@ function addPlayer(players, id) {
 	setPlayerGamemode(p, p.mode);
 }
 
+// Update server players
 function updatePlayers(serverPlayers) {
 	for (let id in players) {
 		let p = players[id];

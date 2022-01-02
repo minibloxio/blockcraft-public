@@ -39,7 +39,6 @@ class ChunkManager {
 	    let range = 1;
 	    let direction = 'up';
 
-	    let maxChunkRequests = 1;
 		let maxChunkRevisible = 1;
 		let requests = 0;
 		let revisible = 0;
@@ -55,7 +54,6 @@ class ChunkManager {
 				// Add chunks to request
 				for (let y = 0; y < (world.buildHeight+1)/cellSize; y++) {
 					let cellY = y;
-					let cellId = cellX + "," + cellY + "," + cellZ;
 
 					this.chunksToRequest.push({
 						x: cellX,

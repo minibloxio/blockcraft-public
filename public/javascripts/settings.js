@@ -134,7 +134,8 @@ function addKeyboardControls() {
     })
 }
 
-function addSliderControl(name, id, defaultValue, object, key) {
+function addSliderControl(name, id, defaultValue, object, key, callback) {
+    
     // Sensitivity
     if (getCookie(name)) {
         object[key] = parseFloat(getCookie(name));
@@ -148,6 +149,9 @@ function addSliderControl(name, id, defaultValue, object, key) {
         object[key] = $("#" + id + "Slider")[0].value;
         $("#" + id + "Value").text(name + ": " + object[key]);
         setCookie(name, object[key], cookieExpiryTime);
+        if (callback) {
+            callback();
+        }
     })
 }
 
@@ -163,6 +167,7 @@ function addVideoControls() {
     addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow")
     addSwitchControl("Clouds", "cloud", true, stage, "showClouds", "generate")
     addSwitchControl("Stars", "stars", true, stage.stars, "visible")
+    addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov")
 
     addSelectControl("Material Texture", "texture", "lambert", chunkManager, "texture", chunkManager.updateTexture);
 }

@@ -375,20 +375,31 @@ io.on('connection', function (socket_) {
 
 		let { blockSize } = world;
 		player.pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
-		for (let t of player.toolbar) {
-			if (!t)
-				continue;
-			if (t.v == data.v && t.class == data.class) {
-				t.c = Math.max(0, t.c - 1);
 
-				// Add item as server-side entity
+		for (let item of data) {
+			if (item.force) {
 				let entityId = Function.randomString(5);
-				data.pos = { x: data.x, y: data.y, z: data.z };
-				data.vel = { x: data.dir.x * blockSize * 3, y: blockSize * 2, z: data.dir.z * blockSize * 3 };
-				world.entities[entityId] = server.addEntity(entityId, data);
-				newEntities.push(world.entities[entityId])
+				item.pos = { x: item.x, y: item.y, z: item.z };
+				item.vel = { x: item.dir.x * blockSize * 3, y: blockSize * 2, z: item.dir.z * blockSize * 3 };
+				world.entities[entityId] = server.addEntity(entityId, item);
+				newEntities.push(world.entities[entityId]);
+				continue;
+			}
+			for (let t of player.toolbar) {
+				if (!t)
+					continue;
+				if (t.v == item.v && t.class == item.class) {
+					t.c = Math.max(0, t.c - item.c);
 
-				break;
+					// Add item as server-side entity
+					let entityId = Function.randomString(5);
+					item.pos = { x: item.x, y: item.y, z: item.z };
+					item.vel = { x: item.dir.x * blockSize * 3, y: blockSize * 2, z: item.dir.z * blockSize * 3 };
+					world.entities[entityId] = server.addEntity(entityId, item);
+					newEntities.push(world.entities[entityId])
+
+					break;
+				}
 			}
 		}
 	})
