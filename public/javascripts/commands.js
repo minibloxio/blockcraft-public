@@ -137,7 +137,7 @@ function updateHints() {
 function giveCommandHint(msg, autocomplete) {
     // Initialize variables
     commands = JSON.parse(commandsInit);
-    hintText = "/";
+    chat.hintText = "/";
     let firstArgUnique = false;
     let firstArgValue = "";
     let firstArgCounter = 0;
@@ -159,17 +159,17 @@ function giveCommandHint(msg, autocomplete) {
             if (firstArgCounter > commandHintLimit) return;
 
             if (firstArgUnique) { // If the first argument is unique
-                hintText += ", " + command;
+                chat.hintText += ", " + command;
                 firstArgValue = "";
             } else {
-                hintText += command;
+                chat.hintText += command;
                 firstArgUnique = command;
                 firstArgValue = command;
             }
             
             if (autocomplete) { // Autocomplete the command
                 let extraSpace = Object.keys(commands[command]).length > 1 ? " " : "";
-                let completedCommand = hintText + extraSpace;
+                let completedCommand = chat.hintText + extraSpace;
                 $("#chat-input").val(completedCommand);
                 giveCommandHint(completedCommand.slice(1).split(" "), false);
                 return;
@@ -183,42 +183,42 @@ function giveCommandHint(msg, autocomplete) {
             if (msg.length == 1) {
                 if (autocomplete) {
                     let extraSpace = Object.keys(commands[command]).length > 1 ? " " : "";
-                    let completedCommand = hintText + command + extraSpace;
+                    let completedCommand = chat.hintText + command + extraSpace;
                     $("#chat-input").val(completedCommand);
                     giveCommandHint(completedCommand.slice(1).split(" "), false);
                     return;
                 }
 
-                hintText += command + " " + commands[command].hint;
+                chat.hintText += command + " " + commands[command].hint;
             }
         }
 
         // If the command exists and the command has a second argument
         if (command == msg[0] && msg.length >= 2 && commands[command].hints) { 
             firstArgUnique = command;
-            hintText += msg[0] + " ";
+            chat.hintText += msg[0] + " ";
 
             // Special case for /setblock
             if (msg[0] == "setblock") {
                 msg.shift();
                 if (msg.length < 4) {
-                    hintText += msg.join(" ").removeExtraSpaces() + " ";
+                    chat.hintText += msg.join(" ").removeExtraSpaces() + " ";
 
                     if (autocomplete && msg.length <= 3) {
-                        if ((msg[2] == undefined || msg[2].length == 0)) hintText += '~';
-                        let completedCommand = (hintText + " ").removeExtraSpaces();
+                        if ((msg[2] == undefined || msg[2].length == 0)) chat.hintText += '~';
+                        let completedCommand = (chat.hintText + " ").removeExtraSpaces();
                         $("#chat-input").val(completedCommand);
                         giveCommandHint(completedCommand.slice(1).split(" "), false);
                         return;
                     }
 
-                    if (msg.length <= 3 && (msg[2] == undefined || !msg[2].length)) hintText += "~";
+                    if (msg.length <= 3 && (msg[2] == undefined || !msg[2].length)) chat.hintText += "~";
 
-                    hintText += " - Set block at " + getCoord(msg);
-                    hintText = hintText.removeExtraSpaces();
+                    chat.hintText += " - Set block at " + getCoord(msg);
+                    chat.hintText = chat.hintText.removeExtraSpaces();
                     return;
                 } else if (msg.length == 4) {
-                    hintText += msg.slice(0, 3).join(" ") + " ";
+                    chat.hintText += msg.slice(0, 3).join(" ") + " ";
                     msg.splice(0, 2);
                 }
             }
@@ -233,16 +233,16 @@ function giveCommandHint(msg, autocomplete) {
                     if (secondHintCounter > commandHintLimit) return;
 
                     if (secondHint) {
-                        hintText += ", " + hint;
+                        chat.hintText += ", " + hint;
                         secondHintValue = "";
                     } else {
-                        hintText += hint;
+                        chat.hintText += hint;
                         secondHint = hint;
                         secondHintValue = hint;
                     }
 
                     if (autocomplete) {
-                        let completedCommand = hintText;
+                        let completedCommand = chat.hintText;
                         $("#chat-input").val(completedCommand);
                         giveCommandHint(completedCommand.slice(1).split(" "), false);
                         return;
@@ -254,19 +254,19 @@ function giveCommandHint(msg, autocomplete) {
                     if (msg[0] == "give") {
                         let num = clamp(parseInt(msg[2]), 0, 64);
                         if (msg[2] == '') num = 1;
-                        hintText += " " + msg[2] + " - Give " + num + " " + hint + " to yourself";
+                        chat.hintText += " " + msg[2] + " - Give " + num + " " + hint + " to yourself";
                         return;
                     } else if (msg[0] == "op") {
-                        hintText += " " + msg[2] + " - Enter the password to make " + hint + " an operator";
+                        chat.hintText += " " + msg[2] + " - Enter the password to make " + hint + " an operator";
                         return;
                     } else if (msg[0] == "deop") {
-                        hintText += " " + msg[2] + " - Enter the password to remove " + hint + " as an operator";
+                        chat.hintText += " " + msg[2] + " - Enter the password to remove " + hint + " as an operator";
                         return;
                     } else if (msg[0] == "kick") {
-                        hintText += " " + msg[2] + " - Enter the reason for kicking " + hint;
+                        chat.hintText += " " + msg[2] + " - Enter the reason for kicking " + hint;
                         return;
                     } else if (msg[0] == "msg" || msg[0] == "whisper") {
-                        hintText += " " + msg.slice(2).join(" ") + " - Enter the message to send to " + hint;
+                        chat.hintText += " " + msg.slice(2).join(" ") + " - Enter the message to send to " + hint;
                         return;
                     }
                 }
@@ -279,28 +279,28 @@ function giveCommandHint(msg, autocomplete) {
                     let coord = getCoord(msg);
                     if (coord) {
                         if (msg.length == 3 && !validCoord(msg)) {
-                            hintText += msg.join(" ") + " - Invalid coordinates";
+                            chat.hintText += msg.join(" ") + " - Invalid coordinates";
                             return;
                         } else {
-                            hintText += msg.join(" ") + " - Teleport to " + coord;
+                            chat.hintText += msg.join(" ") + " - Teleport to " + coord;
                             return;
                         }
                     }
                 } else if (Object.keys(commands[command].hints) == 0) {
                     msg.shift();
-                    hintText += msg.join(" ") + " - No players online to teleport to";
+                    chat.hintText += msg.join(" ") + " - No players online to teleport to";
                     return;
                 }
             }
 
             // Check if the second argument is the only one available
             if (secondHintValue) {
-                hintText += " " + (commands[command].hints[secondHintValue].hint || ("- " + commands[command].hints[secondHintValue]));
+                chat.hintText += " " + (commands[command].hints[secondHintValue].hint || ("- " + commands[command].hints[secondHintValue]));
                 return;
             } else if (!secondHint) {
                 msg.shift();
-                hintText += msg.join(" ") + " - " + commands[command].error;
-                hintText = "?" + hintText;
+                chat.hintText += msg.join(" ") + " - " + commands[command].error;
+                chat.hintText = "?" + chat.hintText;
             }
 
             break;
@@ -308,12 +308,12 @@ function giveCommandHint(msg, autocomplete) {
     }
 
     msg = msg.join(" ").trim().split(" ");
-    if ((hintText == "/" && !firstArgUnique) || (msg.length > 1 && msg[0] != firstArgUnique && msg[1].length > 0 && !secondHint)) {
-        hintText += msg.join(" ") + " - No command found";
-        hintText = "?" + hintText;
+    if ((chat.hintText == "/" && !firstArgUnique) || (msg.length > 1 && msg[0] != firstArgUnique && msg[1].length > 0 && !secondHint)) {
+        chat.hintText += msg.join(" ") + " - No command found";
+        chat.hintText = "?" + chat.hintText;
     }
     if (firstArgUnique && firstArgValue) {
-        hintText += " " + commands[firstArgValue].hint;
+        chat.hintText += " " + commands[firstArgValue].hint;
     }
 }
 
@@ -382,7 +382,7 @@ function checkCommand(msg) {
     } else if (msg[0] == "list") {
         listPlayers();
     } else {
-        addChat({
+        chat.addChat({
             text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',
             color: "red"
         });
@@ -398,20 +398,20 @@ function displayHelp(msg) {
         }
 
         // Display all commands
-        addChat({
+        chat.addChat({
             text: 'COMMANDS: ' + helpText.slice(0, -2),
         })
-        addChat({
+        chat.addChat({
             text: 'Type /help <command> for more info on a command'
         })
     } else {
         let command = msg[1];
         if (commands[command]) {
-            addChat({
+            chat.addChat({
                 text: 'Usage: /' + command + ' ' + commands[command].hint
             })
         } else {
-            addChat({
+            chat.addChat({
                 text: 'Error: Unable to recognize command "' + command + '"'
             })
         }
@@ -420,28 +420,28 @@ function displayHelp(msg) {
 
 // Display tutorial
 function displayTutorial() {
-    addChat({
+    chat.addChat({
         text: "------------------"
     })
-    addChat({
+    chat.addChat({
         text: "TUTORIAL"
     })
-    addChat({
+    chat.addChat({
         text: "Use WASD to move around, SPACEBAR to jump, SHIFT to sprint, and ALT to crouch"
     })
-    addChat({
+    chat.addChat({
         text: "Use the mouse to look around, LEFT CLICK to mine and attack, RIGHT CLICK to place blocks"
     })
-    addChat({
+    chat.addChat({
         text: "Press E to open your inventory and crafting menu"
     })
-    addChat({
+    chat.addChat({
         text: "Press R to reset your position to your spawn point"
     })
-    addChat({
+    chat.addChat({
         text: "Press F to fly in creative mode"
     })
-    addChat({
+    chat.addChat({
         text: "------------------"
     })
 }
@@ -450,27 +450,27 @@ function displayTutorial() {
 function updateGamemode(mode) {
     let prevGamemode = player.mode;
     if (["survival", "s"].indexOf(mode) > -1) {
-        addChat({
+        chat.addChat({
             text: "Gamemode changed to survival mode"
         });
         player.mode = "survival";
     } else if (["creative", "c"].indexOf(mode) > -1) {
-        addChat({
+        chat.addChat({
             text: "Gamemode changed to creative mode"
         });
         player.mode = "creative";
     } else if (["spectator", "sp"].indexOf(mode) > -1) {
-        addChat({
+        chat.addChat({
             text: "Gamemode changed to spectator mode"
         });
         player.mode = "spectator";
     } else if (["camera", "ca"].indexOf(mode) > -1) {
-        addChat({
+        chat.addChat({
             text: "Gamemode changed to camera mode"
         });
         player.mode = "camera";
     } else {
-        addChat({
+        chat.addChat({
             text: "Error: Unrecognized gamemode",
             color: "red"
         });
@@ -499,7 +499,7 @@ function teleport(msg) {
             let coord = new THREE.Vector3(pos.x*world.blockSize, pos.y*world.blockSize, pos.z*world.blockSize);
             player.setCoords(coord);
         } else {
-            addChat({
+            chat.addChat({
                 text: 'Error: Invalid coordinate (format: /tp <int> <int> <int>)',
                 color: "red"
             });
@@ -514,7 +514,7 @@ function teleport(msg) {
             let p = players[id];
             if (p.name == target) {
                 exists = true; 
-                addChat({
+                chat.addChat({
                     text: "Teleported " + player.name + " to " + p.name
                 });
                 player.setCoords(p.pos);
@@ -523,7 +523,7 @@ function teleport(msg) {
             }
         }
         if (!exists) {
-            addChat({
+            chat.addChat({
                 text: 'Error: No player found with name "' + target + '" to teleport to',
                 color: "red"
             });
@@ -535,13 +535,13 @@ function teleport(msg) {
 function changeGodmode() {
     if (!player.god) {
         player.god = true;
-        addChat({
+        chat.addChat({
             text: "God mode enabled"
         });
         player.updateGamemode(true);
     } else if (player.god) {
         player.god = false;
-        addChat({
+        chat.addChat({
             text: "God mode disabled"
         });
         player.updateGamemode(true);
@@ -550,7 +550,7 @@ function changeGodmode() {
 
 // Display world seed
 function displaySeed() {
-    addChat({
+    chat.addChat({
         text: "World seed: " + world.seed
     });
 }
@@ -571,11 +571,11 @@ function setBlock(msg) {
             t: world.blockId[msg[3]],
             cmd: true,
         });
-        addChat({
+        chat.addChat({
             text: "Set block at " + coord.x + " " + coord.y + " " + coord.z + " to " + msg[3]
         })
     } else {
-        addChat({
+        chat.addChat({
             text: 'Error: Invalid coordinate (format: /setblock <int> <int> <int>)',
             color: "red"
         });
@@ -597,11 +597,11 @@ function giveItem(msg) {
             amount: amount,
             class: world.blockId[item] ? "block" : "item",
         })
-        addChat({
+        chat.addChat({
             text: "Gave " + amount + " " + item + " to " + player.name
         })
     } else {
-        addChat({
+        chat.addChat({
             text: 'Error: Invalid item or amount',
             color: "red"
         });
@@ -615,27 +615,27 @@ function clear(type) {
         if (item) {
             socket.emit('clearHand', player.currentSlot);
             let thing = item.class == "block" ? world.blockOrder[item.v] : world.itemOrder[item.v];
-            addChat({
+            chat.addChat({
                 text: "Cleared " + item.c + " " + thing + " from hand"
             });
         } else {
-            addChat({
+            chat.addChat({
                 text: "No item in hand to clear",
                 color: "red"
             });
         }
     } else if (type == "inventory") { // Clear the inventory
         socket.emit('clearInventory');
-        addChat({
+        chat.addChat({
             text: "Cleared inventory"
         });
     } else if (type == "chat") { // Clear the chat
         chat.length = 0;
-        addChat({
+        chat.addChat({
             text: "Cleared chat"
         });
     } else { // Invalid type
-        addChat({
+        chat.addChat({
             text: 'Error: Invalid clear type',
             color: "red"
         });
@@ -664,12 +664,12 @@ function setOperator(msg, isOp) {
     }
 
     if (!exists) {
-        addChat({
+        chat.addChat({
             text: 'Error: No player found with name "' + target + '" to set operator status for',
             color: "red"
         });
     } else if (password == undefined || password.length == 0) {
-        addChat({
+        chat.addChat({
             text: 'Error: No password specified',
             color: "red"
         });
@@ -705,12 +705,12 @@ function kickPlayer(msg) {
     }
 
     if (!player.operator) {
-        addChat({
+        chat.addChat({
             text: 'Error: This command can only be used by operators',
             color: "red"
         });
     } else if (!exists) {
-        addChat({
+        chat.addChat({
             text: 'Error: No player found with name "' + target + '" to kick',
             color: "red"
         });
@@ -744,12 +744,12 @@ function killPlayer(msg) {
     }
 
     if (!player.operator) {
-        addChat({
+        chat.addChat({
             text: 'Error: This command can only be used by operators',
             color: "red"
         });
     } else if (!exists) {
-        addChat({
+        chat.addChat({
             text: 'Error: No player found with name "' + target + '" to kill',
             color: "red"
         });
@@ -764,7 +764,7 @@ function killPlayer(msg) {
 // Set spawnpoint
 function setSpawn() {
     player.spawnpoint = player.position.clone();
-    addChat({
+    chat.addChat({
         text: "Set spawnpoint to x: " + round(player.spawnpoint.x) + " y: " + round(player.spawnpoint.y) + " z: " + round(player.spawnpoint.z)
     })
 }
@@ -772,7 +772,7 @@ function setSpawn() {
 // Set home
 function setHome() {
     player.home = player.position.clone();
-    addChat({
+    chat.addChat({
         text: "Set home to x: " + round(player.home.x) + " y: " + round(player.home.y) + " z: " + round(player.home.z)
     })
 }
@@ -782,7 +782,7 @@ function goHome() {
     if (player.home) {
         player.setCoords(player.home);
     } else {
-        addChat({
+        chat.addChat({
             text: "Error: No home set",
             color: "red"
         });
@@ -813,17 +813,17 @@ function messagePlayer(msg) {
     }
 
     if (!exists) {
-        addChat({
+        chat.addChat({
             text: 'Error: No player found with name "' + target + '" to message',
             color: "red"
         });
     } else if (message.length == 0) {
-        addChat({
+        chat.addChat({
             text: 'Error: No message specified',
             color: "red"
         });
     } else {
-        addChat({
+        chat.addChat({
             name: 'You whisper to ' + target,
             text: message,
             color: "grey",
@@ -843,17 +843,17 @@ function replyPlayer(msg) {
     let target = players[player.lastWhisper].name;
 
     if (!player.lastWhisper) {
-        addChat({
+        chat.addChat({
             text: 'Error: No player found with name "' + target + '" to reply to',
             color: "red"
         });
     } else if (message.length == 0) {
-        addChat({
+        chat.addChat({
             text: 'Error: No message specified',
             color: "red"
         });
     } else {
-        addChat({
+        chat.addChat({
             name: 'You reply to ' + target,
             text: message,
             color: "grey",
@@ -868,18 +868,18 @@ function replyPlayer(msg) {
 // List players
 function listPlayers() {
     let playersOnline = Object.keys(players).length + 1;
-    addChat({
+    chat.addChat({
         text: "Players online (" + playersOnline + "):",
     })
     for (let id in players) {
         let p = players[id];
         let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";
-        addChat({
+        chat.addChat({
             text: p.name + " (" + ping + "ms ping, " + p.fps + " fps)",
         })
     }
     let ping = round(player.ping.reduce((a, b) => a + b, 0)/player.ping.length, 0) || "disc";
-    addChat({
+    chat.addChat({
         text: player.name + " (" + ping + "ms ping, " + player.fps + " fps)",
     })
 }

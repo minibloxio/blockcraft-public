@@ -353,7 +353,7 @@ function nextState(e) {
     } else if (isState("loadingChunks") && Object.keys(chunkManager.currChunks).length >= maxChunks) { // Loading Chunks -> In Game
         console.log("Requesting pointer lock");
         requestPointerLock();
-        initChat();
+        chat.initChat();
 
         $(".menu-button").hide();
         $("#ingame-bar").show();

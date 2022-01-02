@@ -719,7 +719,7 @@ class Player {
 	}
 
 	dropItem() {
-		if (!this.allowDrop || !player.controls.enabled || showChatBar) {
+		if (!this.allowDrop || !player.controls.enabled || chat.showChatBar) {
 			this.allowDrop = false; 
 			return;
 		}
@@ -841,7 +841,7 @@ class Player {
 			}
 
 			// Jump
-			if (this.key.up && !showChatBar) {
+			if (this.key.up && !chat.showChatBar) {
 				if (this.onObject) {
 					this.velocity.y += this.initialJumpVelocity;
 					if (this.onObjectTime < this.bhopTimeLimit) {

@@ -92,7 +92,7 @@ function exitPointerLock() {
 	$("#chat-input").blur();
 	$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
 	$("#chat-input").val('');
-	showChatBar = false;
+	chat.showChatBar = false;
 }
 
 function initPointerLock() {
@@ -125,7 +125,7 @@ function initPointerLock() {
 			if (event.keyCode == 27 && player.controls.enabled)
 				document.exitPointerLock();
 
-			if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !showChatBar && loaded >= maxLoaded+1 && (player.controls.enabled || inventory.showInventory)) {
+			if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !chat.showChatBar && loaded >= maxLoaded+1 && (player.controls.enabled || inventory.showInventory)) {
 
 				if (player.controls.enabled && inventory.canShowInventory) {
 					inventory.showInventory = true;

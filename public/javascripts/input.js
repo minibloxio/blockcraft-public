@@ -118,21 +118,20 @@ var onKeyDown = function ( event ) {
 	if (!initialized) return;
 	
 	// CHAT INPUT
-	if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && showChatFlag) {
-		showChatFlag = false;
-    	showChatBar = !showChatBar;
-    	if (showChatBar) {
+	if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && chat.showChatFlag) {
+		chat.showChatFlag = false;
+    	chat.showChatBar = !chat.showChatBar;
+    	if (chat.showChatBar) {
     		$("#chat-input").focus();
     		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0.3)"});
-    		showChat = true;
+    		chat.showChat = true;
     	} else {
     		$("#chat-input").blur();
     		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
-    		hideChatTimer(5000);
     	}
 
     	let msg = $("#chat-input").val()
-    	if (!showChatBar && msg) {
+    	if (!chat.showChatBar && msg) {
     		if (msg[0] != "/") { // Send message to everyone
     			socket.emit("message", $("#chat-input").val());
 	    		$("#chat-input").val("")
@@ -144,7 +143,7 @@ var onKeyDown = function ( event ) {
     		}
     	}
 	}
-	//  else if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && !showChatFlag) {
+	//  else if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && !chat.showChatFlag) {
 
 	// CREATIVE MENU CONTROLS
 	if (event.keyCode == 38 ) {
@@ -153,7 +152,7 @@ var onKeyDown = function ( event ) {
 		inventory.scroll(-1);
 	}
 
-	if (!initialized || !player.controls.enabled || showChatBar)
+	if (!initialized || !player.controls.enabled || chat.showChatBar)
 		return;
 	
 	// GAME CONTROLS
@@ -239,14 +238,14 @@ var onKeyUp = function ( event ) {
 	// CHAT INPUT
 	hintText = "";
 	if ([13].indexOf(event.keyCode) > -1) {
-		showChatFlag = true;
+		chat.showChatFlag = true;
 		return;
 	}
 
 	// Give command hint
 	let msg = $("#chat-input").val();
     
-	if (player && player.controls.enabled && showChatFlag && msg && msg[0] == "/") {
+	if (player && player.controls.enabled && chat.showChatFlag && msg && msg[0] == "/") {
 		msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
 		giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
 	}

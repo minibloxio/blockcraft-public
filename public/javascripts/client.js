@@ -122,7 +122,7 @@ socket.on('removePlayer', function (id) {
 	if (!initialized || !players[id])
 		return;
 
-	addChat({text: players[id].name + " has left the server", 
+	chat.addChat({text: players[id].name + " has left the server", 
 		color: "yellow",
 		timer: 3000,
 	});
@@ -153,11 +153,11 @@ socket.on('update', async function (data) {
 })
 
 socket.on('messageAll', function (data) {
-	addChat(data);
+	chat.addChat(data);
 })
 
 socket.on('message', function (data) {
-	addChat(data);
+	chat.addChat(data);
 	if (data.type == "whisper") {
 		player.lastWhisper = data.id;
 	}
