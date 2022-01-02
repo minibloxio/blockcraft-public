@@ -24,14 +24,20 @@ const io = new Server(httpsServer, {
 		methods: ["GET", "POST"]
 	}
 });
+
+let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com", "https://ap-southeast.victorwei.com"]
 var io_client = require( 'socket.io-client' );
-// let socket = io_client.connect('https://na-east.victorwei.com');
-// console.log(socket);
-// socket.emit('sessionInfoRequest');
-// socket.on('sessionInfo', function (data) {
-// 	console.log(JSON.parse(data));
-// })
-// socket.emit('message', 'Hello World');
+
+let serverSessions = {};
+
+for (let i = 0; i < serverList.length; i++) {
+	let server = serverList[i];
+	let socket = io_client.connect(server);
+	socket.emit('sessionInfoRequest');
+	socket.on('sessionInfo', function (data) {
+		serverSessions[server] = JSON.parse(data);
+	})
+}
 
 // Cluster (used for multiple Node.js servers)
 const cluster = require('cluster');
@@ -224,9 +230,14 @@ io.on('connection', function (socket_) {
 	let socket = socket_;
 	var address = socket.client.request.headers['cf-connecting-ip'] || socket.client.request.headers['x-real-ip'] || socket.client.request.headers['host'];
 
-	// Session info request
+	// Session info request (server)
 	socket.on('sessionInfoRequest', function (data) {
 		socket.emit('sessionInfo', JSON.stringify(sessions));
+	});
+
+	// Session info request (client)
+	socket.on('sessionInfo', function (data) {
+		socket.emit('sessionInfo', JSON.stringify(serverSessions));
 	});
 
 	// Server info request

@@ -569,3 +569,12 @@ function regex(msg) {
 Array.prototype.diff = function(a) { 
     return this.filter(function(i) {return a.indexOf(i) < 0;});
 };
+
+// Array max/min
+Array.prototype.max = function() {
+    return Math.max.apply(null, this);
+};
+
+Array.prototype.min = function() {
+    return Math.min.apply(null, this);
+};
