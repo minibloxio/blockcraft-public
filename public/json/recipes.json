@@ -175,9 +175,9 @@ recipes = [
         "output": "wood_shovel",
         "count": 1,
         "grid": [
-            ["diamond", "diamond"],
-            ["stick", "diamond"],
-            ["stick", null]
+            ["planks"],
+            ["stick"],
+            ["stick"]
         ],
     },
     {

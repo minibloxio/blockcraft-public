@@ -27,7 +27,10 @@ const io = new Server(httpsServer, {
 var io_client = require( 'socket.io-client' );
 // let socket = io_client.connect('https://na-east.victorwei.com');
 // console.log(socket);
-// socket.emit('join');
+// socket.emit('sessionInfoRequest');
+// socket.on('sessionInfo', function (data) {
+// 	console.log(JSON.parse(data));
+// })
 // socket.emit('message', 'Hello World');
 
 // Cluster (used for multiple Node.js servers)
