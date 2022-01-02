@@ -19,6 +19,8 @@ let showChatBar = false;
 let hideChatId = undefined;
 let chatMsg = "";
 let hintText = "";
+let maxChatWidth = 600;
+let maxChatHeight = Math.min(600, innerHeight - 100);
 
 // Init chat
 let chat = [];
@@ -85,6 +87,9 @@ function addChat(options) {
 function initChat() {
 	chat.length = 0;
 	chatTimer = undefined;
+	
+
+	// WELCOME MESSAGE
 	addChat({
 		text: "------------------",
 		color: "aqua",
@@ -104,6 +109,39 @@ function initChat() {
 		color: "aqua",
 		timer: 15000
 	})
+	
+	// LATEST UPDATES
+	let change = changelog[0];
+
+	let date = change.date;
+	let version = change.version;
+	let changes = change.changes.split("|");
+
+	
+
+	$("#changelog").append($("<br>"));
+
+	addChat({
+		text: "Latest updates v" + version + " | " + date + ":",
+		color: "yellow",
+		timer: 15000
+	})
+
+	for (let comment of changes) {
+
+		addChat({
+			text: " - " + comment,
+			color: "white",
+			timer: 15000
+		})
+	}
+
+	addChat({
+		text: "------------------",
+		color: "aqua",
+		timer: 15000
+	})
+
 }
 
 // Hide chat after timer
@@ -127,11 +165,9 @@ function hideChatTimer(time) {
 function displayChat() {
 	if (player.mode == "camera") return;
 
-	let msgHeight = 35;
+	let msgHeight = 30;
 	let fontSize = msgHeight - 10;
 	let yOffset = 100;
-
-	let maxHeight = Math.min(500, innerHeight - 100);
 	let currHeight = 0;
 
 	ctx.font = fontSize+"px Minecraft-Regular";
@@ -152,14 +188,14 @@ function displayChat() {
 			text = text.substr(0, 1000);
 			let newLines = getLines(ctx, text, 580, msg.color || "white", opacity).reverse();
 			lines = lines.concat(newLines);
-			currHeight += msgHeight;
-			if (currHeight > maxHeight) break;
+			currHeight += msgHeight*newLines.length;
+			if (currHeight > maxChatHeight) break;
 		}
 	}
 
 	// Draw chat background
 	ctx.save();
-	drawRectangle(0, canvas.height-yOffset-lines.length*msgHeight, 600, lines.length*msgHeight, "black", {alpha: 0.3});
+	drawRectangle(0, canvas.height-yOffset-lines.length*msgHeight, maxChatWidth, lines.length*msgHeight, "black", {alpha: 0.3});
 	ctx.clip();
 
 	// Draw chat messages

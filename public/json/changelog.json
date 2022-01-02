@@ -1,5 +1,10 @@
 changelog = [
 	{
+		"date": "Jan 2, 2022",
+		"version": "0.32.0",
+		"changes": "Added crafting table menu along with several new recipes| Added several new blocks and items| Added search bar and scrollbar to creative mode inventory|  Disabled image smoothing for sharper item icons| Fixed bug where players do not show death screen when in creative mode"
+	},
+	{
 		"date": "Dec 30, 2021",
 		"version": "0.31.0",
 		"changes": "Added /leave /op /deop /kill /kick /spawnpoint /sethome /home /msg /reply and /list commands| Added several new blocks| Added nametag colors specific to each gamemode| Usernames must now be alphabetical| Fixed issue where players shared texture materials"
