@@ -1,0 +1,115 @@
+recipes = [
+    {
+        "output": "planks",
+        "count": 4,
+        "grid": [
+            ["wood"]
+        ],
+    },
+    {
+        "output": "crafting_table",
+        "count": 1,
+        "grid": [
+            ["planks", "planks"],
+            ["planks", "planks"]
+        ]
+    },
+    {
+        "output": "stick",
+        "count": 1,
+        "grid": [
+            ["planks"],
+            ["planks"]
+        ]
+    },
+    {
+        "output": "wood_sword",
+        "count": 1,
+        "grid": [
+            ["planks"],
+            ["planks"],
+            ["stick"]
+        ],
+    },
+    {
+        "output": "stone_sword",
+        "count": 1,
+        "grid": [
+            ["cobblestone"],
+            ["cobblestone"],
+            ["stick"]
+        ]
+    },
+    {
+        "output": "iron_sword",
+        "count": 1,
+        "grid": [
+            ["iron_ingot"],
+            ["iron_ingot"],
+            ["stick"]
+        ]
+    },
+    {
+        "output": "gold_sword",
+        "count": 1,
+        "grid": [
+            ["gold_ingot"],
+            ["gold_ingot"],
+            ["stick"]
+        ]
+    },
+    {
+        "output": "diamond_sword",
+        "count": 1,
+        "grid": [
+            ["diamond"],
+            ["diamond"],
+            ["stick"]
+        ]
+    },
+    {
+        "output": "wood_pickaxe",
+        "count": 1,
+        "grid": [
+            ["planks", "planks", "planks"],
+            [null, "stick", null],
+            [null, "stick", null]
+        ],
+    },
+    {
+        "output": "stone_pickaxe",
+        "count": 1,
+        "grid": [
+            ["cobblestone", "cobblestone", "cobblestone"],
+            [null, "stick", null],
+            [null, "stick", null]
+        ],
+    },
+    {
+        "output": "iron_pickaxe",
+        "count": 1,
+        "grid": [
+            ["iron_ingot", "iron_ingot", "iron_ingot"],
+            [null, "stick", null],
+            [null, "stick", null]
+        ],
+    },
+    {
+        "output": "gold_pickaxe",
+        "count": 1,
+        "grid": [
+            ["gold_ingot", "gold_ingot", "gold_ingot"],
+            [null, "stick", null],
+            [null, "stick", null]
+        ],
+    },
+    {
+        "output": "diamond_pickaxe",
+        "count": 1,
+        "grid": [
+            ["diamond", "diamond", "diamond"],
+            [null, "stick", null],
+            [null, "stick", null]
+        ],
+    }
+];

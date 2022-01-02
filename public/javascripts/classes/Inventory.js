@@ -40,42 +40,146 @@ class Inventory {
         this.toolbarX = this.halfW-hotboxWidth*4;
         this.toolbarSelectorX = this.halfW-hotboxWidth*3.5-2.5;
     }
+    
+    // Reduce crafting grid to fit only the items
+    reduceCraftingGrid(grid, columns, rows) {
+        let newGrid = [];
+        for (let j = 0; j < (rows || columns); j++) {
+            let isEmpty = true;
+            for (let i = 0; i < columns; i++) {
+                let item = grid[i+columns*j];
+                if (item) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+            if (!isEmpty) {
+                for (let i = 0; i < columns; i++) {
+                    let item = grid[i+columns*j];
+                    if (item) {
+                        newGrid.push(item);
+                    }
+                }
+            }
+        }
+        return newGrid;
+    }
+
+    // Draw crafting grid
+    printGrid(grid, width, height) {
+        for (let j = 0; j < (height || width); j++) {
+            let row = [];
+            for (let i = 0; i < width; i++) {
+                let item = grid[i+width*j];
+                row.push(item);
+            }
+        }
+    }
+
+    // Get entity by name
+    getEntity(name) {
+        if (world.blockId[name]) {
+            return {
+                v: world.blockId[name],
+                class: "block"
+            }
+        } else if (world.itemId[name]) {
+            return {
+                v: world.itemId[name],
+                class: "item"
+            }
+        }
+    }
 
     // Update crafting output
     updateCraftingOutput(remove) {
         let {craftingGrid, craftingTableGrid, showCraftingTable} = this;
-        
-        let grid = [undefined, undefined, undefined, undefined];
+
+        let grid = undefined;
+        let size = 4;
 
         if (showCraftingTable) {
-            for (let i = 0; i < craftingTableGrid.length; i++) {
-                if (craftingTableGrid[i])
-                    grid[i] = craftingTableGrid[i].v;
-            }
+            grid = craftingTableGrid;
         } else {
-            for (let i = 0; i < craftingGrid.length; i++) {
-                if (craftingGrid[i])
-                    grid[i] = craftingGrid[i].v;
+            grid = craftingGrid;
+            size = 3;
+        }
+
+        let craftingSize = grid.filter(n=> n == 0 || n ).length;
+        
+        let outputs = [];
+        // Loop through recipes
+        for (let recipe of recipes) {
+            let rows = recipe.grid.length;
+            let columns = recipe.grid[0].length;
+
+            // Loop through crafting grid
+            let foundRecipe = false;
+            for (let i = 0; i < size-rows; i++) {
+                for (let j = 0; j < size-columns; j++) {
+                    let same = true;
+                    let recipeSize = 0;
+                    
+                    // Loop through recipe grid
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < columns; c++) {
+                            let recipeItem = recipe.grid[r][c];
+                            if (recipeItem) recipeSize++;
+                            let entity = grid[(j+c)+(i+r)*(size-1)];
+
+                            let craftingItem = undefined;
+                            if (entity && entity.class=="item") {
+                                craftingItem = world.itemOrder[entity.v-1];
+                            } else if (entity && entity.class=="block") {
+                                craftingItem = world.blockOrder[entity.v-1];
+                            }
+                            if (craftingItem != recipeItem) {
+                                same = false;
+                                break;
+                            }
+                        }
+                        if (!same) {
+                            break;
+                        }
+                    }
+
+                    if (same) {
+                        outputs.push({
+                            name: recipe.output,
+                            count: recipe.count,
+                            size: recipeSize
+                        })
+                        foundRecipe = true;
+                        break;
+                    }
+                }
+                if (foundRecipe) break;
             }
         }
 
-        this.craftingOutput = undefined;
-        for (let r of recipes) {
-            if (r.check(grid)) {
-                if (remove) {
-                    for (let i = 0; i < craftingGrid.length; i++) {
-                        if (craftingGrid[i] && craftingGrid[i].v == r.grid[i]) {
-                            craftingGrid[i].c -= 1;
-                            if (craftingGrid[i].c == 0)
-                                craftingGrid[i] = undefined
-                        }
-                    }
-                } else {
-                    this.craftingOutput = JSON.parse(JSON.stringify(r.output));
-                }
-                return;
+        // Get the best output
+        let outputItem = undefined;
+        for (let output of outputs) {
+            if (output.size == craftingSize) {
+                outputItem = this.getEntity(output.name);
+                outputItem.c = output.count;
+                break;
             }
         }
+
+        // Remove 1 item from crafting grid
+        if (outputItem && remove) { 
+            for (let i = 0; i < grid.length; i++) {
+                if (grid[i]) {
+                    grid[i].c -= 1;
+                    if (grid[i].c <= 0) {
+                        grid[i] = undefined;
+                    }
+                }
+            }
+        }
+
+        this.craftingOutput = outputItem;
     }
 
     // Check if mouse is within inventory
@@ -633,7 +737,7 @@ class Inventory {
             blockWidth, blockWidth
         );
         if (entity.c) {
-            drawText(entity.c, 
+            drawText(entity.c == 1 ? "" : entity.c, 
                 xPos+blockWidth+2,
                 yPos+blockWidth+5, 
                 "20px Minecraft-Regular", "white", "right", "bottom", 1, true
@@ -708,7 +812,7 @@ class Inventory {
                     yPos, 
                     blockWidth, blockWidth
                 );
-                drawText(entity.c, 
+                drawText(entity.c == 1 ? "" : entity.c, 
                     xPos+blockWidth+2,
                     yPos+blockWidth+5, 
                     "20px Minecraft-Regular", "white", "right", "bottom", 1, true

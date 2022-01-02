@@ -1,4 +1,4 @@
-let recipes = [];
+let oldRecipes = [];
 
 class Recipe {
 	constructor(type, outputQuantity, output, input) {
@@ -36,15 +36,15 @@ function initRecipes() {
 	// Recipes
 
 
-	// Old recipes
-	recipes.push(new Recipe("block", 4, world.blockId["planks"], [world.blockId["wood"], undefined, undefined, undefined]));
-	recipes.push(new Recipe("block", 4, world.blockId["planks"], [undefined, world.blockId["wood"], undefined, undefined]));
-	recipes.push(new Recipe("block", 4, world.blockId["planks"], [undefined, undefined, world.blockId["wood"], undefined]));
-	recipes.push(new Recipe("block", 4, world.blockId["planks"], [undefined, undefined, undefined, world.blockId["wood"]]));
-	recipes.push(new Recipe("block", 1, world.blockId["crafting_table"], [world.blockId["planks"], world.blockId["planks"], world.blockId["planks"], world.blockId["planks"]]));
-	recipes.push(new Recipe("item", 4, world.itemId["stick"], [world.blockId["planks"], undefined, world.blockId["planks"], undefined]));
-	recipes.push(new Recipe("item", 4, world.itemId["stick"], [undefined, world.blockId["planks"], undefined, world.blockId["planks"]]));
+	// Old oldRecipes
+	oldRecipes.push(new Recipe("block", 4, world.blockId["planks"], [world.blockId["wood"], undefined, undefined, undefined]));
+	oldRecipes.push(new Recipe("block", 4, world.blockId["planks"], [undefined, world.blockId["wood"], undefined, undefined]));
+	oldRecipes.push(new Recipe("block", 4, world.blockId["planks"], [undefined, undefined, world.blockId["wood"], undefined]));
+	oldRecipes.push(new Recipe("block", 4, world.blockId["planks"], [undefined, undefined, undefined, world.blockId["wood"]]));
+	oldRecipes.push(new Recipe("block", 1, world.blockId["crafting_table"], [world.blockId["planks"], world.blockId["planks"], world.blockId["planks"], world.blockId["planks"]]));
+	oldRecipes.push(new Recipe("item", 4, world.itemId["stick"], [world.blockId["planks"], undefined, world.blockId["planks"], undefined]));
+	oldRecipes.push(new Recipe("item", 4, world.itemId["stick"], [undefined, world.blockId["planks"], undefined, world.blockId["planks"]]));
 
-	recipes.push(new Recipe("item", 1, world.itemId["wood_sword"], [world.blockId["planks"], undefined, world.itemId["stick"], undefined]));
-	recipes.push(new Recipe("item", 1, world.itemId["wood_sword"], [undefined, world.blockId["planks"], undefined, world.itemId["stick"]]));
+	oldRecipes.push(new Recipe("item", 1, world.itemId["wood_sword"], [world.blockId["planks"], undefined, world.itemId["stick"], undefined]));
+	oldRecipes.push(new Recipe("item", 1, world.itemId["wood_sword"], [undefined, world.blockId["planks"], undefined, world.itemId["stick"]]));
 }

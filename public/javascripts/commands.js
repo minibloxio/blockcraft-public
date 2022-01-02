@@ -127,6 +127,9 @@ function updateHints() {
         commands.setblock.hints[id] = "Set block to " + id; // Update setblock hint
         commands.give.hints[id] = "Give 1 " + id + " to yourself"; // Update give hint
     }
+    for (let id in world.itemId) {
+        commands.give.hints[id] = "Give 1 " + id + " to yourself"; // Update give hint
+    }
     commands.help.hints = commands; // Update help hint
 }
 
@@ -586,12 +589,13 @@ function giveItem(msg) {
     let amount = msg.shift();
     if (amount == undefined || amount.length == 0) amount = 1;
 
-    if (Number.isInteger(parseInt(amount)) && world.blockId[item]) {
+    let entity = world.blockId[item] || world.itemId[item];
+    if (Number.isInteger(parseInt(amount)) && entity) {
         amount = clamp(parseInt(amount), 1, 64);
         socket.emit('giveItem', {
-            v: world.blockId[item],
+            v: entity,
             amount: amount,
-            class: "block",
+            class: world.blockId[item] ? "block" : "item",
         })
         addChat({
             text: "Gave " + amount + " " + item + " to " + player.name

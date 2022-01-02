@@ -105,6 +105,8 @@ module.exports = class World {
 				this.getEntity("arrow", 64),
 				this.getEntity("crafting_table"),
 				this.getEntity("wood", 64),
+                this.getEntity("planks", 64),
+                this.getEntity("stick", 64),
 			],
 			walking: false,
 			sneaking: false,
