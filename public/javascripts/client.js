@@ -49,9 +49,6 @@ socket.on('joinResponse', function (data) {
 	// Initalize player
 	player.join(data.startPos);
 
-	// Initialize recipes
-	initRecipes();
-
 	// Receive current server players
 	players = {};
 	let serverPlayers = data.serverPlayers;

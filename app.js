@@ -24,6 +24,11 @@ const io = new Server(httpsServer, {
 		methods: ["GET", "POST"]
 	}
 });
+var io_client = require( 'socket.io-client' );
+// let socket = io_client.connect('https://na-east.victorwei.com');
+// console.log(socket);
+// socket.emit('join');
+// socket.emit('message', 'Hello World');
 
 // Cluster (used for multiple Node.js servers)
 const cluster = require('cluster');
@@ -215,6 +220,11 @@ function addLog(id, stat, value) {
 io.on('connection', function (socket_) {
 	let socket = socket_;
 	var address = socket.client.request.headers['cf-connecting-ip'] || socket.client.request.headers['x-real-ip'] || socket.client.request.headers['host'];
+
+	// Session info request
+	socket.on('sessionInfoRequest', function (data) {
+		socket.emit('sessionInfo', JSON.stringify(sessions));
+	});
 
 	// Server info request
 	socket.on('serverInfoRequest', function (data) {

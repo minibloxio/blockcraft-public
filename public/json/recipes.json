@@ -15,8 +15,17 @@ recipes = [
         ]
     },
     {
-        "output": "stick",
+        "output": "furnace",
         "count": 1,
+        "grid": [
+            ["cobblestone", "cobblestone", "cobblestone"],
+            ["cobblestone", null, "cobblestone"],
+            ["cobblestone", "cobblestone", "cobblestone"]
+        ]
+    },
+    {
+        "output": "stick",
+        "count": 4,
         "grid": [
             ["planks"],
             ["planks"]
@@ -160,6 +169,60 @@ recipes = [
             ["diamond", "diamond"],
             ["stick", "diamond"],
             ["stick", null]
+        ],
+    },
+    {
+        "output": "wood_shovel",
+        "count": 1,
+        "grid": [
+            ["diamond", "diamond"],
+            ["stick", "diamond"],
+            ["stick", null]
+        ],
+    },
+    {
+        "output": "stone_shovel",
+        "count": 1,
+        "grid": [
+            ["cobblestone"],
+            ["stick"],
+            ["stick"]
+        ],
+    },
+    {
+        "output": "iron_shovel",
+        "count": 1,
+        "grid": [
+            ["iron_ingot"],
+            ["stick"],
+            ["stick"]
+        ],
+    },
+    {
+        "output": "gold_shovel",
+        "count": 1,
+        "grid": [
+            ["gold_ingot"],
+            ["stick"],
+            ["stick"]
+        ],
+    },
+    {
+        "output": "diamond_shovel",
+        "count": 1,
+        "grid": [
+            ["diamond"],
+            ["stick"],
+            ["stick"]
+        ],
+    },
+    {
+        "output": "flint_and_steel",
+        "count": 1,
+        "mirrored": true,
+        "grid": [
+            ["flint", null],
+            [null, "iron_ingot"],
         ],
     }
 ];
