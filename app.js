@@ -25,19 +25,22 @@ const io = new Server(httpsServer, {
 	}
 });
 
-let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com", "https://ap-southeast.victorwei.com"]
-var io_client = require( 'socket.io-client' );
-
 let serverSessions = {};
+// let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com", "https://ap-southeast.victorwei.com"]
+// var io_client = require( 'socket.io-client' );
 
-for (let i = 0; i < serverList.length; i++) {
-	let server = serverList[i];
-	let socket = io_client.connect(server);
-	socket.emit('sessionInfoRequest');
-	socket.on('sessionInfo', function (data) {
-		serverSessions[server] = JSON.parse(data);
-	})
-}
+// const all_session_logs = __dirname + '/logs/allSessions.json';
+// for (let i = 0; i < serverList.length; i++) {
+// 	let server = serverList[i];
+// 	let socket = io_client.connect(server);
+// 	socket.emit('sessionInfoRequest');
+// 	socket.on('sessionInfo', function (data) {
+// 		serverSessions[server] = JSON.parse(data);
+// 		fs.writeFile(all_session_logs, data, function (err) {
+// 			if (err) throw err;
+// 		});
+// 	})
+// }
 
 // Cluster (used for multiple Node.js servers)
 const cluster = require('cluster');
@@ -91,6 +94,8 @@ rl.on('line', (input) => {
 		saveToLog();
 	} else if (input === 'purge') {
 		world.purge(); // Purge all chunks
+	} else if (input === 'socket') {
+		console.log(serverSessions)
 	} else if (input) { // Message to all clients
 		io.emit('messageAll', {
 			name: 'Server',
