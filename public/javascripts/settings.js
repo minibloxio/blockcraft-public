@@ -158,7 +158,7 @@ function addSliderControl(name, id, defaultValue, object, key, callback) {
 function addVideoControls() {
     //addSliderControl("FPS", "fps", 60, game, "fps")
     addSliderControl("Sensitivity", "sensitivity", 50, player, "sens")
-    addSliderControl("FOV", "fov", 75, camera, "fov");
+    //addSliderControl("FOV", "fov", 75, camera, "fov");
     addSliderControl("Render Distance", "renderDistance", 8, chunkManager, "renderDistance")
     addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
     //addSliderControl("Web Workers", "workers", 2, game, "numOfVoxelWorkers");

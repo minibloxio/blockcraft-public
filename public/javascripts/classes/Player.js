@@ -1067,13 +1067,13 @@ class Player {
 			this.speed = 0.3;
 
 		// Change camera fov when sprinting
-		if ((this.speed <= 2 || this.distanceMoved < 1.5) && camera.dynFov) {
+		if ((this.speed <= 2 || this.distanceMoved < 1.5)) {
 			if (camera.fov > 75) {
-				camera.fov -= delta*100;
+				camera.fov = Math.max(camera.fov - delta*100, 75);
 			}
 		} else if (this.distanceMoved > 7 && camera.dynFov) {
-			if (camera.fov < 90) {
-				camera.fov += delta*100;
+			if (camera.fov < 85) {
+				camera.fov = Math.min(camera.fov + delta*100, 85);
 			}
 		}
 		camera.updateProjectionMatrix();

@@ -42,10 +42,6 @@ function displayStats() {
 			let stat = statistics[i];
 			stat.display(i);
 		}
-		
-		//stats.showPanel(0);
-	} else {
-		//stats.showPanel();
 	}
 }
 
