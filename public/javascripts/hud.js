@@ -16,7 +16,7 @@ let crosshairWidth = 2
 let chat = new ChatManager();
 
 // Health
-let heartSize = 40;
+let heartSize = 25;
 let heartT = 0;
 let heartUp = false;
 
@@ -65,7 +65,7 @@ function displayPlayerHealth() {
 				yOffset += 5;
 			}
 
-			let xPos = canvas.width/2-heartSize*5+i*heartSize;
+			let xPos = canvas.width/2-heartSize*9.5+i*heartSize;
 			let yPos = canvas.height-heartSize-yOffset;
 
 			// Draw hearts based on player hp

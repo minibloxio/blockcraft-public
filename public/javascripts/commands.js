@@ -104,23 +104,6 @@ let prevCommands = [
 let commandIndex = -1;
 let canChangeCommand = true;
 
-// Move cursor to end of input
-function posEnd(end) {
-    var len = end.value.length;
-      
-    // Mostly for Web Browsers
-    if (end.setSelectionRange) {
-        end.focus();
-        end.setSelectionRange(len, len);
-    } else if (end.createTextRange) {
-        var t = end.createTextRange();
-        t.collapse(true);
-        t.moveEnd('character', len);
-        t.moveStart('character', len);
-        t.select();
-    }
-}
-
 // Previous command
 function prevCommand() {
     canChangeCommand = false;
@@ -148,9 +131,7 @@ function nextCommand() {
             commandIndex = -1;
         }
     }
-}
-
-            
+}     
 
 // Update hints
 function updateHints() {

@@ -123,7 +123,7 @@ var onKeyDown = function ( event ) {
     	chat.showChatBar = !chat.showChatBar;
     	if (chat.showChatBar) {
     		$("#chat-input").focus();
-    		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0.3)"});
+    		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0.4)"});
     		chat.showChat = true;
 			chat.hintText = "";
     	} else {
