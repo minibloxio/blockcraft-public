@@ -125,9 +125,11 @@ var onKeyDown = function ( event ) {
     		$("#chat-input").focus();
     		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0.3)"});
     		chat.showChat = true;
+			chat.hintText = "";
     	} else {
     		$("#chat-input").blur();
     		$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
+			commandIndex = -1;
     	}
 
     	let msg = $("#chat-input").val()
@@ -136,20 +138,25 @@ var onKeyDown = function ( event ) {
     			socket.emit("message", $("#chat-input").val());
 	    		$("#chat-input").val("")
     		} else { // Check minecraft command
-				prevCommands.push($("#chat-input").val());
+				if (prevCommands[0] != $("#chat-input").val()) {
+					prevCommands.unshift($("#chat-input").val());
+				}
 	    		$("#chat-input").val("")
     			msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
     			checkCommand(msg);
     		}
+			commandIndex = -1;
     	}
 	}
 	//  else if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && !chat.showChatFlag) {
 
-	// CREATIVE MENU CONTROLS
+	// ARROW KEY CONTROLS
 	if (event.keyCode == 38 ) {
 		inventory.scroll(1);
+		prevCommand();
 	} else if (event.keyCode == 40) {
 		inventory.scroll(-1);
+		nextCommand();
 	}
 
 	if (!initialized || !player.controls.enabled || chat.showChatBar)
@@ -252,7 +259,15 @@ var onKeyUp = function ( event ) {
 
 	if (!initialized) return;
 
+	// ARROW KEY CONTROLS
 	// CREATIVE MENU CONTROLS
+	if (event.keyCode == 38 ) {
+		inventory.scroll(1);
+		canChangeCommand = true;
+	} else if (event.keyCode == 40) {
+		inventory.scroll(-1);
+		canChangeCommand = true;
+	}
 
 	// GAME CONTROLS
 	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {

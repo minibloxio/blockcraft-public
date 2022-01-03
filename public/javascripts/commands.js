@@ -96,7 +96,61 @@ let commandsInit = JSON.stringify({
     },
 })
 let commands = JSON.parse(commandsInit);
-let prevCommands = [];
+let prevCommands = [
+    '/help',
+    '/tutorial',
+    '/list',
+];
+let commandIndex = -1;
+let canChangeCommand = true;
+
+// Move cursor to end of input
+function posEnd(end) {
+    var len = end.value.length;
+      
+    // Mostly for Web Browsers
+    if (end.setSelectionRange) {
+        end.focus();
+        end.setSelectionRange(len, len);
+    } else if (end.createTextRange) {
+        var t = end.createTextRange();
+        t.collapse(true);
+        t.moveEnd('character', len);
+        t.moveStart('character', len);
+        t.select();
+    }
+}
+
+// Previous command
+function prevCommand() {
+    canChangeCommand = false;
+    if (prevCommands.length > 0) {
+        if (commandIndex < prevCommands.length-1) {
+            commandIndex += 1;
+            let input = $("#chat-input");
+
+            input.val(prevCommands[commandIndex]);
+        }
+    }
+}
+
+// Next command
+function nextCommand() {
+    canChangeCommand = false;
+    if (prevCommands.length > 0) {
+        commandIndex -= 1;
+        if (commandIndex >= 0) {
+            let input = $("#chat-input");
+
+            input.val(prevCommands[commandIndex]);
+        } else {
+            $("#chat-input").val("");
+            commandIndex = -1;
+        }
+    }
+}
+
+            
 
 // Update hints
 function updateHints() {

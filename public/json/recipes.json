@@ -32,6 +32,15 @@ recipes = [
         ]
     },
     {
+        "output": "sign",
+        "count": 1,
+        "grid": [
+            ["planks", "planks", "planks"],
+            ["planks", "planks", "planks"],
+            [null, "stick", null]
+        ]
+    },
+    {
         "output": "wood_sword",
         "count": 1,
         "grid": [
@@ -221,5 +230,21 @@ recipes = [
         "count": 1,
         "shapeless": true,
         "grid": ["flint", "iron_ingot"],
+    },
+    {
+        "output": "snow",
+        "count": 1,
+        "grid": [
+            ["snowball", "snowball"],
+            ["snowball", "snowball"]
+        ]
+    },
+    {
+        "output": "wool_colored_white",
+        "count": 1,
+        "grid": [
+            ["string", "string"],
+            ["string", "string"]
+        ]
     }
 ];
