@@ -38,7 +38,7 @@ class Stat {
 
 		let fontSize = 20;
 		let margin = 5;
-		drawRectangle(10-margin, index*fontSize+55, ctx.measureText(text).width+margin*2, fontSize, "black", {alpha: 0.3});
+		drawRectangle(10-margin, index*fontSize+55, ctx.measureText(text).width+margin*2, fontSize, "black", {alpha: 0.2});
 		drawText(text, 10, index*fontSize+55, fontSize+"px Minecraft-Regular", "white", "left", "top");
 	}
 }

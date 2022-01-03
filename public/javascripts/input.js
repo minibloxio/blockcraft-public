@@ -63,30 +63,24 @@ $("body").mousemove(function (e) {
 
 let mouseLeft, mouseRight = false;
 $("body").mousedown(function (e) {
-	if (!initialized)
-		return;
-	if (!inventory.showInventory)
-		return;
+	if (!initialized || !inventory.showInventory) return;
 	switch (e.which) {
         case 1:
-		    inventory.selectInventory("left");
+		    inventory.selectInventory("left", true);
 		    mouseLeft = true;
             break;
         case 2:
             
             break;
         case 3:
-            inventory.selectInventory("right");
+            inventory.selectInventory("right", true);
             mouseRight = true;
             break;
         default:
             //alert('You have a strange Mouse!');
     }
 }).mouseup(function (e) {
-	if (!initialized)
-		return;
-	if (!inventory.showInventory)
-		return;
+	if (!initialized || !inventory.showInventory) return;
 	switch (e.which) {
         case 1:
         	mouseLeft = false
