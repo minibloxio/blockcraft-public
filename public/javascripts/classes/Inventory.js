@@ -91,6 +91,14 @@ class Inventory {
         }
     }
 
+    getEntityName(entity) {
+        if (entity && entity.class=="item") {
+            return world.itemOrder[entity.v-1];
+        } else if (entity && entity.class=="block") {
+            return world.blockOrder[entity.v-1];
+        }
+    }
+
     // Check recipe at position
     checkRecipe(recipe, grid, rows, columns, i, j, size, mirrored) {
         let same = true;
@@ -104,12 +112,7 @@ class Inventory {
                 if (recipeItem) recipeSize++;
                 let entity = grid[(j+c)+(i+r)*(size-1)];
 
-                let craftingItem = undefined;
-                if (entity && entity.class=="item") {
-                    craftingItem = world.itemOrder[entity.v-1];
-                } else if (entity && entity.class=="block") {
-                    craftingItem = world.blockOrder[entity.v-1];
-                }
+                let craftingItem = this.getEntityName(entity);
                 if (craftingItem != recipeItem) {
                     same = false;
                     break;
@@ -122,8 +125,32 @@ class Inventory {
         return {same, recipeSize};
     }
 
+    // Check shapeless recipe
+    checkShapelessRecipe(recipe, grid) {
+        let recipeSize = recipe.grid.length;
+
+        for (let i = 0; i < recipe.grid.length; i++) {
+            let item = recipe.grid[i];
+            for (let j = 0; j < grid.length; j++) {
+                let entity = grid[j];
+
+                let craftingItem = this.getEntityName(entity);
+                if (craftingItem == item) {
+                    recipeSize--;
+                    break;
+                }
+            }
+        }
+
+        if (recipeSize == 0) {
+            return {same: true, recipeSize: recipe.grid.length};
+        } else {
+            return {same: false, recipeSize: recipe.grid.length};
+        }
+    }
+
     // Add recipe to possible outputs
-    addRecipe(recipe, recipeSize, outputs) {
+    addRecipeToOutput(recipe, recipeSize, outputs) {
         outputs.push({
             name: recipe.output,
             count: recipe.count,
@@ -153,13 +180,22 @@ class Inventory {
             let rows = recipe.grid.length;
             let columns = recipe.grid[0].length;
 
+            // Shapeless recipe check
+            if (recipe.shapeless) {
+                let {same, recipeSize} = this.checkShapelessRecipe(recipe, grid);
+                if (same) {
+                    this.addRecipeToOutput(recipe, recipeSize, outputs);
+                    continue;
+                }
+            }
+
             // Loop through crafting grid
             let foundRecipe = false;
             for (let i = 0; i < size-rows; i++) {
                 for (let j = 0; j < size-columns; j++) {
                     var {same, recipeSize} = this.checkRecipe(recipe, grid, rows, columns, i, j, size);
                     if (same) {
-                        this.addRecipe(recipe, recipeSize, outputs);
+                        this.addRecipeToOutput(recipe, recipeSize, outputs);
                         foundRecipe = true;
                         break;
                     }
@@ -168,7 +204,7 @@ class Inventory {
 
                     var {same, recipeSize} = this.checkRecipe(recipe, grid, rows, columns, i, j, size, true);
                     if (same) {
-                        this.addRecipe(recipe, recipeSize, outputs);
+                        this.addRecipeToOutput(recipe, recipeSize, outputs);
                         foundRecipe = true;
                         break;
                     }

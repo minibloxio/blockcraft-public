@@ -219,10 +219,7 @@ recipes = [
     {
         "output": "flint_and_steel",
         "count": 1,
-        "mirrored": true,
-        "grid": [
-            ["flint", null],
-            [null, "iron_ingot"],
-        ],
+        "shapeless": true,
+        "grid": ["flint", "iron_ingot"],
     }
 ];
