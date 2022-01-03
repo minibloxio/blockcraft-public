@@ -21,6 +21,12 @@ let game = {
 	packetDelay: 16,
 	lastPacket: Date.now(),
 	numOfVoxelWorkers: 2,
+	guiSize: 1,
+}
+
+// Update GUI size
+function updateGUISize() {
+	chat.updateChatSize();
 }
 
 // Initialize game
@@ -41,6 +47,7 @@ function init() {
     initStatistics(); // Add statistics to record
 	initRenderer(); // Finalize by adding the renderer
 	initPointerLock(); // Initialize pointer lock
+	updateGUISize();
 	
 	window.addEventListener( 'resize', onWindowResize, false ); // Add resize event
 

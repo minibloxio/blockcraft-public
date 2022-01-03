@@ -236,7 +236,7 @@ var onKeyDown = function ( event ) {
 var onKeyUp = function ( event ) {
 
 	// CHAT INPUT
-	hintText = "";
+	chat.hintText = "";
 	if ([13].indexOf(event.keyCode) > -1) {
 		chat.showChatFlag = true;
 		return;

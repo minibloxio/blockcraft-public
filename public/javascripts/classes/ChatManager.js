@@ -6,12 +6,38 @@ class ChatManager {
         this.showChatBar = false;
         this.hideChatId = undefined;
         this.hintText = "";
+
+        // Chat GUI
         this.maxChatWidth = 800;
         this.maxChatHeight = Math.min(600, innerHeight - 100);
+        this.msgHeight = 30;
+        this.fontSize = this.msgHeight - 10;
+        this.yOffset = 100;
 
         // Init chat
         this.chat = [];
         this.chatTimer = undefined;
+    }
+
+    // Update GUI size
+    updateChatSize() {
+        let size = game.guiSize;
+        if (size == 1) {
+            this.maxChatWidth = 600;
+            this.maxChatHeight = Math.min(800, innerHeight - 100);
+            this.msgHeight = 30;
+        } else if (size == 2) {
+            this.maxChatWidth = 600;
+            this.maxChatHeight = Math.min(600, innerHeight - 100);
+            this.msgHeight = 35;
+        } else if (size == 3) {
+            this.maxChatWidth = 600;
+            this.maxChatHeight = innerHeight - 200;
+            this.msgHeight = 40;
+        }
+        this.fontSize = this.msgHeight - 10;
+        $("#chat-input").css("font-size", this.fontSize + "px");
+        $("#chat-input").css("height", this.msgHeight + "px");
     }
 
     // Add chat message
@@ -115,12 +141,9 @@ class ChatManager {
     displayChat() {
         if (player.mode == "camera") return;
 
-        let msgHeight = 30;
-        let fontSize = msgHeight - 10;
-        let yOffset = 100;
         let currHeight = 0;
 
-        ctx.font = fontSize+"px Minecraft-Regular";
+        ctx.font = this.fontSize+"px Minecraft-Regular";
         let lines = [];
         for (let i = 0; i < this.chat.length; i++) {
             let msg = this.chat[i];
@@ -138,19 +161,19 @@ class ChatManager {
                 text = text.substr(0, 1000);
                 let newLines = this.getLines(ctx, text, this.maxChatWidth-20, msg.color || "white", opacity).reverse();
                 lines = lines.concat(newLines);
-                currHeight += msgHeight*newLines.length;
+                currHeight += this.msgHeight*newLines.length;
                 if (currHeight > this.maxChatHeight) break;
             }
         }
 
         // Draw chat background
         ctx.save();
-        drawRectangle(0, canvas.height-yOffset-lines.length*msgHeight, this.maxChatWidth, lines.length*msgHeight, "black", {alpha: 0.3});
+        drawRectangle(0, canvas.height-this.yOffset-lines.length*this.msgHeight, this.maxChatWidth, lines.length*this.msgHeight, "black", {alpha: 0.3});
         ctx.clip();
 
         // Draw chat messages
         for (let i = 0; i < lines.length; i++) {
-            drawText(lines[i].text, 10, canvas.height-yOffset-10-i*msgHeight, fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity, 1, true);
+            drawText(lines[i].text, 10, canvas.height-this.yOffset-10-i*this.msgHeight, this.fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity, 1, true);
         }
         ctx.restore();
 
@@ -168,9 +191,9 @@ class ChatManager {
             let hintWidth = ctx.measureText(text).width;
             let width = Math.max(commandWidth, hintWidth);
             
-            drawRectangle(5, canvas.height-50-msgHeight+10-5, width + 10, msgHeight, "black", {alpha: 0.7});
-            drawText(text, 10, canvas.height-50-5, fontSize+"px Minecraft-Regular", hintColor, "start", "alphabetic");
-            drawText(command, 10, canvas.height-50-5, fontSize+"px Minecraft-Regular", "white", "start", "alphabetic");
+            drawRectangle(5, canvas.height-50-this.msgHeight+10-5, width + 10, this.msgHeight, "black", {alpha: 0.7});
+            drawText(text, 10, canvas.height-50-5, this.fontSize+"px Minecraft-Regular", hintColor, "start", "alphabetic");
+            drawText(command, 10, canvas.height-50-5, this.fontSize+"px Minecraft-Regular", "white", "start", "alphabetic");
         }
     }
 

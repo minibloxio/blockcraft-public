@@ -161,6 +161,7 @@ function addVideoControls() {
     //addSliderControl("FOV", "fov", 75, camera, "fov");
     addSliderControl("Render Distance", "renderDistance", 8, chunkManager, "renderDistance")
     addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
+    addSliderControl("GUI Size", "guiSize", 1, game, "guiSize", updateGUISize);
     //addSliderControl("Web Workers", "workers", 2, game, "numOfVoxelWorkers");
 
     addSwitchControl("Statistics", "stats", false, hud, "showStats")
