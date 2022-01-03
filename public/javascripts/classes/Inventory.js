@@ -152,11 +152,11 @@ class Inventory {
     }
 
     // Update item in inventory
-    updateItem(block, i, type, firstClick) {
-        //console.log(block, i, type, firstClick);
+    updateItem(block, i, type, xPos, yPos, firstClick) {
+        //if (type != "hover") console.log(type, firstClick);
         let {searchBlocks, searchItems, craftingGrid, craftingTableGrid, currentRow} = this;
 
-        if (block == "creative") { // CREATIVE MODE
+        if (block == "creative" && firstClick) { // CREATIVE MODE
             i = i + currentRow*9;
             if (type == "left") { // Left click item
                 let entity = {}
@@ -225,23 +225,25 @@ class Inventory {
                     entity.class = "item";
                 }
                 
-                this.drawHoverBox(name, entity);
+                this.drawHintBox(name, entity);
             }
-        } else { // SURVIVAL MODE
+        } else if (block != "creative") { // SURVIVAL MODE
             if (type == "left") { // Left click item
-                if (!this.selectedItem && block[i] && block[i].c > 0) {
+                console.log(block[i]);
+                if (!this.selectedItem && block[i] && block[i].c > 0 && firstClick) {
                     // Pick up item
                     this.selectedItem = JSON.parse(JSON.stringify(block[i]));
                     block[i] = undefined;
-                } else if (this.selectedItem && this.selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
+                } else if (this.selectedItem && this.selectedItem.c > 0 && (!block[i] || block[i].c == 0) && firstClick) {
                     // Drop item
-                    block[i] = JSON.parse(JSON.stringify(this.selectedItem));
-                    this.selectedItem = undefined;
+                    // block[i] = JSON.parse(JSON.stringify(this.selectedItem));
+                    // this.selectedItem = undefined;
+                    this.addHighlightBox(xPos, yPos);
                 } else if (this.selectedItem && this.selectedItem.c > 0 && block[i] && block[i].c > 0 ) {
                     if (block[i].v == this.selectedItem.v) { // Combine items
                         block[i].c += this.selectedItem.c;
                         this.selectedItem = undefined;
-                    } else { // Switch items
+                    } else if (firstClick) { // Switch items
                         let prevBlock = JSON.parse(JSON.stringify(block[i]));
                         block[i] = JSON.parse(JSON.stringify(this.selectedItem));
                         this.selectedItem = prevBlock;
@@ -326,7 +328,7 @@ class Inventory {
                         name = world.itemOrder[entity.v-1];
                     }
                     
-                    this.drawHoverBox(name, entity);
+                    this.drawHintBox(name, entity);
                 }
             }
 
@@ -357,9 +359,7 @@ class Inventory {
     selectInventory(type, firstClick) {
         if (!this.showInventory) return;
 
-        //if (type != "hover") console.log(type);
         let {craftingGrid, craftingTableGrid, showCraftingTable, craftingOutput} = this;
-        this.highlightBoxes = [];
 
         // Check if click is outside of inventory
         if (type != "hover" && !this.withinInventory()) {
@@ -380,7 +380,7 @@ class Inventory {
             let {xPos, yPos} = this.getPos("inventory", i);
             if (!this.withinItemFrame(xPos, yPos)) continue;
 
-            this.updateItem(this.inventory, i, type, firstClick);
+            this.updateItem(this.inventory, i, type, xPos, yPos, firstClick);
             this.addHighlightBox(xPos, yPos);
         }
 
@@ -393,7 +393,7 @@ class Inventory {
                     let {xPos, yPos} = self.getPos("craftingTable", i, j);
                     if (!self.withinItemFrame(xPos, yPos)) return;
 
-                    self.updateItem(craftingTableGrid, i+j*gridSize, type, firstClick);
+                    self.updateItem(craftingTableGrid, i+j*gridSize, type, xPos, yPos, firstClick);
                     self.addHighlightBox(xPos, yPos);
                 })
             } else {
@@ -403,7 +403,7 @@ class Inventory {
                     let {xPos, yPos} = self.getPos("crafting", i, j);
                     if (!self.withinItemFrame(xPos, yPos)) return;
 
-                    self.updateItem(craftingGrid, i+j*gridSize, type, firstClick);
+                    self.updateItem(craftingGrid, i+j*gridSize, type, xPos, yPos, firstClick);
                     self.addHighlightBox(xPos, yPos);
                 })
             }
@@ -436,7 +436,7 @@ class Inventory {
                     let {xPos, yPos} = this.getPos("creative", i, j);
 
                     if (this.withinItemFrame(xPos, yPos)) {
-                        this.updateItem("creative", i+(3-j)*9, type, firstClick);
+                        this.updateItem("creative", i+(3-j)*9, type, xPos, yPos, firstClick);
                         this.addHighlightBox(xPos, yPos);
                     }
                 }
@@ -669,9 +669,12 @@ class Inventory {
 
         if (showInventory) {
             this.displayInventoryBackground();
-            // if (mouseLeft) this.selectInventory("left");
-            // if (mouseRight) this.selectInventory("right");
-            // if (!mouseLeft && !mouseRight) this.usedBoxes = [];
+            if (mouseLeft) this.selectInventory("left");
+            if (mouseRight) this.selectInventory("right");
+            if (!mouseLeft && !mouseRight) {
+                this.selectedBoxes = [];
+                this.highlightBoxes = [];
+            }
 
             // Draw items in inventory
             for (let i = 0; i < inventory.length; i++) {
@@ -821,7 +824,7 @@ class Inventory {
     }
 
     // Draw hover box
-    drawHoverBox(name, entity) {
+    drawHintBox(name, entity) {
         if (this.selectedItem || !name || !this.showInventory) return;
         //if (!map[16]) return;
 
