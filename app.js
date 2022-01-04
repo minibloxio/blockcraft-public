@@ -93,7 +93,7 @@ rl.on('line', (input) => {
 	} else if (input === 'purge') {
 		world.purge(); // Purge all chunks
 	} else if (input === 'socket') {
-		console.log(serverSessions)
+		
 	} else if (input) { // Message to all clients
 		io.emit('messageAll', {
 			name: 'Server',
