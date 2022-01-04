@@ -618,6 +618,8 @@ module.exports = class World {
   checkCollision(entity, io) {
     const {blockSize} = this;
 
+    if (!entity.pos) return;
+
     // Entity gravity
     var x = Math.floor(entity.pos.x/blockSize);
     var y = Math.floor((entity.pos.y-4)/blockSize);
