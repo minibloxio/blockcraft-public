@@ -276,6 +276,7 @@ function disconnectServer() {
 
     // Remove all entities
     for (let id in world.entities) {
+        if (!world.entities[id].mesh) continue;
         world.entities[id].mesh.geometry.dispose();
 		world.entities[id].mesh.material.dispose();
 		scene.remove(world.entities[id].mesh);
@@ -283,7 +284,6 @@ function disconnectServer() {
     }
 
     state += 1;
-    //prevState(); // Go back to server select
 }
 
 
