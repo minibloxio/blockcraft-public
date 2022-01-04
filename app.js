@@ -93,7 +93,7 @@ rl.on('line', (input) => {
 	} else if (input === 'purge') {
 		world.purge(); // Purge all chunks
 	} else if (input === 'socket') {
-		
+
 	} else if (input) { // Message to all clients
 		io.emit('messageAll', {
 			name: 'Server',
@@ -439,6 +439,7 @@ io.on('connection', function (socket_) {
 		let chunksToGenerate = [];
 		let chunksToSend = [];
 
+		// Loop through each chunk
 		for (let chunk of data) {
 			let id = `${chunk.x},${chunk.y},${chunk.z}`
 			let cell = world.cells[id];
@@ -457,7 +458,6 @@ io.on('connection', function (socket_) {
 				if (!world.cellDeltas[id]) {
 					world.cellDeltas[id] = new Uint8Array(new SharedArrayBuffer(cellSizeCubed));
 					data.cellDelta = world.cellDeltas[id];
-
 				}
 
 				chunksToGenerate.push(data);
