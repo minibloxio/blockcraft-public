@@ -150,8 +150,6 @@ world.init({
 
 worker.postMessage({ cmd: "setup", blockOrder: server.blockOrder, itemOrder: server.itemOrder });
 
-var updatedBlocks = [];
-
 // Load save file
 let save_path = __dirname + '/saves/test.json';
 fs.readFile(save_path, function (err, data) {
@@ -373,7 +371,7 @@ io.on('connection', function (socket_) {
 		// Update punching status
 		if (!data.cmd) player.punching = true;
 		world.setVoxel(data.x, data.y, data.z, data.t, true, true);
-		updatedBlocks.push(data);
+		world.updatedBlocks.push(data);
 
 		// Check if block is being broken or placed
 		if (data.t == 0 && player.mode == "survival") { // BLOCK MINED
@@ -387,14 +385,7 @@ io.on('connection', function (socket_) {
 			addLog(socket.id, "bm"); // Block mined
 		} else if (data.t > 0 && !data.cmd && player.mode == "survival") { // BLOCK PLACED
 			// Remove item from toolbar
-			for (let t of player.toolbar) {
-				if (!t)
-					continue;
-				if (t.v == data.t && t.class == data.class) {
-					t.c = Math.max(0, t.c - 1);
-				}
-			}
-
+			world.removePlayerItem(player, server.blockOrder[data.t-1]);
 			addLog(socket.id, "bp"); // Block placed
 		}
 	})
@@ -536,22 +527,22 @@ io.on('connection', function (socket_) {
 	})
 
 	// Throw ender pearl
-	socket.on('throwEnderPearl', function (data) {
+	socket.on('throwItem', function (data) {
 		let player = players[socket.id];
 		if (!player) return;
 
 		let { blockSize } = world;
 		player.pickupDelay = Date.now() + 1000;  // Disable pickup while dropping items
 
-		world.removeItem(player, "ender_pearl");
+		world.removePlayerItem(player, data.name);
 
 		let entityId = Function.randomString(5);
 		let force = blockSize * 20;
 		let entity = server.addEntity(entityId, {
 			pos: data.pos, 
 			vel: { x: data.dir.x * force, y: data.dir.y * force, z: data.dir.z * force },
-			name: "ender_pearl",
-			v: world.itemId["ender_pearl"],
+			name: data.name,
+			v: world.itemId[data.name],
 			class: "item",
 			playerId: socket.id,
 		})
@@ -567,7 +558,7 @@ io.on('connection', function (socket_) {
 		let { blockSize } = world;
 		player.pickupDelay = Date.now() + 1000;  // Disable pickup while dropping items
 
-		world.removeItem(player, "arrow");
+		world.removePlayerItem(player, "arrow");
 
 		let entityId = Function.randomString(5);
 		let force = blockSize * 10 * data.force;
@@ -808,14 +799,14 @@ setInterval(function () {
 	// Send updated data to client
 	io.emit('update', {
 		serverPlayers: players,
-		updatedBlocks: updatedBlocks,
+		updatedBlocks: world.updatedBlocks,
 		newEntities: world.newEntities,
 		entities: world.entities,
 		tick: world.tick,
 		t: Date.now()
 	})
 
-	updatedBlocks = [];
+	world.updatedBlocks = [];
 	world.newEntities = [];
 }, dt)
 

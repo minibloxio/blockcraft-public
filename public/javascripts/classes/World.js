@@ -18,6 +18,14 @@ class World {
     const cellZ = Math.floor(z / cellSize);
     return `${cellX},${cellY},${cellZ}`;
   }
+  computeCoordsFromId(id) {
+    const [cellX, cellY, cellZ] = id.split(',').map(Number);
+    return {
+        x: cellX * this.cellSize,
+        y: cellY * this.cellSize,
+        z: cellZ * this.cellSize,
+    }
+  }
   computeCellFromPlayer(x, y, z) {
     const {cellSize} = this;
     const cellX = Math.floor(x / cellSize / this.blockSize);

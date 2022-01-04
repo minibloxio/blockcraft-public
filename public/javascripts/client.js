@@ -189,10 +189,17 @@ function updateClient(data) {
 
 	// Update blocks
 	let updatedBlocks = data.updatedBlocks;
+    let updatedChunks = {};
 	for (let block of updatedBlocks) {
 		world.setVoxel(block.x, block.y, block.z, block.t);
-		updateVoxelGeometry(block.x, block.y, block.z, true, true); // Update if in different chunk?
+        let cellId = world.computeCellId(block.x, block.y, block.z);
+        updatedChunks[cellId] = true;
 	}
+
+    for (let id in updatedChunks) {
+        let cell = world.computeCoordsFromId(id);
+        updateVoxelGeometry(cell.x, cell.y, cell.z, true, true);
+    }
 
 	// Add new entities
 	let newEntities = data.newEntities;

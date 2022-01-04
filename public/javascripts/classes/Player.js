@@ -347,9 +347,15 @@ class Player {
 
 	throw() {
 		let item = this.getCurrItem();
-		if (item && item.v == world.itemId["ender_pearl"] && this.key.rightClick) {
-			socket.emit('throwEnderPearl', {
+		if (!item || !this.key.rightClick) return;
+
+		let throwableItems = ["ender_pearl", "fireball", "snowball"];
+
+		for (let throwableItem of throwableItems) {
+			if (item.v != world.itemId[throwableItem]) continue;
+			socket.emit('throwItem', {
 				id: socket.id,
+				name: throwableItem,
 				pos: this.position.clone(),
 				dir: this.getItemVel()
 			})

@@ -350,7 +350,7 @@ function updateServerEntities(delta) {
 		let e = world.entities[id]
 		e.mesh.position.lerp(e.pos, delta*10)
 
-		if (e.name == "ender_pearl") {
+		if (e.name == "ender_pearl" || e.name == "fireball") {
 			e.mesh.lookAt(player.position);
 		} else if (e.class == "item") {
 			e.mesh.rotation.y += delta;
