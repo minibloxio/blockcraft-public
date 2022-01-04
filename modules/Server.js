@@ -105,7 +105,6 @@ module.exports = class World {
 				this.getEntity("arrow", 64),
 				this.getEntity("wood", 64),
                 this.getEntity("ender_pearl", 64),
-                this.getEntity("fireball", 64),
 			],
 			walking: false,
 			sneaking: false,

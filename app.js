@@ -527,7 +527,7 @@ io.on('connection', function (socket_) {
 		}
 	})
 
-	// Throw ender pearl
+	// Throw item
 	socket.on('throwItem', function (data) {
 		let player = players[socket.id];
 		if (!player) return;
@@ -538,9 +538,9 @@ io.on('connection', function (socket_) {
 		world.removePlayerItem(player, data.name);
 
 		let entityId = Function.randomString(5);
-		let force = blockSize * 20;
+		let force = blockSize * 30;
 		let entity = server.addEntity(entityId, {
-			pos: data.pos, 
+			pos: data.pos || { x: player.pos.x, y: player.pos.y, z: player.pos.z },
 			vel: { x: data.dir.x * force, y: data.dir.y * force, z: data.dir.z * force },
 			name: data.name,
 			v: world.itemId[data.name],

@@ -348,6 +348,7 @@ function updatePlayerColor(id, color, opacity) {
 function updateServerEntities(delta) {
 	for (let id in world.entities) {
 		let e = world.entities[id]
+        if (!e.mesh) continue;
 		e.mesh.position.lerp(e.pos, delta*10)
 
 		if (e.name == "ender_pearl" || e.name == "fireball") {
@@ -360,7 +361,9 @@ function updateServerEntities(delta) {
 
 // Add entity
 function addEntity(entity) {
+
 	if (entity.type == "item") {
+        if (!entity || !entity.pos) return;
 		let {blockSize} = world;
 
 		if (entity.class == "item") { // Add item
@@ -408,7 +411,7 @@ function addEntity(entity) {
 
 			scene.add(world.entities[entity.id].mesh);
 		}
-	} else if (entity.type == "remove_item" && world.entities[entity.id]) {
+	} else if (entity.type == "remove_item" && world.entities[entity.id] && world.entities[entity.id].mesh) {
 
 		world.entities[entity.id].mesh.geometry.dispose();
 		world.entities[entity.id].mesh.material.dispose();

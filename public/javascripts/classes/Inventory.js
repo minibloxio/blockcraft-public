@@ -207,7 +207,6 @@ class Inventory {
 
     // Update item in inventory
     updateItem(block, i, type, xPos, yPos, firstClick) {
-        //if (type != "hover") console.log(type, firstClick);
         let {searchBlocks, searchItems, craftingGrid, craftingTableGrid, currentRow} = this;
 
         if (block == "creative" && firstClick) { // CREATIVE MODE

@@ -213,7 +213,7 @@ function updateClient(data) {
 		let entity = updatedEntities[id];
 		if (entity.type == "item" && world.entities[id]) {
 			world.entities[id].pos = entity.pos;
-			if (world.entities[id].mesh.position.length() == 0) {
+			if (world.entities[id].mesh && world.entities[id].mesh.position.length() == 0) {
 				world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z)
 			}
 		}
