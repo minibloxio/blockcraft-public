@@ -605,7 +605,7 @@ module.exports = class World {
                 }
 
                 // Check collision
-                this.checkCollision(entity, io);
+                this.checkCollision(entity, players, io);
 
                 // Gravitate towards players
                 let deletedEntities = this.gravitateEntities(players, entity, entity_id, io);
@@ -639,7 +639,7 @@ module.exports = class World {
         }
     }
 
-    checkCollision(entity, io) {
+    checkCollision(entity, players, io) {
         const { blockSize } = this;
 
         if (!entity.pos) return;
@@ -669,8 +669,10 @@ module.exports = class World {
             } else if (entity.name == "fireball") { // FIREBALL
                 removeItem = true;
 
-                let explosionRadius = 9;
-                this.destroyBlocks(x, y, z, explosionRadius);  
+                if (players[entity.playerId].operator) {
+                    let explosionRadius = 9;
+                    this.destroyBlocks(x, y, z, explosionRadius);
+                }
             } else if (entity.name == "snowball") { // SNOWBALL
                 removeItem = true;
             }
