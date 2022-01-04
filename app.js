@@ -276,13 +276,17 @@ io.on('connection', function (socket_) {
 		addLog(socket.id, "ip", address);
 		addLog(socket.id, "tc", Date.now()); // Time connected
 		addLog(socket.id, "n", player.name);
-		saveToLog();
 
-		// // Add random items to player's inventory
-		// for (let i = 0; i < 30; i++) {
-		// 	let item = getEntity("wood", Math.floor(Math.random()*64));
-		// 	players[socket.id].toolbar.push(item);
-		// }
+		// Check player token
+		if (data.token) {
+			addLog(socket.id, 't', data.token);
+		} else {
+			let uniqueToken = Function.randomString(10);;
+			addLog(socket.id, 't', uniqueToken);
+			socket.emit('uniqueToken', uniqueToken);
+		}
+
+		saveToLog(); // Save log
 
 		// Send update to everyone
 		io.emit('addPlayer', player)

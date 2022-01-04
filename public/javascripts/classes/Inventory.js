@@ -766,7 +766,6 @@ class Inventory {
             
             // Draw items in crafting grid
             if (player.mode == "survival" && !showCraftingTable) {
-                console.log(this.selectedBoxes)
                 let gridSize = 2;
                 this.loop(gridSize, function (i, j, self) {
                     let block = craftingGrid[i+j*gridSize];

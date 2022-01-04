@@ -240,6 +240,7 @@ function joinServer() {
 
 		let joinInfo = {
 			name: name,
+            token: getCookie('token'),
 		}
 		socket.emit('join', joinInfo)
 		loaded += 1;

@@ -118,6 +118,7 @@ module.exports = class World {
 			mode: "survival",
 			fps: 0,
             showInventory: false,
+            token: data.token || "",
 		}
     }
 

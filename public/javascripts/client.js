@@ -38,6 +38,11 @@ socket.on('kick', function (reason) {
 	disconnectServer();
 })
 
+// Update session token
+socket.on('uniqueToken', function (token) {
+	setCookie('token', token, 365);
+})
+
 // Initialize client
 socket.on('joinResponse', function (data) {
 	// Check if already initialized
