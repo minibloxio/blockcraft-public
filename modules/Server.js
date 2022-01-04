@@ -33,7 +33,7 @@ module.exports = class World {
         let tools = ["pickaxe", "axe", "shovel", "sword"];
         let toolMat = ["wood", "stone", "iron", "gold", "diamond"];
         let foods = ["beef", "chicken", "porkchop", "mutton", "rabbit"];
-        this.itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball",  "flint", "flint_and_steel", "brick", "glowstone_dust", "snowball", "sign"];
+        this.itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball",  "flint", "flint_and_steel", "brick", "glowstone_dust", "snowball", "ender_pearl", "fireball", "sign"];
         for (let mat of toolMat) {
             for (let tool of tools) {
                 this.itemOrder.push(mat + "_" + tool);
@@ -103,10 +103,9 @@ module.exports = class World {
 				this.getEntity("wood_axe"), 
 				this.getEntity("bow"), 
 				this.getEntity("arrow", 64),
-				this.getEntity("crafting_table"),
-				this.getEntity("iron_ingot", 64),
-                this.getEntity("flint", 64),
-                this.getEntity("stick", 64),
+				this.getEntity("wood", 64),
+                this.getEntity("ender_pearl", 64),
+                this.getEntity("fireball", 64),
 			],
 			walking: false,
 			sneaking: false,
@@ -124,15 +123,22 @@ module.exports = class World {
 
     // Add entity
     addEntity(id, data) {
-        return {
+        let entity = {
             pos: data.pos,
             vel: data.vel,
             acc: {x: 0, y: 0, z: 0},
+            force: data.force,
+            lethal: data.lethal,
             type: "item",
-            class: data.class || "block",
             v: data.v,
+            class: data.class || "block",
             id: id,
-            t: Date.now()
+            playerId: data.playerId,
+            name: data.name,
+            t: Date.now(),
+            onObject: false,
         }
+
+        return entity;
     }
 }

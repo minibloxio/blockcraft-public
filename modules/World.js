@@ -90,6 +90,7 @@ module.exports = class World {
 
     // Entities
     this.entities = {};
+    this.newEntities = [];
 
     this.blockId = {};
   }
@@ -582,7 +583,7 @@ module.exports = class World {
 	  }
   }
   
-  update(dt, players, newEntities, io) {
+  update(dt, players, io) {
   	// Update entities
   	for (let entity_id in this.entities) {
   		let entity = this.entities[entity_id];
@@ -590,7 +591,7 @@ module.exports = class World {
   			// Delete entity if too long
   			if (Date.now()-entity.t > 1000 * 60 * 10) { // 10 minutes
   				// Remove the item from world
-					newEntities.push({
+					this.newEntities.push({
 						type: "remove_item",
 						id: entity.id,
 						v: entity.v,
@@ -600,12 +601,12 @@ module.exports = class World {
   			}
 
         // Check collision
-        this.checkCollision(entity);
+        this.checkCollision(entity, io);
 
 				// Gravitate towards players
         let deletedEntities = this.gravitateEntities(players, entity, entity_id, io);
         for (let deletedEntity of deletedEntities) {
-          newEntities.push(deletedEntity);
+          this.newEntities.push(deletedEntity);
         }
         
         // Apply physics
@@ -614,7 +615,7 @@ module.exports = class World {
   	}
   }
 
-  checkCollision(entity) {
+  checkCollision(entity, io) {
     const {blockSize} = this;
 
     // Entity gravity
@@ -629,6 +630,20 @@ module.exports = class World {
     if (this.getVoxel(x, dy, z) > 0) {
       entity.acc = {x: 0, y: 0, z: 0}
       entity.vel = {x: 0, y: 0, z: 0}
+
+      // ENDER PEARL
+      if (entity.name == "ender_pearl") {
+        entity.pos.y += blockSize*1.6;
+        io.to(`${entity.playerId}`).emit('teleport', entity)
+        // Remove entity
+        this.newEntities.push({
+          type: "remove_item",
+          id: entity.id,
+          v: entity.v,
+          class: entity.class,
+        })
+        delete this.entities[entity.id];
+      }
     }
     if (this.getVoxel(x, y, z) > 0) {
       entity.acc = {x: 0, y: 9.81*blockSize, z: 0}
@@ -639,14 +654,13 @@ module.exports = class World {
 
   gravitateEntities(players, entity, entity_id, io) {
     const {blockSize} = this;
-    let newEntities = []; // Entities to be removed
+    let entitiesToRemove = []; // Entities to be removed
 
     for (let id in players) {
       let p = players[id];
       if (p.showInventory || p.pickupDelay > Date.now()) continue;
 
       // Pick up item
-
       let dir = {x: (p.pos.x-entity.pos.x), y: (p.pos.y-blockSize-(entity.pos.y)), z: (p.pos.z-entity.pos.z)}
       let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
 
@@ -663,7 +677,7 @@ module.exports = class World {
           io.emit('punch', id);
 
           // Remove the item from world
-          newEntities.push({
+          entitiesToRemove.push({
             type: "remove_item",
             id: entity.id,
             v: entity.v,
@@ -675,7 +689,7 @@ module.exports = class World {
           World.addItem(p, entity);
 
           // Remove the item from world
-          newEntities.push({
+          entitiesToRemove.push({
             type: "remove_item",
             id: entity.id,
             v: entity.v,
@@ -693,7 +707,7 @@ module.exports = class World {
       }
     }
 
-    return newEntities;
+    return entitiesToRemove;
   }
 
   applyPhysics(entity, dt) {
@@ -742,5 +756,14 @@ module.exports = class World {
         })
       }
     }
+  }
+
+  removeItem(player, name) {
+    for (let t of player.toolbar) {
+			if (t && t.v == this.itemId[name] && t.c > 0) {
+				t.c = Math.max(0, t.c - 1);
+				break;
+			}
+		}
   }
 }

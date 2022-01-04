@@ -153,7 +153,6 @@ world.init({
 worker.postMessage({ cmd: "setup", blockOrder: server.blockOrder, itemOrder: server.itemOrder });
 
 var updatedBlocks = [];
-var newEntities = [];
 
 // Load save file
 let save_path = __dirname + '/saves/test.json';
@@ -385,7 +384,7 @@ io.on('connection', function (socket_) {
 			data.pos = { x: (data.x + 0.5) * blockSize - blockSize / 8, y: (data.y + 0.5) * blockSize - blockSize / 8, z: (data.z + 0.5) * blockSize - blockSize / 8 };
 			data.vel = { x: Function.random(5, -5), y: blockSize * 2, z: Function.random(5, -5) };
 			world.entities[entityId] = server.addEntity(entityId, data)
-			newEntities.push(world.entities[entityId])
+			world.newEntities.push(world.entities[entityId])
 
 			addLog(socket.id, "bm"); // Block mined
 		} else if (data.t > 0 && !data.cmd && player.mode == "survival") { // BLOCK PLACED
@@ -412,10 +411,9 @@ io.on('connection', function (socket_) {
 		for (let item of data) {
 			if (item.force) {
 				let entityId = Function.randomString(5);
-				item.pos = { x: item.x, y: item.y, z: item.z };
 				item.vel = { x: item.dir.x * blockSize * 3, y: blockSize * 2, z: item.dir.z * blockSize * 3 };
 				world.entities[entityId] = server.addEntity(entityId, item);
-				newEntities.push(world.entities[entityId]);
+				world.newEntities.push(world.entities[entityId]);
 				droppedItems = true;
 				continue;
 			}
@@ -426,10 +424,9 @@ io.on('connection', function (socket_) {
 
 					// Add item as server-side entity
 					let entityId = Function.randomString(5);
-					item.pos = { x: item.x, y: item.y, z: item.z };
 					item.vel = { x: item.dir.x * blockSize * 3, y: blockSize * 2, z: item.dir.z * blockSize * 3 };
 					world.entities[entityId] = server.addEntity(entityId, item);
-					newEntities.push(world.entities[entityId])
+					world.newEntities.push(world.entities[entityId])
 					droppedItems = true;
 					break;
 				}
@@ -540,39 +537,53 @@ io.on('connection', function (socket_) {
 		}
 	})
 
+	// Throw ender pearl
+	socket.on('throwEnderPearl', function (data) {
+		let player = players[socket.id];
+		if (!player) return;
+
+		let { blockSize } = world;
+		player.pickupDelay = Date.now() + 1000;  // Disable pickup while dropping items
+
+		world.removeItem(player, "ender_pearl");
+
+		let entityId = Function.randomString(5);
+		let force = blockSize * 20;
+		let entity = server.addEntity(entityId, {
+			pos: data.pos, 
+			vel: { x: data.dir.x * force, y: data.dir.y * force, z: data.dir.z * force },
+			name: "ender_pearl",
+			v: world.itemId["ender_pearl"],
+			class: "item",
+			playerId: socket.id,
+		})
+		world.entities[entityId] = entity;
+		world.newEntities.push(entity)
+	})
+
 	// Fire server-side arrow
 	socket.on('fireArrow', function (data) {
 		let player = players[socket.id];
 		if (!player) return;
 
 		let { blockSize } = world;
-		player.pickupDelay = Date.now() + 2000;  // Disable pickup while dropping items
+		player.pickupDelay = Date.now() + 1000;  // Disable pickup while dropping items
 
-		for (let t of player.toolbar) {
-			if (t && t.v == world.itemId["arrow"] && t.c > 0) {
-				t.c = Math.max(0, t.c - 1);
-				break;
-			}
-		}
+		world.removeItem(player, "arrow");
 
 		let entityId = Function.randomString(5);
 		let force = blockSize * 10 * data.force;
-		let entity = {
-			pos: { x: data.x, y: data.y, z: data.z },
-			vel: { x: data.dir.x * force, y: data.dir.y * force, z: data.dir.z * force },
-			acc: { x: 0, y: 0, z: 0 },
-			force: data.force,
+		let entity = server.addEntity(entityId, {
+			pos: data.pos, 
+			vel: { x: data.dir.x * force, y: data.dir.y * force, z: data.dir.z * force }, 
+			force: data.force, 
 			lethal: true,
-			type: "item",
 			v: world.itemId["arrow"],
 			class: "item",
-			id: entityId,
-			playerId: data.id,
-			t: Date.now(),
-			onObject: false
-		}
+			playerId: socket.id,
+		})
 		world.entities[entityId] = entity;
-		newEntities.push(entity)
+		world.newEntities.push(entity)
 	})
 
 	// Chat
@@ -794,20 +805,20 @@ setInterval(function () {
 		saveToLog();
 	}
 
-	world.update(dt / 1000, players, newEntities, io);
+	world.update(dt / 1000, players, io);
 
 	// Send updated data to client
 	io.emit('update', {
 		serverPlayers: players,
 		updatedBlocks: updatedBlocks,
-		newEntities: newEntities,
+		newEntities: world.newEntities,
 		entities: world.entities,
 		tick: world.tick,
 		t: Date.now()
 	})
 
 	updatedBlocks = [];
-	newEntities = [];
+	world.newEntities = [];
 }, dt)
 
 module.exports = app;

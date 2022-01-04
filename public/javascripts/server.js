@@ -350,8 +350,11 @@ function updateServerEntities(delta) {
 		let e = world.entities[id]
 		e.mesh.position.lerp(e.pos, delta*10)
 
-		if (e.class == "item")
+		if (e.name == "ender_pearl") {
+			e.mesh.lookAt(player.position);
+		} else if (e.class == "item") {
 			e.mesh.rotation.y += delta;
+		}
 	}
 }
 
@@ -360,7 +363,7 @@ function addEntity(entity) {
 	if (entity.type == "item") {
 		let {blockSize} = world;
 
-		if (entity.class == "item") {
+		if (entity.class == "item") { // Add item
 			let canvas = document.createElement("canvas");
 			let atlas = textureManager.getTextureAtlas(entity.class);
 			canvas.width = 16;
@@ -370,7 +373,7 @@ function addEntity(entity) {
 			let texture = new THREE.CanvasTexture(canvas);
 			texture.magFilter = THREE.NearestFilter;
 			texture.minFilter = THREE.NearestFilter;
-			let mat = new THREE.MeshLambertMaterial({map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide})
+			let mat = new THREE.MeshLambertMaterial({map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide});
 
 			let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(blockSize/4, blockSize/4), mat);
 			item_mesh.renderOrder = 1;
@@ -381,7 +384,7 @@ function addEntity(entity) {
 			world.entities[entity.id].mesh = item_mesh;
 
 			scene.add(world.entities[entity.id].mesh)
-		} else {
+		} else {  // Add block
 			let uvVoxel = entity.v-1;
 			let block_geometry = new THREE.BufferGeometry();
 			const {positions, normals, uvs, indices} = world.generateGeometryDataForItem(uvVoxel);

@@ -237,6 +237,20 @@ class Player {
 		if (item && item.c > 0) return item;
 	}
 
+	getItemVel() {
+		let force = 400000;
+		let vel = new THREE.Vector3();
+		let mag = this.velocity.distanceTo(vel);
+		camera.getWorldDirection(vel)
+		let playerVel = this.velocity.clone();
+		let playerVelY = playerVel.y;
+		playerVel.normalize();
+		playerVel.y = playerVelY;
+		playerVel.multiplyScalar(mag/force); // Default
+		vel.add(playerVel);
+		return vel;
+	}
+
 	updateHand(item) {
 		item = item || this.getCurrItem();
 		this.arm.visible = !(this.mode == "spectator" || this.mode == "camera");
@@ -299,6 +313,49 @@ class Player {
 		camera.add(this.arm);
 	}
 
+	drawBow() {
+		let hand = this.getCurrItem();
+		if (hand.v == world.itemId["bow"]) {
+			if (this.key.lastRightClick) {
+				if (this.state == undefined)
+					this.state = 0;
+				let diff = (Date.now()-this.key.lastRightClick);
+
+				let arrowExists = false;
+				for (let t of this.toolbar) {
+					if (t && t.v == world.itemId["arrow"] && t.c > 0) {
+						arrowExists = true;
+						break;
+					}
+				}
+
+				if (diff > 300 && arrowExists) {
+					this.state = Math.min(Math.floor((diff - 300)/300), 2) + 1
+				}
+			} else {
+				if (this.state > 0) { // Release bow
+					socket.emit('fireArrow', {
+						pos: this.position.clone(),
+						dir: this.getItemVel(),
+						force: this.state
+					})
+				}
+				this.state = 0;
+			}
+		}
+	}
+
+	throw() {
+		let item = this.getCurrItem();
+		if (item && item.v == world.itemId["ender_pearl"] && this.key.rightClick) {
+			socket.emit('throwEnderPearl', {
+				id: socket.id,
+				pos: this.position.clone(),
+				dir: this.getItemVel()
+			})
+		}
+	}
+
 	moveHand(entity) {
 		if (this.mode == "spectator" || this.mode == "camera") return;
 
@@ -307,6 +364,9 @@ class Player {
 		let hand = this.getCurrItem();
 		let blockingSpeed = 10;
 		if (hand && hand.class == "item" && hand.c > 0) {
+			// Throwing items
+			this.throw();
+
 			// Blocking
 			let swords = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 			let isSword = false;
@@ -324,47 +384,8 @@ class Player {
 			}
 
 			// Drawing a bow
-			if (hand.v == world.itemId["bow"]) {
-				if (this.key.lastRightClick) {
-					if (this.state == undefined)
-						this.state = 0;
-					let diff = (Date.now()-this.key.lastRightClick);
+			this.drawBow();
 
-					let arrowExists = false;
-					for (let t of this.toolbar) {
-						if (t && t.v == world.itemId["arrow"] && t.c > 0) {
-							arrowExists = true;
-							break;
-						}
-					}
-
-					if (diff > 300 && arrowExists) {
-						this.state = Math.min(Math.floor((diff - 300)/300), 2) + 1
-					}
-				} else {
-					if (this.state > 0) { // Release bow
-						let vel = new THREE.Vector3();
-						let mag = this.velocity.distanceTo(vel);
-						camera.getWorldDirection(vel)
-						let playerVel = this.velocity.clone();
-						let playerVelY = playerVel.y;
-						playerVel.normalize();
-						playerVel.y = playerVelY;
-						playerVel.multiplyScalar(mag/400000); // Default
-						vel.add(playerVel)
-
-						socket.emit('fireArrow', {
-							x: this.position.x,
-							y: this.position.y,
-							z: this.position.z,
-							id: socket.id,
-							dir: vel,
-							force: this.state
-						})
-					}
-					this.state = 0;
-				}
-			}
 		}
 			
 
@@ -728,13 +749,14 @@ class Player {
 		if (item && item.c > 0) {
 			let dropDir = this.getDropDir();
 
+			let position = this.position.clone();
+			position.y -= 8;
+
 			let droppedItem = {
 				type: item.type,
 				v: item.v,
 				c: 1,
-				x: this.position.x,
-				y: this.position.y-8,
-				z: this.position.z,
+				pos: position,
 				class: item.class,
 				dir: {x: dropDir.x, z: dropDir.y}
 			}

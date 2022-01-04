@@ -123,6 +123,7 @@ socket.on('addPlayer', function (data) {
 	}
 })
 
+// Remove player
 socket.on('removePlayer', function (id) {
 	if (!initialized || !players[id])
 		return;
@@ -135,6 +136,7 @@ socket.on('removePlayer', function (id) {
 	delete players[id];
 })
 
+// Receive knockback
 socket.on('knockback', function (data) {
 	let lateralForce = new Vector(data.dir.x, data.dir.z);
 	lateralForce.normalize();
@@ -144,6 +146,7 @@ socket.on('knockback', function (data) {
 	player.knockbackVelocity.z = lateralForce.y;
 })
 
+// Receive punch
 socket.on('punch', function (id) {
 	if (id != socket.id && players && players[id]) {
 		updatePlayerColor(id, new THREE.Color(1, 0.5, 0.5))
@@ -151,6 +154,11 @@ socket.on('punch', function (id) {
 			updatePlayerColor(id, new THREE.Color(1, 1, 1))
 		}, 500)
 	}
+})
+
+// Teleport player
+socket.on('teleport', function (data) {
+	player.setCoords(data.pos);
 })
 
 socket.on('update', async function (data) {
@@ -218,133 +226,3 @@ function updateClient(data) {
 		socket.emit('latency', data.t);
 	}
 }
-
-// let serverSessions = {};
-// socket.on('sessionInfo', function (data) {
-// 	serverSessions = JSON.parse(data);
-
-// 	let playersAll = [];
-// 	let playersWithUniqueUsernamesAll = 0;
-// 	let ipsAll = [];
-// 	let totalConnectionsAll = 0;
-// 	let rawConnectionsAll = 0;
-// 	let totalChunksRequestedAll = 0;
-// 	let totalMessagesSentAll = 0;
-// 	let totalRespawnsAll = 0;
-// 	let totalDeathsAll = 0;
-// 	let totalBlocksPlacedAll = 0;
-// 	let totalBlocksMinedAll = 0;
-// 	let timeOnlineAll = [];
-// 	let averageTimeOnlineAll = 0;
-// 	let averageTimeCounterAll = 0;
-
-
-// 	for (let link in serverSessions) {
-// 		let sessions = serverSessions[link];
-// 		console.log(link);
-
-		
-// 		// Stats
-// 		let players = [];
-// 		let playersWithUniqueUsernames = 0;
-// 		let ips = [];
-// 		let totalConnections = 0;
-// 		let rawConnections = Object.keys(sessions).length;
-// 		rawConnectionsAll += rawConnections;
-// 		let totalChunksRequested = 0;
-// 		let totalMessagesSent = 0;
-// 		let totalRespawns = 0;
-// 		let totalDeaths = 0;
-// 		let totalBlocksPlaced = 0;
-// 		let totalBlocksMined = 0;
-// 		let timeOnline = [];
-// 		let averageTimeOnline = 0;
-// 		let averageTimeCounter = 0;
-
-// 		for (let id in sessions) {
-// 			let session = sessions[id];
-// 			if (session.s.n) {
-// 				if (!players.includes(session.s.n)) {
-// 					if (!session.s.n.startsWith("Player")) playersWithUniqueUsernames++;
-// 					players.push(session.s.n);
-// 				}
-// 				if (!playersAll.includes(session.s.n)) {
-// 					if (!session.s.n.startsWith("Player")) playersWithUniqueUsernamesAll++;
-// 					playersAll.push(session.s.n);
-// 				}
-
-// 				totalConnections += 1;
-// 				totalChunksRequested += session.s.cr || 0;
-// 				totalMessagesSent += session.s.ms || 0;
-// 				totalRespawns += session.s.r || 0;
-// 				totalDeaths += session.s.d || 0;
-// 				totalBlocksPlaced += session.s.bp || 0;
-// 				totalBlocksMined += session.s.bm || 0;
-// 			}
-
-// 			if (session.s.ip) {
-// 				if (!ips.includes(session.s.ip)) {
-// 					ips.push(session.s.ip);
-// 				}
-// 				if (!ipsAll.includes(session.s.ip)) {
-// 					ipsAll.push(session.s.ip);
-// 				}
-// 			}
-
-
-
-// 			if (session.s.tc && session.s.td) {
-// 				let time = session.s.td - session.s.tc;
-// 				timeOnline.push(time);
-// 				averageTimeOnline = ((averageTimeOnline * averageTimeCounter) + time) / (averageTimeCounter + 1);
-// 				averageTimeCounter++;
-// 				timeOnlineAll.push(time);
-// 				averageTimeOnlineAll = ((averageTimeOnlineAll * averageTimeCounterAll) + time) / (averageTimeCounterAll + 1);
-// 				averageTimeCounterAll++;
-// 			}
-// 		}
-// 		console.log("Players: " + players);
-// 		console.log("Unique players: " + players.length);
-// 		console.log("Unique usernames: " + playersWithUniqueUsernames);
-// 		console.log("IPs: " + ips);
-// 		console.log("Unique IPs: " + ips.length);
-// 		console.log("Raw connections: " + Object.keys(sessions).length);
-// 		console.log("Total connections: " + totalConnections);
-// 		console.log("Total chunks requested: " + totalChunksRequested);
-// 		console.log("Total messages sent: " + totalMessagesSent);
-// 		console.log("Total respawns: " + totalRespawns);
-// 		console.log("Total deaths: " + totalDeaths);
-// 		console.log("Total blocks placed: " + totalBlocksPlaced);
-// 		console.log("Total blocks mined: " + totalBlocksMined);
-// 		console.log("Average time online: " + averageTimeOnline/1000 + " seconds");
-// 		console.log("Max time online: " + Math.max(...timeOnline)/1000 + " seconds");
-// 		console.log("Min time online: " + Math.min(...timeOnline)/1000 + " seconds");
-		
-// 		totalConnectionsAll += totalConnections;
-// 		totalChunksRequestedAll += totalChunksRequested;
-// 		totalMessagesSentAll += totalMessagesSent;
-// 		totalRespawnsAll += totalRespawns;
-// 		totalDeathsAll += totalDeaths;
-// 		totalBlocksPlacedAll += totalBlocksPlaced;
-// 		totalBlocksMinedAll += totalBlocksMined;
-
-// 	}
-
-// 	console.log("ALL SERVERS");
-// 	console.log("Players: " + playersAll);
-// 	console.log("Unique players: " + playersAll.length);
-// 	console.log("Unique usernames: " + playersWithUniqueUsernamesAll);
-// 	console.log("IPs: " + ipsAll);
-// 	console.log("Unique IPs: " + ipsAll.length);
-// 	console.log("Raw connections: " + rawConnectionsAll);
-// 	console.log("Total connections: " + totalConnectionsAll);
-// 	console.log("Total chunks requested: " + totalChunksRequestedAll);
-// 	console.log("Total messages sent: " + totalMessagesSentAll);
-// 	console.log("Total respawns: " + totalRespawnsAll);
-// 	console.log("Total deaths: " + totalDeathsAll);
-// 	console.log("Total blocks placed: " + totalBlocksPlacedAll);
-// 	console.log("Total blocks mined: " + totalBlocksMinedAll);
-// 	console.log("Average time online: " + averageTimeOnlineAll/1000 + " seconds");
-// 	console.log("Max time online: " + Math.max(...timeOnlineAll)/1000 + " seconds");
-// 	console.log("Min time online: " + Math.min(...timeOnlineAll)/1000 + " seconds");
-// })
