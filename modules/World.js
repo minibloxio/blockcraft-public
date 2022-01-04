@@ -655,6 +655,8 @@ module.exports = class World {
   }
 
   gravitateEntities(players, entity, entity_id, io) {
+    if (!entity.pos) return;
+
     const {blockSize} = this;
     let entitiesToRemove = []; // Entities to be removed
 

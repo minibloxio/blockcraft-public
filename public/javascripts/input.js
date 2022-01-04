@@ -228,7 +228,6 @@ var onKeyDown = function ( event ) {
 var onKeyUp = function ( event ) {
 
 	// CHAT INPUT
-	//chat.hintText = "";
 	if ([13].indexOf(event.keyCode) > -1) {
 		chat.showChatFlag = true;
 		return;
@@ -256,6 +255,7 @@ var onKeyUp = function ( event ) {
 		}
 		
 		// Give command hint
+		chat.hintText = "";
 		let msg = $("#chat-input").val()
 		
 		if (player && player.controls.enabled && chat.showChatFlag && msg && msg[0] == "/") {

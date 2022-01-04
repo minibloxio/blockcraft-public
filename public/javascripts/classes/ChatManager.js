@@ -187,7 +187,7 @@ class ChatManager {
                 hintColor = "red";
             }
 
-            let command = $("#chat-input").val().removeExtraSpaces();
+            let command = $("#chat-input").val()//.removeExtraSpaces();
             let commandWidth = ctx.measureText(command).width;
             let hintWidth = ctx.measureText(text).width;
             let width = Math.max(commandWidth, hintWidth);
