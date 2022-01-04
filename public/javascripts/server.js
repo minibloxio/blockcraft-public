@@ -19,6 +19,7 @@ function sendPacket() {
 	}
 }
 
+// Add mesh
 function addMesh(geometry, material) {
 	let mesh = new THREE.Mesh(geometry, material);
 	mesh.castShadow = true;
@@ -26,6 +27,7 @@ function addMesh(geometry, material) {
 	return mesh;
 }
 
+// Update player name tag
 function updateNameTag(p, options) {
 	if (!options) options = {};
 	let {blockSize} = world;
@@ -52,6 +54,7 @@ function updateNameTag(p, options) {
 	p.entity.add(p.nameTag);
 }
 
+// Add player
 function addPlayer(players, id) {
 	let {blockSize} = world;
 
@@ -350,8 +353,8 @@ function updateServerEntities(delta) {
 		let e = world.entities[id]
         if (!e.mesh) continue;
 		e.mesh.position.lerp(e.pos, delta*10)
-
-		if (e.name == "ender_pearl" || e.name == "fireball") {
+        let throwables = ["ender_pearl", "fireball", "snowball", "egg"];
+		if (throwables.includes(e.name)) {
 			e.mesh.lookAt(player.position);
 		} else if (e.class == "item") {
 			e.mesh.rotation.y += delta;

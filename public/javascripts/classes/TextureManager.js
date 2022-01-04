@@ -72,6 +72,15 @@ class TextureManager {
             "brown_mushroom_block": "mushroom_block_skin_brown",
             "red_mushroom_block": "mushroom_block_skin_red",
             "mushroom_stem": ["mushroom_block_skin_stem", "mushroom_block_inside", "mushroom_block_inside"],
+            "jukebox": ["jukebox_side", "jukebox_side", "jukebox_top"],
+            "log_acacia": ["log_acacia", "log_acacia_top", "log_acacia_top"],
+            "log_big_oak": ["log_big_oak", "log_big_oak_top", "log_big_oak_top"],
+            "log_birch": ["log_birch", "log_birch_top", "log_birch_top"],
+            "log_jungle": ["log_jungle", "log_jungle_top", "log_jungle_top"],
+            "log_spruce": ["log_spruce", "log_spruce_top", "log_spruce_top"],
+            "melon": ["melon_side", "melon_top", "melon_top"],
+            "red_sandstone": ["red_sandstone_normal", "red_sandstone_bottom", "red_sandstone_top"],
+            "red_sandstone_smooth": ["red_sandstone_smooth", "red_sandstone_bottom", "red_sandstone_top"],
         }
 
         this.blockFaces = {};
@@ -206,6 +215,7 @@ class TextureManager {
         let index = 0;
         for (let entity of order) {
             let b = entities[entity];
+            //console.log(entity);
             if (b instanceof Array) {
                 for (let i = 0; i < 3; i++) {
                     ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)
@@ -252,6 +262,7 @@ class TextureManager {
         let index = 0;
         for (let item of order) {
             let b = this.items[item];
+            //console.log(item);
             if (b instanceof Array) {
                 for (let i = 0; i < b.length; i++) {
                 ctx_.drawImage(this.itemFaces[b[i]].image, index*16, i*16)

@@ -265,21 +265,22 @@ class Inventory {
                         this.selectedItem = prevBlock;
                     }
                 }
-            } else if (type == "hover") {
-                let name = "";
-                let entity = {};
-                if (i < searchBlocks.length) {
-                    name = searchBlocks[i];
-                    entity.v = world.blockId[name];
-                    entity.class = "block";
-                } else if (i < searchBlocks.length+searchItems.length) {
-                    name = searchItems[i-searchBlocks.length]; 
-                    entity.v = world.itemId[name];
-                    entity.class = "item";
-                }
-                
-                this.drawHintBox(name, entity);
             }
+        } else if (block == "creative" && type == "hover") {
+            i = i + currentRow*9;
+            let name = "";
+            let entity = {};
+            if (i < searchBlocks.length) {
+                name = searchBlocks[i];
+                entity.v = world.blockId[name];
+                entity.class = "block";
+            } else if (i < searchBlocks.length+searchItems.length) {
+                name = searchItems[i-searchBlocks.length]; 
+                entity.v = world.itemId[name];
+                entity.class = "item";
+            }
+            
+            this.drawHintBox(name, entity);
         } else if (block != "creative") { // SURVIVAL MODE
             let selectedExists = this.selectedItem && this.selectedItem.c > 0;
             let blockExists = block[i] && block[i].c > 0;

@@ -156,6 +156,8 @@ function updateHints() {
     commands.op.hints[player.name] = "Make yourself an operator"; // Update op hint
     commands.deop.hints[player.name] = "Remove your operator status"; // Update deop hint
     commands.kill.hints[player.name] = "Kill yourself" // Update kill hint
+    commands.kill.hints['@e'] =  "Kill all server entities";
+    commands.kill.hints['@a'] =  "Kill all players";
 
     for (let id in world.blockId) {
         commands.setblock.hints[id] = "Set block to " + id; // Update setblock hint
@@ -517,8 +519,18 @@ function updateGamemode(mode) {
 
 // Set the time of day
 function setTime(time) {
-    if (typeof(parseInt(time)) == "number")
-        socket.emit('settime', parseInt(time))
+    let timeInt = parseInt(time);
+    if (typeof(timeInt) == "number" && timeInt) {
+        socket.emit('settime', timeInt)
+        chat.addChat({
+            text: "Time set to " + timeInt
+        })
+    } else {
+        chat.addChat({
+            text: "Error: Invalid time",
+            color: "red"
+        })
+    }
 }
 
 // Teleport the player to the specified coordinates or player
@@ -761,6 +773,23 @@ function kickPlayer(msg) {
 function killPlayer(msg) {
     msg.shift();
     let target = msg[0];
+
+    if (!player.operator) {
+        chat.addChat({
+            text: 'Error: This command can only be used by operators',
+            color: "red"
+        });
+        return;
+    }
+
+    if (target == "@e") {
+        socket.emit('killEntities');
+        return;
+    } else if (target == "@a") {
+        socket.emit('killPlayers');
+        return;
+    }
+
     let playerId = null;
 
     let exists = false;
@@ -777,12 +806,7 @@ function killPlayer(msg) {
         }
     }
 
-    if (!player.operator) {
-        chat.addChat({
-            text: 'Error: This command can only be used by operators',
-            color: "red"
-        });
-    } else if (!exists) {
+    if (!exists) {
         chat.addChat({
             text: 'Error: No player found with name "' + target + '" to kill',
             color: "red"

@@ -660,24 +660,19 @@ module.exports = class World {
             entity.acc = { x: 0, y: 0, z: 0 }
             entity.vel = { x: 0, y: 0, z: 0 }
 
-            let removeItem = false;
+            let throwables = ["ender_pearl", "fireball", "snowball", "egg"];
+
             if (entity.name == "ender_pearl") { // ENDER PEARL
                 entity.pos.y += blockSize * 1.6;
                 io.to(`${entity.playerId}`).emit('teleport', entity)
-
-                removeItem = true;
             } else if (entity.name == "fireball") { // FIREBALL
-                removeItem = true;
-
                 if (players[entity.playerId].operator) {
                     let explosionRadius = 5;
                     this.destroyBlocks(x, y, z, explosionRadius);
                 }
-            } else if (entity.name == "snowball") { // SNOWBALL
-                removeItem = true;
             }
 
-            if (removeItem) this.removeItem(entity.id, entity.v, entity.class);
+            if (throwables.includes(entity.name)) this.removeItem(entity.id, entity.v, entity.class);
         }
         if (voxel) {
             entity.acc = { x: 0, y: 9.81 * blockSize, z: 0 }

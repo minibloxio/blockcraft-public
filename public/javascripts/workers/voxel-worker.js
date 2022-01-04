@@ -142,7 +142,7 @@ function addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y
     );
 }
 
-let transparentBlocks = ["water", "glass", "ice", "glass_black", "glass_blue", "glass_brown", "glass_cyan", "glass_gray", "glass_green", "glass_light_blue", "glass_lime", "glass_magenta", "glass_orange", "glass_pink", "glass_purple", "glass_red", "glass_silver", "glass_white", "glass_yellow", "cake"]
+let transparentBlocks = ["water", "glass", "ice", "glass_black", "glass_blue", "glass_brown", "glass_cyan", "glass_gray", "glass_green", "glass_light_blue", "glass_lime", "glass_magenta", "glass_orange", "glass_pink", "glass_purple", "glass_red", "glass_silver", "glass_white", "glass_yellow", "cake", "mob_spawner", "slime"]
 
 // Check if is transparent
 function isTransparent(voxel) {

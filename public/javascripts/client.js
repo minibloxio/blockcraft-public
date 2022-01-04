@@ -225,7 +225,12 @@ function updateClient(data) {
 	}
 
 	// Update tick
-	tick.value = data.tick;
+    let tickDiff = Math.abs(data.tick - tick.value);
+    if (tickDiff > 1000) {
+        tick = new Ola(data.tick);
+    } else {
+        tick.value = data.tick;
+    }
 
 	// Latency check
 	if (Date.now() - lastUpdate > 500) {

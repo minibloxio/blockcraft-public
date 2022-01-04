@@ -106,6 +106,7 @@ rl.on('line', (input) => {
 // Server logging
 const { createLogger, format, transports } = require('winston');
 const e = require('express');
+const { log } = require('console');
 const { combine, timestamp, printf, colorize, align } = format;
 
 const myFormat = printf(({ level, message, timestamp }) => {
@@ -718,6 +719,49 @@ io.on('connection', function (socket_) {
 			});
 		}
 	})
+
+    // Kill all players
+    socket.on('killPlayers', function (data) {
+        if (!players[socket.id]) return;
+
+        if (players[socket.id].operator) {
+            io.emit('messageAll', {
+                name: "Server",
+                text: "Killed all players",
+                color: "aqua"
+            });
+            for (let id in players) {
+                io.to(`${id}`).emit('kill');
+                players[id].hp = 0;
+                players[id].dead = true;
+            }
+        } else {
+            socket.emit('message', {
+                name: "Server",
+                text: "You do not have operator status to kill players",
+                color: "aqua"
+            });
+        }
+    })
+
+    // Kill entities
+    socket.on('killEntities', function () {
+        if (!players[socket.id]) return;
+
+        if (players[socket.id].operator) {
+            for (let id in world.entities) {
+                let type = "block";
+                if (world.itemId[world.entities[id].v-1]) type = "item";
+                world.removeItem(id, world.entities[id].v, type);
+            }
+        } else {
+            socket.emit('message', {
+                name: "Server",
+                text: "You do not have operator status to kill entities",
+                color: "aqua"
+            });
+        }
+    })
 
 	// DISCONNECT
 	socket.on('disconnect', function () {
