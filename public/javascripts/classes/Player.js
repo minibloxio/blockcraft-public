@@ -76,7 +76,6 @@ class Player {
 
 		this.blockT = 0;
 		this.punching = Date.now();
-		this.drop = false; // Drop item
 
 		this.lastRaycast = Date.now();
 		this.nearbyMeshes = [];
@@ -741,8 +740,6 @@ class Player {
 			}
 
 			socket.emit('dropItems', [droppedItem]);
-
-			this.drop = false;
 		}
 	}
 

@@ -84,12 +84,14 @@ $("body").mousedown(function (e) {
 	switch (e.which) {
         case 1:
         	mouseLeft = false
+			inventory.unselect();
             break;
         case 2:
             
             break;
         case 3:
             mouseRight = false;
+			inventory.unselect();
             break;
         default:
             //alert('You have a strange Mouse!');
@@ -97,8 +99,7 @@ $("body").mousedown(function (e) {
 })
 
 $("body").dblclick(function () {
-	if (!initialized)
-		return;
+	if (!initialized) return;
 	inventory.selectInventory("double")
 })
 
@@ -142,17 +143,7 @@ var onKeyDown = function ( event ) {
 			commandIndex = -1;
     	}
 	}
-	//  else if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && !chat.showChatFlag) {
-
-	// ARROW KEY CONTROLS
-	if (event.keyCode == 38 ) {
-		inventory.scroll(1);
-		prevCommand();
-	} else if (event.keyCode == 40) {
-		inventory.scroll(-1);
-		nextCommand();
-	}
-
+	
 	if (!initialized || !player.controls.enabled || chat.showChatBar)
 		return;
 	
@@ -196,7 +187,7 @@ var onKeyDown = function ( event ) {
 			}
 			break;
 			case "Drop Item":
-			player.dropItem();
+			player.allowDrop = true;
 			break;
 			case "Respawn":
 			if (player.controls.enabled && player.allowRespawn) {
@@ -237,23 +228,14 @@ var onKeyDown = function ( event ) {
 var onKeyUp = function ( event ) {
 
 	// CHAT INPUT
-	chat.hintText = "";
+	//chat.hintText = "";
 	if ([13].indexOf(event.keyCode) > -1) {
 		chat.showChatFlag = true;
 		return;
 	}
 
-	// Give command hint
-	let msg = $("#chat-input").val();
-    
-	if (player && player.controls.enabled && chat.showChatFlag && msg && msg[0] == "/") {
-		msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
-		giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
-	}
-
 	if (!initialized) return;
 
-	// ARROW KEY CONTROLS
 	// CREATIVE MENU CONTROLS
 	if (event.keyCode == 38 ) {
 		inventory.scroll(1);
@@ -262,6 +244,27 @@ var onKeyUp = function ( event ) {
 		inventory.scroll(-1);
 		canChangeCommand = true;
 	}
+
+	if (chat.showChatBar) {
+		// ARROW KEY CONTROLS
+		if (event.keyCode == 38 ) {
+			inventory.scroll(1);
+			prevCommand();
+		} else if (event.keyCode == 40) {
+			inventory.scroll(-1);
+			nextCommand();
+		}
+		
+		// Give command hint
+		let msg = $("#chat-input").val()
+		
+		if (player && player.controls.enabled && chat.showChatFlag && msg && msg[0] == "/") {
+			chat.hintText = "";
+			msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
+			giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
+		}
+	}
+
 
 	// GAME CONTROLS
 	if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
@@ -303,7 +306,7 @@ var onKeyUp = function ( event ) {
 			player.allowClip = true;
 			break;
 			case "Drop Item":
-			player.allowDrop = true;
+			player.allowDrop = false;
 			break;
 			case "Respawn":
 			player.allowRespawn = true;

@@ -174,7 +174,7 @@ class ChatManager {
 
         // Draw chat messages
         for (let i = 0; i < lines.length; i++) {
-            drawText(lines[i].text, 10, canvas.height-this.yOffset-this.msgOffset-i*this.msgHeight, this.fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity, 1, true);
+            drawText(lines[i].text, 10, canvas.height-this.yOffset-this.msgOffset-i*this.msgHeight, this.fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity, true, parseInt(game.guiSize)*1.3);
         }
         ctx.restore();
 

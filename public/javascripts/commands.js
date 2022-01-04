@@ -99,7 +99,6 @@ let commands = JSON.parse(commandsInit);
 let prevCommands = [
     '/help',
     '/tutorial',
-    '/list',
 ];
 let commandIndex = -1;
 let canChangeCommand = true;

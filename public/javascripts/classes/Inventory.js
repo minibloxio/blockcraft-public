@@ -3,11 +3,12 @@ class Inventory {
         // Inventory
         this.showInventory = false;
         this.canShowInventory = true;
-        this.blockWidth = 39;
+        this.blockWidth = 40;
         this.boxSize = 48;
         this.hotboxWidth = 60;
         this.selectorWidth = 65;
-        this.boxRatio = 8/9.1;
+        this.boxRatio = 8/9.2;
+        this.toolbarRatio = 8/9.1;
         this.margin = 5;
 
         this.width = 480;
@@ -25,6 +26,14 @@ class Inventory {
         // Toolbar
         this.toolbarX = this.halfW-this.hotboxWidth*4;
         this.toolbarSelectorX = this.halfW-this.hotboxWidth*3.5-2.5;
+
+        // Highlight boxes
+        this.highlightBoxes = [];
+        this.selectedBoxes = [];
+
+        this.highlightBoxColor = "#C5C5C5";
+        this.backgroundBoxColor = "#8B8B8B";
+        this.backgroundColor = "#C6C6C6";
     }
 
     // Resize inventory
@@ -151,6 +160,52 @@ class Inventory {
         return mouse.x > xPos && mouse.x < xPos + boxSize && mouse.y > yPos && mouse.y < yPos + boxSize;
     }
 
+    // Unselect item
+    unselect() {
+        let {selectedItem, selectedBoxes} = this;
+
+        this.pickup = false;
+        this.drop = false;
+        console.log(selectedBoxes);
+        if (selectedBoxes.length && selectedBoxes.left) {
+            let quotient = Math.floor(selectedItem.c / selectedBoxes.length);
+            // Loop through selected boxes and add divided items 
+            for (let box of selectedBoxes) {
+                let total = quotient;
+                if (box.block[box.i] && box.block[box.i].c) total += box.block[box.i].c;
+                box.block[box.i] = {
+                    v: selectedItem.v,
+                    c: total,
+                    class: selectedItem.class
+                }
+            }
+            // Update selected item
+            selectedItem.c -= quotient * selectedBoxes.length;
+
+            if (selectedItem.c <= 0) this.selectedItem = undefined;
+        }
+
+        this.selectedBoxes = [];
+
+    }
+
+    // Compare items
+    compareItems(items, itemToCompare, i) {
+        let total = 0;
+        for (let j = 0; j < items.length; j++) {
+            if (items[j] && items[j].v == itemToCompare.v && i != j) {
+                total += items[j].c;
+                items[j] = undefined;
+            }
+        }
+        return total;
+    }
+
+    // Copy item
+    copyItem(item) {
+        return JSON.parse(JSON.stringify(item));
+    }
+
     // Update item in inventory
     updateItem(block, i, type, xPos, yPos, firstClick) {
         //if (type != "hover") console.log(type, firstClick);
@@ -228,45 +283,57 @@ class Inventory {
                 this.drawHintBox(name, entity);
             }
         } else if (block != "creative") { // SURVIVAL MODE
+            let selectedExists = this.selectedItem && this.selectedItem.c > 0;
+            let blockExists = block[i] && block[i].c > 0;
+            let blockEqualsSelected = blockExists && selectedExists && block[i].v == this.selectedItem.v;
+            let enoughSpace = selectedExists && this.selectedItem.c > this.selectedBoxes.length;
+
             if (type == "left") { // Left click item
-                console.log(block[i]);
-                if (!this.selectedItem && block[i] && block[i].c > 0 && firstClick) {
-                    // Pick up item
-                    this.selectedItem = JSON.parse(JSON.stringify(block[i]));
+                if (!selectedExists && blockExists && firstClick) { // Pick up item
+                    this.selectedItem = this.copyItem(block[i]);
                     block[i] = undefined;
-                } else if (this.selectedItem && this.selectedItem.c > 0 && (!block[i] || block[i].c == 0) && firstClick) {
-                    // Drop item
-                    // block[i] = JSON.parse(JSON.stringify(this.selectedItem));
-                    // this.selectedItem = undefined;
-                    this.addHighlightBox(xPos, yPos);
-                } else if (this.selectedItem && this.selectedItem.c > 0 && block[i] && block[i].c > 0 ) {
-                    if (block[i].v == this.selectedItem.v) { // Combine items
-                        block[i].c += this.selectedItem.c;
-                        this.selectedItem = undefined;
-                    } else if (firstClick) { // Switch items
-                        let prevBlock = JSON.parse(JSON.stringify(block[i]));
-                        block[i] = JSON.parse(JSON.stringify(this.selectedItem));
-                        this.selectedItem = prevBlock;
-                    }
+                    this.pickup = true;
+                } else if (selectedExists && !this.pickup && (!blockExists || blockEqualsSelected) && enoughSpace) { // Drop item
+                    this.addSelectedBox(xPos, yPos, block, i, this.selectedItem, true); // Add box to selected boxes to spread evenly
+                    this.drop = true;
+                } else if (selectedExists && blockExists && !blockEqualsSelected && firstClick) { // Switch items
+                    let prevBlock = JSON.parse(JSON.stringify(block[i]));
+                    block[i] = JSON.parse(JSON.stringify(this.selectedItem));
+                    this.selectedItem = prevBlock;
+                    this.pickup = true;
                 }
             } else if (type == "right") { // Right click item
-                if (!this.selectedItem && block[i] && block[i].c > 0) {
-                    // Split item stack
+                if (!selectedExists && blockExists && firstClick) { // Split item stack
                     this.selectedItem = {
                         v: block[i].v,
                         c: Math.ceil(block[i].c/2),
                         class: block[i].class
                     };
                     block[i].c -= Math.ceil(block[i].c/2);
-                } else if (this.selectedItem && this.selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
-                    // Drop 1 item
-                    block[i] = {
-                        v: this.selectedItem.v, 
-                        c: 1,
-                        class: this.selectedItem.class
-                    };
-                    this.selectedItem.c -= 1;
-                } else if (this.selectedItem && this.selectedItem.c > 0 && block[i] && block[i].c > 0) {
+                } else if (selectedExists && (!blockExists || blockEqualsSelected)) { // Drop 1 item
+                    let total = 1;
+
+                    let exists = false;
+                    for (let box of this.selectedBoxes) {
+                        if (box.x == xPos && box.y == yPos && box.i == i) {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists) {
+                        if (blockExists) total += block[i].c;
+                        block[i] = {
+                            v: this.selectedItem.v, 
+                            c: total,
+                            class: this.selectedItem.class
+                        };
+                        this.selectedItem.c -= 1;
+                        this.drop = true;
+
+                        this.addSelectedBox(xPos, yPos, block, i, this.selectedItem);
+                    }
+                } else if (selectedExists && block[i] && block[i].c > 0 && firstClick) {
                     // Switch or combine
                     if (block[i].v == this.selectedItem.v) {
                         block[i].c += 1;
@@ -278,44 +345,24 @@ class Inventory {
                     }
                 }
             } else if (type == "double") { // Double click item
-                if (!block[i])
-                    return;
-
-                if (this.selectedItem && this.selectedItem.v != block[i].v) {
+                if (this.selectedItem && block[i] && this.selectedItem.v != block[i].v) {
                     return;
                 }
 
                 // Collect same item type
-                let total = block[i].c;
-                for (let j = 0; j < block.length; j++) {
-                    if (block[j] && block[j].v == block[i].v && i != j) {
-                        total += block[j].c;
-                        block[j] = undefined;
-                    }
-                }
-                for (let j = 0; j < craftingGrid.length; j++) {
-                    if (craftingGrid[j] && craftingGrid[j].v == block[i].v && i != j) {
-                        total += craftingGrid[j].c;
-                        craftingGrid[j] = undefined;
-                    }
-                }
-                for (let j = 0; j < craftingTableGrid.length; j++) {
-                    if (craftingTableGrid[j] && craftingTableGrid[j].v == block[i].v && i != j) {
-                        total += craftingTableGrid[j].c;
-                        craftingTableGrid[j] = undefined;
-                    }
-                }
-                for (let j = 0; j < this.inventory.length; j++) {
-                    if (this.inventory[j] && this.inventory[j].v == block[i].v && i != j) {
-                        total += this.inventory[j].c;
-                        this.inventory[j] = undefined;
-                    }
-                }
+                let total = 0;
+                let itemToCompare = block[i] || this.selectedItem;
+                if (block[i]) total = block[i].c;
+                else total = this.selectedItem.c;
+                total += this.compareItems(block, itemToCompare, i);
+                total += this.compareItems(craftingGrid, itemToCompare, i);
+                total += this.compareItems(craftingTableGrid, itemToCompare, i);
+                total += this.compareItems(inventory, itemToCompare, i);
 
                 this.selectedItem = {
-                    v: block[i].v, 
+                    v: itemToCompare.v, 
                     c: total,
-                    class: block[i].class
+                    class: itemToCompare.class
                 }
                 block[i] = undefined;
             } else if (type == "hover") {
@@ -359,18 +406,21 @@ class Inventory {
     selectInventory(type, firstClick) {
         if (!this.showInventory) return;
 
-        let {craftingGrid, craftingTableGrid, showCraftingTable, craftingOutput} = this;
+        let {craftingGrid, craftingTableGrid, showCraftingTable, craftingOutput, selectedItem} = this;
 
         // Check if click is outside of inventory
-        if (type != "hover" && !this.withinInventory()) {
+        if (type != "hover" && !this.withinInventory() && !this.drop && !this.pickup && selectedItem && selectedItem.c > 0) {
             if (type == "left") { // Drop all items from hand
                 socket.emit('dropItems', getDroppedItems([this.selectedItem]));
                
                 this.selectedItem = undefined;
             } else if (type == "right") { // Drop one item from hand
                 socket.emit('dropItems', getDroppedItems([this.selectedItem], 1));
-                if (this.selectedItem.c > 0) { // Remove one item
+                if (this.selectedItem.c > 0 && !this.drop) { // Remove one item
                     this.selectedItem.c -= 1;
+                    this.drop = true;
+                } else {
+                    this.selectedItem = undefined;
                 }
             }
         }
@@ -449,21 +499,28 @@ class Inventory {
     // Add highlight box
     addHighlightBox(x, y) {
         let {margin} = this;
+        let xPos = x - margin;
+        let yPos = y - margin;
+
+        for (let i = 0; i < this.highlightBoxes.length; i++) {
+            if (this.highlightBoxes[i].x == xPos && this.highlightBoxes[i].y == yPos) {
+                return;
+            }
+        }
+
         this.highlightBoxes.push({
             x: x-margin,
             y: y-margin,
         })
     }
 
-    // Draw highlight boxes
-    drawHighlightBoxes() {
-       let {highlightBoxes, boxSize} = this;
-        if (highlightBoxes && highlightBoxes.length > 0) {
-            for (let i = 0; i < highlightBoxes.length; i++) {
-                let box = highlightBoxes[i];
-                drawRectangle(box.x,box.y, boxSize, boxSize, "#A9A9A9")
-            }
+    // Add selected box
+    addSelectedBox(x, y, block, i, item, left) {
+        this.selectedBoxes.left = left;
+        for (let i = 0; i < this.selectedBoxes.length; i++) {
+            if (this.selectedBoxes[i].x == x && this.selectedBoxes[i].y == y) return;
         }
+        this.selectedBoxes.push({x, y, block, i, item, left})
     }
 
     // Update item search
@@ -505,7 +562,7 @@ class Inventory {
         let {hotboxWidth, blockWidth, boxSize, height, margin} = this;
 
         let xPos, yPos;
-        let startX = this.halfW-hotboxWidth*4+(hotboxWidth-blockWidth)/2;
+        let startX = this.halfW-hotboxWidth*4+(hotboxWidth-blockWidth)/2+3;
         let startY = this.halfH+height/2;
 
         if (type == "inventory") {
@@ -558,11 +615,11 @@ class Inventory {
         maxScroll = Math.max(maxScroll, 1);
 
         // Draw scroll bar area
-        drawRectangle(this.halfW+width/2, this.halfH-height/2, 40, height, "lightgrey")
+        drawRectangle(this.halfW+width/2, this.halfH-height/2, 40, height, this.backgroundColor)
         // Draw scroll bar background
         drawRectangle(this.halfW+width/2+5, this.halfH-scrollHeight-scrollMargin*2-margin, 30, scrollHeight+scrollMargin*2, "grey")
         // Draw scroll bar thumb
-        drawRectangle(this.halfW+width/2+7, this.halfH-scrollHeight-margin-scrollMargin+currentRow*scrollHeight/maxScroll, 26, scrollHeight/maxScroll, "lightgrey")
+        drawRectangle(this.halfW+width/2+7, this.halfH-scrollHeight-margin-scrollMargin+currentRow*scrollHeight/maxScroll, 26, scrollHeight/maxScroll, this.backgroundColor)
 
         // Move scroll bar
         if (mouse.x > this.halfW+width/2 && mouse.x < this.halfW+width/2+40 && mouse.y > this.halfH-height/2 && mouse.y < this.halfH-height/2+height) {
@@ -579,15 +636,6 @@ class Inventory {
         }
     }
 
-    // Draw background box
-    drawBackgroundBox(xPos, yPos) {
-        let {boxSize} = this;
-        let outline = 1;
-        let backgroundBoxColor = "#BEBEBE";
-        drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey");
-        drawRectangle(xPos,yPos,boxSize,boxSize,backgroundBoxColor)
-    }
-
     // Display inventory background
     displayInventoryBackground() {
         let {searchBlocks, searchItems, craftingOutput, hotboxWidth, currentRow, showCraftingTable} = this;
@@ -599,7 +647,7 @@ class Inventory {
 
         // Draw background
         drawRectangle(0, 0, canvas.width, canvas.height, "rgba(0, 0, 0, 0.5)")
-        drawRect(this.halfW, this.halfH, width, height, 0, "lightgrey")
+        drawRect(this.halfW, this.halfH, width, height, 0, this.backgroundColor)
         let title = (player.mode == "survival" || showCraftingTable) ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode"
         drawText(title, this.halfW, this.halfH-height/2+padding, "25px Minecraft-Regular", "grey", "center", "top")
 
@@ -620,6 +668,7 @@ class Inventory {
             let {xPos, yPos} = this.getPos("craftingTableOutput", 0, 0, true);
             this.drawBackgroundBox(xPos, yPos);
             this.drawHighlightBoxes();
+            this.drawSelectedBoxes();
             this.drawItem(xPos+this.margin, yPos+this.margin, craftingOutput); // Draw crafting output
             return;
         }
@@ -634,7 +683,6 @@ class Inventory {
             // Add crafting output background box
             let {xPos, yPos} = this.getPos("craftingOutput", 0, 0, true);
             this.drawBackgroundBox(xPos, yPos);
-            this.drawHighlightBoxes();
             this.drawItem(xPos+this.margin, yPos+this.margin, craftingOutput); // Draw crafting output
         } else if (player.mode == "creative") { // CREATIVE MODE
             this.animateScrollbar();
@@ -650,8 +698,6 @@ class Inventory {
                 self.drawBackgroundBox(xPos, yPos);
             })
 
-            this.drawHighlightBoxes();
-
             // Draw items in inventory
             let index = 0;
             let blocks = searchBlocks || world.blockOrder;
@@ -661,17 +707,36 @@ class Inventory {
             let items = searchItems || world.itemOrder;
             index = this.drawItems(items, offset, "item", index);
         }
+        this.drawHighlightBoxes();
+        this.drawSelectedBoxes();
     }
+
+    // Selected box exist in inventory
+    selectedBoxExists(block, i) {
+        let {selectedBoxes} = this;
+        let exists = false;
+        if (selectedBoxes.left) {
+            for (let j = 0; j < selectedBoxes.length; j++) {
+                let box = selectedBoxes[j];
+                if (box.block[box.i] && box.block[box.i].v == block.v && box.i == i) {
+                    exists = true;
+                    break;
+                }
+            }
+        }
+        return exists;
+    }
+
 
     // Display inventory
     displayInventory() {
-        let {showInventory, showCraftingTable, inventory, craftingGrid, craftingTableGrid, selectedItem} = this;
+        let {showInventory, showCraftingTable, inventory, craftingGrid, craftingTableGrid, selectedItem, selectedBoxes} = this;
 
         if (showInventory) {
             this.displayInventoryBackground();
             if (mouseLeft) this.selectInventory("left");
             if (mouseRight) this.selectInventory("right");
-            if (!mouseLeft && !mouseRight) {
+            if (!this.drop) {
                 this.selectedBoxes = [];
                 this.highlightBoxes = [];
             }
@@ -679,7 +744,9 @@ class Inventory {
             // Draw items in inventory
             for (let i = 0; i < inventory.length; i++) {
                 let block = inventory[i];
-                if (!block || block.c == 0) continue;
+                if (!block || block.c == 0 ) continue;
+                let exists = this.selectedBoxExists(block, i);
+                if (exists) continue;
                 let {xPos, yPos} = this.getPos("inventory", i);
                 this.drawItem(xPos, yPos, block);
             }
@@ -688,8 +755,10 @@ class Inventory {
             if (showCraftingTable) {
                 let gridSize = 3;
                 this.loop(gridSize, function (i, j, self) {
-                    let block = craftingTableGrid[i+j*3];
+                    let block = craftingTableGrid[i+j*gridSize];
                     if (!block || block.c == 0) return;
+                    let exists = self.selectedBoxExists(block, i+j*gridSize);
+                    if (exists) return;
                     let {xPos, yPos} = self.getPos("craftingTable", i, j);
                     self.drawItem(xPos, yPos, block);
                 })
@@ -697,18 +766,29 @@ class Inventory {
             
             // Draw items in crafting grid
             if (player.mode == "survival" && !showCraftingTable) {
+                console.log(this.selectedBoxes)
                 let gridSize = 2;
                 this.loop(gridSize, function (i, j, self) {
-                    let block = craftingGrid[i+j*2];
+                    let block = craftingGrid[i+j*gridSize];
                     if (!block || block.c == 0) return;
+                    let exists = self.selectedBoxExists(block, i+j*gridSize);
+                    if (exists) return;
                     let {xPos, yPos} = self.getPos("crafting", i, j);
                     self.drawItem(xPos, yPos, block);
                 })
             }
             
             // Draw selected item
-            if (selectedItem && selectedItem.c > 0) {
-                this.drawItem(mouse.x, mouse.y, selectedItem)
+            if (selectedItem) {
+                let remainder = selectedItem.c;
+                if (selectedBoxes.length > 1 && selectedBoxes.left) {
+                    remainder = selectedItem.c % selectedBoxes.length;
+                }
+                this.drawItem(mouse.x, mouse.y, {
+                    v: selectedItem.v,
+                    c: remainder,
+                    class: selectedItem.class
+                })
             }
 
         } else {
@@ -738,13 +818,13 @@ class Inventory {
             yPos, 
             blockWidth, blockWidth
         );
-        if (entity.c) {
-            drawText(entity.c == 1 ? "" : entity.c, 
-                xPos+blockWidth+2,
-                yPos+blockWidth+5, 
-                "20px Minecraft-Regular", "white", "right", "bottom", 1, true
-            );
-        }
+        drawText(entity.c == 1 ? "" : entity.c, 
+            xPos+blockWidth+2,
+            yPos+blockWidth+5, 
+            "20px Minecraft-Regular", 
+            entity.c ? "white" : "yellow",
+            "right", "bottom", 1, true
+        );
     }
 
     // Draw items in creative mode
@@ -805,7 +885,7 @@ class Inventory {
                 let index = entity.v-1;
                 let atlas = textureManager.getTextureAtlas(entity.class);
 
-                let xPos = toolbarX+(hotboxWidth-blockWidth)/2+i*hotboxWidth*this.boxRatio;
+                let xPos = toolbarX+(hotboxWidth-blockWidth)/2+i*hotboxWidth*this.toolbarRatio;
                 let yPos = canvas.height-hotboxWidth+(hotboxWidth-blockWidth)/8;
 
                 ctx.drawImage(atlas, 
@@ -823,6 +903,45 @@ class Inventory {
         }
     }
 
+    // Draw highlight boxes
+    drawHighlightBoxes() {
+        let {highlightBoxes, boxSize} = this;
+        if (highlightBoxes && highlightBoxes.length > 0) {
+            for (let i = 0; i < highlightBoxes.length; i++) {
+                let box = highlightBoxes[i];
+                drawRectangle(box.x,box.y, boxSize, boxSize, this.highlightBoxColor)
+            }
+        }
+    }
+
+    // Draw selected boxes
+    drawSelectedBoxes() {
+        let {selectedBoxes, selectedItem} = this;
+        if (selectedBoxes && selectedBoxes.left && selectedBoxes.length > 1 && selectedItem) {
+            let quotient = Math.floor(selectedItem.c / selectedBoxes.length);
+
+            for (let i = 0; i < selectedBoxes.length; i++) {
+                let box = selectedBoxes[i];
+                let total = quotient;
+                if (box.block[box.i] && box.block[box.i].c) total += box.block[box.i].c;
+
+                this.drawItem(box.x, box.y, {
+                    v: box.item.v,
+                    c: total,
+                    class: box.item.class,
+                });
+            }
+        }
+    }
+
+    // Draw background box
+    drawBackgroundBox(xPos, yPos) {
+        let {boxSize} = this;
+        let outline = 1;
+        drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey");
+        drawRectangle(xPos,yPos,boxSize,boxSize,this.backgroundBoxColor)
+    }
+
     // Draw hover box
     drawHintBox(name, entity) {
         if (this.selectedItem || !name || !this.showInventory) return;
@@ -830,12 +949,12 @@ class Inventory {
 
         let hoverBoxPadding = 10;
         let hoverBoxWidth = Math.max(ctx.measureText(name).width + hoverBoxPadding*2, 60);
-        let hoverBoxHeight = 90;
-        let direction = mouse.y>this.halfH ? 1 : 0;
-        drawRectangle(mouse.x, mouse.y-hoverBoxHeight*direction, hoverBoxWidth, hoverBoxHeight, "rgba(0, 0, 0, 0.5");
-
-        drawText(name, mouse.x+hoverBoxWidth/2, mouse.y-hoverBoxHeight*direction+hoverBoxPadding, "white", "25px Minecraft-Regular", "center", "top");
-        this.drawItem(mouse.x+hoverBoxWidth/2-this.blockWidth/2, mouse.y-hoverBoxHeight*direction+hoverBoxPadding+30, entity)
+        let hoverBoxHeight = 30;
+        let hoverBoxMargin = 20;
+        let direction = 1;
+        drawRectangle(mouse.x+hoverBoxMargin, mouse.y-hoverBoxHeight*direction-hoverBoxMargin, hoverBoxWidth, hoverBoxHeight, "rgba(0, 0, 0, 0.5");
+        drawText(name, mouse.x+hoverBoxWidth/2+hoverBoxMargin, mouse.y-hoverBoxHeight*direction-hoverBoxMargin+6, "white", "25px Minecraft-Regular", "center", "top");
+        // this.drawItem(mouse.x+hoverBoxWidth/2-this.blockWidth/2, mouse.y-hoverBoxHeight*direction+hoverBoxPadding+30, entity)
     }
 
 }

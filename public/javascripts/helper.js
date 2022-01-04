@@ -184,22 +184,24 @@ function drawLine(x1, y1, x2, y2, color, thickness, cap, alpha) {
 	ctx.closePath();
 }
 
-function drawText(text, x, y, font, color, align, baseline, alpha, stroke) {
+function drawText(text, x, y, font, color, align, baseline, alpha, stroke, strokeOffset) {
 	let options = {};
 	if (font instanceof Object) {
 		options = font;
 	}
 	ctx.beginPath();
 	ctx.font = options.font || font || "20px Arial";
-	ctx.fillStyle = options.color || color || "red";
+	
 	ctx.textAlign = options.align || align || "default";
 	ctx.globalAlpha = alpha || 1;
 	ctx.textBaseline = options.baseline || baseline || "default";
     if (stroke) {
-        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
         ctx.lineWidth = 2;
-        ctx.strokeText(text, x+1, y+1);
+        let offset = strokeOffset || 1;
+        ctx.fillText(text, x+offset, y+offset);
     }
+    ctx.fillStyle = options.color || color || "red";
 	ctx.fillText(text, x, y);
 	ctx.globalAlpha = 1;
 	ctx.closePath();
