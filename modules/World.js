@@ -670,7 +670,7 @@ module.exports = class World {
                 removeItem = true;
 
                 if (players[entity.playerId].operator) {
-                    let explosionRadius = 9;
+                    let explosionRadius = 5;
                     this.destroyBlocks(x, y, z, explosionRadius);
                 }
             } else if (entity.name == "snowball") { // SNOWBALL
@@ -688,7 +688,7 @@ module.exports = class World {
 
 
     gravitateEntities(players, entity, entity_id, io) {
-        if (!entity.pos) return;
+        if (!entity.pos) return [];
 
         const { blockSize } = this;
         let entitiesToRemove = []; // Entities to be removed
@@ -747,6 +747,7 @@ module.exports = class World {
     }
 
     applyPhysics(entity, dt) {
+        if (!entity.pos) return;
 
         // Update velocity and acceleration
         if (entity.name != "fireball") {

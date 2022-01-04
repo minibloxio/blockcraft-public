@@ -166,7 +166,6 @@ class Inventory {
 
         this.pickup = false;
         this.drop = false;
-        console.log(selectedBoxes);
         if (selectedBoxes.length && selectedBoxes.left) {
             let quotient = Math.floor(selectedItem.c / selectedBoxes.length);
             // Loop through selected boxes and add divided items 
@@ -684,6 +683,7 @@ class Inventory {
             let {xPos, yPos} = this.getPos("craftingOutput", 0, 0, true);
             this.drawBackgroundBox(xPos, yPos);
             this.drawItem(xPos+this.margin, yPos+this.margin, craftingOutput); // Draw crafting output
+            this.drawHighlightBoxes();
         } else if (player.mode == "creative") { // CREATIVE MODE
             this.animateScrollbar();
 
@@ -697,6 +697,7 @@ class Inventory {
                 let {xPos, yPos} = self.getPos("creative", i, j, true);
                 self.drawBackgroundBox(xPos, yPos);
             })
+            this.drawHighlightBoxes();
 
             // Draw items in inventory
             let index = 0;
@@ -707,7 +708,6 @@ class Inventory {
             let items = searchItems || world.itemOrder;
             index = this.drawItems(items, offset, "item", index);
         }
-        this.drawHighlightBoxes();
         this.drawSelectedBoxes();
     }
 
@@ -726,7 +726,6 @@ class Inventory {
         }
         return exists;
     }
-
 
     // Display inventory
     displayInventory() {

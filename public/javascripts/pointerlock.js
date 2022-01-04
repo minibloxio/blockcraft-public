@@ -16,16 +16,21 @@ function requestPointerLock() {
 
 // Get item entity
 function getItemEntity(player, item, dropDir) {
-	return {
-		force: true,
-		v: item.v,
-		c: 1,
-		x: player.position.x,
-		y: player.position.y-8,
-		z: player.position.z,
-		class: item.class,
-		dir: {x: dropDir.x, z: dropDir.y}
-	}
+    let pos = {
+        x: player.position.x,
+        y: player.position.y-8,
+        z: player.position.z
+    }
+
+    let entity = {
+        force: true,
+        v: item.v,
+        c: 1,
+        pos: pos,
+        class: item.class,
+        dir: {x: dropDir.x, z: dropDir.y}
+    }
+    return entity;
 }
 
 // Get dropped items

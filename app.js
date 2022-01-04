@@ -391,6 +391,7 @@ io.on('connection', function (socket_) {
 	})
 
 	socket.on('dropItems', function (data) {
+        console.log(data);
 		let player = players[socket.id];
 		if (!player) return;
 

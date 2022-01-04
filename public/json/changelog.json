@@ -1,4 +1,9 @@
 changelog = [
+    {
+		"date": "Jan 4, 2022",
+		"version": "0.33.0",
+		"changes": "Added enderpearls and fireballs to the game|Added shapeless and mirrored crafting recipes|Updated inventory management to allow for drag clicking"
+	},
 	{
 		"date": "Jan 2, 2022",
 		"version": "0.32.0",
