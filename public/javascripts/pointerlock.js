@@ -73,7 +73,6 @@ function enterPointerLock () {
 		socket.emit('dropItems', droppedItems);
 		
 		inventory.craftingOutput = undefined;
-		inventory.showInventory = false;
 		inventory.showCraftingTable = false;
 	} else { // Return to game from chat
 		let name = $("#name-input").val();
@@ -90,10 +89,8 @@ function enterPointerLock () {
 function exitPointerLock() {
 	if (!inventory.showInventory) {
 		blocker.style.display = 'block';
-		//element.requestPointerLock();
 	}
 	player.controls.enabled = false;
-	//$("#chat-input").hide();
 	$("#chat-input").blur();
 	$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
 	$("#chat-input").val('');
@@ -139,7 +136,10 @@ function initPointerLock() {
 					inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
 
 					document.exitPointerLock();
-				} else if (document.activeElement.id != "search-input") {
+				} else if (document.activeElement.id != "search-input" && inventory.canShowInventory) {
+					inventory.showInventory = false;
+					inventory.canShowInventory = false;
+
 					// Ask the browser to lock the pointer
 					element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
 					element.requestPointerLock();
