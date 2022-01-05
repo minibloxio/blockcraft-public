@@ -23,11 +23,32 @@ socket.io.on('reconnect_failed', function () {
 })
 
 // Disconnected from server
+let disconnectId = undefined;
+let disconnectCounter = 5;
 socket.on('disconnect', function (reason) {
 	console.log("Disconnected from server due to:", reason);
 
 	if (reason == "io server disconnect") { // Served closed the connection
 		disconnectServer();
+	}
+
+	if (reason == "transport close") {
+		socket.disconnect();
+		chat.addChat({
+			text: "The server has restarted for a new update.",
+			color: "red",
+		})
+		disconnectId = setInterval(function () {
+			chat.addChat({
+				text: `Your browser will refresh in ${disconnectCounter} seconds.`,
+				color: "red",
+			})
+			disconnectCounter -= 1;
+			if (disconnectCounter == 0) {
+				clearInterval(disconnectId);
+				window.location.reload(true);
+			}
+		}, 1000);
 	}
 })
 

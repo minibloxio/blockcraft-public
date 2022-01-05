@@ -74,9 +74,11 @@ class HUD {
             let xPos = canvas.width/2+inventory.hotboxWidth*4+(i-10)*this.iconSize;
             let yPos = canvas.height-this.yOffset;
 
-            // Draw hearts based on player hp
             ctx.drawImage(icons, 17, 27, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
-            ctx.drawImage(icons, 53, 27, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
+
+            if ((player.hunger)/10 > i) {
+                ctx.drawImage(icons, 53, 27, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
+            }
         }
     }
 
@@ -90,7 +92,6 @@ class HUD {
             let yPos = canvas.height-this.yOffset-this.iconSize*1.3;
 
             if ((player.oxygen-2)/30 > i) {
-                // Draw hearts based on player hp
                 ctx.drawImage(icons, 17, 18, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
             }  else if ((player.oxygen)/30 > i) {
                 ctx.drawImage(icons, 25, 18, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
@@ -130,7 +131,7 @@ class HUD {
 
             // Draw player ping
             let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";
-            drawText(ping, rightX, yPos, "20px Minecraft-Regular", "white", "left", "top")
+            drawText(ping, rightX, yPos, "20px Minecraft-Regular", "white", "right", "top")
 
             // Draw name
             let color = getPlayerColor(p);

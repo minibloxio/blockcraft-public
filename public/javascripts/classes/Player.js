@@ -129,7 +129,8 @@ class Player {
 
 		// Player info
 		this.hp = 10;
-        this.oxygen = 100;
+        this.oxygen = 300;
+		this.hunger = 100;
 
 		// Hand
 		if (!initialized) this.addArm();
@@ -1114,7 +1115,7 @@ class Player {
             this.oxygen += (this.lastTick - game.tick.value);
             this.lastTick = game.tick.value;
         } else {
-            this.oxygen = 0;
+            this.oxygen = 300;
             this.lastTick = game.tick.value;
         }
 
