@@ -138,6 +138,7 @@ fs.readFile(save_path, function (err, data) {
 	if (err) {
 		logger.warn("Unable to load save file from", save_path)
 		logger.warn("Creating new world...")
+        world.loadSeed(world.seed, worker);
 		return;
 	}
 

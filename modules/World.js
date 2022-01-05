@@ -61,10 +61,10 @@ function RLEencode(array) {
 }
 
 module.exports = class World {
-    constructor(worker) {
+    constructor() {
         // World seed
-        this.generator = new WorldGeneration();
         this.seed = Math.random();
+        this.generator = new WorldGeneration(this.seed);
 
         this.tick = 0;
 

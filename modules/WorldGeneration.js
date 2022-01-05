@@ -3,11 +3,13 @@ let SimplexNoise = require('simplex-noise')
 let rng1, rng2;
 
 module.exports = class WorldGeneration {
-    constructor () {
+    constructor (seed) {
         this.heightNoise = 128;
 
         this.waterLevel = Math.floor(0.1 * this.heightNoise) + 30;
         this.mountainLevel = 80;
+
+        if (seed) this.setSeed(seed);
     }
 
     setSeed(seed) {
