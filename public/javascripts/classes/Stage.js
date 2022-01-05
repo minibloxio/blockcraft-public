@@ -45,7 +45,7 @@ class Stage {
 	    this.sun = TextureManager.loadSprite('./sun.png', 16*16*16);
 	    this.moon = TextureManager.loadSprite('./moon.png', 16*16*16);
 		this.dayNightCycle = true;
-		this.daySpeed = 0.001; // Default: 0.001
+		this.daySpeed = 1/(12000/Math.PI); // Default: 0.001
 
 		this.sunDist = 50000; // Default: 50000
 	    this.offset = new THREE.Vector3(this.sunDist, 0, 0);
@@ -114,12 +114,12 @@ class Stage {
 
 	update() {
 		let {blockSize} = world;
-		let t = tick.value || 1000;
+		let tick = game.tick.value || 1000;
 
 		if (this.stars.visible) {
 			// Update stars transparency
 			let opacityOffset = 0.1;
-			let opacity = opacityOffset-Math.pow(Math.sin(t*this.daySpeed)/2+0.5, 5);
+			let opacity = opacityOffset-Math.pow(Math.sin(tick*this.daySpeed)/2+0.5, 5);
 			let clampedOpacity = mapRange(opacity > 0 ? opacity : 0, 0, opacityOffset, 0, 1)
 			this.stars.material.opacity = clampedOpacity;
 
@@ -127,14 +127,14 @@ class Stage {
 			let starRotationSpeed = 0.001 // Default: 0.001
 			let rotationAxis = new THREE.Vector3(1, 1, 1);
 			rotationAxis.normalize();
-			this.stars.setRotationFromAxisAngle(rotationAxis, tick.value*starRotationSpeed);
+			this.stars.setRotationFromAxisAngle(rotationAxis, tick*starRotationSpeed);
 			this.stars.position.set(player.position.x, player.position.y, player.position.z);
 		}
 		
 		// Update sun position
 		if (this.dayNightCycle) {
-			this.offset.x = Math.cos(t*this.daySpeed)*this.sunDist;
-			this.offset.y = Math.sin(t*this.daySpeed)*this.sunDist;
+			this.offset.x = Math.cos(tick*this.daySpeed)*this.sunDist;
+			this.offset.y = Math.sin(tick*this.daySpeed)*this.sunDist;
 		}
 
 		var sun = player.position.clone()

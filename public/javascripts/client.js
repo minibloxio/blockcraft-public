@@ -89,7 +89,7 @@ socket.on('joinResponse', function (data) {
 	for (let voxelWorker of voxelWorkers) voxelWorker.postMessage(worldData);
 
 	// Update to server tick
-	tick = new Ola(data.tick);
+	game.tick = new Ola(data.tick);
 
 	// Update item search
 	inventory.updateItemSearch('');
@@ -226,11 +226,11 @@ function updateClient(data) {
 	}
 
 	// Update tick
-    let tickDiff = Math.abs(data.tick - tick.value);
+    let tickDiff = Math.abs(data.tick - game.tick.value);
     if (tickDiff > 1000) {
-        tick = new Ola(data.tick);
+        game.tick = new Ola(data.tick);
     } else {
-        tick.value = data.tick;
+        game.tick.value = data.tick;
     }
 
 	// Latency check

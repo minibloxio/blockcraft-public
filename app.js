@@ -773,7 +773,9 @@ setInterval(function () {
 			player.dead = true;
 			let txt = player.name;
 
-			if (player.dmgType == "fall")
+            if (player.dmgType == "drowning") {
+                txt += " has drowned";
+            } else if (player.dmgType == "fall")
 				txt += " fell off a cliff";
 			else
 				txt += " was slain by " + player.dmgType

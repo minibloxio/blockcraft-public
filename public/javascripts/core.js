@@ -1,6 +1,5 @@
 // Three.js
 let scene, renderer, world, chunkManager, textureManager, stage, sky, stats, composer, colorShader, player, players;
-let tick = new Ola(0);
 
 // Stats
 let prevTime = performance.now();
@@ -24,6 +23,7 @@ let game = {
 	numOfVoxelWorkers: 2,
 	guiSize: 1,
     transparentLeaves: getCookie("transparentLeaves"),
+    tick: 0,
 }
 
 // Update GUI size

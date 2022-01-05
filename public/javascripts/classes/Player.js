@@ -129,6 +129,7 @@ class Player {
 
 		// Player info
 		this.hp = 10;
+        this.oxygen = 100;
 
 		// Hand
 		if (!initialized) this.addArm();
@@ -1104,19 +1105,27 @@ class Player {
 		camera.updateProjectionMatrix();
 	}
 
-	updateClient(data) {
-		if (data && data.hp > this.hp) {
-			hud.heartUp = true;
-		}
+    // Update vitals
+	updateVitals() {
+        if (this.mode != 'survival') return;
 
-		// Update server-side data
-		this.hp = data.hp;
-		this.name = data.name;
-		this.ping = data.ping;
-		this.toolbar = data.toolbar;
-		this.inventory = data.toolbar;
-		this.operator = data.operator;
-	}
+        if (this.headInWater) {
+            this.oxygen += (this.lastTick - game.tick.value)*5;
+            this.lastTick = game.tick.value;
+        } else {
+            this.oxygen = 300;
+            this.lastTick = game.tick.value;
+        }
+
+        if (this.oxygen < -20) {
+            socket.emit('takeDamage', {
+                dmg: 1,
+                type: 'drowning'
+            })
+            this.oxygen = 0;
+            this.lastTick = game.tick.value;
+        }
+    }
 
 	update(delta) {
 		if (player.hp <= 0 || !initialized || !joined || !isState("inGame")) return;
@@ -1132,6 +1141,23 @@ class Player {
 		this.updateHand();
 		
 		this.move(delta);
+
+        this.updateVitals(delta);
+	}
+    
+    // Update client with server information
+    updateClient(data) {
+		if (data && data.hp > this.hp) {
+			hud.heartUp = true;
+		}
+
+		// Update server-side data
+		this.hp = data.hp;
+		this.name = data.name;
+		this.ping = data.ping;
+		this.toolbar = data.toolbar;
+		this.inventory = data.toolbar;
+		this.operator = data.operator;
 	}
 
 	collideVoxel(x, y, z) {
@@ -1162,6 +1188,7 @@ class Player {
 		if (!world.blockId) return;
 
 		this.inWater = voxel1 == world.blockId["water"] || voxel2 == world.blockId["water"];
+        this.headInWater = world.getVoxel(this.position.x/blockSize, this.position.y/blockSize, this.position.z/blockSize) == world.blockId["water"];
 
 		x = posX;
 		y = Math.floor((this.position.y)/blockSize);

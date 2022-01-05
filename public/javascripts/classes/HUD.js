@@ -21,7 +21,7 @@ class HUD {
     }
 
     // Display player health
-    displayPlayerHealth() {
+    displayHealth() {
         if (!initialized) return;
 
         if (player && player.hp <= 0) { // Player is dead
@@ -31,42 +31,41 @@ class HUD {
             drawText("Press R to respawn.", canvas.width/2, canvas.height*2/3, "50px Minecraft-Regular", "white", "center", "middle")
         }
 
-        if (player.mode != "survival") return;
-
-        if (player && player.hp > 0) {
-            for (let i = 0; i < 10; i++) {
-                let yOffset = this.yOffset;
-                if (this.heartT == i && this.heartUp) {
-                    yOffset += 5;
-                }
-
-                let xPos = canvas.width/2-inventory.hotboxWidth*4+i*this.iconSize;
-                let yPos = canvas.height-yOffset;
-
-                // Draw hearts based on player hp
-                if (player.hp - i >= 1) {
-                    ctx.drawImage(full_heart, xPos, yPos, this.iconSize, this.iconSize)
-                } else if (player.hp - i > 0) {
-                    ctx.drawImage(half_heart, xPos, yPos, this.iconSize, this.iconSize)
-                    this.isHalf = false;
-                } else {
-                    ctx.drawImage(empty_heart, xPos, yPos, this.iconSize, this.iconSize)
-                }
+        // Draw player health
+        for (let i = 0; i < 10; i++) {
+            let yOffset = this.yOffset;
+            if (this.heartT == i && this.heartUp) {
+                yOffset += 5;
             }
 
-            // Update heart jump animation
-            if (this.heartUp) {
-                this.heartT += delta*10;
-                if (this.heartT > 9) {
-                    this.heartT = 0;
-                    this.heartUp = false;
-                }
+            let xPos = canvas.width/2-inventory.hotboxWidth*4+i*this.iconSize;
+            let yPos = canvas.height-yOffset;
+
+            // Draw hearts based on player hp
+            if (player.hp - i >= 1) {
+                ctx.drawImage(full_heart, xPos, yPos, this.iconSize, this.iconSize)
+            } else if (player.hp - i > 0) {
+                ctx.drawImage(half_heart, xPos, yPos, this.iconSize, this.iconSize)
+                this.isHalf = false;
+            } else {
+                ctx.drawImage(empty_heart, xPos, yPos, this.iconSize, this.iconSize)
             }
         }
 
-        // Draw hunger bar
-        for (let i = 0; i < 10; i++) {
+        // Update heart jump animation
+        if (this.heartUp) {
+            this.heartT += delta*10;
+            if (this.heartT > 9) {
+                this.heartT = 0;
+                this.heartUp = false;
+            }
+        }
+        
+    }
 
+    // Draw hunger bar
+    displayHunger() {
+        for (let i = 0; i < 10; i++) {
             let xPos = canvas.width/2+inventory.hotboxWidth*4+(i-10)*this.iconSize;
             let yPos = canvas.height-this.yOffset;
 
@@ -74,15 +73,25 @@ class HUD {
             ctx.drawImage(icons, 17, 27, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
             ctx.drawImage(icons, 53, 27, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
         }
+    }
+
+    // Display oxygen bar
+    displayOxygen() {
+        if (!player.inWater) return;
 
         // Draw air bubbles
         for (let i = 0; i < 10; i++) {
-
-            let xPos = canvas.width/2+inventory.hotboxWidth*4+(i-10)*this.iconSize;
+            let xPos = canvas.width/2+inventory.hotboxWidth*4+(-1-i)*this.iconSize;
             let yPos = canvas.height-this.yOffset-this.iconSize*1.3;
 
-            // Draw hearts based on player hp
-            ctx.drawImage(icons, 17, 18, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
+            if ((player.oxygen-2)/30 > i) {
+                // Draw hearts based on player hp
+                ctx.drawImage(icons, 17, 18, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
+            }  else if ((player.oxygen)/30 > i) {
+                ctx.drawImage(icons, 25, 18, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
+            }
+
+
         }
     }
 
@@ -172,7 +181,11 @@ class HUD {
     }
 
     display() {
-        this.displayPlayerHealth();
         this.displayPlayerTab();
+
+        if (player.mode != "survival") return;
+        this.displayHealth();
+        this.displayHunger();
+        this.displayOxygen();
     }
 }
