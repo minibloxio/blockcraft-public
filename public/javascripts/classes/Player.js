@@ -1109,21 +1109,24 @@ class Player {
 	updateVitals() {
         if (this.mode != 'survival') return;
 
+		// Update oxygen bar
         if (this.headInWater) {
-            this.oxygen += (this.lastTick - game.tick.value)*5;
+            this.oxygen += (this.lastTick - game.tick.value);
             this.lastTick = game.tick.value;
         } else {
-            this.oxygen = 300;
+            this.oxygen = 0;
             this.lastTick = game.tick.value;
         }
 
-        if (this.oxygen < -20) {
+        if (this.oxygen < -30) {
             socket.emit('takeDamage', {
                 dmg: 1,
                 type: 'drowning'
             })
             this.oxygen = 0;
             this.lastTick = game.tick.value;
+
+			camera.rotation.z = Math.PI/16;
         }
     }
 

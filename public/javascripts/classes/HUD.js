@@ -6,6 +6,11 @@ class HUD {
         this.showStats = true;
         this.updateInterval = 50;
         this.hudTime = Date.now();
+
+        this.showPlayerTab = false;
+
+        this.crosshairSize = 25;
+        this.crosshairWidth = 2;
     }
 
     resize() {
@@ -97,25 +102,26 @@ class HUD {
 
     // Display player tab list
     displayPlayerTab() {
-        if (!showPlayerTab)
+        if (!this.showPlayerTab)
             return;
 
         let pad = 20;
         let top = 50;
-        let width = 550;
+        let width = 300+this.iconSize*11;
         let height = (Object.keys(players).length+1)*30+2*pad+20;
 
         let leftX = canvas.width/2-width/2+pad;
-        let rightX = canvas.width/2+this.iconSize*11;
+        let rightX = canvas.width/2+width/2-pad;
         let topY = top+pad;
+        let healthOffset = canvas.width/2-this.iconSize*2;
 
         // Draw background
         drawRectangle(canvas.width/2-width/2, top, width, height, "black", {alpha: 0.5});
 
         // Draw title
         drawText("Username", leftX, topY, "20px Minecraft-Regular", "yellow", "left", "top")
-        drawText("Health", canvas.width/2, topY, "20px Minecraft-Regular", "yellow", "left", "top")
-        drawText("Ping", rightX, topY, "20px Minecraft-Regular", "yellow", "left", "top")
+        drawText("Health", healthOffset, topY, "20px Minecraft-Regular", "yellow", "left", "top")
+        drawText("Ping", rightX, topY, "20px Minecraft-Regular", "yellow", "right", "top")
 
         let index = 0;
         for (let id in players) {
@@ -134,7 +140,7 @@ class HUD {
 
             // Draw player health
             for (let i = 0; i < 10; i++) {
-                let xPos = canvas.width/2+i*this.iconSize;
+                let xPos = healthOffset+(i)*this.iconSize;
 
                 // Draw hearts based on player hp
                 if (p.hp - i >= 1) {
@@ -162,11 +168,11 @@ class HUD {
 
         // Draw player ping
         let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";
-        drawText(ping, rightX, yPos, "20px Minecraft-Regular", "white", "left", "top")
+        drawText(ping, rightX, yPos, "20px Minecraft-Regular", "white", "right", "top")
 
         // Draw player health
         for (let i = 0; i < 10; i++) {
-            let xPos = canvas.width/2+i*this.iconSize;
+            let xPos = healthOffset+(i)*this.iconSize;
 
             // Draw hearts based on player hp
             if (p.hp - i >= 1) {
@@ -181,11 +187,22 @@ class HUD {
     }
 
     display() {
+        this.displayCrosshair();
         this.displayPlayerTab();
 
         if (player.mode != "survival") return;
         this.displayHealth();
         this.displayHunger();
         this.displayOxygen();
+    }
+
+    // Display crosshair
+    displayCrosshair() {
+        if (!initialized || player.mode == "camera") return;
+        let {crosshairSize, crosshairWidth} = this;
+    
+        // Draw crosshair
+        ctx.fillRect(canvas.width/2-crosshairWidth/2, canvas.height/2-crosshairSize/2, crosshairWidth, crosshairSize)
+        ctx.fillRect(canvas.width/2-crosshairSize/2, canvas.height/2-crosshairWidth/2, crosshairSize, crosshairWidth)
     }
 }

@@ -201,7 +201,7 @@ var onKeyDown = function ( event ) {
 			camera.enableZoom = true;
 			break;
 			case "Player Tab":
-			showPlayerTab = true;
+			hud.showPlayerTab = true;
 			break;
 			case "Slot 1":
 			player.currentSlot = 0;break;
@@ -317,7 +317,7 @@ var onKeyUp = function ( event ) {
 			camera.zoom = 1;
 			break;
 			case "Player Tab":
-			showPlayerTab = false;
+			hud.showPlayerTab = false;
 			break;
 		}
 	}
