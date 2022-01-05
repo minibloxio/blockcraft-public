@@ -56,10 +56,8 @@ class TextureManager {
     config() {
         this.blocks = {
             "water": "water_clear",
-            "grass": ["grass_side", "dirt", "grass_top"],
+            "grass": ["grass_side", "dirt", "grass_top", "grass_side_overlay"],
             "snowy_grass": ["grass_side_snowed", "dirt", "snow"],
-            "log_oak": ["log_oak", "log_oak_top", "log_oak_top"],
-            "leaves": "leaves_oak",
             "crafting_table": ["crafting_table_front", "planks_oak", "crafting_table_top"],
             "planks": "planks_oak",
             "sandstone": ["sandstone_normal", "sandstone_bottom", "sandstone_top"],
@@ -73,6 +71,7 @@ class TextureManager {
             "red_mushroom_block": "mushroom_block_skin_red",
             "mushroom_stem": ["mushroom_block_skin_stem", "mushroom_block_inside", "mushroom_block_inside"],
             "jukebox": ["jukebox_side", "jukebox_side", "jukebox_top"],
+            "log_oak": ["log_oak", "log_oak_top", "log_oak_top"],
             "log_acacia": ["log_acacia", "log_acacia_top", "log_acacia_top"],
             "log_big_oak": ["log_big_oak", "log_big_oak_top", "log_big_oak_top"],
             "log_birch": ["log_birch", "log_birch_top", "log_birch_top"],
@@ -81,6 +80,17 @@ class TextureManager {
             "melon": ["melon_side", "melon_top", "melon_top"],
             "red_sandstone": ["red_sandstone_normal", "red_sandstone_bottom", "red_sandstone_top"],
             "red_sandstone_smooth": ["red_sandstone_smooth", "red_sandstone_bottom", "red_sandstone_top"],
+        }
+
+        this.colormap = {
+            "leaves_oak": [30, 200, 0],
+            "leaves_spruce": [97, 165, 124],
+            "leaves_birch": [51, 160, 26],
+            "leaves_jungle": [30, 240, 0],
+            "leaves_acacia": [76, 168, 32],
+            "leaves_big_oak": [71, 160, 29],
+            "grass_top": [97, 200, 20],
+            "grass_side": [20, 200, 20],
         }
 
         this.blockFaces = {};
@@ -208,6 +218,8 @@ class TextureManager {
         //this.materialTransparent.clipIntersection = true;
 
         this.texture_atlas = texture.image;
+
+        console.log("Done stitching block textures in " + (Date.now() - this.t) + "ms");
     }
 
     // Draw the image net
@@ -216,20 +228,70 @@ class TextureManager {
         for (let entity of order) {
             let b = entities[entity];
             //console.log(entity);
-            if (b instanceof Array) {
+            
+            if (b instanceof Array) { // Unique block faces
                 for (let i = 0; i < 3; i++) {
-                    ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)
+                    if (b[i] != "grass_side") {
+                        ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)
+
+                        if (Object.keys(this.colormap).includes(b[i])) {
+
+                            let imageData = ctx_.getImageData(index*16, i*16, 16, 16);
+                                
+                            this.tintImageData(imageData.data, this.colormap["grass_top"]);
+                            ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)
+                            ctx_.putImageData(imageData, index*16, i*16);
+                        }
+                    } else {
+                        ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16);
+                        ctx_.drawImage(this.blockFaces[b[3]].image, index*16, i*16)
+                        let imageData = ctx_.getImageData(index*16, i*16, 16, 16);
+                        this.tintImageData(imageData.data, this.colormap["grass_top"], true);
+                        ctx_.putImageData(imageData, index*16, i*16);
+                    }
+
                 }
-            } else if (b) {
-                ctx_.drawImage(this.blockFaces[b].image, index*16, 0)
-                ctx_.drawImage(this.blockFaces[b].image, index*16, 16)
-                ctx_.drawImage(this.blockFaces[b].image, index*16, 32)
-            } else {
-                ctx_.drawImage(this.blockFaces[entity].image, index*16, 0)
-                ctx_.drawImage(this.blockFaces[entity].image, index*16, 16)
-                ctx_.drawImage(this.blockFaces[entity].image, index*16, 32)
+                
+            } else if (b) { // Single block face with custom name
+                this.drawImage(ctx_, this.blockFaces[b].image, index*16);
+            } else if (Object.keys(this.colormap).includes(entity)) { // Custom color
+                let color = this.colormap[entity];
+
+                ctx_.drawImage(this.blockFaces[entity].image, index*16, 0);
+                let imageData = ctx_.getImageData(index*16, 0, 16, 16);
+
+                this.tintImageData(imageData.data, color);
+                this.drawImage(ctx_, imageData, index, true);
+            } else { // Default block face
+                this.drawImage(ctx_, this.blockFaces[entity].image, index);
             }
+
+
             index++;
+        }
+    }
+
+    tintImageData(data, color, firstFourRows) {
+        for (var i = 0; i < data.length; i += 4) {
+            if (i > 256 && firstFourRows) return;
+            let sameColor = data[i] == data[i+1] && data[i+1] == data[i+2];
+            if (data[i+3] != 0 && sameColor) {
+                data[i] = data[i] / 255 * color[0];
+                data[i+1] = data[i+1] / 255 * color[1];
+                data[i+2] = data[i+2] / 255 * color[2];
+            }
+        } 
+    }
+
+    drawImage(ctx_, image, index, put) {
+        if (put) {
+            ctx_.putImageData(image, index*16, 0);
+            ctx_.putImageData(image, index*16, 16);
+            ctx_.putImageData(image, index*16, 32);
+        } else {
+            ctx_.drawImage(image, index*16, 0);
+            ctx_.drawImage(image, index*16, 16);
+            ctx_.drawImage(image, index*16, 32);
         }
     }
 

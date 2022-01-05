@@ -169,11 +169,12 @@ function addVideoControls() {
     addSwitchControl("Clouds", "cloud", false, stage, "showClouds", "generate")
     addSwitchControl("Stars", "stars", true, stage.stars, "visible")
     addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov")
+    addSwitchControl("Transparent Leaves", "transparentLeaves", true, game, "transparentLeaves", false, updateTransparency);
 
     addSelectControl("Material Texture", "texture", "lambert", chunkManager, "texture", chunkManager.updateTexture);
 }
 
-function addSwitchControl(name, id, defaultValue, object, key, key2) {
+function addSwitchControl(name, id, defaultValue, object, key, key2, callback) {
     if (getCookie(name)) {
         object[key] = getCookie(name) == "true" ? true : false;
         if (key2)
@@ -192,6 +193,7 @@ function addSwitchControl(name, id, defaultValue, object, key, key2) {
             object[key2] = object[key];
         $("#" + id + "Value").text(name + ": " + (object[key] ? "ON" : "OFF"));
         setCookie(name, object[key], cookieExpiryTime);
+        callback();
     })
 }
 
@@ -205,7 +207,7 @@ function addSelectControl(name, id, defaultValue, object, key, callback) {
     $(document).on('change',"#" + id + "Select",function(){
         object[key] = $("#" + id + "Select")[0].value;
         setCookie(name, object[key], cookieExpiryTime);
-        callback();
+        if (callback) callback();
     });
 }
 
@@ -221,3 +223,13 @@ $(document).ready(function () {
         addVideoControls();
     })
 })
+
+function updateTransparency() {
+    for (let voxelWorker of voxelWorkers) {
+        voxelWorker.postMessage({
+            type: "updateTransparency",
+            transparentLeaves: game.transparentLeaves
+        });
+    }
+    chunkManager.reload();
+}

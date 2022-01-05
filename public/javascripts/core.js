@@ -18,10 +18,12 @@ voxelWorkerIndex = 0;
 // Game information
 let game = {
 	fps: getCookie("FPS") || 60,
+    token: getCookie("token") || "",
 	packetDelay: 16,
 	lastPacket: Date.now(),
 	numOfVoxelWorkers: 2,
 	guiSize: 1,
+    transparentLeaves: getCookie("transparentLeaves"),
 }
 
 // Update GUI size
@@ -70,7 +72,13 @@ function initWorkers() {
 		voxelWorkers[i].addEventListener('message', async (e) => {
 			await chunkManager.processChunks(e.data, "voxel");
 		})
+        voxelWorkers[i].postMessage({
+            type: 'updateTransparency',
+            transparentLeaves: game.transparentLeaves,
+        });
 	}
+
+
 }
 
 // Initialize statistics
@@ -83,10 +91,10 @@ function initStatistics() {
     	return world.computeCellFromPlayer(pos.x, pos.y, pos.z);
     }))
     statistics.push(new Stat("Vel", player.velocity, false, 2))
-    statistics.push(new Stat("Dir", player.direction, false, 2))
     statistics.push(new Stat("Speed", player, "speed", 2))
     statistics.push(new Stat("Fly", player, "fly", 2))
-    statistics.push(new Stat("Clip", player, "clip", 2))
+    statistics.push(new Stat("Socket ID", socket, "id"))
+    statistics.push(new Stat("Token", game, "token"))
 }
 
 // Initalize the renderer

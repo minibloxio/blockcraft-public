@@ -41,6 +41,7 @@ socket.on('kick', function (reason) {
 // Update session token
 socket.on('uniqueToken', function (token) {
 	setCookie('token', token, 365);
+    game.token = token;
 })
 
 // Initialize client

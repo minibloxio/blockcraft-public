@@ -34,7 +34,7 @@ class ChatManager {
         } else if (size == 3) {
             this.maxChatWidth = 600;
             this.maxChatHeight = innerHeight - 200;
-            this.msgHeight = 45;
+            this.msgHeight = 40;
         }
         this.fontSize = this.msgHeight - this.msgOffset;
         $("#chat-input").css("font-size", this.fontSize + "px");

@@ -260,7 +260,7 @@ module.exports = class WorldGeneration {
                                 for (let z = -2; z <= 2; z++) {
                                     if (Math.floor((height + y)/cellSize) != cellY) continue;
                                     if (!(x == 0 && z == 0))
-                                        world.setVoxel(xPos + x, height + y, zPos + z, world.blockId["leaves"]);
+                                        world.setVoxel(xPos + x, height + y, zPos + z, world.blockId["leaves_oak"]);
                                 }
                             }
                         } else if (y == 5) {
@@ -268,17 +268,17 @@ module.exports = class WorldGeneration {
                                 for (let z = -1; z <= 1; z++) {
                                     if (Math.floor((height + y)/cellSize) != cellY) continue;
                                     if (!(x == 0 && z == 0))
-                                        world.setVoxel(xPos + x, height + y, zPos + z, world.blockId["leaves"]);
+                                        world.setVoxel(xPos + x, height + y, zPos + z, world.blockId["leaves_oak"]);
                                 }
                             }
                         } else {
                             for (let x = -1; x <= 1; x++) {
                                 if (Math.floor((height + y)/cellSize) != cellY) continue;
-                                world.setVoxel(xPos + x, height + y, zPos, world.blockId["leaves"]);
+                                world.setVoxel(xPos + x, height + y, zPos, world.blockId["leaves_oak"]);
                             }
                             for (let z = -1; z <= 1; z++) {
                                 if (Math.floor((height + y)/cellSize) != cellY) continue;
-                                world.setVoxel(xPos, height + y, zPos + z, world.blockId["leaves"]);
+                                world.setVoxel(xPos, height + y, zPos + z, world.blockId["leaves_oak"]);
                             }
                         }
                     }
