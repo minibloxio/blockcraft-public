@@ -1162,6 +1162,7 @@ class Player {
 		this.toolbar = data.toolbar;
 		this.inventory = data.toolbar;
 		this.operator = data.operator;
+        this.biome = data.biome;
 	}
 
 	collideVoxel(x, y, z) {

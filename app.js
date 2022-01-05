@@ -794,7 +794,10 @@ setInterval(function () {
 			})
 
 			addLog(id, "d"); // Deaths
-		}
+		} else {
+            // Update player position in biome
+            player.biome = world.generator.getColumnInfo(player.pos.x/world.blockSize, player.pos.z/world.blockSize)[2];
+        }
 	}
 
 	// Auto save

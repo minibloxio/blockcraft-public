@@ -91,6 +91,7 @@ function initStatistics() {
     statistics.push(new Stat("Chunk Pos", player.position, false, 2, function (pos) {
     	return world.computeCellFromPlayer(pos.x, pos.y, pos.z);
     }))
+    statistics.push(new Stat("Biome", player, "biome", 2))
     statistics.push(new Stat("Vel", player.velocity, false, 2))
     statistics.push(new Stat("Speed", player, "speed", 2))
     statistics.push(new Stat("Fly", player, "fly", 2))

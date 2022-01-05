@@ -1,5 +1,6 @@
 // Garbage collection
 const gc = require('expose-gc/function');
+const WorldGeneration = require('./WorldGeneration');
 
 // Decode RLE encoded array
 function RLEdecode(array) {
@@ -62,12 +63,10 @@ function RLEencode(array) {
 module.exports = class World {
     constructor(worker) {
         // World seed
+        this.generator = new WorldGeneration();
         this.seed = Math.random();
 
         this.tick = 0;
-
-        this.waterLevel = 40;
-        this.mountainLevel = 80;
 
         // Cell management
         this.blockSize = 16;
@@ -107,6 +106,7 @@ module.exports = class World {
     // Load seed
     loadSeed(seed, worker) {
         this.seed = seed;
+        this.generator.setSeed(seed);
 	    worker.postMessage({ cmd: "seed", seed: seed });
     }
 

@@ -126,6 +126,7 @@ module.exports = class World {
 			fps: 0,
             showInventory: false,
             token: data.token || "",
+            biome: "",
 		}
     }
 

@@ -1,13 +1,16 @@
 let SimplexNoise = require('simplex-noise')
 
-
 let rng1, rng2;
 
 module.exports = class WorldGeneration {
     constructor () {
+        this.heightNoise = 128;
+
+        this.waterLevel = Math.floor(0.1 * this.heightNoise) + 30;
+        this.mountainLevel = 80;
     }
 
-    updateSeed(seed) {
+    setSeed(seed) {
         rng1 = new SimplexNoise(seed);
         rng2 = new SimplexNoise(seed + 0.2 > 1 ? seed - 0.8 : seed + 0.2);
     }
@@ -74,6 +77,10 @@ module.exports = class WorldGeneration {
         return "TROPICAL_RAIN_FOREST";
     }
 
+    getHeight(height) {
+        return Math.floor(height * this.heightNoise) + 30;
+    }
+
     generateCell(cellX, cellY, cellZ, world, exists) {
         let caveSparsity = 0.02;
         let coalSparsity = 0.2;
@@ -91,9 +98,7 @@ module.exports = class WorldGeneration {
 
                 let height, moisture, biome;
                 [height, moisture, biome] = this.getColumnInfo(xPos, zPos);
-                let heightNoise = 128;
-                height = Math.floor(height * heightNoise) + 30
-                let waterLevel = Math.floor(0.1 * heightNoise) + 30
+                height = this.getHeight(height);
 
                 for (let y = 0; y < cellSize; ++y) {
                     let yPos = y + cellY * cellSize;
@@ -104,7 +109,7 @@ module.exports = class WorldGeneration {
                     let blockId = 0;
 
                     // Waterlands
-                    if (biome == "OCEAN" && yPos <= waterLevel) {
+                    if (biome == "OCEAN" && yPos <= this.waterLevel) {
                         if (yPos >= height) blockId = "water";
                         else if (yPos > height - 3 && moisture < 0.33) blockId = "sand"
                         else if (yPos > height - 3 && moisture < 0.4) blockId = "clay"
@@ -234,12 +239,10 @@ module.exports = class WorldGeneration {
                 let zPos = z + cellZ * cellSize;
                 let height, moisture, biome;
                 [height, moisture, biome] = this.getColumnInfo(xPos, zPos);
-                let heightNoise = 128;
-                height = Math.floor(height * heightNoise) + 30
-                let waterLevel = Math.floor(0.1 * heightNoise) + 30
+                height = Math.floor(height * this.heightNoise) + 30
 
                 // Add fauna
-                let tree = rng1.noise3D(xPos / 30, height, zPos / 30) * rng1.noise2D(xPos, zPos) > moisture && height > waterLevel && height < world.mountainLevel;
+                let tree = rng1.noise3D(xPos / 30, height, zPos / 30) * rng1.noise2D(xPos, zPos) > moisture && height > this.waterLevel && height < this.mountainLevel;
 
                 let ungrowable = ["OCEAN", "BEACH", "SCORCHED", "BARE", "SNOW"]
                 if (ungrowable.indexOf(biome) > -1) tree = false;
@@ -247,7 +250,7 @@ module.exports = class WorldGeneration {
                 if ((rng1.noise3D(xPos * 0.05, height * caveSparsity, zPos * 0.05) + 1) / 2 <= 0.1)
                     continue;
 
-                // Add trees?
+                // Add tree
                 if (tree) {
                     for (let y = 1; y < 6; y++) {
                         if (Math.floor((height + y)/cellSize) != cellY) continue;

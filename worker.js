@@ -3,12 +3,6 @@ const {
 } = require('worker_threads')
 
 const World = require('./modules/World.js');
-const WorldGeneration = require('./modules/WorldGeneration.js');
-let generator = new WorldGeneration();
-    
-function noise1(nx, ny) { return rng1.noise2D(nx, ny)/2 + 0.5; }
-function noise2(nx, ny) { return rng2.noise2D(nx, ny)/2 + 0.5; }
-
 // Setup world
 const world = new World();
 
@@ -20,7 +14,7 @@ parentPort.on('message', (data) => {
             itemOrder: data.itemOrder
         });
     } else if (data.cmd == "seed") {
-        generator.updateSeed(data.seed);
+        world.generator.setSeed(data.seed);
     } else if (data.cmd == "generateChunks") {
         const { socketId, chunkData } = data;
 
@@ -32,7 +26,7 @@ parentPort.on('message', (data) => {
             chunks.push(chunk);
             world.cells[id] = data.cell;
             world.cellDeltas[id] = data.cellDelta;
-            generator.generateCell(chunk.x, chunk.y, chunk.z, world, data.cellExists);
+            world.generator.generateCell(chunk.x, chunk.y, chunk.z, world, data.cellExists);
         }
         
         parentPort.postMessage({socketId, chunks});

@@ -251,7 +251,6 @@ class TextureManager {
                 }
                 
             } else if (b) { // Single block face with custom name
-                console.log(b);
                 this.drawImage(ctx_, this.blockFaces[b].image, index);
             } else if (Object.keys(this.colormap).includes(entity)) { // Custom color
                 let color = this.colormap[entity];
