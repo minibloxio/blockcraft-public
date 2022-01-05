@@ -10,6 +10,9 @@ module.exports = class World {
         this.blockOrder = [];
         this.itemOrder = [];
 
+        this.operators = [];
+        this.blacklist = [];
+
         this.initTextures();
     }
 
@@ -97,7 +100,7 @@ module.exports = class World {
     addPlayer(id, data) {
         if (!data) data = {};
 
-        return {
+        let player = {
 			id: id,
 			name: data.name || ("Player"+Math.floor(Math.random()*9999)),
 			pos: {x: 0,y: 0,z: 0},
@@ -127,7 +130,10 @@ module.exports = class World {
             showInventory: false,
             token: data.token || "",
             biome: "",
+            operator: this.operators.includes(data.token),
 		}
+
+        return player;
     }
 
     // Add entity
@@ -150,4 +156,57 @@ module.exports = class World {
 
         return entity;
     }
+
+    // Add server operator
+    setOperator(fs, isOp, player) {
+        if (isOp && !this.operators.includes(player.token)) {
+            this.operators.push(player.token);
+            fs.writeFile(__dirname + '/../operators.json', JSON.stringify(this.operators), function (err) {
+                if (err) console.log(err);
+            });
+        } else if (!isOp) {
+            for (let i = 0; i < this.operators.length; i++) {
+                if (this.operators[i] == player.token) {
+                    this.operators.splice(i, 1);
+                    break;
+                }
+            }
+            fs.writeFile(__dirname + '/../operators.json', JSON.stringify(this.operators), function (err) {
+                if (err) console.log(err);
+            });
+        }
+    }
+
+    // Set blacklist
+    setBlacklist(fs, ban, player) {
+        let isBanned = false;
+        for (let i = 0; i < this.blacklist.length; i++) {
+            if (this.blacklist[i].token == player.token || this.blacklist[i].ip == player.ip) {
+                isBanned = true;
+                break;
+            }
+        }
+
+        if (ban && !isBanned) {
+            this.blacklist.push({
+                token: player.token,
+                ip: player.ip,
+            });
+            fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function (err) {
+                if (err) console.log(err);
+            });
+        } else if (!ban) {
+            for (let i = 0; i < this.blacklist.length; i++) {
+                if (this.blacklist[i].token == player.token || this.blacklist[i].ip == player.ip) {
+                    this.blacklist.splice(i, 1);
+                    break;
+                }
+            }
+            fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function (err) {
+                if (err) console.log(err);
+            });
+        }
+
+    }
+
 }

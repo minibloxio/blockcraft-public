@@ -71,6 +71,14 @@ let commandsInit = JSON.stringify({
         "hint": "<player> [reason] - Kicks the specified player (requires operator status)",
         "error": "Invalid player"
     },
+    "ban": {
+        "hint": "<player> [reason] - Bans the specified player (requires operator status)",
+        "error": "Invalid player"
+    },
+    "unban": {
+        "hint": "<player> - Unbans the specified player (requires operator status)",
+        "error": "Invalid player"
+    },
     "spawnpoint": {
         "hint": "- Sets your spawnpoint to your current position",
     },
@@ -140,6 +148,8 @@ function updateHints() {
     commands.tp.hints = {};
     commands.op.hints = {};
     commands.deop.hints = {};
+    commands.ban.hints = {};
+    commands.unban.hints = {};
     commands.kick.hints = {};
     commands.kill.hints = {};
     commands.setblock.hints = {};
@@ -151,6 +161,8 @@ function updateHints() {
         commands.tp.hints[players[id].name] = "Teleport to " + players[id].name; // Update tp hint
         commands.op.hints[players[id].name] = "Make " + players[id].name + " an operator"; // Update op hint
         commands.deop.hints[players[id].name] = "Remove " + players[id].name + "'s operator status"; // Update deop hint
+        commands.ban.hints[players[id].name] = "Ban " + players[id].name + " from the server"; // Update kick hint
+        commands.unban.hints[players[id].name] = "Unban " + players[id].name + " from the server"; // Update unban hint
         commands.kick.hints[players[id].name] = "Kick " + players[id].name + " from the server"; // Update kick hint
         commands.kill.hints[players[id].name] = "Kill " + players[id].name; // Update kill hint
         commands.msg.hints[players[id].name] = "Send a private message to " + players[id].name; // Update msg hint
@@ -158,6 +170,8 @@ function updateHints() {
     }
     commands.op.hints[player.name] = "Make yourself an operator"; // Update op hint
     commands.deop.hints[player.name] = "Remove your operator status"; // Update deop hint
+    commands.ban.hints[player.name] = "Ban yourself" // Update ban hint
+    commands.unban.hints[player.name] = "Unban yourself" // Update unban hint
     commands.kill.hints[player.name] = "Kill yourself" // Update kill hint
     commands.kill.hints['@e'] =  "Kill all server entities";
     commands.kill.hints['@a'] =  "Kill all players";
@@ -404,6 +418,10 @@ function checkCommand(msg) {
         setOperator(msg, false);
     } else if (msg[0] == "leave" || msg[0] == "quit" || msg[0] == "exit" || msg[0] == "disconnect" || msg[0] == "disc") {
         disconnectServer();
+    } else if (msg[0] == "ban") {
+        banPlayer(msg);
+    } else if (msg[0] == "unban" || msg[0] == "pardon") {
+        unbanPlayer(msg);
     } else if (msg[0] == "kick") {
         kickPlayer(msg);
     } else if (msg[0] == "kill") {
@@ -422,8 +440,6 @@ function checkCommand(msg) {
         listPlayers();
     } else if (msg[0] == "damage") {
         damagePlayer(msg);
-    } else if (msg[0] == "list") {
-        listPlayers();
     } else if (msg[0] == "list") {
         listPlayers();
     } else {
@@ -737,6 +753,87 @@ function setOperator(msg, isOp) {
         });
     }
 }
+
+// Ban a player
+function banPlayer(msg) {
+    msg.shift();
+    let target = msg[0];
+    let reason = msg[1] ? msg[1] : "No reason specified";
+    let playerId = null;
+
+    let exists = false;
+    if (target == player.name) {
+        exists = true;
+        playerId = socket.id;
+    }
+    for (let id in players) {
+        let p = players[id];
+        if (p.name == target) {
+            exists = true; 
+            playerId = id;
+            break;
+        }
+    }
+
+    if (!player.operator) {
+        chat.addChat({
+            text: 'Error: This command can only be used by operators',
+            color: "red"
+        });
+    } else if (!exists) {
+        chat.addChat({
+            text: 'Error: No player found with name "' + target + '" to kick',
+            color: "red"
+        });
+    } else {
+        socket.emit('banPlayer', {
+            id: playerId,
+            name: target,
+            reason: reason,
+            isBanned: true
+        });
+    }
+}
+
+// Unban a player
+function unbanPlayer(msg) {
+    msg.shift();
+    let target = msg[0];
+    let playerId = null;
+
+    let exists = false;
+    if (target == player.name) {
+        exists = true;
+        playerId = socket.id;
+    }
+    for (let id in players) {
+        let p = players[id];
+        if (p.name == target) {
+            exists = true;
+            playerId = id;
+            break;
+        }
+    }
+
+    if (!player.operator) {
+        chat.addChat({
+            text: 'Error: This command can only be used by operators',
+            color: "red"
+        });
+    } else if (!exists) {
+        chat.addChat({
+            text: 'Error: No player found with name "' + target + '" to kick',
+            color: "red"
+        });
+    } else {
+        socket.emit('banPlayer', {
+            id: playerId,
+            name: target,
+            isBanned: false,
+        });
+    }
+}
+
 
 // Kick a player
 function kickPlayer(msg) {

@@ -1,6 +1,6 @@
 {
 	"port": 3001,
-	"region": "na-east",
-	"link": "https://na-east.victorwei.com",
+	"region": "personal",
+	"link": "https://localhost:3001",
 	"operatorPassword": "poop"
 }

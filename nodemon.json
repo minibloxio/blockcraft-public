@@ -1,5 +1,5 @@
 {   
 	"verbose": false,
-    "ignore": ["saves/*", "logs/*", "nodemon.json"],
+    "ignore": ["saves/*", "logs/*", "nodemon.json", "operators.json", "blacklist.json"],
 	"flags": "--expose-gc"
 }

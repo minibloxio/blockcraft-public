@@ -46,6 +46,7 @@ let joined = false;
 let disconnected = 0; // Disconnection progress
 let disconnectedAnimate = new Ola(0); // Disconnection progress
 let maxDisconnected = 5;
+let lastConnection = Date.now();
 
 function refreshServers() {
     // Disconnect servers
@@ -217,19 +218,30 @@ function connect(url) {
 }
 
 // Error connecting to server
-function connectError() {
-	console.error("Error connecting to server!");
-    $("#direct-connect-input").val('');
-    deleteCookie('directConnect');
-    
-    $("#continue-bar").text("Connection failed");
-    $("#continue-bar").css({"background-color": "red"});
+function connectError(banned) {
+    if (banned) {
+        $("#continue-bar").text("Banned from server");
+        $("#continue-bar").css({"background-color": "red"});
+    } else {
+        console.error("Error connecting to server!");
+        $("#direct-connect-input").val('');
+        deleteCookie('directConnect');
+        
+        $("#continue-bar").text("Connection failed");
+        $("#continue-bar").css({"background-color": "red"});
+    }
 
     setTimeout(function () {
-        $("#continue-bar").text(`Join server (${currentServer.region})`);
+        if ($("#direct-connect-input").val()) {
+            $("#continue-bar").text(`Direct Connect`);
+        } else if (currentServer) {
+            $("#continue-bar").text(`Join server (${currentServer.region})`);
+        } else {
+            $("#continue-bar").text(`Join server`);
+        }
         $("#continue-bar").css({"background-color": "green"});
 
-        state -= 1;
+        if (!banned) state -= 1;
     }, 1000);
 }
 
@@ -333,7 +345,7 @@ function nextState(e) {
         showServerSelect();
 
         state += 1;
-    } else if (isState("serverSelect") && (currentServer || $("#direct-connect-input").val())) { // Server Select -> Connecting to Server
+    } else if (isState("serverSelect") && (currentServer || $("#direct-connect-input").val()) && Date.now()-lastConnection > 1000) { // Server Select -> Connecting to Server
         // Direct connection
         let directConnect = $("#direct-connect-input").val();
         if (directConnect) {  
@@ -377,14 +389,17 @@ function nextState(e) {
     } else if (isState("disconnecting")) { // Disconnecting from server
         
     }
-    
 }
 
 function prevState() {
     if (isState("loading")) { // Go back to server select menu
         showServerSelect();
 
-        state -= 1; 
+        state = 1; 
+    } else if (isState("loadingChunks")) {
+        showServerSelect();
+
+        state = 1;
     } else if (isState("disconnecting")) { // Go back to server select menu
         showServerSelect();
         

@@ -84,6 +84,7 @@ function initWorkers() {
 
 // Initialize statistics
 function initStatistics() {
+    statistics.push(new Stat("Server Region", game, "region", 2))
 	statistics.push(new Stat("Gamemode", player, "mode", 2))
     statistics.push(new Stat("Pos", player.position, false, 2, function (pos) {
     	return pos.clone().divideScalar(world.blockSize);

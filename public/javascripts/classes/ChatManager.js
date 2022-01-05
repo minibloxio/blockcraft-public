@@ -55,6 +55,7 @@ class ChatManager {
                 t: Date.now(), // timestamp
                 discard: options.discard,
                 timer: timer,
+                id: options.id,
             }
         )
         this.chatTimer = options.timer ? options.timer : undefined;
@@ -148,17 +149,24 @@ class ChatManager {
         let lines = [];
         for (let i = 0; i < this.chat.length; i++) {
             let msg = this.chat[i];
+            let isOperator = (players[msg.id] && players[msg.id].operator) || (msg.id == socket.id && player.operator);
+
             let elaspedTime = Date.now() - msg.t;
             if (this.showChatBar || elaspedTime < msg.timer) {
-                let text = msg.text;
                 let opacity = 1; // Fade out
                 if (elaspedTime > msg.timer - 300) {
                     opacity = 1 - (elaspedTime - (msg.timer - 300))/300;
                 }
                 opacity = this.showChatBar ? 1 : opacity;
 
-                if (msg.name)
-                    text = "<"+msg.name+"> "+text;
+                let text = "";
+                if (isOperator && msg.name) {
+                    text += "<"+msg.name+" [admin]> ";
+                } else if (msg.name) {
+                    text += "<"+msg.name+"> ";
+                }
+                
+                text += msg.text;
                 text = text.substr(0, 1000);
                 let newLines = this.getLines(ctx, text, this.maxChatWidth-20, msg.color || "white", opacity).reverse();
                 lines = lines.concat(newLines);

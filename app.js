@@ -120,7 +120,36 @@ let server = new GameServer();
 let players = {};
 
 // Operators
-let operators = [];
+let operator_path = __dirname + '/operators.json';
+fs.readFile(operator_path, function (err, data) {
+    if (err || data.length == 0) {
+        logger.warn("Unable to load operators file from", save_path)
+		logger.warn("Creating new operators file...")
+        fs.writeFile(operator_path, JSON.stringify(server.operators), function (err) {
+            if (err) {
+                logger.error("Unable to create operators file at", save_path)
+            }
+        });
+    } else {
+        server.operators = JSON.parse(data);
+    }
+})
+
+// Black list
+let blacklist_path = __dirname + '/blacklist.json';
+fs.readFile(blacklist_path, function (err, data) {
+    if (err || data.length == 0) {
+        logger.warn("Unable to load blacklist file from", save_path)
+		logger.warn("Creating new blacklist file...")
+        fs.writeFile(blacklist_path, JSON.stringify(server.blacklist), function (err) {
+            if (err) {
+                logger.error("Unable to create blacklist file at", save_path)
+            }
+        });
+    } else {
+        server.blacklist = JSON.parse(data);
+    }
+})
 
 // Setup world
 const world = new World();
@@ -228,6 +257,24 @@ io.on('connection', function (socket_) {
 		socket.emit('serverInfoResponse', info);
 	})
 
+    // Check if the player is blacklisted
+    let blacklisted = false;
+    for (let player of server.blacklist) {
+        if (player.ip == address || player.token == data.token) {
+            blacklisted = true;
+            break;
+        }
+    }
+
+    if (blacklisted) {
+        socket.emit('joinResponse', {
+            blacklisted: true,
+            reason: "You are blacklisted from this server."
+        });
+        io.to(`${socket.id}`).disconnectSockets();
+        return;
+    }
+
 	// Transmit texture info to client
 	socket.emit('textureData', server.textures);
 
@@ -235,8 +282,8 @@ io.on('connection', function (socket_) {
 	socket.on('join', function (data) {
 		// Set player object
 		players[socket.id] = server.addPlayer(socket.id, data);
-
 		let player = players[socket.id];
+        players[socket.id].ip = address;
 
 		// Log player connection
 		addLog(socket.id, "ip", address);
@@ -558,6 +605,7 @@ io.on('connection', function (socket_) {
 		io.emit('messageAll', {
 			name: player.name,
 			text: filter.clean(data),
+            id: socket.id,
 		});
 
 		addLog(socket.id, "ms"); // Messages sent
@@ -627,20 +675,21 @@ io.on('connection', function (socket_) {
 		if (!players[socket.id]) return;
 
 		let password = config.operatorPassword;
-		if (data.password == password && players[data.id].operator != data.isOp) {
+		if (data.password == password && players[data.id].operator != data.isOp) { // Set operator status
 			players[data.id].operator = data.isOp;
 			io.emit('messageAll', {
 				name: "Server",
 				text: (data.isOp ? "Enabled" : "Disabled") + " operator status for " + players[data.id].name,
 				color: "aqua"
 			});
-		} else if (data.password != password) {
+            server.setOperator(fs, data.isOp, players[data.id]);
+		} else if (data.password != password) { // Wrong password
 			socket.emit('message', {
 				name: "Server",
 				text: "Incorrect password",
 				color: "aqua"
 			});
-		} else if (players[data.id].operator == data.isOp) {
+		} else if (players[data.id].operator == data.isOp) { // Already op
 			socket.emit('message', {
 				name: "Server",
 				text: players[data.id].name + " is already " + (data.isOp ? "enabled" : "disabled") + " operator status",
@@ -648,6 +697,38 @@ io.on('connection', function (socket_) {
 			});
 		}
 	})
+
+    // Ban/unban player from server
+    socket.on('banPlayer', function (data) {
+        if (!players[socket.id]) return;
+
+		if (players[socket.id].operator && data.isBanned) {
+			io.emit('messageAll', {
+				name: "Server",
+				text: "Banned " + players[data.id].name + " from the server due to: " + data.reason,
+				color: "aqua"
+			});
+			io.to(`${data.id}`).emit('kick', data.reason);
+			io.to(`${data.id}`).disconnectSockets();
+
+            server.setBlacklist(fs, true, players[data.id]);
+            server.setOperator(fs, false, players[data.id]);
+		} else if (players[socket.id].operator && !data.isBanned) {
+            io.emit('messageAll', {
+                name: "Server",
+                text: "Unbanned " + players[data.id].name + " from the server",
+                color: "aqua"
+            });
+
+            server.setBlacklist(fs, false, players[data.id]);
+        } else {
+			socket.emit('message', {
+				name: "Server",
+				text: "You do not have operator status to ban players",
+				color: "aqua"
+			});
+		}
+    })
 
 	// Kick player from server
 	socket.on('kickPlayer', function (data) {
@@ -811,7 +892,7 @@ setInterval(function () {
 			text: txt,
 			color: "purple",
 			discard: true
-		})
+		});
 	}
 
 	if (Date.now() - autosaveTimer > autosaveInterval) {

@@ -1,6 +1,7 @@
 // Connection to server successful
 socket.on('connect', function () {
 	console.log("Connected successfully with id: " + socket.id);
+    lastConnection = Date.now();
 
 	showSettings();
     state += 1;
@@ -70,6 +71,18 @@ socket.on('joinResponse', function (data) {
 	// Check if already initialized
 	if (initialized) console.log("Already initialized game!");//location.reload(true);
 
+    // Check if blacklisted
+    if (data.blacklisted) {
+        console.log("You are blacklisted!");
+        initialized = false;
+        joined = false;
+        currentServer = undefined;
+        disconnectServer();
+        prevState();
+        connectError(true);
+        return;
+    }
+
 	// Receive common world attritutes
 	Object.assign(world, data.world);
 
@@ -117,6 +130,7 @@ socket.on('joinResponse', function (data) {
 
 	initialized = true;
 	console.log("Successfully joined the server (" + data.info.region + ")");
+    game.region = data.info.region;
 })
 
 // Load textures
