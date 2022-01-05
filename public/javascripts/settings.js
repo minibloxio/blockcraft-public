@@ -193,7 +193,7 @@ function addSwitchControl(name, id, defaultValue, object, key, key2, callback) {
             object[key2] = object[key];
         $("#" + id + "Value").text(name + ": " + (object[key] ? "ON" : "OFF"));
         setCookie(name, object[key], cookieExpiryTime);
-        callback();
+        if (callback) callback();
     })
 }
 

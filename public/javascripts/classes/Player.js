@@ -934,7 +934,7 @@ class Player {
 
 		// Player camera fall knockback
 		if (Math.abs(camera.rotation.z) > 0.1) {
-			camera.rotation.z -= Math.sign(camera.rotation.z)*delta*3; // Rate at which camera rotation returns to normal
+			camera.rotation.z -= Math.sign(camera.rotation.z)*delta*2.5; // Rate at which camera rotation returns to normal
 		} else {
 			camera.rotation.z = 0;
 		}
@@ -969,7 +969,7 @@ class Player {
 								type: 'fall'
 							})
 							camera.rotation.order = "YXZ"
-							camera.rotation.z = Math.PI/16 + Math.PI/64 * Math.min(20, jumpDiff); // Yoink the camera
+							camera.rotation.z = Math.PI/16 + Math.PI/128 * Math.min(20, jumpDiff); // Yoink the camera
 							this.fallCooldown = Date.now();
 							this.prevHeight = this.position.y;
 						}
@@ -1132,7 +1132,7 @@ class Player {
             this.oxygen = 0;
             this.lastOxygenTick = game.tick.value;
 
-			camera.rotation.z = Math.PI/16;
+			camera.rotation.z = Math.PI/8;
         }
     }
 

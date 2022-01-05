@@ -193,24 +193,47 @@ module.exports = class World {
 
         if (ban && !isBanned) {
             this.blacklist.push({
+                name: player.name,
                 token: player.token,
                 ip: player.ip,
             });
             fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function (err) {
                 if (err) console.log(err);
             });
+            return true;
         } else if (!ban) {
+            let success = false;
             for (let i = 0; i < this.blacklist.length; i++) {
-                if (this.blacklist[i].token == player.token || this.blacklist[i].ip == player.ip) {
+                if (this.blacklist[i].name == player.name) {
                     this.blacklist.splice(i, 1);
+                    success = true;
                     break;
                 }
             }
             fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function (err) {
                 if (err) console.log(err);
             });
+            return success;
         }
-
+        return false; // Already banned
     }
 
+    // Check blacklist
+    checkBlacklist(io, socket, check) {
+        let blacklisted = false;
+        for (let player of this.blacklist) {
+            if (player.ip == check || player.token == check) {
+                blacklisted = true;
+                break;
+            }
+        }
+
+        if (blacklisted) {
+            socket.emit('joinResponse', {
+                blacklisted: true,
+            });
+            io.to(`${socket.id}`).disconnectSockets();
+            return;
+        }
+    }
 }

@@ -257,28 +257,17 @@ io.on('connection', function (socket_) {
 		socket.emit('serverInfoResponse', info);
 	})
 
-    // Check if the player is blacklisted
-    let blacklisted = false;
-    for (let player of server.blacklist) {
-        if (player.ip == address || player.token == data.token) {
-            blacklisted = true;
-            break;
-        }
-    }
-
-    if (blacklisted) {
-        socket.emit('joinResponse', {
-            blacklisted: true,
-        });
-        io.to(`${socket.id}`).disconnectSockets();
-        return;
-    }
+    // Check if the player is ip banned
+    server.checkBlacklist(io, socket, address);
 
 	// Transmit texture info to client
 	socket.emit('textureData', server.textures);
 
 	// Join request from the client
 	socket.on('join', function (data) {
+        // Check if the player is token banned
+        server.checkBlacklist(io, socket, data.token);
+
 		// Set player object
 		players[socket.id] = server.addPlayer(socket.id, data);
 		let player = players[socket.id];
@@ -307,6 +296,7 @@ io.on('connection', function (socket_) {
 
 		io.emit('messageAll', {
 			text: text,
+            id: socket.id,
 			color: "yellow"
 		})
 
@@ -699,28 +689,45 @@ io.on('connection', function (socket_) {
 
     // Ban/unban player from server
     socket.on('banPlayer', function (data) {
-        if (!players[socket.id] || !players[data.id]) return;
+        if (!players[socket.id]) return;
 
 		if (players[socket.id].operator && data.isBanned) {
-			io.emit('messageAll', {
-				name: "Server",
-				text: "Banned " + players[data.id].name + " from the server due to: " + data.reason,
-				color: "aqua"
-			});
-            console.log(data.id, players[data.id]);
-            server.setBlacklist(fs, true, players[data.id]);
+            // Revoke operator status
+			players[data.id].operator = false;
             server.setOperator(fs, false, players[data.id]);
+            let success = server.setBlacklist(fs, true, players[data.id]);
+            if (success) {
+                io.emit('messageAll', {
+                    name: "Server",
+                    text: "Banned " + data.name + " from the server due to: " + data.reason,
+                    color: "aqua"
+                });
+            } else {
+                socket.emit('message', {
+                    name: "Server",
+                    text: data.name + " is already banned from the server",
+                    color: "white"
+                });
+            }
 
-			io.to(`${data.id}`).emit('kick', data.reason);
-			io.to(`${data.id}`).disconnectSockets();
+			// io.to(`${data.id}`).emit('kick', data.reason);
+			// io.to(`${data.id}`).disconnectSockets();
 		} else if (players[socket.id].operator && !data.isBanned) {
-            io.emit('messageAll', {
-                name: "Server",
-                text: "Unbanned " + players[data.id].name + " from the server",
-                color: "aqua"
-            });
+            let success = server.setBlacklist(fs, false, data);
+            if (success) {
+                io.emit('messageAll', {
+                    name: "Server",
+                    text: "Unbanned " + data.name + " from the server",
+                    color: "aqua"
+                });
+            } else {
+                socket.emit('message', {
+                    name: "Server",
+                    text: data.name + " is not banned from the server",
+                    color: "white"
+                });
+            }
 
-            server.setBlacklist(fs, false, players[data.id]);
         } else {
 			socket.emit('message', {
 				name: "Server",

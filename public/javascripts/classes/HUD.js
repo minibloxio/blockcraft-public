@@ -44,7 +44,6 @@ class HUD {
 
             if (player.hp <= 2) { // Shake health bar
                 if (game.tick.value - this.heartS > 1) {
-                    console.log("bruh")
                     this.heartS = game.tick.value;
                     this.heartShake = [];
                     for (let i = 0; i < 10; i++) {

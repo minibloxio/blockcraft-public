@@ -799,35 +799,14 @@ function banPlayer(msg) {
 function unbanPlayer(msg) {
     msg.shift();
     let target = msg[0];
-    let playerId = null;
-
-    let exists = false;
-    if (target == player.name) {
-        exists = true;
-        playerId = socket.id;
-    }
-    for (let id in players) {
-        let p = players[id];
-        if (p.name == target) {
-            exists = true;
-            playerId = id;
-            break;
-        }
-    }
 
     if (!player.operator) {
         chat.addChat({
             text: 'Error: This command can only be used by operators',
             color: "red"
         });
-    } else if (!exists) {
-        chat.addChat({
-            text: 'Error: No player found with name "' + target + '" to unban',
-            color: "red"
-        });
     } else {
         socket.emit('banPlayer', {
-            id: playerId,
             name: target,
             isBanned: false,
         });
