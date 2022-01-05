@@ -159,6 +159,8 @@ module.exports = class World {
 
     // Add server operator
     setOperator(fs, isOp, player) {
+        if (!player) return;
+
         if (isOp && !this.operators.includes(player.token)) {
             this.operators.push(player.token);
             fs.writeFile(__dirname + '/../operators.json', JSON.stringify(this.operators), function (err) {
@@ -179,6 +181,8 @@ module.exports = class World {
 
     // Set blacklist
     setBlacklist(fs, ban, player) {
+        if (!player) return;
+        
         let isBanned = false;
         for (let i = 0; i < this.blacklist.length; i++) {
             if (this.blacklist[i].token == player.token || this.blacklist[i].ip == player.ip) {

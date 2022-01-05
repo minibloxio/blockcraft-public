@@ -46,7 +46,8 @@ let joined = false;
 let disconnected = 0; // Disconnection progress
 let disconnectedAnimate = new Ola(0); // Disconnection progress
 let maxDisconnected = 5;
-let lastConnection = Date.now();
+let connectionDelay = 2000;
+let lastConnection = Date.now()-connectionDelay;
 
 function refreshServers() {
     // Disconnect servers
@@ -218,9 +219,13 @@ function connect(url) {
 }
 
 // Error connecting to server
-function connectError(banned) {
-    if (banned) {
-        $("#continue-bar").text("Banned from server");
+function connectError(type, reason) {
+    reason = reason ? " (" + reason + ")" : "";
+    if (type == "banned") {
+        $("#continue-bar").text("Banned from server" + reason);
+        $("#continue-bar").css({"background-color": "red"});
+    } else if (type == "kicked") {
+        $("#continue-bar").text("Kicked from server" + reason);
         $("#continue-bar").css({"background-color": "red"});
     } else {
         console.error("Error connecting to server!");
@@ -241,8 +246,8 @@ function connectError(banned) {
         }
         $("#continue-bar").css({"background-color": "green"});
 
-        if (!banned) state -= 1;
-    }, 1000);
+        if (!type) state -= 1;
+    }, connectionDelay);
 }
 
 // Join server
@@ -345,7 +350,7 @@ function nextState(e) {
         showServerSelect();
 
         state += 1;
-    } else if (isState("serverSelect") && (currentServer || $("#direct-connect-input").val()) && Date.now()-lastConnection > 1000) { // Server Select -> Connecting to Server
+    } else if (isState("serverSelect") && (currentServer || $("#direct-connect-input").val()) && Date.now()-lastConnection > connectionDelay) { // Server Select -> Connecting to Server
         // Direct connection
         let directConnect = $("#direct-connect-input").val();
         if (directConnect) {  

@@ -782,7 +782,7 @@ function banPlayer(msg) {
         });
     } else if (!exists) {
         chat.addChat({
-            text: 'Error: No player found with name "' + target + '" to kick',
+            text: 'Error: No player found with name "' + target + '" to ban',
             color: "red"
         });
     } else {
@@ -822,7 +822,7 @@ function unbanPlayer(msg) {
         });
     } else if (!exists) {
         chat.addChat({
-            text: 'Error: No player found with name "' + target + '" to kick',
+            text: 'Error: No player found with name "' + target + '" to unban',
             color: "red"
         });
     } else {

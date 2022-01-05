@@ -269,7 +269,6 @@ io.on('connection', function (socket_) {
     if (blacklisted) {
         socket.emit('joinResponse', {
             blacklisted: true,
-            reason: "You are blacklisted from this server."
         });
         io.to(`${socket.id}`).disconnectSockets();
         return;
@@ -672,7 +671,7 @@ io.on('connection', function (socket_) {
 
 	// Set player's operater status
 	socket.on('setOperator', function (data) {
-		if (!players[socket.id]) return;
+		if (!players[socket.id] || !players[data.id]) return;
 
 		let password = config.operatorPassword;
 		if (data.password == password && players[data.id].operator != data.isOp) { // Set operator status
@@ -700,7 +699,7 @@ io.on('connection', function (socket_) {
 
     // Ban/unban player from server
     socket.on('banPlayer', function (data) {
-        if (!players[socket.id]) return;
+        if (!players[socket.id] || !players[data.id]) return;
 
 		if (players[socket.id].operator && data.isBanned) {
 			io.emit('messageAll', {
@@ -708,11 +707,12 @@ io.on('connection', function (socket_) {
 				text: "Banned " + players[data.id].name + " from the server due to: " + data.reason,
 				color: "aqua"
 			});
-			io.to(`${data.id}`).emit('kick', data.reason);
-			io.to(`${data.id}`).disconnectSockets();
-
+            console.log(data.id, players[data.id]);
             server.setBlacklist(fs, true, players[data.id]);
             server.setOperator(fs, false, players[data.id]);
+
+			io.to(`${data.id}`).emit('kick', data.reason);
+			io.to(`${data.id}`).disconnectSockets();
 		} else if (players[socket.id].operator && !data.isBanned) {
             io.emit('messageAll', {
                 name: "Server",

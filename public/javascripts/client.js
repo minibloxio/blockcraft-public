@@ -58,6 +58,7 @@ socket.on('kick', function (reason) {
 	let msg = reason ? "Kicked from server due to: " + reason : "Kicked from server";
 	console.log(msg);
 	disconnectServer();
+    connectError("kicked", reason);
 })
 
 // Update session token
@@ -73,13 +74,12 @@ socket.on('joinResponse', function (data) {
 
     // Check if blacklisted
     if (data.blacklisted) {
-        console.log("You are blacklisted!");
         initialized = false;
         joined = false;
         currentServer = undefined;
         disconnectServer();
         prevState();
-        connectError(true);
+        connectError("banned", data.reason);
         return;
     }
 
