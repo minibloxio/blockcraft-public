@@ -773,12 +773,19 @@ setInterval(function () {
 			player.dead = true;
 			let txt = player.name;
 
+
             if (player.dmgType == "drowning") {
                 txt += " has drowned";
-            } else if (player.dmgType == "fall")
+            } else if (player.dmgType == "fall") {
 				txt += " fell off a cliff";
-			else
+			} else if (player.dmgType == "command") {
+				txt += " was killed by a command";
+			} else if (player.dmgType) {
 				txt += " was slain by " + player.dmgType
+			} else {
+				txt += " has died";
+			}
+				
 
 			logger.info(txt);
 

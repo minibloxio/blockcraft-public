@@ -39,7 +39,7 @@ class HUD {
         // Draw player health
         for (let i = 0; i < 10; i++) {
             let yOffset = this.yOffset;
-            if (this.heartT == i && this.heartUp) {
+            if (this.heartT >= i && this.heartT < i+1 && this.heartUp) {
                 yOffset += 5;
             }
 
@@ -59,7 +59,7 @@ class HUD {
 
         // Update heart jump animation
         if (this.heartUp) {
-            this.heartT += delta*10;
+            this.heartT += delta*20;
             if (this.heartT > 9) {
                 this.heartT = 0;
                 this.heartUp = false;

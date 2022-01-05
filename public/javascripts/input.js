@@ -244,6 +244,10 @@ var onKeyUp = function ( event ) {
 		canChangeCommand = true;
 	}
 
+	if (event.keyCode == 39) {
+		hud.heartUp = true;
+	}
+
 	if (chat.showChatBar) {
 		// ARROW KEY CONTROLS
 		if (event.keyCode == 38 ) {

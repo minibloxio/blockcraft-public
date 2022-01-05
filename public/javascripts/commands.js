@@ -94,6 +94,9 @@ let commandsInit = JSON.stringify({
     "list": {
         "hint": "- Lists all players on the server",
     },
+    "damage": {
+        "hint": "<amount> - Damages you by the specified amount",
+    },
 })
 let commands = JSON.parse(commandsInit);
 let prevCommands = [
@@ -415,6 +418,12 @@ function checkCommand(msg) {
         messagePlayer(msg);
     } else if (msg[0] == "reply" || msg[0] == "r") {
         replyPlayer(msg);
+    } else if (msg[0] == "list") {
+        listPlayers();
+    } else if (msg[0] == "damage") {
+        damagePlayer(msg);
+    } else if (msg[0] == "list") {
+        listPlayers();
     } else if (msg[0] == "list") {
         listPlayers();
     } else {
@@ -940,4 +949,20 @@ function listPlayers() {
     chat.addChat({
         text: player.name + " (" + ping + "ms ping, " + player.fps + " fps)",
     })
+}
+
+function damagePlayer(msg) {
+    msg.shift();
+    let damage = parseFloat(msg[0]);
+    if (isNaN(damage)) {
+        chat.addChat({
+            text: 'Error: Invalid damage value',
+            color: "red"
+        });
+        return;
+    }
+    socket.emit('takeDamage', {
+        dmg: damage,
+        type: "command",
+    });
 }
