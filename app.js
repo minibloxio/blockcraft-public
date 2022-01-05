@@ -25,23 +25,6 @@ const io = new Server(httpsServer, {
 	}
 });
 
-let serverSessions = {};
-// let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com", "https://ap-southeast.victorwei.com"]
-// var io_client = require( 'socket.io-client' );
-
-// const all_session_logs = __dirname + '/logs/allSessions.json';
-// for (let i = 0; i < serverList.length; i++) {
-// 	let server = serverList[i];
-// 	let socket = io_client.connect(server);
-// 	socket.emit('sessionInfoRequest');
-// 	socket.on('sessionInfo', function (data) {
-// 		serverSessions[server] = JSON.parse(data);
-// 		fs.writeFile(all_session_logs, data, function (err) {
-// 			if (err) throw err;
-// 		});
-// 	})
-// }
-
 // Cluster (used for multiple Node.js servers)
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
@@ -54,9 +37,7 @@ const worker = new Worker('./worker.js');
 const Function = require('./modules/Function.js');
 const World = require('./modules/World.js');
 const GameServer = require('./modules/Server.js');
-const SimplexNoise = require('simplex-noise'),
-	simplex = new SimplexNoise(Math.random)
-var filter = require('leo-profanity')
+var filter = require('leo-profanity');
 
 // Listen to server port
 httpsServer.listen(serverPort, function () {
@@ -92,8 +73,6 @@ rl.on('line', (input) => {
 		saveToLog();
 	} else if (input === 'purge') {
 		world.purge(); // Purge all chunks
-	} else if (input === 'socket') {
-
 	} else if (input) { // Message to all clients
 		io.emit('messageAll', {
 			name: 'Server',
@@ -105,8 +84,6 @@ rl.on('line', (input) => {
 
 // Server logging
 const { createLogger, format, transports } = require('winston');
-const e = require('express');
-const { log } = require('console');
 const { combine, timestamp, printf, colorize, align } = format;
 
 const myFormat = printf(({ level, message, timestamp }) => {
@@ -140,15 +117,19 @@ const logger = createLogger({
 let server = new GameServer();
 
 // Players
-var players = {};
+let players = {};
+
+// Operators
+let operators = [];
 
 // Setup world
 const world = new World();
 world.init({
 	blockOrder: server.blockOrder,
-	itemOrder: server.itemOrder
+	itemOrder: server.itemOrder,
 });
 
+worker.postMessage({ cmd: 'seed', seed: world.seed });
 worker.postMessage({ cmd: "setup", blockOrder: server.blockOrder, itemOrder: server.itemOrder });
 
 // Load save file
@@ -160,15 +141,8 @@ fs.readFile(save_path, function (err, data) {
 		return;
 	}
 
-	let t = Date.now();
+	world.loadSaveFile(data, worker, logger);
 
-	logger.info("Loading world...")
-
-	let saveFile = JSON.parse(data)
-	world.loadSaveFile(saveFile)
-	worker.postMessage({ cmd: "seed", seed: saveFile.seed });
-
-	logger.info("World successfully loaded in " + (Date.now() - t) + "ms");
 })
 
 // Worker process
@@ -234,11 +208,6 @@ io.on('connection', function (socket_) {
 	// Session info request (server)
 	socket.on('sessionInfoRequest', function (data) {
 		socket.emit('sessionInfo', JSON.stringify(sessions));
-	});
-
-	// Session info request (client)
-	socket.on('sessionInfo', function (data) {
-		socket.emit('sessionInfo', JSON.stringify(serverSessions));
 	});
 
 	// Server info request
@@ -392,7 +361,6 @@ io.on('connection', function (socket_) {
 	})
 
 	socket.on('dropItems', function (data) {
-        console.log(data);
 		let player = players[socket.id];
 		if (!player) return;
 
@@ -451,7 +419,9 @@ io.on('connection', function (socket_) {
 				if (!world.cellDeltas[id]) {
 					world.cellDeltas[id] = new Uint8Array(new SharedArrayBuffer(cellSizeCubed));
 					data.cellDelta = world.cellDeltas[id];
-				}
+				} else {
+                    data.cellExists = true;
+                }
 
 				chunksToGenerate.push(data);
 			}
