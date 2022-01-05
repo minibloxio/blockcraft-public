@@ -210,6 +210,12 @@ a {
     height: 100%;
 }
 
+#welcome p {
+    padding: 0;
+    margin-bottom: 10px;
+    margin-top: 5px;
+}
+
 
 /* CHANGELOG */
 
