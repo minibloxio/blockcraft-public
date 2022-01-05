@@ -1106,7 +1106,7 @@ class Player {
 
 	updateClient(data) {
 		if (data && data.hp > this.hp) {
-			heartUp = true;
+			hud.heartUp = true;
 		}
 
 		// Update server-side data

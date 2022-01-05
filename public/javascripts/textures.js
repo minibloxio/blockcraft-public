@@ -11,6 +11,10 @@ toolbar.src = "./textures/hotbar.png";
 let toolbar_selector = new Image();
 toolbar_selector.src = "./textures/hotbar-selector.png";
 
+// Icons
+let icons = new Image()
+icons.src = "./textures/gui/icons.png";
+
 // Texture Loader
 let loader  = new THREE.TextureLoader();
 	loader.setPath("textures/");

@@ -59,7 +59,6 @@ class TextureManager {
             "grass": ["grass_side", "dirt", "grass_top", "grass_side_overlay"],
             "snowy_grass": ["grass_side_snowed", "dirt", "snow"],
             "crafting_table": ["crafting_table_front", "planks_oak", "crafting_table_top"],
-            "planks": "planks_oak",
             "sandstone": ["sandstone_normal", "sandstone_bottom", "sandstone_top"],
             "bookshelf": ["bookshelf", "planks_oak", "planks_oak"],
             "furnace": ["furnace_front_off", "furnace_side", "furnace_top"],
@@ -89,8 +88,7 @@ class TextureManager {
             "leaves_jungle": [30, 240, 0],
             "leaves_acacia": [76, 168, 32],
             "leaves_big_oak": [71, 160, 29],
-            "grass_top": [97, 200, 20],
-            "grass_side": [20, 200, 20],
+            "grass_top": [134, 200, 95],
         }
 
         this.blockFaces = {};
@@ -253,7 +251,8 @@ class TextureManager {
                 }
                 
             } else if (b) { // Single block face with custom name
-                this.drawImage(ctx_, this.blockFaces[b].image, index*16);
+                console.log(b);
+                this.drawImage(ctx_, this.blockFaces[b].image, index);
             } else if (Object.keys(this.colormap).includes(entity)) { // Custom color
                 let color = this.colormap[entity];
 
@@ -265,7 +264,6 @@ class TextureManager {
             } else { // Default block face
                 this.drawImage(ctx_, this.blockFaces[entity].image, index);
             }
-
 
             index++;
         }

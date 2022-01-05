@@ -28,13 +28,16 @@ let game = {
 
 // Update GUI size
 function updateGUISize() {
-	chat.updateChatSize();
+	chat.resize();
+    inventory.resize();
+    hud.resize();
 }
 
 // Initialize game
 function init() {
 	let t = Date.now();
 	console.log('Initalizing game...')
+	window.addEventListener( 'resize', onWindowResize, false ); // Add resize event
 
 	scene = new THREE.Scene(); // Add scene
 	world = new World(); // Init world
@@ -50,8 +53,6 @@ function init() {
 	initRenderer(); // Finalize by adding the renderer
 	initPointerLock(); // Initialize pointer lock
 	updateGUISize();
-	
-	window.addEventListener( 'resize', onWindowResize, false ); // Add resize event
 
 	console.log('Game initialized in ' + (Date.now() - t) + 'ms') // Log time
 	
@@ -208,4 +209,6 @@ function onWindowResize() {
 	$("#crosshair").css("left", width/2 - crosshairSize/2);
 	var height = $("html").innerHeight();
 	$("#crosshair").css("top", height/2 - crosshairSize/2);
+
+    updateGUISize();
 }

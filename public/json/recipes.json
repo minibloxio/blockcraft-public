@@ -1,17 +1,17 @@
 recipes = [
     {
-        "output": "planks",
+        "output": "planks_oak",
         "count": 4,
         "grid": [
-            ["wood"]
+            ["log_oak"]
         ],
     },
     {
         "output": "crafting_table",
         "count": 1,
         "grid": [
-            ["planks", "planks"],
-            ["planks", "planks"]
+            ["planks_oak", "planks_oak"],
+            ["planks_oak", "planks_oak"]
         ]
     },
     {
@@ -27,16 +27,16 @@ recipes = [
         "output": "stick",
         "count": 4,
         "grid": [
-            ["planks"],
-            ["planks"]
+            ["planks_oak"],
+            ["planks_oak"]
         ]
     },
     {
         "output": "sign",
         "count": 1,
         "grid": [
-            ["planks", "planks", "planks"],
-            ["planks", "planks", "planks"],
+            ["planks_oak", "planks_oak", "planks_oak"],
+            ["planks_oak", "planks_oak", "planks_oak"],
             [null, "stick", null]
         ]
     },
@@ -44,8 +44,8 @@ recipes = [
         "output": "wood_sword",
         "count": 1,
         "grid": [
-            ["planks"],
-            ["planks"],
+            ["planks_oak"],
+            ["planks_oak"],
             ["stick"]
         ],
     },
@@ -89,7 +89,7 @@ recipes = [
         "output": "wood_pickaxe",
         "count": 1,
         "grid": [
-            ["planks", "planks", "planks"],
+            ["planks_oak", "planks_oak", "planks_oak"],
             [null, "stick", null],
             [null, "stick", null]
         ],
@@ -135,8 +135,8 @@ recipes = [
         "count": 1,
         "mirrored": true,
         "grid": [
-            ["planks", "planks"],
-            ["stick", "planks"],
+            ["planks_oak", "planks_oak"],
+            ["stick", "planks_oak"],
             ["stick", null]
         ],
     },
@@ -184,7 +184,7 @@ recipes = [
         "output": "wood_shovel",
         "count": 1,
         "grid": [
-            ["planks"],
+            ["planks_oak"],
             ["stick"],
             ["stick"]
         ],

@@ -21,7 +21,7 @@ class ChatManager {
     }
 
     // Update GUI size
-    updateChatSize() {
+    resize() {
         let size = game.guiSize;
         if (size == 1) {
             this.maxChatWidth = 600;
@@ -34,7 +34,7 @@ class ChatManager {
         } else if (size == 3) {
             this.maxChatWidth = 600;
             this.maxChatHeight = innerHeight - 200;
-            this.msgHeight = 40;
+            this.msgHeight = 35;
         }
         this.fontSize = this.msgHeight - this.msgOffset;
         $("#chat-input").css("font-size", this.fontSize + "px");

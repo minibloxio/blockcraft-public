@@ -7,7 +7,7 @@
 <body>
 <canvas id="canvas" width="400" height="400"></canvas>
 <img id="source" crossorigin="anonymous"
-       src="textures/blocks/leaves_acacia.png">
+       src="textures/gui/icons.png">
 <script>
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
@@ -15,20 +15,17 @@ var ctx = canvas.getContext('2d');
 const image = document.getElementById('source');
 image.onload = function () {
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(image, 0, 0, image.width, image.height);
+    let s = 9;
+    //ctx.drawImage(image, 0, 0);
+    ctx.drawImage(image, 53, 27, 9, 9, 0, 0, 400, 400);
     var imageData = ctx.getImageData(0,0,image.width, image.height);
-    ctx.clearRect(0, 0, image.width, image.height);
-    console.log(imageData);
-    var data = imageData.data;
-    for (var i = 0; i < data.length; i += 4) {
-        if (data[i+3] != 0) {
-            data[i+0] *= 1.25;
-            data[i+1] *= 1.25;
-            data[i+2] *= 1.25;
-        }
+    // ctx.clearRect(0, 0, image.width, image.height);
+    // console.log(imageData);
+    // var data = imageData.data;
+    // for (var i = 0; i < data.length; i += 4) {
 
-    } 
-    ctx.putImageData(imageData, 0, 0); 
+    // } 
+    // ctx.putImageData(imageData, 0, 0); 
 }
 
 </script>

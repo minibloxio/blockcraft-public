@@ -542,6 +542,7 @@ io.on('connection', function (socket_) {
 			v: world.itemId["arrow"],
 			class: "item",
 			playerId: socket.id,
+            name: "arrow",
 		})
 		world.entities[entityId] = entity;
 		world.newEntities.push(entity)
