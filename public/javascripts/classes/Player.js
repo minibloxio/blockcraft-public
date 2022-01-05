@@ -1110,13 +1110,18 @@ class Player {
 	updateVitals() {
         if (this.mode != 'survival') return;
 
+        // Update health bar
+        // if (this.hp < 3) {
+        //     hud.heartUp = true;
+        // }
+
 		// Update oxygen bar
         if (this.headInWater) {
-            this.oxygen += (this.lastTick - game.tick.value);
-            this.lastTick = game.tick.value;
+            this.oxygen += (this.lastOxygenTick - game.tick.value);
+            this.lastOxygenTick = game.tick.value;
         } else {
             this.oxygen = 300;
-            this.lastTick = game.tick.value;
+            this.lastOxygenTick = game.tick.value;
         }
 
         if (this.oxygen < -30) {
@@ -1125,7 +1130,7 @@ class Player {
                 type: 'drowning'
             })
             this.oxygen = 0;
-            this.lastTick = game.tick.value;
+            this.lastOxygenTick = game.tick.value;
 
 			camera.rotation.z = Math.PI/16;
         }
@@ -1192,7 +1197,11 @@ class Player {
 
 		if (!world.blockId) return;
 
-		this.inWater = voxel1 == world.blockId["water"] || voxel2 == world.blockId["water"];
+        let prevInWater = this.inWater;
+		this.inWater = (voxel1 == world.blockId["water"] || voxel2 == world.blockId["water"]);
+        if (prevInWater != this.inWater && !this.inWater) {
+            this.lastInWater = Date.now();
+        }
         this.headInWater = world.getVoxel(this.position.x/blockSize, this.position.y/blockSize, this.position.z/blockSize) == world.blockId["water"];
 
 		x = posX;

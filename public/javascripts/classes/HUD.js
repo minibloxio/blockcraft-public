@@ -2,6 +2,8 @@ class HUD {
     constructor () {
         this.heartT = 0;
         this.heartUp = false;
+        this.heartS = 0;
+        this.heartShake = new Array(10).fill(0);
 
         this.showStats = true;
         this.updateInterval = 50;
@@ -39,6 +41,20 @@ class HUD {
         // Draw player health
         for (let i = 0; i < 10; i++) {
             let yOffset = this.yOffset;
+
+            if (player.hp <= 2) { // Shake health bar
+                if (game.tick.value - this.heartS > 1) {
+                    console.log("bruh")
+                    this.heartS = game.tick.value;
+                    this.heartShake = [];
+                    for (let i = 0; i < 10; i++) {
+                        this.heartShake.push(Math.random()*5);
+                    }
+                }
+
+                yOffset += this.heartShake[i];
+            }
+
             if (this.heartT >= i && this.heartT < i+1 && this.heartUp) {
                 yOffset += 5;
             }
