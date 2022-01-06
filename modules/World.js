@@ -112,7 +112,7 @@ module.exports = class World {
     }
 
     // Load save file
-    loadSaveFile(data, worker, logger) {
+    loadSaveFile(data, worker, logger, server) {
         let t = Date.now();
         logger.info("Loading world...")
 
@@ -129,7 +129,11 @@ module.exports = class World {
         }
 
         // Load entities
-        this.entities = data.entities || {};
+        this.entities = {};
+        for (let id in data.entities) {
+            let entity = data.entities[id];
+            this.entities[id] = server.addEntity(id, entity);
+        }
 
         logger.info("World successfully loaded in " + (Date.now() - t) + "ms");
     }

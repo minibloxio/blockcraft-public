@@ -171,8 +171,7 @@ fs.readFile(save_path, function (err, data) {
 		return;
 	}
 
-	world.loadSaveFile(data, worker, logger);
-
+	world.loadSaveFile(data, worker, logger, server);
 })
 
 // Worker process
