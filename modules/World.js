@@ -305,9 +305,9 @@ module.exports = class World {
             if (entity.type == "item" || entity.type == "arrow") {
                 // Delete entity if too long
                 let timeLimit = 1000 * 60 * 10; // 10 minutes
-                if (entity.name == "fireball") timeLimit = 1000 * 30; // 30 seconds
+                if (entity.name == "fireball") timeLimit = 1000 * 15; // 15 seconds
 
-                if (Date.now() - entity.t > timeLimit) { // 10 minutes
+                if (Date.now() - entity.t > timeLimit) {
                     // Remove the item from world
                     this.newEntities.push({
                         type: "remove_item",
@@ -366,34 +366,37 @@ module.exports = class World {
 
         entity.acc = { x: 0, y: -9.81 * blockSize, z: 0 };
 
-        let deltaVoxel = this.getVoxel(x, delta_y, z) > 0; // Check if there is a voxel below the entity
-        let voxel = this.getVoxel(x, y, z) > 0; // Get the voxel below the entity
+        let deltaVoxel = this.getVoxel(x, delta_y, z); // Check if there is a voxel below the entity
+        let voxel = this.getVoxel(x, y, z); // Get the voxel below the entity
+
+        let throwables = ["ender_pearl", "fireball", "snowball", "egg", "arrow"];
 
         // Check if entity is on ground
-        if (deltaVoxel) {
-            entity.acc = { x: 0, y: 0, z: 0 }
-            entity.vel = { x: 0, y: 0, z: 0 }
-
-            let throwables = ["ender_pearl", "fireball", "snowball", "egg", "arrow"];
-
-            if (entity.name == "ender_pearl") { // ENDER PEARL
+        if (throwables.includes(entity.name)) {
+            if (entity.name == "ender_pearl" && deltaVoxel > 1) { // ENDER PEARL
                 entity.pos.y += blockSize * 1.6;
                 io.to(`${entity.playerId}`).emit('teleport', entity)
-            } else if (entity.name == "fireball") { // FIREBALL
+            } else if (entity.name == "fireball" && deltaVoxel > 1) { // FIREBALL
                 if (players[entity.playerId].operator) {
-                    let explosionRadius = 5;
+                    let explosionRadius = 4;
                     this.destroyBlocks(x, y, z, explosionRadius);
                 }
             }
 
-            if (throwables.includes(entity.name)) {
+            if (deltaVoxel > 1) { // Check if there is a voxel below the entity
                 this.removeItem(entity.id, entity.v, entity.class);
+                return;
             }
-        }
-        if (voxel) {
-            entity.acc = { x: 0, y: 9.81 * blockSize, z: 0 }
-            entity.vel = { x: 0, y: 0, z: 0 }
-            entity.onObject = true;
+        } else {
+            if (deltaVoxel) {
+                entity.acc = { x: 0, y: 0, z: 0 }
+                entity.vel = { x: 0, y: 0, z: 0 }
+            }
+            if (voxel && !throwables.includes(entity.name)) {
+                entity.acc = { x: 0, y: 9.81 * blockSize, z: 0 }
+                entity.vel = { x: 0, y: 0, z: 0 }
+                entity.onObject = true;
+            }
         }
     }
 

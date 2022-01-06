@@ -24,6 +24,7 @@ let game = {
 	guiSize: 1,
     transparentLeaves: getCookie("transparentLeaves"),
     tick: 0,
+    depthWrite: false,
 }
 
 // Update GUI size

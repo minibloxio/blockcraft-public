@@ -207,7 +207,7 @@ class TextureManager {
         
         this.materialTransparent.side = THREE.DoubleSide;
         this.materialTransparent.transparent = true;
-        //this.materialTransparent.depthWrite = false;
+        this.materialTransparent.depthWrite = game.depthWrite;
 
         //this.materialTransparent.dithering = true;
         // this.materialTransparent.polygonOffset = true;

@@ -263,7 +263,8 @@ class ChunkManager {
 	}
 
 	reload() {
-		this.reloading = true;
+        let self = this || chunkManager;
+		self.reloading = true;
 	}
 
 	updateTexture() {

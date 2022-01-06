@@ -30,16 +30,12 @@ class Inventory {
 
     // Resize inventory
     resize() {
-        let {hotboxWidth} = this;
-
         canvas.width = $("html").innerWidth();
         canvas.height = $("html").innerHeight();
+        console.log(canvas.width);
 
         this.halfW = canvas.width/2;
         this.halfH = canvas.height/2;
-
-        this.toolbarX = this.halfW-hotboxWidth*4;
-        this.toolbarSelectorX = this.halfW-hotboxWidth*3.5-2.5;
 
         let size = game.guiSize;
         if (size == 1) {
@@ -69,6 +65,10 @@ class Inventory {
         } else if (size == 3) {
             
         }
+
+        
+        this.toolbarX = this.halfW-this.hotboxWidth*4;
+        this.toolbarSelectorX = this.halfW-this.hotboxWidth*3.5-2.5;
     }
 
     // Get entity by name

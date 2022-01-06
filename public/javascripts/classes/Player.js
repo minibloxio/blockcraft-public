@@ -1129,7 +1129,6 @@ class Player {
                 dmg: 0.5,
                 type: 'drowning'
             })
-            console.log(Math.floor(performance.now()/1000));
             this.oxygen = 0;
             this.lastOxygenTick = game.tick.value;
 
