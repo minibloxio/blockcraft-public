@@ -695,6 +695,8 @@ io.on('connection', function (socket_) {
             // Revoke operator status
 			players[data.id].operator = false;
             server.setOperator(fs, false, players[data.id]);
+
+            // Set ban status
             let success = server.setBlacklist(fs, true, players[data.id]);
             if (success) {
                 io.emit('messageAll', {
@@ -709,10 +711,12 @@ io.on('connection', function (socket_) {
                     color: "white"
                 });
             }
-
-			// io.to(`${data.id}`).emit('kick', data.reason);
-			// io.to(`${data.id}`).disconnectSockets();
+            
+            // Remove player from world
+			io.to(`${data.id}`).emit('kick', data.reason);
+			io.to(`${data.id}`).disconnectSockets();
 		} else if (players[socket.id].operator && !data.isBanned) {
+            // Check if player is banned
             let success = server.setBlacklist(fs, false, data);
             if (success) {
                 io.emit('messageAll', {
@@ -727,7 +731,6 @@ io.on('connection', function (socket_) {
                     color: "white"
                 });
             }
-
         } else {
 			socket.emit('message', {
 				name: "Server",

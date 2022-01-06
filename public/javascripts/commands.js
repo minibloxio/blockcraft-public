@@ -327,15 +327,16 @@ function giveCommandHint(msg, autocomplete) {
 
             // Special case for /tp
             if (msg[0] == "tp") {
-                if ((Number.isInteger(parseInt(msg[1])) || msg[1] == "~")) {
+                if ((Number.isInteger(parseInt(msg[1])) || msg[1].includes("~"))) {
                     msg.shift();
+                    let origMsg = msg.join(" ");
                     let coord = getCoord(msg);
                     if (coord) {
                         if (msg.length == 3 && !validCoord(msg)) {
-                            chat.hintText += msg.join(" ") + " - Invalid coordinates";
+                            chat.hintText += origMsg + " - Invalid coordinates";
                             return;
                         } else {
-                            chat.hintText += msg.join(" ") + " - Teleport to " + coord;
+                            chat.hintText += origMsg + " - Teleport to " + coord;
                             return;
                         }
                     }
@@ -371,9 +372,31 @@ function giveCommandHint(msg, autocomplete) {
 }
 
 function getCoord(msg, pos, decimalPlace) {
-    let x = msg[0] == "~" ? round(player.position.x/world.blockSize, decimalPlace) : parseInt(msg[0]);
-    let y = msg[1] == "~" ? round(player.position.y/world.blockSize, decimalPlace) : parseInt(msg[1]);
-    let z = msg[2] == "~" ? round(player.position.z/world.blockSize, decimalPlace) : parseInt(msg[2]);
+    let x, y, z;
+    if (msg[0] && msg[0].includes('~')) {
+        x = round(player.position.x/world.blockSize, decimalPlace)
+        let dx = parseInt(msg[0].replace('~', ''));
+        if (!isNaN(dx)) x += dx;
+    } else if (msg[0]) {
+        x = parseInt(msg[0]);
+        x = x == 0 ? '0' : x;
+    }
+    if (msg[1] && msg[1].includes('~')) {
+        y = round(player.position.y/world.blockSize, decimalPlace)
+        let dy = parseInt(msg[1].replace('~', ''));
+        if (!isNaN(dy)) y += dy;
+    } else if (msg[1]) {
+        y = parseInt(msg[1]);
+        y = y == 0 ? '0' : y;   
+    }
+    if (msg[2] && msg[2].includes('~')) {
+        z = round(player.position.z/world.blockSize, decimalPlace)
+        let dz = parseInt(msg[2].replace('~', ''));
+        if (!isNaN(dz)) z += dz;
+    } else if (msg[2]) {
+        z = parseInt(msg[2]);
+        z = z == 0 ? '0' : z;
+    }
     if (pos) {
         return {x: x, y: y, z: z};
     } else {
@@ -381,11 +404,11 @@ function getCoord(msg, pos, decimalPlace) {
     }
 }
 
-function validCoord(msg) {
+function validCoord(msg, verify) {
     if (msg.length != 3) return false;
-    if (msg[0].length == 0 || msg[1].length == 0 || msg[2].length == 0) return true;
+    if (!verify && (msg[0].length == 0 || msg[1].length == 0 || msg[2].length == 0)) return true;
     let pos = getCoord(msg, true);
-    return pos.x && pos.y && pos.z;
+    return (pos.x || pos.x == 0) && (pos.y || pos.y == 0) && (pos.z || pos.z == 0);
 }
 
 // Check command validity
@@ -562,13 +585,15 @@ function setTime(time) {
 function teleport(msg) {
     msg.shift();
     if (Number.isInteger(parseInt(msg[0])) || msg[0] == "~") {
-        let validCoordinates = validCoord(msg);
+        let validCoordinates = validCoord(msg, true);
         let pos = getCoord(msg, true, 3);
-        console.log("Attempting to teleport to " + pos.x + " " + pos.y + " " + pos.z);
 
         if (validCoordinates) {
             let coord = new THREE.Vector3(pos.x*world.blockSize, pos.y*world.blockSize, pos.z*world.blockSize);
             player.setCoords(coord);
+            chat.addChat({
+                text: "Teleported to x: " + pos.x + ", y: " + pos.y + ", z: " + pos.z
+            })
         } else {
             chat.addChat({
                 text: 'Error: Invalid coordinate (format: /tp <int> <int> <int>)',
@@ -576,9 +601,7 @@ function teleport(msg) {
             });
         }
     } else {
-
         let target = msg.join(" ");
-        console.log("Attempting to teleport to " + target);
 
         let exists = false;
         for (let id in players) {
@@ -629,11 +652,23 @@ function displaySeed() {
 // Set a block
 function setBlock(msg) {
     msg.shift();
-    let validCoordinates = validCoord(msg.slice(0, 3));
-    let pos = getCoord(msg, true);
+    let validCoordinates = validCoord(msg.slice(0, 3), true);
+    let pos = getCoord(msg, true, 2);
+    // Floor the coordinates towards 0
+    pos.x = Math.floor(pos.x);
+    pos.y = Math.floor(pos.y);
+    pos.z = Math.floor(pos.z);
     console.log("Attempting to set block at " + pos.x + " " + pos.y + " " + pos.z);
 
     if (validCoordinates) {
+        if (!msg[3]) {
+            chat.addChat({
+                text: 'Error: No block specified',
+                color: "red"
+            });
+            return;
+        }
+
         let coord = new THREE.Vector3(pos.x, pos.y, pos.z);
         socket.emit('setBlock', {
             x: coord.x,

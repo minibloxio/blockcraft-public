@@ -271,6 +271,7 @@ module.exports = class World {
         var rip = [];
         var lastValue = undefined;
         var runCount = 0;
+        if (!array) return [];
 
         for (var i = 1, lastValue = array[0]; i <= array.length; i++) {
             if (array[i] !== lastValue) {

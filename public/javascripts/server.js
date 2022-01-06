@@ -348,12 +348,12 @@ function updatePlayerColor(id, color, opacity) {
 }
 
 // Update server entities
+let throwables = ["ender_pearl", "fireball", "snowball", "egg"];
 function updateServerEntities(delta) {
 	for (let id in world.entities) {
 		let e = world.entities[id]
         if (!e.mesh) continue;
 		e.mesh.position.lerp(e.pos, delta*10)
-        let throwables = ["ender_pearl", "fireball", "snowball", "egg"];
 		if (throwables.includes(e.name)) {
 			e.mesh.lookAt(player.position);
 		} else if (e.class == "item") {
@@ -381,7 +381,9 @@ function addEntity(entity) {
 			texture.minFilter = THREE.NearestFilter;
 			let mat = new THREE.MeshLambertMaterial({map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide});
 
-			let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(blockSize/4, blockSize/4), mat);
+            let itemSize = blockSize/4;
+            if (throwables.includes(entity.name)) itemSize = blockSize/2;
+			let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(itemSize, itemSize), mat);
 			item_mesh.renderOrder = 1;
 			item_mesh.name = "item";
 			item_mesh.position.set(entity.pos.x, entity.pos.y+blockSize/8, entity.pos.z);
