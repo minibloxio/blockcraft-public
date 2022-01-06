@@ -96,7 +96,7 @@ class ChatManager {
 
         let date = change.date;
         let version = change.version;
-        let changes = change.changes.split("|");
+        let changes = change.changes.split("| ");
 
         $("#changelog").append($("<br>"));
 

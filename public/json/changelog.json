@@ -1,8 +1,13 @@
 changelog = [
     {
+		"date": "Jan 6, 2022",
+		"version": "0.34.0",
+		"changes": "Added /ban and /unban commands| Added several more blocks| Added a Discord server link for developmental progress| Added drowning in survival mode| Added leaves specific for each tree| Updated arrow mesh when fired| Updated health bar animations after regeneration or taking damage| Fixed issues where trees would re-generate after the server is restarted| Game shows a disconnect timer after the server is restarted"
+	},
+    {
 		"date": "Jan 4, 2022",
 		"version": "0.33.0",
-		"changes": "Added enderpearls and fireballs to the game|Added shapeless and mirrored crafting recipes|Updated inventory management to allow for drag clicking| Fixed bug that caused trees to regrow after the server is restarted"
+		"changes": "Added enderpearls and fireballs to the game| Added shapeless and mirrored crafting recipes| Updated inventory management to allow for drag clicking| Fixed bug that caused trees to regrow after the server is restarted"
 	},
 	{
 		"date": "Jan 2, 2022",
