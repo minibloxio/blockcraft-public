@@ -43,6 +43,7 @@ class TextureManager {
         // Texture atlas
         this.texture_atlas = undefined;
         this.item_atlas = undefined;
+        this.entity_atlas = undefined;
 
         // Materials (used for rendering)
         this.material = undefined;
@@ -54,6 +55,7 @@ class TextureManager {
 
     // Configure the texture manager
     config() {
+        // BLOCK TEXTURES
         this.blocks = {
             "water": "water_clear",
             "grass": ["grass_side", "dirt", "grass_top", "grass_side_overlay"],
@@ -94,31 +96,96 @@ class TextureManager {
         this.blockFaces = {};
         this.blockOrder = undefined;
 
+        // ITEM TEXTURES
         this.items = {
             "bow": ["bow_standby", "bow_pulling_0", "bow_pulling_1", "bow_pulling_2"]
         }
         this.itemFaces = {};
+
+        // ENTITY TEXTURES
+        this.entityFaces = {};
+        this.entities = {};
     }
 
     // Get the texture atlas
     getTextureAtlas(type) {
-        return type == "item" ? textureManager.item_atlas : textureManager.texture_atlas;
+        if (type == "item") {
+            return this.item_atlas;
+        } else if (type == "entity") {
+            return this.entity_atlas;
+        } else {
+            return this.texture_atlas;
+        }
     }
 
     // Load textures
     loadTextures(data) {
         let self = this;
         let t = Date.now();
-        console.log("Loading textures...");
         
         this.loadBlockImages(data.blocks, data.blockOrder)
         this.loadItemImages(data.items, data.itemOrder);
+        this.loadEntityImages(data.entity, data.entityOrder);
 
         this.fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
             self.minecraft_font = font;
             loaded += 1;
             console.log("Done loading font in " + (Date.now() - t) + "ms");
         });
+    }
+
+    // Load entity images
+    loadEntityImages(entity_names, entity_order) {
+        let self = this;
+        this.loader.setPath("textures/entity/");
+        let loading_index = 0;
+
+        for (let name of entity_names) {
+            this.entityFaces[name.slice(0, -4)] = this.loader.load(name, function () {
+                loading_index += 1;
+                
+                if (loading_index == entity_names.length) {
+                    loaded += 1;
+                    self.mergeEntityTextures(entity_order); // Merge block textures
+                }
+            })
+        }
+    }
+
+    // Merge entity textures
+    mergeEntityTextures(order) {
+        let canvas = document.createElement("canvas");
+        let ctx_ = canvas.getContext("2d");
+        canvas.width = world.tileTextureWidth;
+        canvas.height = world.tileTextureHeight;
+      
+        let index = 0;
+        for (let entity of order) {
+            let b = this.entities[entity];
+            console.log(entity);
+            if (b instanceof Array) {
+                for (let i = 0; i < b.length; i++) {
+                ctx_.drawImage(this.entityFaces[b[i]].image, index*16, i*16)
+                }
+            } else {
+                ctx_.drawImage(this.entityFaces[entity].image, index*16, 0)
+            }
+            index++;
+        }
+      
+        canvas = TextureManager.makeCanvasPowerOfTwo(canvas);
+      
+        let texture = new THREE.CanvasTexture(canvas);
+        texture.minFilter = THREE.NearestFilter;
+        texture.magFilter = THREE.NearestFilter;
+        texture.wrapS = undefined;
+        texture.wrapT = undefined;
+        texture.needsUpdate = true;
+      
+        this.entity_atlas = texture.image;
+      
+        loaded += 1;
+        console.log("Done stitching entity textures in " + (Date.now() - this.t) + "ms");
     }
 
     // Load block images
@@ -134,23 +201,6 @@ class TextureManager {
                 if (loading_index == block_names.length) {
                     loaded += 1;
                     self.setTexture(block_order); // Merge block textures
-                }
-            })
-        }
-    }
-
-    // Load item images
-    loadItemImages(item_names, item_order) {
-        let self = this;
-        this.loader.setPath("textures/items/");
-        let loading_index = 0;
-
-        for (let name of item_names) {
-            this.itemFaces[name.slice(0, -4)] = this.loader.load(name, function () {
-                loading_index += 1;
-                
-                if (loading_index == item_names.length) {
-                    self.setTexture(item_order);
                 }
             })
         }

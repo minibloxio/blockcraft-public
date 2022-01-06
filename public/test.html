@@ -15,7 +15,7 @@
 <body>
 <canvas id="canvas" width="400" height="400"></canvas>
 <img id="source" crossorigin="anonymous"
-       src="textures/gui/icons.png">
+       src="textures/entity/arrow.png">
 <script>
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
@@ -25,8 +25,8 @@ image.onload = function () {
     ctx.imageSmoothingEnabled = false;
     let s = 9;
     //ctx.drawImage(image, 0, 0);
-    ctx.drawImage(image, 61, 0, 9, 9, 0, 0, 400, 400);
-    var imageData = ctx.getImageData(0,0,image.width, image.height);
+    ctx.drawImage(image,0, 0, 16, 16, 0, 0, canvas.width, canvas.height);
+    //var imageData = ctx.getImageData(0,0,image.width, image.height);
     // ctx.clearRect(0, 0, image.width, image.height);
     // console.log(imageData);
     // var data = imageData.data;

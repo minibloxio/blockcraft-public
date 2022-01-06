@@ -17,7 +17,7 @@ module.exports = class World {
     }
 
     initTextures() {
-        // Get textures
+        // BLOCK SPRITES
         let colors = ["black", "blue", "brown", "cyan", "gray", "green", "light_blue", "lime", "magenta", "orange", "pink", "purple", "red", "silver", "white", "yellow"];
         let stoneTypes = ["granite", "andesite", "diorite"];
         this.blockOrder = ["water", "bedrock", "stone", "dirt", "cobblestone", "grass", "log_oak", "leaves_oak", "coal_ore", "diamond_ore", "iron_ore", "gold_ore", "crafting_table", "planks_oak", "snow", "snowy_grass", "ice", "ice_packed", "sand", "sandstone", "clay", "gravel", "obsidian", "glowstone", "coal_block", "iron_block", "gold_block", "diamond_block", "brick", "bookshelf", "cobblestone_mossy", "glass", "wool_colored_white", "stonebrick", "stonebrick_carved", "stonebrick_cracked", "stonebrick_mossy", "furnace", "hay_block", "tnt", "cake", "hardened_clay", "coarse_dirt", "brown_mushroom_block", "red_mushroom_block", "mushroom_stem", "mycelium", "emerald_ore", "emerald_block", "end_stone", "jukebox", "melon", "mob_spawner", "prismarine_bricks", "red_sand", "red_sandstone", "red_sandstone_smooth", "redstone_block", "slime", "soul_sand", "sponge", "sponge_wet"];
@@ -30,7 +30,6 @@ module.exports = class World {
             this.blockOrder.push("leaves_"+type);
         }
 
-
         for (let color of colors) {
             this.blockOrder.push("wool_colored_" + color);
             this.blockOrder.push("glass_" + color);
@@ -42,6 +41,7 @@ module.exports = class World {
             this.blockOrder.push("stone_" + stoneType+ "_smooth");
         }
 
+        // ITEM SPRITES
         let tools = ["pickaxe", "axe", "shovel", "sword"];
         let toolMat = ["wood", "stone", "iron", "gold", "diamond"];
         let foods = ["beef", "chicken", "porkchop", "mutton", "rabbit"];
@@ -56,6 +56,9 @@ module.exports = class World {
             this.itemOrder.push(food+"_cooked");
         }
 
+        // ENTITY SPRITES
+        this.entityOrder = ["arrow"];
+
         this.blockId = {};
         for (let i = 0; i < this.blockOrder.length; i++) this.blockId[this.blockOrder[i]] = i+1;
 
@@ -64,16 +67,24 @@ module.exports = class World {
 
         this.textures = {};
         let self = this;
+        // Get block file names
         fs.readdir(public_path + '/textures/blocks', function (err, data) {
             if (err) console.log(err);
             self.textures.blocks = data;
         })
+        // Get item file names
         fs.readdir(public_path + '/textures/items', function (err, data) {
             if (err) console.log(err);
             self.textures.items = data;
         })
+        // Get entity file names
+        fs.readdir(public_path + '/textures/entity', function (err, data) {
+            if (err) console.log(err);
+            self.textures.entity = data;
+        })
         this.textures.blockOrder = this.blockOrder;
         this.textures.itemOrder = this.itemOrder;
+        this.textures.entityOrder = this.entityOrder;
         this.textures.tileSize = 16;
         this.textures.tileTextureWidth = 4096;
         this.textures.tileTextureHeight = 64;
@@ -142,6 +153,7 @@ module.exports = class World {
             pos: data.pos,
             vel: data.vel,
             acc: {x: 0, y: 0, z: 0},
+            dir: data.dir,
             force: data.force,
             lethal: data.lethal,
             type: "item",

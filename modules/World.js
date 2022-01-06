@@ -359,10 +359,10 @@ module.exports = class World {
         if (!entity.pos) return;
 
         // Entity gravity
-        var x = Math.floor(entity.pos.x / blockSize);
-        var y = Math.floor((entity.pos.y - 4) / blockSize);
-        var delta_y = Math.floor((entity.pos.y - 6) / blockSize);
-        var z = Math.floor(entity.pos.z / blockSize);
+        let x = Math.floor(entity.pos.x / blockSize);
+        let y = Math.floor((entity.pos.y - 4) / blockSize);
+        let delta_y = Math.floor((entity.pos.y - 6) / blockSize);
+        let z = Math.floor(entity.pos.z / blockSize);
 
         entity.acc = { x: 0, y: -9.81 * blockSize, z: 0 };
 
@@ -385,15 +385,21 @@ module.exports = class World {
             }
 
             if (deltaVoxel > 1) { // Check if there is a voxel below the entity
-                this.removeItem(entity.id, entity.v, entity.class);
-                return;
+                if (entity.name == "arrow") { // Stick arrow to ground
+                    entity.acc = { x: 0, y: 0, z: 0 }
+                    entity.vel = { x: 0, y: 0, z: 0 }
+                    entity.onObject = true;
+                } else {
+                    this.removeItem(entity.id, entity.v, entity.class);
+                    return; 
+                }
             }
-        } else {
+        } else { // Check if there is a voxel below the entity
             if (deltaVoxel) {
                 entity.acc = { x: 0, y: 0, z: 0 }
                 entity.vel = { x: 0, y: 0, z: 0 }
             }
-            if (voxel && !throwables.includes(entity.name)) {
+            if (voxel) {
                 entity.acc = { x: 0, y: 9.81 * blockSize, z: 0 }
                 entity.vel = { x: 0, y: 0, z: 0 }
                 entity.onObject = true;
@@ -410,7 +416,7 @@ module.exports = class World {
 
         for (let id in players) {
             let p = players[id];
-            if (p.showInventory || p.pickupDelay > Date.now()) continue;
+            if (p.showInventory || p.pickupDelay > Date.now() || (p.mode == "spectator" || p.mode == "camera")) continue;
 
             // Pick up item
             let dir = { x: (p.pos.x - entity.pos.x), y: (p.pos.y - blockSize - (entity.pos.y)), z: (p.pos.z - entity.pos.z) }

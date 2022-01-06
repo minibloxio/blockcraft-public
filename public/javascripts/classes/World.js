@@ -155,6 +155,12 @@ class World {
             indices,
         };
     }
+
+    getFirstEntity() {
+        if (Object.keys(this.entities).length) {
+            return this.entities[Object.keys(this.entities)[0]];
+        }
+    }
 }
 
 World.faces = [

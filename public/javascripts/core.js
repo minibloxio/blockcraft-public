@@ -1,5 +1,5 @@
 // Three.js
-let scene, renderer, world, chunkManager, textureManager, stage, sky, stats, composer, colorShader, player, players;
+let scene, renderer, world, chunkManager, entityManager, textureManager, stage, sky, stats, composer, colorShader, player, players;
 
 // Stats
 let prevTime = performance.now();
@@ -43,7 +43,8 @@ function init() {
 	scene = new THREE.Scene(); // Add scene
 	world = new World(); // Init world
 	chunkManager = new ChunkManager(); // Add chunk manager
-	textureManager = new TextureManager();
+    entityManager = new EntityManager(); // Add entity manager
+	textureManager = new TextureManager(); // Add texture manager
 	player = new Player(camera); // Add player
 	stage = new Stage(); // Initialize the stage (light, sun, moon, stars, etc.)
 

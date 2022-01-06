@@ -103,7 +103,7 @@ socket.on('joinResponse', function (data) {
 
 	// Add pre-existing entities
 	for (let id in data.world.entities) {
-		addEntity(data.world.entities[id]);
+		entityManager.addEntity(data.world.entities[id]);
 	}
 
 	// Init voxel workers
@@ -241,7 +241,7 @@ function updateClient(data) {
 	// Add new entities
 	let newEntities = data.newEntities;
 	for (let entity of newEntities) {
-		addEntity(entity);
+		entityManager.addEntity(entity);
 	}
 
 	// Update existing entities PUT THIS IN THE WORLD CLASS FUNCTION
@@ -250,6 +250,8 @@ function updateClient(data) {
 		let entity = updatedEntities[id];
 		if (entity.type == "item" && world.entities[id]) {
 			world.entities[id].pos = entity.pos;
+            if (!entity.onObject) world.entities[id].vel.set(entity.vel);
+
 			if (world.entities[id].mesh && world.entities[id].mesh.position.length() == 0) {
 				world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z)
 			}

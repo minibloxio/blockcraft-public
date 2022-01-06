@@ -351,77 +351,21 @@ function updatePlayerColor(id, color, opacity) {
 let throwables = ["ender_pearl", "fireball", "snowball", "egg"];
 function updateServerEntities(delta) {
 	for (let id in world.entities) {
-		let e = world.entities[id]
-        if (!e.mesh) continue;
-		e.mesh.position.lerp(e.pos, delta*10)
-		if (throwables.includes(e.name)) {
-			e.mesh.lookAt(player.position);
-		} else if (e.class == "item") {
-			e.mesh.rotation.y += delta;
-		}
-	}
-}
-
-// Add entity
-function addEntity(entity) {
-
-	if (entity.type == "item") {
-        if (!entity || !entity.pos) return;
-		let {blockSize} = world;
-
-		if (entity.class == "item") { // Add item
-			let canvas = document.createElement("canvas");
-			let atlas = textureManager.getTextureAtlas(entity.class);
-			canvas.width = 16;
-			canvas.height = 16;
-			let ctx = canvas.getContext("2d");
-			ctx.drawImage(atlas, (entity.v-1)*16, 0, 16, 16, 0, 0, 16, 16);
-			let texture = new THREE.CanvasTexture(canvas);
-			texture.magFilter = THREE.NearestFilter;
-			texture.minFilter = THREE.NearestFilter;
-			let mat = new THREE.MeshLambertMaterial({map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide});
-
-            let itemSize = blockSize/4;
-            if (throwables.includes(entity.name)) itemSize = blockSize/2;
-			let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(itemSize, itemSize), mat);
-			item_mesh.renderOrder = 1;
-			item_mesh.name = "item";
-			item_mesh.position.set(entity.pos.x, entity.pos.y+blockSize/8, entity.pos.z);
-
-			world.entities[entity.id] = entity;
-			world.entities[entity.id].mesh = item_mesh;
-
-			scene.add(world.entities[entity.id].mesh)
-		} else {  // Add block
-			let uvVoxel = entity.v-1;
-			let block_geometry = new THREE.BufferGeometry();
-			const {positions, normals, uvs, indices} = world.generateGeometryDataForItem(uvVoxel);
-			const positionNumComponents = 3;
-			block_geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
-			const normalNumComponents = 3;
-			block_geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
-			const uvNumComponents = 2;
-			block_geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
-			block_geometry.setIndex(indices);
-			block_geometry.computeBoundingSphere();
-
-			let block_mesh = new THREE.Mesh(block_geometry, textureManager.materialTransparent);
-			block_mesh.name = "item";
-			block_mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
-			block_mesh.castShadow = true;
-			block_mesh.receiveShadow = true;
-
-			world.entities[entity.id] = entity;
-			world.entities[entity.id].mesh = block_mesh;
-
-			scene.add(world.entities[entity.id].mesh);
-		}
-	} else if (entity.type == "remove_item" && world.entities[entity.id] && world.entities[entity.id].mesh) {
-
-		world.entities[entity.id].mesh.geometry.dispose();
-		world.entities[entity.id].mesh.material.dispose();
-		scene.remove(world.entities[entity.id].mesh);
-		delete world.entities[entity.id];
+		let entity = world.entities[id]
+        if (!entity.mesh) continue;
+		entity.mesh.position.lerp(entity.pos, delta*10)
+		if (throwables.includes(entity.name)) {
+			entity.mesh.lookAt(player.position);
+		} else if (entity.class == "item" && entity.name != "arrow") {
+			entity.mesh.rotation.y += delta;
+		} else if (entity.name == "arrow") {
+            let vel = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z);
+            vel.normalize();
+            let dir = new THREE.Vector3(vel.x, vel.y, vel.z);
+            var mx = new THREE.Matrix4().lookAt(dir,new THREE.Vector3(0,0,0),new THREE.Vector3(0,1,0));
+            var qt = new THREE.Quaternion().setFromRotationMatrix(mx);
+            entity.mesh.setRotationFromQuaternion(qt);
+        }
 	}
 }
 
