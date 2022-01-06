@@ -839,9 +839,9 @@ class Inventory {
         drawText(entity.c == 1 ? "" : entity.c, 
             xPos+blockWidth+2,
             yPos+blockWidth+5, 
-            "20px Minecraft-Regular", 
+            Math.floor(blockWidth/2)+5 + "px Minecraft-Regular", 
             entity.c ? "white" : "yellow",
-            "right", "bottom", 1, true
+            "right", "bottom", 1, true, parseInt(game.guiSize)*1.7
         );
     }
 
@@ -966,7 +966,7 @@ class Inventory {
                 drawText(entity.c == 1 ? "" : entity.c, 
                     xPos+this.toolbarBlockWidth+2,
                     yPos+this.toolbarBlockWidth+5, 
-                    "20px Minecraft-Regular", "white", "right", "bottom", 1, true
+                    Math.floor(this.toolbarBlockWidth/2)+5 + "px Minecraft-Regular", "white", "right", "bottom", 1, true, parseInt(game.guiSize)*1.7
                 );
             }
         }

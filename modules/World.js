@@ -375,6 +375,7 @@ module.exports = class World {
         if (throwables.includes(entity.name)) {
             if (entity.name == "ender_pearl" && deltaVoxel > 1) { // ENDER PEARL
                 entity.pos.y += blockSize * 1.6;
+                players[entity.playerId].hp -= 2.5;
                 io.to(`${entity.playerId}`).emit('teleport', entity)
             } else if (entity.name == "fireball" && deltaVoxel > 1) { // FIREBALL
                 if (players[entity.playerId].operator) {

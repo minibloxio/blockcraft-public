@@ -196,9 +196,9 @@ function drawText(text, x, y, font, color, align, baseline, alpha, stroke, strok
 	ctx.globalAlpha = alpha || 1;
 	ctx.textBaseline = options.baseline || baseline || "default";
     if (stroke) {
-        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillStyle = 'rgba(0,0,0,1)';
         ctx.lineWidth = 2;
-        let offset = strokeOffset || 1;
+        let offset = Math.floor(strokeOffset) || 1;
         ctx.fillText(text, x+offset, y+offset);
     }
     ctx.fillStyle = options.color || color || "red";

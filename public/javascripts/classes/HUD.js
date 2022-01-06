@@ -60,10 +60,15 @@ class HUD {
 
             let xPos = canvas.width/2-inventory.hotboxWidth*4+i*this.iconSize;
             let yPos = canvas.height-yOffset;
+            // Floor xPos and yPos
+            xPos = Math.floor(xPos);
+            yPos = Math.floor(yPos);
 
             // Draw hearts based on player hp
+            ctx.drawImage(icons, 16, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
             if (player.hp - i >= 1) {
-                ctx.drawImage(full_heart, xPos, yPos, this.iconSize, this.iconSize)
+                ctx.drawImage(icons, 52, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
+                //ctx.drawImage(full_heart, xPos, yPos, this.iconSize, this.iconSize)
             } else if (player.hp - i > 0) {
                 ctx.drawImage(half_heart, xPos, yPos, this.iconSize, this.iconSize)
                 this.isHalf = false;
@@ -88,28 +93,34 @@ class HUD {
         for (let i = 0; i < 10; i++) {
             let xPos = canvas.width/2+inventory.hotboxWidth*4+(i-10)*this.iconSize;
             let yPos = canvas.height-this.yOffset;
+            // Floor xPos and yPos
+            xPos = Math.floor(xPos);
+            yPos = Math.floor(yPos);
 
-            ctx.drawImage(icons, 17, 27, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
+            ctx.drawImage(icons, 16, 27, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
 
             if ((player.hunger)/10 > i) {
-                ctx.drawImage(icons, 53, 27, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
+                ctx.drawImage(icons, 52, 27, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
             }
         }
     }
 
     // Display oxygen bar
     displayOxygen() {
-        if (!player.inWater) return;
+        if (!colorPass.enabled) return;
 
         // Draw air bubbles
         for (let i = 0; i < 10; i++) {
             let xPos = canvas.width/2+inventory.hotboxWidth*4+(-1-i)*this.iconSize;
             let yPos = canvas.height-this.yOffset-this.iconSize*1.3;
+            // Floor xPos and yPos
+            xPos = Math.floor(xPos);
+            yPos = Math.floor(yPos);
 
             if ((player.oxygen-2)/30 > i) {
-                ctx.drawImage(icons, 17, 18, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
+                ctx.drawImage(icons, 16, 18, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
             }  else if ((player.oxygen)/30 > i) {
-                ctx.drawImage(icons, 25, 18, 8, 9, xPos, yPos, this.iconSize, this.iconSize);
+                ctx.drawImage(icons, 24, 18, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
             }
 
 
