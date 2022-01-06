@@ -294,10 +294,22 @@ function disconnectServer() {
     // Remove all entities
     for (let id in world.entities) {
         if (!world.entities[id].mesh) continue;
-        world.entities[id].mesh.geometry.dispose();
-		world.entities[id].mesh.material.dispose();
-		scene.remove(world.entities[id].mesh);
-		delete world.entities[id];
+
+        let mesh = world.entities[id].mesh;
+        if (mesh.type == "Group") {
+            for (let i = 0; i < mesh.children.length; i++) {
+                let child = mesh.children[i];
+                child.geometry.dispose();
+                child.material.dispose();
+            }
+            scene.remove(mesh);
+        } else {
+            mesh.geometry.dispose();
+            mesh.material.dispose();
+            scene.remove(mesh);
+        }
+        
+        delete world.entities[id];
     }
 
     state += 1;
