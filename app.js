@@ -164,7 +164,7 @@ worker.postMessage({ cmd: "setup", blockOrder: server.blockOrder, itemOrder: ser
 // Load save file
 let save_path = __dirname + '/saves/test.json';
 fs.readFile(save_path, function (err, data) {
-	if (err) {
+	if (err || data.length == 0) {
 		logger.warn("Unable to load save file from", save_path)
 		logger.warn("Creating new world...")
         world.loadSeed(world.seed, worker);
@@ -201,7 +201,7 @@ function getDate() {
 let log_path = __dirname + '/logs/server.json';
 let sessions = {};
 fs.readFile(log_path, function (err, data) {
-	if (err) {
+	if (err || data.length == 0) {
 		logger.warn("Unable to load log file from " + log_path)
 		logger.warn("Creating new log...")
 		return;
