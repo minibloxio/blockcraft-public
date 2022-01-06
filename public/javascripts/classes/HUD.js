@@ -66,14 +66,14 @@ class HUD {
             yPos = Math.floor(yPos);
 
             // Draw player heart background
-            let isLit = game.tick.value % 6 > 3;
+            let isLit = game.tick.value % 6 < 3;
             if (isLit && game.tick.value - this.heartBlink < 12) {
                 ctx.drawImage(icons, 25, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Lit heart
 
                 // Draw temporary hearts
-                if (this.lastHp - i >= 1) {
+                if (10 - i >= 1) {
                     ctx.drawImage(icons, 70, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
-                } else if (this.lastHp - i > 0) {
+                } else if (10 - i > 0) {
                     ctx.drawImage(icons, 79, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
                     this.isHalf = false;
                 }
@@ -118,6 +118,28 @@ class HUD {
         }
     }
 
+    // Display armor
+    displayArmor() {
+        // Draw player health
+        for (let i = 0; i < 10; i++) {
+
+            let xPos = canvas.width/2-inventory.hotboxWidth*4+i*this.iconSize;
+            let yPos = canvas.height-this.yOffset-this.iconSize*1.3;
+            // Floor xPos and yPos
+            xPos = Math.floor(xPos);
+            yPos = Math.floor(yPos);
+            // Draw armor background
+            ctx.drawImage(icons, 16, 9, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
+
+            if (player.hp - i >= 1) {
+                ctx.drawImage(icons, 34, 9, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
+            } else if (player.hp - i > 0) {
+                ctx.drawImage(icons, 25, 9, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
+                this.isHalf = false;
+            }
+        }
+    }
+
     // Display oxygen bar
     displayOxygen() {
         if (!colorPass.enabled) return;
@@ -135,10 +157,9 @@ class HUD {
             }  else if ((player.oxygen)/30 > i) {
                 ctx.drawImage(icons, 24, 18, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
             }
-
-
         }
     }
+
 
     // Display player tab list
     displayPlayerTab() {
@@ -233,6 +254,7 @@ class HUD {
         if (player.mode != "survival") return;
         this.displayHealth();
         this.displayHunger();
+        //this.displayArmor();
         this.displayOxygen();
     }
 
