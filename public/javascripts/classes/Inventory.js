@@ -32,7 +32,6 @@ class Inventory {
     resize() {
         canvas.width = $("html").innerWidth();
         canvas.height = $("html").innerHeight();
-        console.log(canvas.width);
 
         this.halfW = canvas.width/2;
         this.halfH = canvas.height/2;

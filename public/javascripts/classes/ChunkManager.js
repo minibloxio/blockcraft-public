@@ -268,7 +268,7 @@ class ChunkManager {
 	}
 
 	updateTexture() {
-		textureManager.setTexture(textureManager.blockOrder);
+		textureManager.setTexture(world.blockOrder);
 
 		for (let cellId in cellIdToMesh) { // Dispose of all remaining meshes
 			let mesh, meshT;
