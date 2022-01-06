@@ -1044,13 +1044,11 @@ class Player {
 		}
 
 		// Check if stuck
-
 		if (this.collides() && this.clip) {
 			this.position.y += blockSize*delta*30; // Move up at a rate of 10 blocks per second
 		}
 
 		// Save position
-
 		this.savedPosition = this.position.clone();
 
 		// BHOP
@@ -1109,11 +1107,6 @@ class Player {
     // Update vitals
 	updateVitals() {
         if (this.mode != 'survival') return;
-
-        // Update health bar
-        // if (this.hp < 3) {
-        //     hud.heartUp = true;
-        // }
 
 		// Update oxygen bar
         if (this.headInWater) {
@@ -1200,19 +1193,17 @@ class Player {
 
 		if (!world.blockId) return;
 
-        let prevInWater = this.inWater;
+        // Body in water
 		this.inWater = (voxel1 == world.blockId["water"] || voxel2 == world.blockId["water"]);
-        if (prevInWater != this.inWater && !this.inWater) {
-            this.lastInWater = Date.now();
-        }
-        this.headInWater = world.getVoxel(this.position.x/blockSize, this.position.y/blockSize, this.position.z/blockSize) == world.blockId["water"];
 
 		x = posX;
 		y = Math.floor((this.position.y)/blockSize);
 		z = posZ;
 
 		let voxel = world.getVoxel(x, y, z)
+        // Head in water
 		colorPass.enabled = voxel == world.blockId["water"];
+        this.headInWater = colorPass.enabled;
 		
 
 		// Head and feet
