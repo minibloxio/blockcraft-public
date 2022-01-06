@@ -814,7 +814,7 @@ io.on('connection', function (socket_) {
             for (let id in world.entities) {
                 let type = "block";
                 if (world.itemId[world.entities[id].v-1]) type = "item";
-                world.removeItem(id, world.entities[id].v, type);
+                world.removeItem(world.entities[id]);
             }
         } else {
             socket.emit('message', {

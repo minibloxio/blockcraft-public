@@ -71,9 +71,9 @@ class HUD {
                 ctx.drawImage(icons, 25, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Lit heart
 
                 // Draw temporary hearts
-                if (10 - i >= 1) {
+                if (player.lastHp - i >= 1) {
                     ctx.drawImage(icons, 70, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
-                } else if (10 - i > 0) {
+                } else if (player.lastHp - i > 0) {
                     ctx.drawImage(icons, 79, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
                     this.isHalf = false;
                 }

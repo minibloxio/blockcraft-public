@@ -350,7 +350,6 @@ function updatePlayerColor(id, color, opacity) {
 // Animate server entities
 let throwables = ["ender_pearl", "fireball", "snowball", "egg"];
 function animateServerEntities(delta) {
-    let {blockSize} = world;
 
 	for (let id in world.entities) {
 		let entity = world.entities[id]
@@ -362,8 +361,9 @@ function animateServerEntities(delta) {
 			entity.mesh.rotation.y += delta;
 		} else if (entity.name == "arrow") {
             let dir = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z).normalize();
-            var mx = new THREE.Matrix4().lookAt(dir,new THREE.Vector3(0,0,0),new THREE.Vector3(0,1,0));
-            var qt = new THREE.Quaternion().setFromRotationMatrix(mx);
+            let mx = new THREE.Matrix4().lookAt(dir,new THREE.Vector3(0,0,0),new THREE.Vector3(0,1,0));
+            let qt = new THREE.Quaternion().setFromRotationMatrix(mx);
+            entity.qt.slerp(qt, delta);
             entity.mesh.setRotationFromQuaternion(qt);
         }
 

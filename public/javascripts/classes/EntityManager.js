@@ -48,11 +48,9 @@ class EntityManager {
             if (!entity || !entity.pos) return;
             if (entity.name == "arrow") {
                 
-                let vel = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z);
-                vel.normalize();
-                let dir = new THREE.Vector3(vel.x, vel.y, vel.z);
-                var mx = new THREE.Matrix4().lookAt(dir,new THREE.Vector3(0,0,0),new THREE.Vector3(0,1,0));
-                var qt = new THREE.Quaternion().setFromRotationMatrix(mx);
+                let dir = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z).normalize();
+                let mx = new THREE.Matrix4().lookAt(dir,new THREE.Vector3(0,0,0),new THREE.Vector3(0,1,0));
+                entity.qt = new THREE.Quaternion().setFromRotationMatrix(mx);
 
                 let mat = this.getMat(16, 5, 0, 0); // Arrow side
                 let mat2 = this.getMat(5, 5, 0, 5); // Arrow back
@@ -63,14 +61,14 @@ class EntityManager {
                 let arrow1 = new THREE.Mesh(new THREE.PlaneBufferGeometry(16, 5), mat);
                 let arrow2 = new THREE.Mesh(new THREE.PlaneBufferGeometry(16, 5), mat);
                 let arrow3 = new THREE.Mesh(new THREE.PlaneBufferGeometry(5, 5), mat2);
-                arrow1.rotation.y = -Math.PI/2;
 
+                arrow1.rotation.y = -Math.PI/2;
                 arrow2.rotation.x = -Math.PI/2;
                 arrow2.rotation.z = -Math.PI/2;
                 arrow3.position.z = -7;
 
                 arrow.add(arrow1, arrow2, arrow3);
-                arrow.setRotationFromQuaternion(qt);
+                arrow.setRotationFromQuaternion(entity.qt);
 
                 this.addToScene(entity, arrow);
             } else if (entity.class == "item") { // Add item
