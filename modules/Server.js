@@ -156,7 +156,6 @@ module.exports = class World {
             vel: new THREE.Vector3(data.vel.x, data.vel.y, data.vel.z),
             acc: new THREE.Vector3(),
             force: data.force,
-            lethal: data.lethal,
             type: "item",
             v: data.v,
             class: data.class || "block",

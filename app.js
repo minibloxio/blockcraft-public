@@ -569,13 +569,12 @@ io.on('connection', function (socket_) {
 		world.removePlayerItem(player, "arrow");
 
 		let entityId = Function.randomString(5);
-		let force = blockSize * 10 * data.force;
+		let force = blockSize * 12 * data.force;
 		let entity = server.addEntity(entityId, {
 			pos: data.pos, 
 			vel: { x: data.dir.x * force, y: data.dir.y * force, z: data.dir.z * force },
             dir: data.dir,
 			force: data.force, 
-			lethal: true,
 			v: world.itemId["arrow"],
 			class: "item",
 			playerId: socket.id,

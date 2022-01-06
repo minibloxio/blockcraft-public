@@ -361,23 +361,13 @@ function animateServerEntities(delta) {
 		} else if (entity.class == "item" && entity.name != "arrow") {
 			entity.mesh.rotation.y += delta;
 		} else if (entity.name == "arrow") {
-            let pos = new THREE.Vector3(entity.pos.x, entity.pos.y, entity.pos.z);
-            let vel = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z);
-            vel.normalize();
-            vel.multiplyScalar(blockSize*4);
-            pos.add(vel);
-
             let dir = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z).normalize();
             var mx = new THREE.Matrix4().lookAt(dir,new THREE.Vector3(0,0,0),new THREE.Vector3(0,1,0));
             var qt = new THREE.Quaternion().setFromRotationMatrix(mx);
             entity.mesh.setRotationFromQuaternion(qt);
         }
 
-        if (entity.name == "arrow" && !entity.onObject) {
-		    entity.mesh.position.lerp(entity.pos, delta*10)
-        } else {
-            entity.mesh.position.lerp(entity.pos, delta*10)
-        }
+        entity.mesh.position.lerp(entity.pos, delta*10);
 	}
 }
 

@@ -2,64 +2,7 @@
 const gc = require('expose-gc/function');
 const WorldGeneration = require('./WorldGeneration');
 const THREE = require('three');
-
-// Decode RLE encoded array
-function RLEdecode(array) {
-    var newArray = [], isRip, isRun, ripCount, runCount;
-    for (var i = 0; i < array.length; i++) {
-        isRip = array[i] < 0;
-        isRun = array[i] > 0;
-        if (isRip) {
-            ripCount = Math.abs(array[i]);
-            i += 1;
-
-            newArray = newArray.concat(array.slice(i, i + ripCount));
-            i += ripCount - 1;
-        }
-        if (isRun) {
-            runCount = array[i];
-            i += 1;
-            for (var j = 0; j < runCount; j++) {
-                newArray.push(array[i])
-            };
-
-        }
-
-    };
-    return newArray;
-}
-
-// Encode array into RLE
-function RLEencode(array) {
-    var newArray = [];
-    var rip = [];
-    var lastValue = undefined;
-    var runCount = 0;
-
-    for (var i = 1, lastValue = array[0]; i <= array.length; i++) {
-        if (array[i] !== lastValue) {
-            if (runCount !== 0) {
-                newArray.push(runCount + 1, lastValue);
-            } else {
-                rip.push(lastValue);
-            }
-            runCount = 0;
-        }
-
-        if (array[i] === lastValue || i === array.length) {
-            if (rip.length !== 0) {
-                if (rip.length) {
-                    newArray.push(-rip.length);
-                    newArray = newArray.concat(rip);
-                }
-                rip = [];
-            }
-            runCount++;
-        }
-        lastValue = array[i];
-    };
-    return newArray;
-}
+const RLE = require('./RLE');
 
 module.exports = class World {
     constructor() {
@@ -125,7 +68,7 @@ module.exports = class World {
         // Load deltas
         this.cells = {};
         for (let cellId in data.deltas) {
-            this.cellDeltas[cellId] = RLEdecode(data.deltas[cellId])
+            this.cellDeltas[cellId] = RLE.decode(data.deltas[cellId])
         }
 
         // Load entities
@@ -145,7 +88,7 @@ module.exports = class World {
 
         let deltas = {}
         for (let cellId in this.cellDeltas) {
-            deltas[cellId] = RLEencode(this.cellDeltas[cellId])
+            deltas[cellId] = RLE.encode(this.cellDeltas[cellId])
             if (deltas[cellId].length == 2 && deltas[cellId][0] == Math.pow(this.cellSize, 3) && deltas[cellId][1] == 0) delete deltas[cellId];
         }
 
@@ -240,10 +183,8 @@ module.exports = class World {
         return cell;
     }
     getCellForVoxel(x, y, z, cellDelta) {
-        if (cellDelta)
-            return this.cellDeltas[this.computeCellId(x, y, z)];
-        else
-            return this.cells[this.computeCellId(x, y, z)];
+        if (cellDelta) return this.cellDeltas[this.computeCellId(x, y, z)];
+        else return this.cells[this.computeCellId(x, y, z)];
     }
     setVoxel(x, y, z, v, changeDelta, addCell = true) {
         let cell = this.getCellForVoxel(x, y, z);
@@ -269,38 +210,10 @@ module.exports = class World {
         const voxelOffset = this.computeVoxelOffset(x, y, z);
         return cell[voxelOffset];
     }
-    encodeCell(cellX, cellY, cellZ) { // RLE Encoding
-        let array = this.getCellForVoxel(cellX * this.cellSize, cellY * this.cellSize, cellZ * this.cellSize)
+    encodeCell(cellX, cellY, cellZ) {
+        let array = this.getCellForVoxel(cellX * this.cellSize, cellY * this.cellSize, cellZ * this.cellSize);
 
-        var newArray = [];
-        var rip = [];
-        var lastValue = undefined;
-        var runCount = 0;
-        if (!array) return [];
-
-        for (var i = 1, lastValue = array[0]; i <= array.length; i++) {
-            if (array[i] !== lastValue) {
-                if (runCount !== 0) {
-                    newArray.push(runCount + 1, lastValue);
-                } else {
-                    rip.push(lastValue);
-                }
-                runCount = 0;
-            }
-
-            if (array[i] === lastValue || i === array.length) {
-                if (rip.length !== 0) {
-                    if (rip.length) {
-                        newArray.push(-rip.length);
-                        newArray = newArray.concat(rip);
-                    }
-                    rip = [];
-                }
-                runCount++;
-            }
-            lastValue = array[i];
-        };
-        return newArray;
+        return RLE.encode(array);
     }
 
     destroyBlocks(x, y, z, radius) {
@@ -377,19 +290,35 @@ module.exports = class World {
         let entitiesToRemove = []; // Entities to be removed
 
         for (let id in players) {
-            let p = players[id];
-            if (p.showInventory || p.pickupDelay > Date.now() || (p.mode == "spectator" || p.mode == "camera")) continue;
+            let player = players[id];
+            if (player.showInventory || player.pickupDelay > Date.now() || (player.mode == "spectator" || player.mode == "camera")) continue;
 
             // Pick up item
-            let dir = new THREE.Vector3(p.pos.x, p.pos.y, p.pos.z).sub(entity.pos);
+            let dir = new THREE.Vector3(player.pos.x, player.pos.y, player.pos.z).sub(entity.pos);
             dir.y -= blockSize;
             let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
 
+            let isArrow = entity.name == "arrow" && !entity.onObject;
+
             // Add to player if within a block distance
-            if (dist < blockSize*0.75) {
-                if (entity.v == this.itemId["arrow"] && entity.lethal && !entity.onObject && !players[id].blocking) { // Arrow hit
-                    players[id].hp -= entity.force;
-                    if (players[entity.playerId]) players[id].dmgType = players[entity.playerId].name;
+            if (dist < blockSize) {
+                if (!isArrow) {
+                    // Add item to player's inventory if item already exists in inventory
+                    World.addItem(player, entity);
+
+                    // Remove the item from world
+                    entitiesToRemove.push({
+                        type: "remove_item",
+                        id: entity.id,
+                        v: entity.v,
+                        class: entity.class
+                    })
+                    delete this.entities[entity_id];
+                }
+
+                if (isArrow && !player.blocking && !player.dead) { // Arrow hit
+                    player.hp -= entity.force;
+                    if (players[entity.playerId]) player.dmgType = players[entity.playerId].name;
                     entity.force *= 300;
                     entity.dir = entity.vel;
                     io.to(`${id}`).emit('knockback', entity)
@@ -403,22 +332,12 @@ module.exports = class World {
                         class: entity.class
                     })
                     delete this.entities[entity_id];
-                } else {
-                    // Add item to player's inventory if item already exists in inventory
-                    World.addItem(p, entity);
-
-                    // Remove the item from world
-                    entitiesToRemove.push({
-                        type: "remove_item",
-                        id: entity.id,
-                        v: entity.v,
-                        class: entity.class
-                    })
-                    delete this.entities[entity_id];
                 }
+                
+                
             }
 
-            if (dist < blockSize * 2) { // Pull when 2 blocks away
+            if (dist < blockSize * 2 && !isArrow) { // Pull when 2 blocks away
 
                 entity.acc.set(dir.x, dir.y, dir.z);
                 entity.acc.multiplyScalar(2*blockSize);

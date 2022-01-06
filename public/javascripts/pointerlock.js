@@ -57,6 +57,7 @@ function enterPointerLock () {
 	onWindowResize();
 
 	if (inventory.showInventory) { // Return to game from inventory
+        inventory.showInventory = false;
 		
 		let droppedItems = [];
 		if (inventory.showCraftingTable) { // Drop items in crafting table grid
@@ -102,9 +103,10 @@ function initPointerLock() {
 	var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 	if ( havePointerLock ) {
 		var element = document.body;
+        function enabled() { return document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element };
 
 		var pointerlockchange = function ( event ) {
-			if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
+			if ( enabled() ) {
 				enterPointerLock();
 			} else { // Exit pointer lock
 				exitPointerLock();
@@ -137,13 +139,10 @@ function initPointerLock() {
 
 					document.exitPointerLock();
 				} else if (document.activeElement.id != "search-input" && inventory.canShowInventory) {
-					inventory.showInventory = false;
 					inventory.canShowInventory = false;
 
 					// Ask the browser to lock the pointer
-					element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-					element.requestPointerLock();
-
+					requestPointerLock()
 					socket.emit('updateInventory', inventory.inventory);
 				}
 
@@ -155,8 +154,7 @@ function initPointerLock() {
 		}).keyup(function (event) {
 			if (event.keyCode == 27 && inventory.showInventory) { // Escape key
 				// Ask the browser to lock the pointer
-				element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-				element.requestPointerLock();
+				requestPointerLock()
 				socket.emit('updateInventory', inventory.inventory);
 			}
 			
@@ -214,16 +212,14 @@ THREE.PointerLockControls = function ( camera ) {
 	this.enabled = false;
 
 	this.getObject = function () {
-
 		return yawObject;
-
 	};
 
 	this.getDirection = function () {
 
 		// assumes the camera itself is not rotated
 
-		var direction = new THREE.Vector3( 0, 0, - 1 );
+		var direction = new THREE.Vector3( 0, 1, 0 );
 		var rotation = new THREE.Euler( 0, 0, 0, 'YXZ' );
 
 		return function ( v ) {
