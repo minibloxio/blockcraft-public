@@ -29,8 +29,8 @@ let game = {
 
 // Update GUI size
 function updateGUISize() {
-	chat.resize();
     inventory.resize();
+	chat.resize();
     hud.resize();
 }
 

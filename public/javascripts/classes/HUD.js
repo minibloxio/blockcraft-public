@@ -23,7 +23,7 @@ class HUD {
         } else if (size == 3) {
             
         }
-        this.iconSize = inventory.selectorWidth*4/12;
+        this.iconSize = Math.floor(inventory.selectorWidth*4/12);
         this.yOffset = inventory.selectorWidth+this.iconSize*1.5;
     }
 
@@ -68,12 +68,9 @@ class HUD {
             ctx.drawImage(icons, 16, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
             if (player.hp - i >= 1) {
                 ctx.drawImage(icons, 52, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
-                //ctx.drawImage(full_heart, xPos, yPos, this.iconSize, this.iconSize)
             } else if (player.hp - i > 0) {
-                ctx.drawImage(half_heart, xPos, yPos, this.iconSize, this.iconSize)
+                ctx.drawImage(icons, 61, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
                 this.isHalf = false;
-            } else {
-                ctx.drawImage(empty_heart, xPos, yPos, this.iconSize, this.iconSize)
             }
         }
 

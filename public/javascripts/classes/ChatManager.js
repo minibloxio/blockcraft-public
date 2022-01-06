@@ -13,7 +13,6 @@ class ChatManager {
         this.msgHeight = 25;
         this.msgOffset = 5;
         this.fontSize = this.msgHeight - this.msgOffset;
-        this.yOffset = 120;
 
         // Init chat
         this.chat = [];
@@ -36,6 +35,7 @@ class ChatManager {
             this.maxChatHeight = innerHeight - 200;
             this.msgHeight = 35;
         }
+        this.yOffset = 20 + inventory.selectorWidth + 2*hud.iconSize;
         this.fontSize = this.msgHeight - this.msgOffset;
         $("#chat-input").css("font-size", this.fontSize + "px");
         $("#chat-input").css("height", this.msgHeight + "px");
@@ -167,7 +167,7 @@ class ChatManager {
                 }
                 
                 text += msg.text;
-                text = text.substr(0, 1000);
+                text = text.substring(0, 1000);;
                 let newLines = this.getLines(ctx, text, this.maxChatWidth-20, msg.color || "white", opacity).reverse();
                 lines = lines.concat(newLines);
                 currHeight += this.msgHeight*newLines.length;

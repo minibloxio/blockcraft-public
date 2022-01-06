@@ -196,7 +196,6 @@ socket.on('punch', function (id) {
 socket.on('teleport', function (data) {
 	player.setCoords(data.pos);
     camera.rotation.z = Math.PI/12;
-    console.log(camera.rotation.z);
 })
 
 socket.on('update', async function (data) {
