@@ -918,14 +918,15 @@ setInterval(function () {
 	world.update(dt / 1000, players, io);
 
 	// Send updated data to client
-	io.emit('update', {
+    let data = {
 		serverPlayers: players,
 		updatedBlocks: world.updatedBlocks,
 		newEntities: world.newEntities,
 		entities: world.entities,
 		tick: world.tick,
 		t: Date.now()
-	})
+	}
+	io.emit('update', JSON.stringify(data));
 
 	world.updatedBlocks = [];
 	world.newEntities = [];

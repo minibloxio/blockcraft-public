@@ -1,6 +1,7 @@
 // Garbage collection
 const gc = require('expose-gc/function');
 const WorldGeneration = require('./WorldGeneration');
+const THREE = require('three');
 
 // Decode RLE encoded array
 function RLEdecode(array) {
@@ -298,41 +299,6 @@ module.exports = class World {
         return newArray;
     }
 
-    update(dt, players, io) {
-        // Update entities
-        for (let entity_id in this.entities) {
-            let entity = this.entities[entity_id];
-            if (entity.type == "item" || entity.type == "arrow") {
-                // Delete entity if too long
-                let timeLimit = 1000 * 60 * 10; // 10 minutes
-                if (entity.name == "fireball") timeLimit = 1000 * 15; // 15 seconds
-
-                if (Date.now() - entity.t > timeLimit) {
-                    // Remove the item from world
-                    this.newEntities.push({
-                        type: "remove_item",
-                        id: entity.id,
-                        v: entity.v,
-                        class: entity.class,
-                    })
-                    delete this.entities[entity_id];
-                }
-
-                // Check collision
-                this.checkCollision(entity, players, io);
-
-                // Gravitate towards players
-                let deletedEntities = this.gravitateEntities(players, entity, entity_id, io);
-                for (let deletedEntity of deletedEntities) {
-                    this.newEntities.push(deletedEntity);
-                }
-
-                // Apply physics
-                this.applyPhysics(entity, dt);
-            }
-        }
-    }
-
     destroyBlocks(x, y, z, radius) {
         let radiusSquared = radius * radius;
         for (let dx = -radius; dx <= radius; dx++) {
@@ -355,7 +321,6 @@ module.exports = class World {
 
     checkCollision(entity, players, io) {
         const { blockSize } = this;
-
         if (!entity.pos) return;
 
         // Entity gravity
@@ -364,12 +329,12 @@ module.exports = class World {
         let delta_y = Math.floor((entity.pos.y - 6) / blockSize);
         let z = Math.floor(entity.pos.z / blockSize);
 
-        entity.acc = { x: 0, y: -9.81 * blockSize, z: 0 };
+        if (!entity.onObject) entity.acc = new THREE.Vector3(0, -9.81*blockSize, 0);
 
         let deltaVoxel = this.getVoxel(x, delta_y, z); // Check if there is a voxel below the entity
         let voxel = this.getVoxel(x, y, z); // Get the voxel below the entity
 
-        let throwables = ["ender_pearl", "fireball", "snowball", "egg", "arrow"];
+        let throwables = ["ender_pearl", "fireball", "snowball", "egg"];
 
         // Check if entity is on ground
         if (throwables.includes(entity.name)) {
@@ -378,35 +343,28 @@ module.exports = class World {
                 players[entity.playerId].hp -= 2.5;
                 io.to(`${entity.playerId}`).emit('teleport', entity)
             } else if (entity.name == "fireball" && deltaVoxel > 1) { // FIREBALL
-                if (players[entity.playerId].operator) {
+                if (players[entity.playerId].operator) { // Check if player is operator
                     let explosionRadius = 4;
                     this.destroyBlocks(x, y, z, explosionRadius);
                 }
             }
 
-            if (deltaVoxel > 1) { // Check if there is a voxel below the entity
-                if (entity.name == "arrow") { // Stick arrow to ground
-                    entity.acc = { x: 0, y: 0, z: 0 }
-                    entity.vel = { x: 0, y: 0, z: 0 }
-                    entity.onObject = true;
-                } else {
-                    this.removeItem(entity.id, entity.v, entity.class);
-                    return; 
-                }
+            if (deltaVoxel > 1) {
+                this.removeItem(entity.id, entity.v, entity.class);
+                return; 
             }
-        } else { // Check if there is a voxel below the entity
+        } else if (entity.name != "arrow") { // Check if there is a voxel below the entity
             if (deltaVoxel) {
-                entity.acc = { x: 0, y: 0, z: 0 }
-                entity.vel = { x: 0, y: 0, z: 0 }
+                entity.acc = new THREE.Vector3();
+                entity.vel = new THREE.Vector3();
             }
             if (voxel) {
-                entity.acc = { x: 0, y: 9.81 * blockSize, z: 0 }
-                entity.vel = { x: 0, y: 0, z: 0 }
+                entity.acc = new THREE.Vector3(0, 9.81, 0);
+                entity.vel = new THREE.Vector3();
                 entity.onObject = true;
             }
         }
     }
-
 
     gravitateEntities(players, entity, entity_id, io) {
         if (!entity.pos) return [];
@@ -419,16 +377,16 @@ module.exports = class World {
             if (p.showInventory || p.pickupDelay > Date.now() || (p.mode == "spectator" || p.mode == "camera")) continue;
 
             // Pick up item
-            let dir = { x: (p.pos.x - entity.pos.x), y: (p.pos.y - blockSize - (entity.pos.y)), z: (p.pos.z - entity.pos.z) }
+            let dir = new THREE.Vector3(p.pos.x, p.pos.y, p.pos.z).sub(entity.pos);
+            dir.y -= blockSize;
             let dist = Math.sqrt(Math.pow(dir.x, 2) + Math.pow(dir.y, 2) + Math.pow(dir.z, 2))
 
             // Add to player if within a block distance
-            if (dist < blockSize) {
-                if (entity.v == this.itemId["arrow"] && entity.class == "item" && entity.lethal && !entity.onObject && !players[id].blocking) { // Arrow hit
-
+            if (dist < blockSize*0.75) {
+                if (entity.v == this.itemId["arrow"] && entity.lethal && !entity.onObject && !players[id].blocking) { // Arrow hit
                     players[id].hp -= entity.force;
                     if (players[entity.playerId]) players[id].dmgType = players[entity.playerId].name;
-                    entity.force *= 300
+                    entity.force *= 300;
                     entity.dir = entity.vel;
                     io.to(`${id}`).emit('knockback', entity)
                     io.emit('punch', id);
@@ -456,30 +414,99 @@ module.exports = class World {
                 }
             }
 
-            if (dist < blockSize * 2.5 && (entity.v != this.itemId["arrow"] || entity.onObject)) { // Pull when 2 blocks away
+            if (dist < blockSize * 2) { // Pull when 2 blocks away
 
-                entity.acc.x = dir.x * 2 * blockSize;
-                entity.acc.y = dir.y * 2 * blockSize;
-                entity.acc.z = dir.z * 2 * blockSize;
+                entity.acc.set(dir.x, dir.y, dir.z);
+                entity.acc.multiplyScalar(2*blockSize);
+
+                entity.pulling = true;
             }
         }
 
         return entitiesToRemove;
     }
 
-    applyPhysics(entity, dt) {
-        if (!entity.pos) return;
+    checkArrowCollision(entity) {
+        const { blockSize } = this;
+        if (!entity.pos || entity.name != "arrow") return;
 
-        // Update velocity and acceleration
-        if (entity.name != "fireball") {
-            entity.vel.x += entity.acc.x * dt;
-            entity.vel.y += entity.acc.y * dt;
-            entity.vel.z += entity.acc.z * dt;
+        let pos = entity.pos.clone();
+        let vel = entity.vel.clone().normalize().multiplyScalar(blockSize/2);
+        pos.add(vel).divideScalar(blockSize);
+
+        if (entity.lastPos) {
+            pos = entity.lastPos;
         }
 
-        entity.pos.x += entity.vel.x * dt;
-        entity.pos.y += entity.vel.y * dt;
-        entity.pos.z += entity.vel.z * dt;
+        let voxel = this.getVoxel(pos.x, pos.y, pos.z);
+
+        if (voxel > 1) { // Check if there is a voxel below the entity
+            entity.acc = new THREE.Vector3();
+            entity.vel = new THREE.Vector3();
+            entity.lastPos = pos.clone();
+            entity.onObject = true;
+        } else {
+            entity.lastPos = null;
+        }
+    }
+
+    applyPhysics(entity, dt, players, io, entity_id) {
+        if (!entity.pos) return;
+
+        entity.onObject = false;
+        entity.pulling = false;
+
+        // Check collision with world
+        this.checkCollision(entity, players, io);
+        this.checkArrowCollision(entity);
+
+        // Gravitate towards players
+        let deletedEntities = this.gravitateEntities(players, entity, entity_id, io);
+        for (let deletedEntity of deletedEntities) {
+            this.newEntities.push(deletedEntity);
+        }
+        
+        // Update velocity and acceleration
+        if (entity.name != "fireball") {
+            let da = entity.acc.clone().multiplyScalar(dt);
+            entity.vel.add(da);
+        }
+
+        // Apply physics iteratively
+        let iterations = 8;
+        for (let i = 0; i < iterations; i++) {
+            let dv = entity.vel.clone().multiplyScalar(dt/iterations);
+            entity.pos.add(dv);
+            if (!entity.pulling) {
+                this.checkArrowCollision(entity);
+            }
+        }
+    }
+
+    update(dt, players, io) {
+        // Update entities
+        for (let entity_id in this.entities) {
+            let entity = this.entities[entity_id];
+            if (entity.type == "item" || entity.type == "arrow") {
+                // Delete entity if too long
+                let timeLimit = 1000 * 60 * 10; // 10 minutes
+                if (entity.name == "fireball") timeLimit = 1000 * 15; // 15 seconds
+
+                if (Date.now() - entity.t > timeLimit) {
+                    // Remove the item from world
+                    this.newEntities.push({
+                        type: "remove_item",
+                        id: entity.id,
+                        v: entity.v,
+                        class: entity.class,
+                    })
+                    delete this.entities[entity_id];
+                }
+
+                // Apply physics
+                this.applyPhysics(entity, dt, players, io, entity_id);
+            }
+        }
     }
 
     static addItem(p, entity) {

@@ -180,8 +180,8 @@ function animate() {
 		}
 	}
 
-	// Update server entities
-	updateServerEntities(delta);
+	// Animate server entities
+	animateServerEntities(delta);
 
 	// Send events to server
 	sendPacket();

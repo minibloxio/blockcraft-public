@@ -347,24 +347,36 @@ function updatePlayerColor(id, color, opacity) {
 	}
 }
 
-// Update server entities
+// Animate server entities
 let throwables = ["ender_pearl", "fireball", "snowball", "egg"];
-function updateServerEntities(delta) {
+function animateServerEntities(delta) {
+    let {blockSize} = world;
+
 	for (let id in world.entities) {
 		let entity = world.entities[id]
         if (!entity.mesh) continue;
-		entity.mesh.position.lerp(entity.pos, delta*10)
+        
 		if (throwables.includes(entity.name)) {
 			entity.mesh.lookAt(player.position);
 		} else if (entity.class == "item" && entity.name != "arrow") {
 			entity.mesh.rotation.y += delta;
 		} else if (entity.name == "arrow") {
+            let pos = new THREE.Vector3(entity.pos.x, entity.pos.y, entity.pos.z);
             let vel = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z);
             vel.normalize();
-            let dir = new THREE.Vector3(vel.x, vel.y, vel.z);
+            vel.multiplyScalar(blockSize*4);
+            pos.add(vel);
+
+            let dir = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z).normalize();
             var mx = new THREE.Matrix4().lookAt(dir,new THREE.Vector3(0,0,0),new THREE.Vector3(0,1,0));
             var qt = new THREE.Quaternion().setFromRotationMatrix(mx);
             entity.mesh.setRotationFromQuaternion(qt);
+        }
+
+        if (entity.name == "arrow" && !entity.onObject) {
+		    entity.mesh.position.lerp(entity.pos, delta*10)
+        } else {
+            entity.mesh.position.lerp(entity.pos, delta*10)
         }
 	}
 }

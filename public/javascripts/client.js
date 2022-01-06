@@ -199,7 +199,7 @@ socket.on('teleport', function (data) {
 })
 
 socket.on('update', async function (data) {
-	await updateClient(data);
+	await updateClient(JSON.parse(data));
 })
 
 socket.on('messageAll', function (data) {
@@ -249,8 +249,14 @@ function updateClient(data) {
 	for (let id in updatedEntities) {
 		let entity = updatedEntities[id];
 		if (entity.type == "item" && world.entities[id]) {
-			world.entities[id].pos = entity.pos;
-            if (!entity.onObject) world.entities[id].vel.set(entity.vel);
+
+            if (entity.name == "arrow" && !entity.onObject) {
+                world.entities[id].pos = entity.pos;
+                world.entities[id].vel.set(entity.vel);
+            } else {
+                world.entities[id].pos = entity.pos;
+            }
+
 
 			if (world.entities[id].mesh && world.entities[id].mesh.position.length() == 0) {
 				world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z)

@@ -1,4 +1,5 @@
 let fs = require('fs');
+const THREE = require('three');
 const public_path = __dirname + '/../public/';
 
 module.exports = class World {
@@ -150,16 +151,15 @@ module.exports = class World {
     // Add entity
     addEntity(id, data) {
         let entity = {
-            pos: data.pos,
-            vel: data.vel,
-            acc: {x: 0, y: 0, z: 0},
-            dir: data.dir,
+            id: id,
+            pos: new THREE.Vector3(data.pos.x, data.pos.y, data.pos.z),
+            vel: new THREE.Vector3(data.vel.x, data.vel.y, data.vel.z),
+            acc: new THREE.Vector3(),
             force: data.force,
             lethal: data.lethal,
             type: "item",
             v: data.v,
             class: data.class || "block",
-            id: id,
             playerId: data.playerId,
             name: data.name,
             t: Date.now(),
