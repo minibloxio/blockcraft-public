@@ -37,6 +37,7 @@ const worker = new Worker('./worker.js');
 const Function = require('./modules/Function.js');
 const World = require('./modules/World.js');
 const GameServer = require('./modules/Server.js');
+const THREE = require('three');
 var filter = require('leo-profanity');
 
 // Listen to server port
@@ -568,11 +569,14 @@ io.on('connection', function (socket_) {
 
 		world.removePlayerItem(player, "arrow");
 
-		let entityId = Function.randomString(5);
 		let force = blockSize * 12 * data.force;
+        let vel = new THREE.Vector3(data.dir.x, data.dir.y, data.dir.z);
+        vel.add(new THREE.Vector3().random().multiplyScalar(2).subScalar(1).multiplyScalar(0.002)); // Randomize direction
+        vel.multiplyScalar(force);
+		let entityId = Function.randomString(5);
 		let entity = server.addEntity(entityId, {
 			pos: data.pos, 
-			vel: { x: data.dir.x * force, y: data.dir.y * force, z: data.dir.z * force },
+			vel: vel,
             dir: data.dir,
 			force: data.force, 
 			v: world.itemId["arrow"],

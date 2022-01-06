@@ -50,7 +50,7 @@ function getDroppedItems(items, count) {
 }
 
 // Enter pointer lock
-function enterPointerLock () {
+function enterPointerLock() {
 	player.controls.enabled = true;
 	blocker.style.display = 'none';
 	$("#background-image").hide();
@@ -196,10 +196,6 @@ THREE.PointerLockControls = function ( camera ) {
 		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
 
 	};
-
-	// setInterval(function () {
-	// 	yawObject.rotation.y -= 0.005;
-	// }, 16);
 
 	this.dispose = function () {
 

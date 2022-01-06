@@ -30,6 +30,8 @@ module.exports = class World {
 
     // Initiate textures
     init(options) {
+        // Server io
+        this.io = options.io;
 
         // Block ids
         this.blockOrder = options.blockOrder || [];
@@ -271,15 +273,16 @@ module.exports = class World {
 
 
     getDist(player, entity) {
-        const { blockSize } = this;
+        const {blockSize} = this;
         let dir = new THREE.Vector3(player.pos.x, player.pos.y, player.pos.z).sub(entity.pos);
-        dir.y -= blockSize;
+        dir.y -= blockSize*0.6;
         let dist = dir.length();
         return {dist, dir}
     }
 
     gravitateEntity(players, entity) {
         if (!entity.pos) return [];
+        if (entity.name == "arrow" && !entity.onObject) return;
 
         const { blockSize } = this;
 
@@ -290,26 +293,27 @@ module.exports = class World {
             // Pick up item
             let {dist, dir} = this.getDist(player, entity);
 
-            let isArrow = entity.name == "arrow" && !entity.onObject;
-
             // Add to player if within a block distance
-            if (dist < blockSize && !isArrow) {
+            if (dist < blockSize/2) {
                 World.addItem(player, entity);
                 this.removeItem(entity);
                 return; 
             }
 
             // Pull when 2 blocks away
-            if (dist < blockSize * 2 && !isArrow) { 
+            if (dist < blockSize * 2) { 
                 entity.acc.set(dir.x, dir.y, dir.z);
-                entity.acc.multiplyScalar(4*blockSize);
+                let pullStrength = 3;
+                if (entity.name == "arrow") pullStrength = 16;
+                entity.acc.multiplyScalar(16*blockSize);
+                entity.pulling = true;
             }
         }
     }
 
     checkArrowCollision(players, entity, io) {
         const { blockSize } = this;
-        if (!entity.pos || entity.name != "arrow") return;
+        if (!entity.pos || entity.name != "arrow" || entity.pulling) return;
 
         let pos = entity.pos.clone();
         let vel = entity.vel.clone().normalize().multiplyScalar(blockSize/2);
@@ -324,7 +328,6 @@ module.exports = class World {
             entity.acc = new THREE.Vector3();
             entity.vel = new THREE.Vector3();
             entity.lastPos = pos.clone();
-            console.log("ARROW COLLISION");
             entity.onObject = true;
         } else {
             entity.lastPos = null;
@@ -333,26 +336,25 @@ module.exports = class World {
         // Check collision with players
         for (let id in players) {
             let player = players[id];
-            if (player.mode == "spectator" || player.mode == "camera" || player.blocking || player.dead) continue;
+            let canHitOwnPlayer = (Date.now() - entity.t > 200) ? true : id != entity.playerId;
+
+            if (player.mode == "spectator" || player.mode == "camera" || player.blocking || player.dead || entity.onObject || !canHitOwnPlayer) continue;
 
             let {dist} = this.getDist(player, entity);
             if (dist > blockSize) continue;
 
-            let canHitOwnPlayer = (Date.now() - entity.t > 200) ? true : id != entity.playerId;
+            // Arrow hit
+            player.hp -= entity.force;
+            if (players[entity.playerId]) player.dmgType = players[entity.playerId].name;
+            entity.force *= 300;
+            entity.dir = entity.vel; // Update direction of arrow based on velocity
+            io.to(`${id}`).emit('knockback', entity);
+            io.emit('punch', id); // Update player color
 
-            if (!player.blocking && !player.dead && canHitOwnPlayer && !entity.onObject) { // Arrow hit
-                player.hp -= entity.force;
-                if (players[entity.playerId]) player.dmgType = players[entity.playerId].name;
-                entity.force *= 300;
-                entity.dir = entity.vel; // Update direction of arrow based on velocity
-                io.to(`${id}`).emit('knockback', entity);
-                io.emit('punch', id); // Update player color
+            // Remove the item from world
+            this.removeItem(entity);
 
-                // Remove the item from world
-                this.removeItem(entity);
-
-                return true;
-            }
+            return true;
         }
     }
 
@@ -403,40 +405,29 @@ module.exports = class World {
     }
 
     static addItem(p, entity) {
-        let added = false;
         // Add item to player's inventory if item already exists in inventory
         for (let slot of p.toolbar) {
-            if (!slot) continue;
-            if (slot.v == entity.v && slot.class == entity.class) {
-                slot.c += entity.amount || 1;
-                added = true;
-                return;
-            }
+            if (!slot || slot.v != entity.v || slot.class != entity.class) continue;
+
+            slot.c += entity.amount || 1;
+            return;
+        }
+
+        let newItem = {
+            v: entity.v,
+            c: entity.amount || 1,
+            class: entity.class
+        }
+
+        for (let i = 0; i < p.toolbar.length; i++) {
+            if (p.toolbar[i] && p.toolbar[i].c != 0) continue;
+
+            p.toolbar[i] = newItem;
+            return;
         }
 
         // Add item if item does not exist in inventory
-        if (!added) {
-            let filled = false;
-            for (let i = 0; i < p.toolbar.length; i++) {
-                if (!p.toolbar[i] || p.toolbar[i].c == 0) {
-                    p.toolbar[i] = {
-                        v: entity.v,
-                        c: entity.amount || 1,
-                        class: entity.class
-                    }
-                    filled = true;
-                    break;
-                }
-            }
-
-            if (!filled) {
-                p.toolbar.push({
-                    v: entity.v,
-                    c: entity.amount || 1,
-                    class: entity.class
-                })
-            }
-        }
+        p.toolbar.push(newItem);
     }
 
     removeItem(entity) {
