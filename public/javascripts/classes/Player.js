@@ -1156,8 +1156,11 @@ class Player {
     
     // Update client with server information
     updateClient(data) {
-		if (data && data.hp > this.hp) {
-			hud.heartUp = true;
+		if (data && data.hp != this.hp) {
+			hud.heartBlink = game.tick.value;
+            if (!hud.lastHp || data.hp > hud.lastHp) {
+                hud.lastHp = this.hp;
+            }
 		}
 
 		// Update server-side data
@@ -1182,7 +1185,7 @@ class Player {
 		let posX = Math.floor(this.position.x/blockSize);
 		let posZ = Math.floor(this.position.z/blockSize);
 
-		// Under water
+		// Check  if under water
 		let x = posX;
 		let y = Math.floor((this.position.y-blockSize*1.62)/blockSize);
 		let z = posZ;

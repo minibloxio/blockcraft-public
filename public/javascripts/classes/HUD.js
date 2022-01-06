@@ -6,7 +6,7 @@ class HUD {
         this.heartShake = new Array(10).fill(0);
 
         this.showStats = true;
-        this.updateInterval = 50;
+        this.updateInterval = 0;
         this.hudTime = Date.now();
 
         this.showPlayerTab = false;
@@ -18,6 +18,7 @@ class HUD {
     resize() {
         let size = game.guiSize;
         if (size == 1) {
+
         } else if (size == 2) {
 
         } else if (size == 3) {
@@ -64,8 +65,23 @@ class HUD {
             xPos = Math.floor(xPos);
             yPos = Math.floor(yPos);
 
-            // Draw hearts based on player hp
-            ctx.drawImage(icons, 16, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
+            // Draw player heart background
+            let isLit = game.tick.value % 6 > 3;
+            if (isLit && game.tick.value - this.heartBlink < 12) {
+                ctx.drawImage(icons, 25, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Lit heart
+
+                // Draw temporary hearts
+                if (this.lastHp - i >= 1) {
+                    ctx.drawImage(icons, 70, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
+                } else if (this.lastHp - i > 0) {
+                    ctx.drawImage(icons, 79, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
+                    this.isHalf = false;
+                }
+            } else {
+                ctx.drawImage(icons, 16, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Unlit heart
+            }
+            
+            // Draw player hearts
             if (player.hp - i >= 1) {
                 ctx.drawImage(icons, 52, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
             } else if (player.hp - i > 0) {

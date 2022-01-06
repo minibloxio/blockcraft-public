@@ -850,7 +850,7 @@ setInterval(function () {
 
 	world.tick += 1;
 	// Regeneration
-	if (world.tick % 100 == 0) {
+	if (world.tick % 50 == 0) { // Every 2.5 seconds
 		for (let id in players) {
 			if (players[id].hp > 0)
 				players[id].hp = Math.min(players[id].hp + 0.5, 10);

@@ -23,17 +23,17 @@ class ChatManager {
     resize() {
         let size = game.guiSize;
         if (size == 1) {
-            this.maxChatWidth = 600;
+            this.maxChatWidth = 500;
             this.maxChatHeight = Math.min(800, innerHeight - 100);
             this.msgHeight = 25;
         } else if (size == 2) {
-            this.maxChatWidth = 600;
+            this.maxChatWidth = 500;
             this.maxChatHeight = Math.min(600, innerHeight - 100);
-            this.msgHeight = 30;
+            this.msgHeight = 27;
         } else if (size == 3) {
             this.maxChatWidth = 600;
             this.maxChatHeight = innerHeight - 200;
-            this.msgHeight = 35;
+            this.msgHeight = 30;
         }
         this.yOffset = 20 + inventory.selectorWidth + 2*hud.iconSize;
         this.fontSize = this.msgHeight - this.msgOffset;
