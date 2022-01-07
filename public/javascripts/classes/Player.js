@@ -328,6 +328,7 @@ class Player {
             this.bowCharge = this.bowCharge || 0;
             let diff = (Date.now()-this.key.lastRightClick);
 
+            // Check if arrow exists
             let arrowExists = false;
             for (let t of this.toolbar) {
                 if (t && t.v == world.itemId["arrow"] && t.c > 0) {
@@ -336,8 +337,15 @@ class Player {
                 }
             }
 
+            // Set bow charge
             if (diff > 300 && arrowExists) {
                 this.bowCharge = Math.min(Math.floor((diff - 300)/300), 2) + 1
+            }
+
+            // Update fov
+            game.fov = parseInt(game.fov);
+            if (camera.fov > game.fov-10 && camera.dynFov) {
+                this.deltaFov -= delta * 10;
             }
         } else {
             if (this.bowCharge > 0) { // Release bow
@@ -348,6 +356,10 @@ class Player {
                 })
             }
             this.bowCharge = 0;
+
+            if (camera.fov < game.fov-1) {
+                this.deltaFov += delta * 50;
+            }
         }
 	}
 
@@ -1078,13 +1090,14 @@ class Player {
 			}
 			this.maxSprintSpeed = this.defaultMaxSprintSpeed;
 		}
-		if ((this.key.sneak || this.drawingBow) && !this.fly && this.onObject) {
+		if (this.key.sneak && !this.fly && this.onObject) {
 			
 			this.speed = 0.75;
 
 			this.position.y += -this.walkSpeed*1.5;
 			this.halfHeight = blockSize * 0.6;
 		}
+        if (this.drawingBow) this.speed = 0.75;
 		if (this.blocking && !this.fly && this.onObject)
 			this.speed = 0.75;
 		if (this.blocking && this.key.sneak && !this.fly && this.onObject)
@@ -1092,14 +1105,16 @@ class Player {
 
 		// Change camera fov when sprinting
 
-        game.fov = parseInt(game.fov);
-        if ((this.speed <= 2 || this.distanceMoved < 1.5)) {
-            if (camera.fov > game.fov) {
-                this.deltaFov = Math.max(this.deltaFov - delta*100, 0);
-            }
-        } else if (this.distanceMoved > 7 && camera.dynFov) {
-            if (camera.fov < game.fov+10) {
-                this.deltaFov = Math.min(this.deltaFov + delta*100, 10);
+        if (!this.drawingBow) {
+            game.fov = parseInt(game.fov);
+            if ((this.speed <= 2 || this.distanceMoved < 1.5)) {
+                if (camera.fov > game.fov) {
+                    this.deltaFov -= delta*100;
+                }
+            } else if (this.distanceMoved > 7 && camera.dynFov) {
+                if (camera.fov < game.fov+10) {
+                    this.deltaFov += delta*100;
+                }
             }
         }
         

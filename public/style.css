@@ -86,7 +86,7 @@ a {
 #nav {
     height: 60px;
     text-align: left;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     color: white;
     font-family: "Minecraft-Regular";
 }
@@ -106,7 +106,7 @@ a {
     border-top: none;
     text-align: left;
     color: white;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     padding: 40px;
 }
 
@@ -128,7 +128,6 @@ a {
 #input-container {
     text-align: center;
     top: calc(62vh + 60px);
-    background-color: rgba(0, 0, 0, 0.5);
     z-index: 3;
 }
 
