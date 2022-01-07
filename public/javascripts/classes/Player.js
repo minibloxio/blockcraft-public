@@ -324,21 +324,23 @@ class Player {
         if (!isBow) return;
 
         if (this.key.lastRightClick) {
-            this.drawingBow = true;
             this.bowCharge = this.bowCharge || 0;
             let diff = (Date.now() - this.key.lastRightClick);
 
             // Check if arrow exists
-            let arrowExists = false;
+            let exists = false;
             for (let t of this.toolbar) {
                 if (t && t.v == world.itemId["arrow"] && t.c > 0) {
-                    arrowExists = true;
+                    exists = true;
                     break;
                 }
             }
+            if (!exists) return;
+
+            this.drawingBow = true;
 
             // Set bow charge
-            if (diff > 300 && arrowExists) {
+            if (diff > 300) {
                 this.bowCharge = Math.min(Math.floor((diff - 300) / 300), 2) + 1
             }
 
