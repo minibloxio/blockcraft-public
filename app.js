@@ -406,7 +406,10 @@ io.on('connection', function(socket_) {
         }
     })
 
+    let counter = 0;
     socket.on('dropItems', function(data) {
+        counter += 1;
+        console.log(counter);
         let player = players[socket.id];
         if (!player) return;
 
@@ -424,7 +427,7 @@ io.on('connection', function(socket_) {
             }
             for (let t of player.toolbar) {
                 if (!t) continue;
-                if (t.v == item.v && t.class == item.class) {
+                if (t.v == item.v && t.class == item.class && t.c > 0) {
                     t.c = Math.max(0, t.c - item.c);
 
                     // Add item as server-side entity

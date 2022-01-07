@@ -378,8 +378,28 @@ function animateServerEntities(delta) {
 
         if (throwables.includes(entity.name)) {
             entity.mesh.lookAt(player.position);
-        } else if (entity.class == "item" && entity.name != "arrow") {
-            entity.mesh.rotation.y += delta;
+        } else if (entity.name != "arrow") {
+            entity.mesh.rotation.y += delta; // Rotate entity around y axis
+
+            let mesh = entity.mesh.children;
+
+            if (entity.onObject) { // Animate server entities on the ground
+                let offset = Math.sin(Date.now() / 1000 * (Math.PI)) * 3;
+                if (entity.class == "item") {
+                    let target = new THREE.Vector3(0, offset, 0);
+                    mesh[1].position.lerp(target, delta * 10);
+                    mesh[0].position.set(0, mesh[1].position.y, 0);
+                } else if (entity.class = "block") {
+                    let target = new THREE.Vector3(-2, 2 + offset, -2);
+                    mesh[1].position.lerp(target, delta * 10);
+                    mesh[0].position.set(0, mesh[1].position.y, 0);
+                }
+
+            } else {
+                mesh[1].position.y = 0;
+            }
+
+
         } else if (entity.name == "arrow") {
             let dir = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z).normalize();
             let mx = new THREE.Matrix4().lookAt(dir, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0));

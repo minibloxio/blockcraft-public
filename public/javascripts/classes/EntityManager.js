@@ -42,8 +42,11 @@ class EntityManager {
         } else {
             entities[id].mesh = new THREE.Group();
             if (type == "block") mesh.position.set(-2, 0, -2);
+            if (type == "item") mesh.position.set(0, 0, 0);
 
             entities[id].bbox = new THREE.BoxHelper(mesh, 0xffff00);
+            entities[id].bbox.matrixAutoUpdate = true;
+            entities[id].bbox.visible = false;
             entities[id].bbox.visible = game.debug || false;
             entities[id].mesh.add(entities[id].bbox);
             entities[id].mesh.add(mesh);

@@ -303,6 +303,7 @@ module.exports = class World {
             if (deltaVoxel) {
                 entity.acc = new THREE.Vector3();
                 entity.vel = new THREE.Vector3();
+                entity.onGround = true;
             }
             if (voxel) {
                 entity.acc = new THREE.Vector3(0, 9.81, 0);
@@ -326,7 +327,7 @@ module.exports = class World {
             let { dist, dir } = this.getDist(player, entity);
 
             // Add to player if within a block distance
-            if (dist < blockSize / 2) {
+            if (dist < blockSize) {
                 World.addItem(player, entity);
                 this.removeItem(entity);
                 return;
