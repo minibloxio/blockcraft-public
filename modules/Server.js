@@ -260,8 +260,11 @@ module.exports = class World {
             if (player.hp <= 0 && !player.dead) {
                 player.dead = true;
                 let txt = player.name;
-    
-                if (player.dmgType == "drowning") {
+                
+                if (player.dmgType.includes("arrow")) {
+                    let name = player.dmgType.replace('arrow','');
+                    txt += " was sniped by " + name;
+                } else if (player.dmgType == "drowning") {
                     txt += " has drowned";
                 } else if (player.dmgType == "fall") {
                     txt += " fell off a cliff";
@@ -274,7 +277,6 @@ module.exports = class World {
                 } else {
                     txt += " has died";
                 }
-                    
     
                 logger.info(txt);
     
@@ -283,7 +285,7 @@ module.exports = class World {
                 })
     
                 addLog(id, "d"); // Deaths
-            } else {
+            } else if (!player.dead && player.hp > 0) {
                 // Update player position in biome
                 player.biome = world.generator.getColumnInfo(player.pos.x/world.blockSize, player.pos.z/world.blockSize)[2];
                 
@@ -291,8 +293,8 @@ module.exports = class World {
                 if (regenTick) players[id].hp = Math.min(players[id].hp + 1, 20);
 
                 // Check if the player is in the void
-                if (voidTick && player.pos.y < -world.blockSize) {
-                    player.hp -= 1;
+                if (voidTick && player.pos.y < -world.blockSize*64) {
+                    player.hp -= 2;
                     player.dmgType = "void";
                     io.to(`${player.id}`).emit('damage');
                 }

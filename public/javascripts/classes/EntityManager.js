@@ -41,11 +41,13 @@ class EntityManager {
 
     addEntity(entity) {
         let {blockSize} = world;
-
-        if (entity.vel) entity.vel = new Ola({x: entity.vel.x, y: entity.vel.y, z: entity.vel.z});
-
         if (entity.type == "item") {
-            if (!entity || !entity.pos) return;
+            if (!entity.pos) return;
+            console.log(entity.vel);
+    
+
+            if (entity.vel) entity.vel = new Ola({x: entity.vel.x, y: entity.vel.y, z: entity.vel.z});
+
             if (entity.name == "arrow") {
                 
                 let dir = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z).normalize();

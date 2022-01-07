@@ -592,7 +592,7 @@ function teleport(msg) {
             let coord = new THREE.Vector3(pos.x*world.blockSize, pos.y*world.blockSize, pos.z*world.blockSize);
             player.setCoords(coord);
             chat.addChat({
-                text: "Teleported to x: " + pos.x + ", y: " + pos.y + ", z: " + pos.z
+                text: "Teleported to x: " + round(pos.x, 1) + ", y: " + round(pos.y, 1) + ", z: " + round(pos.z, 1)
             })
         } else {
             chat.addChat({

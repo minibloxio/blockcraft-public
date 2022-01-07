@@ -343,7 +343,7 @@ module.exports = class World {
 
             // Arrow hit
             player.hp -= entity.force;
-            if (players[entity.playerId]) player.dmgType = players[entity.playerId].name;
+            if (players[entity.playerId]) player.dmgType = "arrow" + players[entity.playerId].name;
             entity.force *= 300;
             entity.dir = entity.vel; // Update direction of arrow based on velocity
             io.to(`${id}`).emit('knockback', entity);

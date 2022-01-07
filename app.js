@@ -577,13 +577,12 @@ io.on('connection', function (socket_) {
         vel.multiplyScalar(force);
 		let entityId = Function.randomString(5);
 		let entity = server.addEntity(entityId, {
+			playerId: socket.id,
 			pos: data.pos, 
 			vel: vel,
-            dir: data.dir,
 			force: data.force, 
 			v: world.itemId["arrow"],
 			class: "item",
-			playerId: socket.id,
             name: "arrow",
 		})
 		world.entities[entityId] = entity;
