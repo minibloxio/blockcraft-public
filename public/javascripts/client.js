@@ -192,6 +192,11 @@ socket.on('punch', function (id) {
 	}
 })
 
+// Receive damage
+socket.on('damage', function (data) {
+    camera.rotation.z = Math.PI/12;
+})
+
 // Teleport player
 socket.on('teleport', function (data) {
 	player.setCoords(data.pos);

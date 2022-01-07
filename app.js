@@ -490,7 +490,7 @@ io.on('connection', function (socket_) {
 		if (!player) return;
 
 		if (player) {
-			player.hp = 10;
+			player.hp = 20;
 			player.dead = false;
 		}
 
@@ -517,7 +517,7 @@ io.on('connection', function (socket_) {
 				data.force /= 2;
 			}
 
-			players[data.id].hp -= data.crit ? dmg * 1.5 : dmg;
+			players[data.id].hp -= data.crit ? dmg * 3 : dmg;
 			players[data.id].dmgType = player.name;
 			io.to(`${data.id}`).emit('knockback', data)
 			io.volatile.emit('punch', data.id);
@@ -532,6 +532,7 @@ io.on('connection', function (socket_) {
 		if (player.mode == "survival") {
 			player.hp -= data.dmg;
 			player.dmgType = data.type;
+            io.to(`${socket.id}`).emit('damage');
 		}
 	})
 
@@ -863,13 +864,6 @@ setInterval(function () {
 	}
 
 	world.tick += 1;
-	// Regeneration
-	if (world.tick % 50 == 0) { // Every 2.5 seconds
-		for (let id in players) {
-			if (players[id].hp > 0)
-				players[id].hp = Math.min(players[id].hp + 0.5, 10);
-		}
-	}
 
 	// Update players
     server.updatePlayers(players, world, logger, io, addLog);

@@ -119,7 +119,7 @@ module.exports = class World {
 			vel: {x: 0,y: 0,z: 0},
 			rot: {x: 0,y: 0,z: 0},
 			dir: {x: 0,y: 0,z: 0},
-			hp: 10,
+			hp: 20,
 			dead: false,
 			toolbar: [
 				this.getEntity("wood_sword"), 
@@ -127,8 +127,8 @@ module.exports = class World {
 				this.getEntity("wood_axe"), 
 				this.getEntity("bow"), 
 				this.getEntity("arrow", 64),
-				this.getEntity("log_oak", 64),
-                this.getEntity("ender_pearl", 64),
+				this.getEntity("fireball", 16),
+                this.getEntity("ender_pearl", 16),
 			],
 			walking: false,
 			sneaking: false,
@@ -250,9 +250,13 @@ module.exports = class World {
 
     // Update players
     updatePlayers(players, world, logger, io, addLog) {
+        let regenTick = world.tick % 50 == 0;
+        let voidTick = (world.tick+5) % 10 == 0;
+
         for (let id in players) {
             let player = players[id];
-    
+            
+            // Check if the player is dead
             if (player.hp <= 0 && !player.dead) {
                 player.dead = true;
                 let txt = player.name;
@@ -261,6 +265,8 @@ module.exports = class World {
                     txt += " has drowned";
                 } else if (player.dmgType == "fall") {
                     txt += " fell off a cliff";
+                } else if (player.dmgType == "void") {
+                    txt += " fell out of the world";
                 } else if (player.dmgType == "command") {
                     txt += " was killed by a command";
                 } else if (player.dmgType) {
@@ -280,6 +286,16 @@ module.exports = class World {
             } else {
                 // Update player position in biome
                 player.biome = world.generator.getColumnInfo(player.pos.x/world.blockSize, player.pos.z/world.blockSize)[2];
+                
+                // Regenerate health
+                if (regenTick) players[id].hp = Math.min(players[id].hp + 1, 20);
+
+                // Check if the player is in the void
+                if (voidTick && player.pos.y < -world.blockSize) {
+                    player.hp -= 1;
+                    player.dmgType = "void";
+                    io.to(`${player.id}`).emit('damage');
+                }
             }
         }
     }

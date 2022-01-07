@@ -128,7 +128,7 @@ class Player {
 		this.allowRespawn = true;
 
 		// Player info
-		this.hp = 10;
+		this.hp = 20;
         this.oxygen = 300;
 		this.hunger = 100;
 

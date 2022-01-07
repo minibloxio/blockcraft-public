@@ -43,7 +43,7 @@ class HUD {
         for (let i = 0; i < 10; i++) {
             let yOffset = this.yOffset;
 
-            if (player.hp <= 2) { // Shake health bar
+            if (player.hp <= 4) { // Shake health bar
                 if (game.tick.value - this.heartS > 1) {
                     this.heartS = game.tick.value;
                     this.heartShake = [];
@@ -95,7 +95,7 @@ class HUD {
     // Display armor
     displayArmor() {
         // Draw player health
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 20; i++) {
 
             let xPos = canvas.width/2-inventory.hotboxWidth*4+i*this.iconSize;
             let yPos = canvas.height-this.yOffset-this.iconSize*1.3;
@@ -184,6 +184,7 @@ class HUD {
         }
 
         let p = player;
+
         if (!p.ping) return;
 
         // Draw client name
@@ -217,7 +218,7 @@ class HUD {
             ctx.drawImage(icons, 25, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Lit background
 
             // Draw temporary hearts
-            if (p.lastHp - i >= 1) {
+            if (p.lastHp - i >= 2) {
                 ctx.drawImage(icons, 70, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
             } else if (p.lastHp - i > 0) {
                 ctx.drawImage(icons, 79, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
@@ -226,9 +227,10 @@ class HUD {
             ctx.drawImage(icons, 16, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Unlit background
         }
         
-        if (p.hp - i >= 1) { // Full heart
+        let offset = (p.hp/2 - i);
+        if (offset >= 1) { // Full heart
             ctx.drawImage(icons, 52, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
-        } else if (p.hp - i > 0) { // Half heart
+        } else if (offset > 0) { // Half heart
             ctx.drawImage(icons, 61, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
         }
     }
