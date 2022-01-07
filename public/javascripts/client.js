@@ -174,12 +174,12 @@ socket.on('removePlayer', function (id) {
 
 // Receive knockback
 socket.on('knockback', function (data) {
-	let lateralForce = new Vector(data.dir.x, data.dir.z);
+	let lateralForce = new THREE.Vector3(data.dir.x, data.dir.y, data.dir.z);
 	lateralForce.normalize();
-	lateralForce.mult(data.force);
+	lateralForce.multiplyScalar(data.force);
 	player.knockbackVelocity.x = lateralForce.x;
-	player.knockbackVelocity.y = 300;
-	player.knockbackVelocity.z = lateralForce.y;
+	player.knockbackVelocity.y = data.explosion ? lateralForce.y : 300;
+	player.knockbackVelocity.z = lateralForce.z;
 })
 
 // Receive punch

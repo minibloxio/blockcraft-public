@@ -198,7 +198,7 @@ module.exports = class World {
         return RLE.encode(array);
     }
 
-    destroyBlocks(x, y, z, radius) {
+    explode(x, y, z, radius, players = {}, io) {
         let radiusSquared = radius * radius;
 
         // Destroy blocks within radius
@@ -225,6 +225,24 @@ module.exports = class World {
             let distSquared = pos.distanceToSquared(new THREE.Vector3(x, y, z));
             if (distSquared <= radiusSquared) {
                 this.removeItem(entity);
+            }
+        }
+        // Damage players within radius
+        for (let id in players) {
+            let player = players[id];
+            if (player.mode != "survival") continue;
+            let pos = new THREE.Vector3(player.pos.x, player.pos.y, player.pos.z).divideScalar(this.blockSize);
+            let distSquared = pos.distanceToSquared(new THREE.Vector3(x, y, z));
+            if (distSquared <= radiusSquared) {
+                let damage = Math.floor((radiusSquared-distSquared) / radiusSquared * 15);
+
+                player.hp -= damage;
+                player.dmgType = "explosion";
+                io.to(id).emit("knockback", {
+                    dir: pos.sub(new THREE.Vector3(x, y, z)).normalize(),
+                    force: damage * 50,
+                    explosion: true,
+                });
             }
         }
     }
@@ -272,7 +290,7 @@ module.exports = class World {
             } else if (entity.name == "fireball" && deltaVoxel > 1) { // FIREBALL
                 if (players[entity.playerId].operator) { // Check if player is operator
                     let explosionRadius = 4;
-                    this.destroyBlocks(x, y, z, explosionRadius);
+                    this.explode(x, y, z, explosionRadius, players, io);
                 }
             }
 

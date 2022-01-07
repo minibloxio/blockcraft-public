@@ -272,6 +272,8 @@ module.exports = class World {
                     txt += " hit the ground too hard";
                 } else if (player.dmgType == "void") {
                     txt += " fell out of the world";
+                } else if (player.dmgType == "explosion") {
+                    txt += " blew up";
                 } else if (player.dmgType == "command") {
                     txt += " was killed by a command";
                 } else if (player.dmgType) {

@@ -928,7 +928,8 @@ class Player {
 		let knockback = new THREE.Vector3(this.knockbackVelocity.x, this.knockbackVelocity.y, this.knockbackVelocity.z);
 		knockback.multiplyScalar(delta);
 		this.newMove.add(knockback);
-		this.knockbackVelocity.divideScalar(1.1*delta/0.007);
+        let frictionCoef = Math.min(0.95, 0.9*delta/0.007);
+		this.knockbackVelocity.multiplyScalar(frictionCoef);
 
 		// Player camera fall knockback
 		if (Math.abs(camera.rotation.z) > 0.1) {
@@ -1101,18 +1102,8 @@ class Player {
                 this.deltaFov = Math.min(this.deltaFov + delta*100, 10);
             }
         }
-		// if ((this.speed <= 2 || this.distanceMoved < 1.5)) {
-		// 	if (camera.fov > 75) {
-		// 		camera.fov = Math.max(camera.fov - delta*100, 75);
-		// 	}
-		// } else if (this.distanceMoved > 7 && camera.dynFov) {
-		// 	if (camera.fov < 85) {
-		// 		camera.fov = Math.min(camera.fov + delta*100, 85);
-		// 	}
-		// }
         
         camera.fov = game.fov + this.deltaFov;
-        
 		camera.updateProjectionMatrix();
 	}
 
