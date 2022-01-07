@@ -121,11 +121,12 @@ module.exports = class World {
             dir: { x: 0, y: 0, z: 0 },
             hp: 20,
             dead: false,
-            toolbar: [
+            toolbar: [ // Starting items
                 this.getEntity("wood_sword"),
                 this.getEntity("wood_pickaxe"),
                 this.getEntity("wood_axe"),
                 this.getEntity("bow"),
+                this.getEntity("log_spruce", 64),
                 this.getEntity("arrow", 64),
                 this.getEntity("ender_pearl", 16),
             ],

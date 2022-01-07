@@ -30,15 +30,25 @@ class EntityManager {
         return this.textureToMat(canvas);
     }
 
-    addToScene(entity, mesh) {
+    addToScene(entity, mesh, type) {
         let entities = world.entities;
         let id = entity.id;
 
-        mesh.name = "item";
-        mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
 
         entities[id] = entity;
-        entities[id].mesh = mesh;;
+        if (type == "arrow") {
+            entities[id].mesh = mesh;
+            mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
+        } else {
+            entities[id].mesh = new THREE.Group();
+            if (type == "block") mesh.position.set(-2, 0, -2);
+
+            entities[id].bbox = new THREE.BoxHelper(mesh, 0xffff00);
+            entities[id].bbox.visible = game.debug || false;
+            entities[id].mesh.add(entities[id].bbox);
+            entities[id].mesh.add(mesh);
+        }
+        mesh.name = "item";
 
         scene.add(entities[id].mesh)
     }
@@ -72,9 +82,13 @@ class EntityManager {
                 arrow3.position.z = -7;
 
                 arrow.add(arrow1, arrow2, arrow3);
+                entity.bbox = new THREE.BoxHelper(arrow, 0xffff00);
+                entity.bbox.visible = game.debug || false;
+                arrow.add(entity.bbox);
+
                 arrow.setRotationFromQuaternion(entity.qt);
 
-                this.addToScene(entity, arrow);
+                this.addToScene(entity, arrow, "arrow");
             } else if (entity.class == "item") { // Add item
                 let { canvas, ctx, atlas } = this.getCanvas("item");
                 ctx.drawImage(atlas, (entity.v - 1) * 16, 0, 16, 16, 0, 0, 16, 16);
@@ -84,7 +98,7 @@ class EntityManager {
                 if (throwables.includes(entity.name)) itemSize = blockSize / 2;
                 let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(itemSize, itemSize), mat);
                 item_mesh.renderOrder = 1;
-                this.addToScene(entity, item_mesh);
+                this.addToScene(entity, item_mesh, "item");
             } else { // Add block
                 let uvVoxel = entity.v - 1;
                 let block_geometry = new THREE.BufferGeometry();
@@ -98,7 +112,7 @@ class EntityManager {
                 let block_mesh = new THREE.Mesh(block_geometry, textureManager.materialTransparent);
                 block_mesh.castShadow = true;
                 block_mesh.receiveShadow = true;
-                this.addToScene(entity, block_mesh);
+                this.addToScene(entity, block_mesh, "block");
             }
         } else if (entity.type == "remove_item" && world.entities[entity.id] && world.entities[entity.id].mesh) {
             let mesh = world.entities[entity.id].mesh;

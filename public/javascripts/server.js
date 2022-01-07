@@ -85,10 +85,6 @@ function addPlayer(players, id) {
     p.rightArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), playerMat.arm)
     p.rightArm.position.set(0, -blockSize * 0.3, 0);
 
-
-
-
-
     // Shoulder joints
     p.rightShoulder = new THREE.Object3D();
     p.rightShoulder.position.set(player.dim.armSize * 3 / 2, -blockSize * 0.15, 0);
@@ -248,7 +244,7 @@ function updatePlayer(p) {
     p.skeleton.rotation.set(p.rot.x, p.rot.y, p.rot.z);
     p.neck.rotation.x = p.dir.y;
 
-    let shift = blockSize / 8;
+    // let shift = blockSize / 8;
 
     // // Sneaking animation
     // if (p.sneaking) {

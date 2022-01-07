@@ -249,4 +249,9 @@ function updateDebug() {
         let player = players[id];
         player.bbox.visible = game.debug;
     }
+
+    for (let id in world.entities) {
+        let entity = world.entities[id];
+        entity.bbox.visible = game.debug;
+    }
 }
