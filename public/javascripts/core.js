@@ -1,42 +1,22 @@
 // Three.js
-let scene, renderer, world, chunkManager, entityManager, textureManager, stage, sky, stats, composer, player, players;
+let scene, camera, renderer, world, chunkManager, entityManager, textureManager, workerManager, stage, stats, composer, player, players;
 
 // Stats
 let prevTime = performance.now();
 let statistics = [];
 
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000000); // Camera
-
 let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
-
-// Web workers
-let rleWorker;
-let voxelWorkers = [];
-voxelWorkerIndex = 0;
-
-// Game information
-let game = {
-    token: getCookie("token") || "",
-    packetDelay: 16,
-    lastPacket: Date.now(),
-    numOfVoxelWorkers: 2,
-    guiSize: 1,
-    transparentLeaves: getCookie("transparentLeaves"),
-    tick: 0,
-    lastUpdate: Date.now(),
-    updates: [],
-    fpsList: [],
-    depthWrite: false,
-    fov: getCookie("fov") || 75,
-    debug: getCookie("debug") || false,
-}
+let game = new Game(); // Add game
 
 // Update GUI size
 function updateGUISize() {
+    console.log("Updating GUI size...");
     inventory.resize();
     chat.resize();
     hud.resize();
 }
+
+const axesHelper = new THREE.AxesHelper(3);
 
 // Initialize game
 function init() {
@@ -45,46 +25,30 @@ function init() {
     window.addEventListener('resize', onWindowResize, false); // Add resize event
 
     scene = new THREE.Scene(); // Add scene
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000000); // Camera
+
+    scene.add(axesHelper);
+
     world = new World(); // Init world
     chunkManager = new ChunkManager(); // Add chunk manager
     entityManager = new EntityManager(); // Add entity manager
     textureManager = new TextureManager(); // Add texture manager
+    workerManager = new WorkerManager(); // Web worker manager
     player = new Player(camera); // Add player
     stage = new Stage(); // Initialize the stage (light, sun, moon, stars, etc.)
 
     addVideoControls(); // Add video settings
     addKeyboardControls(); // Add keyboard controls
-    initWorkers(); // Initialize web workers
     initStatistics(); // Add statistics to record
     initRenderer(); // Finalize by adding the renderer
     initPointerLock(); // Initialize pointer lock
-    updateGUISize();
+    updateGUISize(); // Update the GUI size
 
     console.log('Game initialized in ' + (Date.now() - t) + 'ms') // Log time
 
-    animate(); // Animate
+    animate(); // Start the animation loop
 }
 
-// Initialize web workers
-function initWorkers() {
-    rleWorker = new Worker('javascripts/workers/rle-worker.js'); // Run length encoding worker
-
-    rleWorker.addEventListener('message', async(e) => {
-        await chunkManager.processChunks(e.data, "rle");
-    })
-
-    // Voxel geometry workers
-    for (let i = 0; i < game.numOfVoxelWorkers; i++) {
-        voxelWorkers.push(new Worker('javascripts/workers/voxel-worker.js'));
-        voxelWorkers[i].addEventListener('message', async(e) => {
-            await chunkManager.processChunks(e.data, "voxel");
-        })
-        voxelWorkers[i].postMessage({
-            type: 'updateTransparency',
-            transparentLeaves: game.transparentLeaves,
-        });
-    }
-}
 
 // Initialize statistics
 function initStatistics() {
@@ -154,17 +118,10 @@ function animate() {
     delta = Math.min(delta, 0.1)
 
     updateMenu(); // Update the menu
-
-    player.update(delta, world); // Player update
-
-    // Update chunks
-    chunkManager.update(player);
-
-    // Update server players
-    animateServerPlayers();
-
-    // Animate server entities
-    animateServerEntities(delta);
+    player.update(delta, world); // Update player
+    chunkManager.update(player); // Update chunks
+    animateServerPlayers(); // Update server players
+    animateServerEntities(delta); // Animate server entities
 
     // Send events to server
     sendPacket();

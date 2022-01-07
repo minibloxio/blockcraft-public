@@ -120,7 +120,7 @@ socket.on('joinResponse', function(data) {
         cells: world.cells,
     };
 
-    for (let voxelWorker of voxelWorkers) voxelWorker.postMessage(worldData);
+    workerManager.updateVoxelData(worldData);
 
     // Update to server tick
     game.tick = new Ola(data.tick);
@@ -145,7 +145,7 @@ socket.on('textureData', function(data) {
 
 // Update chunk
 socket.on('receiveChunk', async function(data) {
-    await rleWorker.postMessage(data); // Send decoding to the rleWorker
+    await workerManager.updateRLEWorker(data); // Send decoding to the rleWorker
 })
 
 // Add newcoming players

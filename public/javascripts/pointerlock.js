@@ -6,19 +6,19 @@ Provides pointer lock functionality and the ability to connect to the game serve
 
 // Request pointer lock
 function requestPointerLock() {
-	if (loaded >= maxLoaded) {
-		// Ask the browser to lock the pointer
-		var element = document.body;
-		element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-		element.requestPointerLock();
-	}
+    if (loaded >= maxLoaded) {
+        // Ask the browser to lock the pointer
+        var element = document.body;
+        element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+        element.requestPointerLock();
+    }
 }
 
 // Get item entity
 function getItemEntity(player, item, dropDir) {
     let pos = {
         x: player.position.x,
-        y: player.position.y-8,
+        y: player.position.y - 8,
         z: player.position.z
     }
 
@@ -28,206 +28,202 @@ function getItemEntity(player, item, dropDir) {
         c: 1,
         pos: pos,
         class: item.class,
-        dir: {x: dropDir.x, z: dropDir.y}
+        dir: { x: dropDir.x, z: dropDir.y }
     }
     return entity;
 }
 
 // Get dropped items
 function getDroppedItems(items, count) {
-	if (!items) return [];
+    if (!items) return [];
 
-	let droppedItems = [];
-	let dropDir = player.getDropDir();
-	for (let item of items) {
-		if (!item) continue;
-		for (let i = 0; i < (count || item.c); i++) {
-			droppedItems.push(getItemEntity(player, item, dropDir));
-		}
-	}
+    let droppedItems = [];
+    let dropDir = player.getDropDir();
+    for (let item of items) {
+        if (!item) continue;
+        for (let i = 0; i < (count || item.c); i++) {
+            droppedItems.push(getItemEntity(player, item, dropDir));
+        }
+    }
 
-	return droppedItems;
+    return droppedItems;
 }
 
 // Enter pointer lock
 function enterPointerLock() {
-	player.controls.enabled = true;
-	blocker.style.display = 'none';
-	$("#background-image").hide();
-	onWindowResize();
+    player.controls.enabled = true;
+    blocker.style.display = 'none';
+    $("#background-image").hide();
+    onWindowResize();
 
-	if (inventory.showInventory) { // Return to game from inventory
+    if (inventory.showInventory) { // Return to game from inventory
         inventory.showInventory = false;
-		
-		let droppedItems = [];
-		if (inventory.showCraftingTable) { // Drop items in crafting table grid
-			droppedItems = getDroppedItems(inventory.craftingTableGrid);
-			inventory.craftingTableGrid.length = 0;
-		} else { // Drop items in crafting grid
-			droppedItems = getDroppedItems(inventory.craftingGrid);
-			inventory.craftingGrid.length = 0;
-		}
-		droppedItems = droppedItems.concat(getDroppedItems([inventory.selectedItem])); // Drop items in hand
-		inventory.selectedItem = null;
-		droppedItems.force = true;
 
-		socket.emit('dropItems', droppedItems);
-		
-		inventory.craftingOutput = undefined;
-		inventory.showCraftingTable = false;
-	} else { // Return to game from chat
-		let name = $("#name-input").val();
+        let droppedItems = [];
+        if (inventory.showCraftingTable) { // Drop items in crafting table grid
+            droppedItems = getDroppedItems(inventory.craftingTableGrid);
+            inventory.craftingTableGrid.length = 0;
+        } else { // Drop items in crafting grid
+            droppedItems = getDroppedItems(inventory.craftingGrid);
+            inventory.craftingGrid.length = 0;
+        }
+        droppedItems = droppedItems.concat(getDroppedItems([inventory.selectedItem])); // Drop items in hand
+        inventory.selectedItem = null;
+        droppedItems.force = true;
 
-		if (name && getCookie("Name") != name)
-			setCookie("Name", name, 7);
+        socket.emit('dropItems', droppedItems);
 
-		socket.emit('playerInfo', {
-			name: name
-		})
-	}
+        inventory.craftingOutput = undefined;
+        inventory.showCraftingTable = false;
+    } else { // Return to game from chat
+        let name = $("#name-input").val();
+
+        if (name && getCookie("Name") != name)
+            setCookie("Name", name, 7);
+
+        socket.emit('playerInfo', {
+            name: name
+        })
+    }
 }
 
 function exitPointerLock() {
-	if (!inventory.showInventory) {
-		blocker.style.display = 'block';
-	}
-	player.controls.enabled = false;
-	$("#chat-input").blur();
-	$("#chat-input").css({"background-color": "rgba(0, 0, 0, 0)"});
-	$("#chat-input").val('');
-	chat.showChatBar = false;
+    if (!inventory.showInventory) {
+        blocker.style.display = 'block';
+    }
+    player.controls.enabled = false;
+    $("#chat-input").blur();
+    $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0)" });
+    $("#chat-input").val('');
+    chat.showChatBar = false;
 }
 
 function initPointerLock() {
 
-	var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
-	if ( havePointerLock ) {
-		var element = document.body;
+    var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+    if (havePointerLock) {
+        var element = document.body;
+
         function enabled() { return document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element };
 
-		var pointerlockchange = function ( event ) {
-			if ( enabled() ) {
-				enterPointerLock();
-			} else { // Exit pointer lock
-				exitPointerLock();
-			}
-		};
+        var pointerlockchange = function(event) {
+            if (enabled()) {
+                enterPointerLock();
+            } else { // Exit pointer lock
+                exitPointerLock();
+            }
+        };
 
-		var pointerlockerror = function ( event ) {
-		};
+        var pointerlockerror = function(event) {};
 
-		// Hook pointer lock change events
-		document.addEventListener( 'pointerlockchange', pointerlockchange, false );
-		document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
-		document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
+        // Hook pointer lock change events
+        document.addEventListener('pointerlockchange', pointerlockchange, false);
+        document.addEventListener('mozpointerlockchange', pointerlockchange, false);
+        document.addEventListener('webkitpointerlockchange', pointerlockchange, false);
 
-		document.addEventListener( 'pointerlockerror', pointerlockerror, false );
-		document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
-		document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
+        document.addEventListener('pointerlockerror', pointerlockerror, false);
+        document.addEventListener('mozpointerlockerror', pointerlockerror, false);
+        document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
 
-		$("body").keydown(function (event) {
-			if (event.keyCode == 27 && player.controls.enabled)
-				document.exitPointerLock();
+        $("body").keydown(function(event) {
+            if (event.keyCode == 27 && player.controls.enabled)
+                document.exitPointerLock();
 
-			if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !chat.showChatBar && loaded >= maxLoaded+1 && (player.controls.enabled || inventory.showInventory)) {
+            if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !chat.showChatBar && loaded >= maxLoaded + 1 && (player.controls.enabled || inventory.showInventory)) {
 
-				if (player.controls.enabled && inventory.canShowInventory) {
-					inventory.showInventory = true;
-					inventory.canShowInventory = false;
-					inventory.showCraftingTable = false;
-					inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
+                if (player.controls.enabled && inventory.canShowInventory) {
+                    inventory.showInventory = true;
+                    inventory.canShowInventory = false;
+                    inventory.showCraftingTable = false;
+                    inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
 
-					document.exitPointerLock();
-				} else if (document.activeElement.id != "search-input" && inventory.canShowInventory) {
-					inventory.canShowInventory = false;
+                    document.exitPointerLock();
+                } else if (document.activeElement.id != "search-input" && inventory.canShowInventory) {
+                    inventory.canShowInventory = false;
 
-					// Ask the browser to lock the pointer
-					requestPointerLock()
-					socket.emit('updateInventory', inventory.inventory);
-				}
+                    // Ask the browser to lock the pointer
+                    requestPointerLock()
+                    socket.emit('updateInventory', inventory.inventory);
+                }
 
-			}
+            }
 
-			if (event.keyCode == 9)
-				event.preventDefault();
-			
-		}).keyup(function (event) {
-			if (event.keyCode == 27 && inventory.showInventory) { // Escape key
-				// Ask the browser to lock the pointer
-				requestPointerLock()
-				socket.emit('updateInventory', inventory.inventory);
-			}
-			
-			inventory.canShowInventory = true;
-		})
-	} else {
-		console.error("PointerLock is not supported on this browser")
-	}
- }
+            if (event.keyCode == 9)
+                event.preventDefault();
 
-THREE.PointerLockControls = function ( camera ) {
+        }).keyup(function(event) {
+            if (event.keyCode == 27 && inventory.showInventory) { // Escape key
+                // Ask the browser to lock the pointer
+                requestPointerLock()
+                socket.emit('updateInventory', inventory.inventory);
+            }
 
-	var scope = this;
+            inventory.canShowInventory = true;
+        })
+    } else {
+        console.error("PointerLock is not supported on this browser")
+    }
+}
 
-	camera.rotation.set( 0, 0, 0 );
+THREE.PointerLockControls = function(camera) {
 
-	var pitchObject = new THREE.Object3D();
-	pitchObject.add( camera );
+    var scope = this;
 
-	var yawObject = new THREE.Object3D();
-	yawObject.position.y = 10;
-	yawObject.add( pitchObject );
+    camera.rotation.set(0, 0, 0);
 
-	var PI_2 = Math.PI / 2;
+    var pitchObject = new THREE.Object3D();
+    pitchObject.add(camera);
 
-	var onMouseMove = function ( event ) {
+    var yawObject = new THREE.Object3D();
+    yawObject.position.y = 10;
+    yawObject.add(pitchObject);
 
-		if ( scope.enabled === false ) return;
+    var PI_2 = Math.PI / 2;
 
-		var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-		var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+    var onMouseMove = function(event) {
 
-		if (Math.abs(movementX) > 300) return;
-		if (Math.abs(movementY) > 300) return;
-		
-		yawObject.rotation.y -= movementX * 0.00004 * player.sens;
-		pitchObject.rotation.x -= movementY * 0.00004 * player.sens;
+        if (scope.enabled === false) return;
 
-		pitchObject.rotation.x = Math.max( - PI_2, Math.min( PI_2, pitchObject.rotation.x ) );
+        var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
-	};
+        if (Math.abs(movementX) > 300) return;
+        if (Math.abs(movementY) > 300) return;
 
-	this.dispose = function () {
+        yawObject.rotation.y -= movementX * 0.00004 * player.sens;
+        pitchObject.rotation.x -= movementY * 0.00004 * player.sens;
 
-		document.removeEventListener( 'mousemove', onMouseMove, false );
+        pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
 
-	};
+    };
 
-	document.addEventListener( 'mousemove', onMouseMove, false );
+    this.dispose = function() {
 
-	this.enabled = false;
+        document.removeEventListener('mousemove', onMouseMove, false);
 
-	this.getObject = function () {
-		return yawObject;
-	};
+    };
 
-	this.getDirection = function () {
+    document.addEventListener('mousemove', onMouseMove, false);
 
-		// assumes the camera itself is not rotated
+    this.enabled = false;
 
-		var direction = new THREE.Vector3( 0, 1, 0 );
-		var rotation = new THREE.Euler( 0, 0, 0, 'YXZ' );
+    this.getObject = function() {
+        return yawObject;
+    };
 
-		return function ( v ) {
+    this.getDirection = function() {
 
-			rotation.set( pitchObject.rotation.x, yawObject.rotation.y, 0 );
+        // assumes the camera itself is not rotated
+        var direction = new THREE.Vector3(0, 1, 0);
+        var rotation = new THREE.Euler(0, 0, 0, 'YXZ');
 
-			v.copy( direction ).applyEuler( rotation );
+        return function(v) {
 
-			return v;
+            rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
+            v.copy(direction).applyEuler(rotation);
+            return v;
+        };
 
-		};
-
-	}();
+    }();
 
 };

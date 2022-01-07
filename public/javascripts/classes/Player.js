@@ -255,7 +255,7 @@ class Player {
         return vel;
     }
 
-    updateHand(item) {
+    updateHand(item) { // OPTIMIZE
         item = item || this.getCurrItem();
         this.arm.visible = !(this.mode == "spectator" || this.mode == "camera");
 
@@ -441,7 +441,7 @@ class Player {
             rot1.slerp(rot2, this.blockT);
             this.arm.rotation.setFromQuaternion(rot1);
         } else {
-            if (this.punchT < 1) { // Forward animation
+            if (this.punchT < 1) { // Forward animatipon
                 this.arm.position.lerpVectors(pos1, pos2, this.punchT);
                 rot1.slerp(rot2, this.punchT);
                 this.arm.rotation.setFromQuaternion(rot1);
@@ -461,8 +461,6 @@ class Player {
         this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), armC.material);
         this.arm.castShadow = true;
         this.arm.receiveShadow = true;
-        this.arm.position.set(2, -2, -2.5);
-        this.arm.rotation.set(Math.PI, Math.PI, 0);
         camera.add(this.arm);
     }
 

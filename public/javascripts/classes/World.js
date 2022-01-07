@@ -132,10 +132,12 @@ class World {
         const indices = [];
 
         // There is a voxel here but do we need faces for it?
-        for (const { dir, corners, uvRow } of World.faces) {
+        for (const { dir, corners, uvRow }
+            of World.faces) {
             // this voxel has no neighbor in this direction so we need a face.
             const ndx = positions.length / 3;
-            for (const { pos, uv } of corners) {
+            for (const { pos, uv }
+                of corners) {
                 positions.push((pos[0] * this.blockSize / 4), (pos[1] * this.blockSize / 4), (pos[2] * this.blockSize / 4));
                 normals.push(...dir);
                 uvs.push(
@@ -163,10 +165,9 @@ class World {
     }
 }
 
-World.faces = [
-    { // left
+World.faces = [{ // left
         uvRow: 0,
-        dir: [-1, 0, 0,],
+        dir: [-1, 0, 0, ],
         corners: [
             { pos: [0, 1, 0], uv: [0, 1], },
             { pos: [0, 0, 0], uv: [0, 0], },
@@ -176,7 +177,7 @@ World.faces = [
     },
     { // right
         uvRow: 0,
-        dir: [1, 0, 0,],
+        dir: [1, 0, 0, ],
         corners: [
             { pos: [1, 1, 1], uv: [0, 1], },
             { pos: [1, 0, 1], uv: [0, 0], },
@@ -186,7 +187,7 @@ World.faces = [
     },
     { // bottom
         uvRow: 1,
-        dir: [0, -1, 0,],
+        dir: [0, -1, 0, ],
         corners: [
             { pos: [1, 0, 1], uv: [1, 0], },
             { pos: [0, 0, 1], uv: [0, 0], },
@@ -196,7 +197,7 @@ World.faces = [
     },
     { // top
         uvRow: 2,
-        dir: [0, 1, 0,],
+        dir: [0, 1, 0, ],
         corners: [
             { pos: [0, 1, 1], uv: [1, 1], },
             { pos: [1, 1, 1], uv: [0, 1], },
@@ -206,7 +207,7 @@ World.faces = [
     },
     { // back
         uvRow: 0,
-        dir: [0, 0, -1,],
+        dir: [0, 0, -1, ],
         corners: [
             { pos: [1, 0, 0], uv: [0, 0], },
             { pos: [0, 0, 0], uv: [1, 0], },
@@ -216,7 +217,7 @@ World.faces = [
     },
     { // front
         uvRow: 0,
-        dir: [0, 0, 1,],
+        dir: [0, 0, 1, ],
         corners: [
             { pos: [0, 0, 1], uv: [0, 0], },
             { pos: [1, 0, 1], uv: [1, 0], },
@@ -258,7 +259,7 @@ function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
             const cellY = Math.floor(oy / cellSize);
             const cellZ = Math.floor(oz / cellSize);
 
-            let cell = new Int16Array(new ArrayBuffer(4*4)); // Int8 is enough for now (max of 256 chunk radius)
+            let cell = new Int16Array(new ArrayBuffer(4 * 4)); // Int8 is enough for now (max of 256 chunk radius)
             cell[0] = cellX;
             cell[1] = cellY;
             cell[2] = cellZ;
@@ -270,12 +271,7 @@ function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
         if (!neighbor) break;
     }
 
-    voxelWorkers[voxelWorkerIndex].postMessage(cells)
-    voxelWorkerIndex += 1;
-    if (voxelWorkerIndex >= game.numOfVoxelWorkers) {
-        voxelWorkerIndex = 0;
-    }
-
+    workerManager.updateVoxelWorkers(cells);
 }
 
 // Update the voxel geometry for a single cell
