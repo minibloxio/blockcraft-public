@@ -27,6 +27,7 @@ let game = {
     updates: [],
     fpsList: [],
     depthWrite: false,
+    fov: getCookie("fov") || 75,
 }
 
 // Update GUI size
@@ -82,8 +83,6 @@ function initWorkers() {
             transparentLeaves: game.transparentLeaves,
         });
 	}
-
-
 }
 
 // Initialize statistics
@@ -108,6 +107,10 @@ function initStatistics() {
     statistics.push(new Stat("Vel", player.velocity, false, 1));
     statistics.push(new Stat("Speed", player, "speed", 2));
     statistics.push(new Stat("Fly", player, "fly"));
+    statistics.push(new Stat("FOV", camera, "fov"));
+    statistics.push(new Stat("Base FOV", game, "fov"));
+    statistics.push(new Stat("Delta FOV", player, "deltaFov", 2));
+    statistics.push(new Stat("Bow", player, "drawingBow"));
 }
 
 // Initalize the renderer

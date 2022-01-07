@@ -50,6 +50,8 @@ class Player {
 		this.bhopMaxSpeed = this.defaultMaxSprintSpeed+1; // Maximum speed that can be reached through bhopping
 		this.bhopRate = 0.05; // How much the speed ramps up after each successful bhop
 
+        this.deltaFov = 0;
+
 		// Events
 
 		this.key = {
@@ -260,14 +262,14 @@ class Player {
 		this.moveHand(item);
 
 		let s = JSON.stringify(item);
-		if (s == this.prevItem && this.state == this.prevState) {
+		if (s == this.prevItem && this.bowCharge == this.prevState) {
 			return;
-		} else if (this.state == this.prevState) {
-			this.state = 0;
+		} else if (this.bowCharge == this.prevState) {
+			this.bowCharge = 0;
 		}
 
 		this.prevItem = s;
-		this.prevState = this.state;
+		this.prevState = this.bowCharge;
 		camera.remove(this.arm);
 
 		if (item && item.class == "item" && item.c > 0) { // Display item
@@ -277,7 +279,7 @@ class Player {
 			canvas.height = itemSize;
 			let ctx = canvas.getContext("2d");
 			let atlas = textureManager.getTextureAtlas(item.class);
-			ctx.drawImage(atlas, (item.v-1)*itemSize, (this.state ? this.state : 0)*itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
+			ctx.drawImage(atlas, (item.v-1)*itemSize, (this.bowCharge ? this.bowCharge : 0)*itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
 			let texture = new THREE.CanvasTexture(canvas);
 			texture.magFilter = THREE.NearestFilter;
 			texture.minFilter = THREE.NearestFilter;
@@ -317,34 +319,36 @@ class Player {
 
 	drawBow() {
 		let hand = this.getCurrItem();
-		if (hand.v == world.itemId["bow"]) {
-			if (this.key.lastRightClick) {
-				if (this.state == undefined)
-					this.state = 0;
-				let diff = (Date.now()-this.key.lastRightClick);
+        let isBow = hand.v == world.itemId["bow"];
+        this.drawingBow = false;
+        if (!isBow) return;
 
-				let arrowExists = false;
-				for (let t of this.toolbar) {
-					if (t && t.v == world.itemId["arrow"] && t.c > 0) {
-						arrowExists = true;
-						break;
-					}
-				}
+        if (this.key.lastRightClick) {
+            this.drawingBow = true;
+            this.bowCharge = this.bowCharge || 0;
+            let diff = (Date.now()-this.key.lastRightClick);
 
-				if (diff > 300 && arrowExists) {
-					this.state = Math.min(Math.floor((diff - 300)/300), 2) + 1
-				}
-			} else {
-				if (this.state > 0) { // Release bow
-					socket.emit('fireArrow', {
-						pos: this.position.clone(),
-						dir: this.getItemVel(),
-						force: this.state
-					})
-				}
-				this.state = 0;
-			}
-		}
+            let arrowExists = false;
+            for (let t of this.toolbar) {
+                if (t && t.v == world.itemId["arrow"] && t.c > 0) {
+                    arrowExists = true;
+                    break;
+                }
+            }
+
+            if (diff > 300 && arrowExists) {
+                this.bowCharge = Math.min(Math.floor((diff - 300)/300), 2) + 1
+            }
+        } else {
+            if (this.bowCharge > 0) { // Release bow
+                socket.emit('fireArrow', {
+                    pos: this.position.clone(),
+                    dir: this.getItemVel(),
+                    force: this.bowCharge
+                })
+            }
+            this.bowCharge = 0;
+        }
 	}
 
 	throw() {
@@ -395,9 +399,6 @@ class Player {
 			this.drawBow();
 
 		}
-			
-
-			
 
 		// Move hand
 		let pos1, pos2, rot1, rot2;
@@ -443,9 +444,6 @@ class Player {
 	}
 
 	addArm() {
-		let {blockSize} = world;
-		// Add client arm
-		
 		this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), armC.material);
 		this.arm.castShadow = true;
 		this.arm.receiveShadow = true;
@@ -1079,7 +1077,7 @@ class Player {
 			}
 			this.maxSprintSpeed = this.defaultMaxSprintSpeed;
 		}
-		if (this.key.sneak && !this.fly && this.onObject) {
+		if ((this.key.sneak || this.drawingBow) && !this.fly && this.onObject) {
 			
 			this.speed = 0.75;
 
@@ -1092,15 +1090,29 @@ class Player {
 			this.speed = 0.3;
 
 		// Change camera fov when sprinting
-		if ((this.speed <= 2 || this.distanceMoved < 1.5)) {
-			if (camera.fov > 75) {
-				camera.fov = Math.max(camera.fov - delta*100, 75);
-			}
-		} else if (this.distanceMoved > 7 && camera.dynFov) {
-			if (camera.fov < 85) {
-				camera.fov = Math.min(camera.fov + delta*100, 85);
-			}
-		}
+
+        game.fov = parseInt(game.fov);
+        if ((this.speed <= 2 || this.distanceMoved < 1.5)) {
+            if (camera.fov > game.fov) {
+                this.deltaFov = Math.max(this.deltaFov - delta*100, 0);
+            }
+        } else if (this.distanceMoved > 7 && camera.dynFov) {
+            if (camera.fov < game.fov+10) {
+                this.deltaFov = Math.min(this.deltaFov + delta*100, 10);
+            }
+        }
+		// if ((this.speed <= 2 || this.distanceMoved < 1.5)) {
+		// 	if (camera.fov > 75) {
+		// 		camera.fov = Math.max(camera.fov - delta*100, 75);
+		// 	}
+		// } else if (this.distanceMoved > 7 && camera.dynFov) {
+		// 	if (camera.fov < 85) {
+		// 		camera.fov = Math.min(camera.fov + delta*100, 85);
+		// 	}
+		// }
+        
+        camera.fov = game.fov + this.deltaFov;
+        
 		camera.updateProjectionMatrix();
 	}
 
