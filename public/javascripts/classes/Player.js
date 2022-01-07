@@ -1150,9 +1150,9 @@ class Player {
     // Update client with server information
     updateClient(data) {
 		if (data && data.hp != this.hp) {
-			hud.heartBlink = game.tick.value;
-            if (!hud.lastHp || data.hp > hud.lastHp) {
-                hud.lastHp = this.hp;
+			this.heartBlink = game.tick.value;
+            if (!this.lastHp || data.hp > this.lastHp) {
+                this.lastHp = this.hp;
             }
 		}
 

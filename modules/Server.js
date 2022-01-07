@@ -247,4 +247,40 @@ module.exports = class World {
             return;
         }
     }
+
+    // Update players
+    updatePlayers(players, world, logger, io, addLog) {
+        for (let id in players) {
+            let player = players[id];
+    
+            if (player.hp <= 0 && !player.dead) {
+                player.dead = true;
+                let txt = player.name;
+    
+                if (player.dmgType == "drowning") {
+                    txt += " has drowned";
+                } else if (player.dmgType == "fall") {
+                    txt += " fell off a cliff";
+                } else if (player.dmgType == "command") {
+                    txt += " was killed by a command";
+                } else if (player.dmgType) {
+                    txt += " was slain by " + player.dmgType
+                } else {
+                    txt += " has died";
+                }
+                    
+    
+                logger.info(txt);
+    
+                io.emit('messageAll', {
+                    text: txt
+                })
+    
+                addLog(id, "d"); // Deaths
+            } else {
+                // Update player position in biome
+                player.biome = world.generator.getColumnInfo(player.pos.x/world.blockSize, player.pos.z/world.blockSize)[2];
+            }
+        }
+    }
 }

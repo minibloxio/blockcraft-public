@@ -1,5 +1,5 @@
 // Three.js
-let scene, renderer, world, chunkManager, entityManager, textureManager, stage, sky, stats, composer, colorShader, player, players;
+let scene, renderer, world, chunkManager, entityManager, textureManager, stage, sky, stats, composer, player, players;
 
 // Stats
 let prevTime = performance.now();
@@ -16,7 +16,6 @@ voxelWorkerIndex = 0;
 
 // Game information
 let game = {
-	fps: getCookie("FPS") || 60,
     token: getCookie("token") || "",
 	packetDelay: 16,
 	lastPacket: Date.now(),
@@ -24,6 +23,9 @@ let game = {
 	guiSize: 1,
     transparentLeaves: getCookie("transparentLeaves"),
     tick: 0,
+    lastUpdate: Date.now(),
+    updates: [],
+    fpsList: [],
     depthWrite: false,
 }
 
@@ -86,20 +88,26 @@ function initWorkers() {
 
 // Initialize statistics
 function initStatistics() {
-    statistics.push(new Stat("Server Region", game, "region", 2))
-	statistics.push(new Stat("Gamemode", player, "mode", 2))
-    statistics.push(new Stat("Pos", player.position, false, 2, function (pos) {
+    statistics.push(new Stat("Server", game, "region"));
+    statistics.push(new Stat("Socket ID", socket, "id"));
+    statistics.push(new Stat("Token", game, "token"));
+    statistics.push(new Stat("FPS", game, "fps", 0));
+    statistics.push(new Stat("UPS", game, "ups", 1));
+    statistics.push(new Stat("TPS", game, "tps", 1));
+    statistics.push(new Stat("MEM", function () {
+        return Math.round(performance.memory.usedJSHeapSize / 1048576);
+    }, "mb", 0));
+	statistics.push(new Stat("Gamemode", player, "mode"));
+    statistics.push(new Stat("Pos", player.position, false, 1, function (pos) {
     	return pos.clone().divideScalar(world.blockSize);
-    }))
-    statistics.push(new Stat("Chunk Pos", player.position, false, 2, function (pos) {
+    }));
+    statistics.push(new Stat("Chunk Pos", player.position, false, 0, function (pos) {
     	return world.computeCellFromPlayer(pos.x, pos.y, pos.z);
-    }))
-    statistics.push(new Stat("Biome", player, "biome", 2))
-    statistics.push(new Stat("Vel", player.velocity, false, 2))
-    statistics.push(new Stat("Speed", player, "speed", 2))
-    statistics.push(new Stat("Fly", player, "fly", 2))
-    statistics.push(new Stat("Socket ID", socket, "id"))
-    statistics.push(new Stat("Token", game, "token"))
+    }));
+    statistics.push(new Stat("Biome", player, "biome"));
+    statistics.push(new Stat("Vel", player.velocity, false, 1));
+    statistics.push(new Stat("Speed", player, "speed", 2));
+    statistics.push(new Stat("Fly", player, "fly"));
 }
 
 // Initalize the renderer
@@ -120,32 +128,7 @@ function initRenderer() {
 
 	document.body.appendChild( renderer.domElement );
 
-	// Under water color shader
-	colorShader = {
-		uniforms: {
-		  tDiffuse: { value: null },
-		  color:    { value: new THREE.Color(0x2e41f4) },
-		},
-		vertexShader: `
-		  varying vec2 vUv;
-		  void main() {
-		    vUv = uv;
-		    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1);
-		  }
-		`,
-		fragmentShader: `
-		  uniform vec3 color;
-		  uniform sampler2D tDiffuse;
-		  varying vec2 vUv;
-		  void main() {
-		    vec4 previousPassColor = texture2D(tDiffuse, vUv);
-		    gl_FragColor = vec4(
-		        previousPassColor.rgb * color,
-		        previousPassColor.a);
-		  }
-		`,
-	};
-
+    // Add a color shader
 	colorPass = new THREE.ShaderPass(colorShader);
 	colorPass.renderToScreen = true;
 	colorPass.enabled = false;
@@ -189,13 +172,20 @@ function animate() {
 	// Scene update
 	stage.update();
 	stats.update();
-	player.fps = round(stats.fps, 1);
 
 	composer.render( scene, camera );
 	
 	updateHUD(); // Update the HUD
 
 	prevTime = time;
+
+    // Update fps
+	player.fps = round(stats.fps, 1);
+    game.fpsList.unshift(performance.now() - time);
+    if (game.fpsList.length > 50) {
+        game.fps = 1000/game.fpsList.average();
+        game.fpsList.length = 25;
+    }
 }
 
 // Window resize

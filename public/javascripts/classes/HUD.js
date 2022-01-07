@@ -61,33 +61,7 @@ class HUD {
 
             let xPos = canvas.width/2-inventory.hotboxWidth*4+i*this.iconSize;
             let yPos = canvas.height-yOffset;
-            // Floor xPos and yPos
-            xPos = Math.floor(xPos);
-            yPos = Math.floor(yPos);
-
-            // Draw player heart background
-            let isLit = game.tick.value % 6 < 3;
-            if (isLit && game.tick.value - this.heartBlink < 12) {
-                ctx.drawImage(icons, 25, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Lit heart
-
-                // Draw temporary hearts
-                if (player.lastHp - i >= 1) {
-                    ctx.drawImage(icons, 70, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
-                } else if (player.lastHp - i > 0) {
-                    ctx.drawImage(icons, 79, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
-                    this.isHalf = false;
-                }
-            } else {
-                ctx.drawImage(icons, 16, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Unlit heart
-            }
-            
-            // Draw player hearts
-            if (player.hp - i >= 1) {
-                ctx.drawImage(icons, 52, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
-            } else if (player.hp - i > 0) {
-                ctx.drawImage(icons, 61, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
-                this.isHalf = false;
-            }
+            this.drawHearts(xPos, yPos, player, i);
         }
 
         // Update heart jump animation
@@ -160,7 +134,6 @@ class HUD {
         }
     }
 
-
     // Display player tab list
     displayPlayerTab() {
         if (!this.showPlayerTab)
@@ -204,14 +177,7 @@ class HUD {
                 let xPos = healthOffset+(i)*this.iconSize;
 
                 // Draw hearts based on player hp
-                if (p.hp - i >= 1) {
-                    ctx.drawImage(full_heart, xPos, yPos, this.iconSize, this.iconSize)
-                } else if (p.hp - i > 0) {
-                    ctx.drawImage(half_heart, xPos, yPos, this.iconSize, this.iconSize)
-                    this.isHalf = false;
-                } else {
-                    ctx.drawImage(empty_heart, xPos, yPos, this.iconSize, this.iconSize)
-                }
+                this.drawHearts(xPos, yPos, p, i);
             }
 
             index++;
@@ -236,14 +202,34 @@ class HUD {
             let xPos = healthOffset+(i)*this.iconSize;
 
             // Draw hearts based on player hp
-            if (p.hp - i >= 1) {
-                ctx.drawImage(full_heart, xPos, yPos, this.iconSize, this.iconSize)
-            } else if (p.hp - i > 0) {
-                ctx.drawImage(half_heart, xPos, yPos, this.iconSize, this.iconSize)
-                this.isHalf = false;
-            } else {
-                ctx.drawImage(empty_heart, xPos, yPos, this.iconSize, this.iconSize)
+            this.drawHearts(xPos, yPos, p, i);
+        }
+    }
+
+    drawHearts(xPos, yPos, p, i) {
+        // Floor xPos and yPos
+        xPos = Math.floor(xPos);
+        yPos = Math.floor(yPos);
+
+        // Draw player heart background
+        let isLit = game.tick.value % 6 < 3;
+        if (isLit && game.tick.value - p.heartBlink < 12) {
+            ctx.drawImage(icons, 25, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Lit background
+
+            // Draw temporary hearts
+            if (p.lastHp - i >= 1) {
+                ctx.drawImage(icons, 70, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
+            } else if (p.lastHp - i > 0) {
+                ctx.drawImage(icons, 79, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
             }
+        } else {
+            ctx.drawImage(icons, 16, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize); // Unlit background
+        }
+        
+        if (p.hp - i >= 1) { // Full heart
+            ctx.drawImage(icons, 52, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
+        } else if (p.hp - i > 0) { // Half heart
+            ctx.drawImage(icons, 61, 0, 9, 9, xPos, yPos, this.iconSize, this.iconSize);
         }
     }
 

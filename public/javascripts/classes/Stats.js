@@ -1,5 +1,5 @@
 class Stat {
-	constructor(name, value, key, round, func) {
+	constructor(name, value, key, round, func = []) {
 		this.name = name;
 		this.value = value;
 
@@ -12,29 +12,35 @@ class Stat {
 	display(index) {
 		let text = this.name + ": ";
 
-		let val = this.value;
-		if (this.func && this.key) {
-			val = this.func(this.value[this.key]);
-		} else if (this.func) {
-			val = this.func(this.value)
-		}
+        let val = this.value;
 
-		if (this.key) {
-			let type = typeof(val[this.key])
-			val = val[this.key];
-			if (type == "boolean")
-				text += val
-			else if (type == "string")
-				text += val
-			else
-				text += round(val, this.round);
+        if (typeof val === 'function') {
+            this.func.push(val())
+            if (this.func.length > 100) this.func.shift();
+            text += round(this.func.average(), this.amount) + this.key;
+        } else {
+            if (typeof this.func === 'function' && this.key) {
+                val = this.func(this.value[this.key]);
+            } else if (typeof this.func === 'function') {
+                val = this.func(this.value)
+            }
 
+            if (this.key) {
+                let type = typeof(val[this.key])
+                val = val[this.key];
+                if (type == "boolean")
+                    text += val
+                else if (type == "string")
+                    text += val
+                else
+                    text += round(val, this.round || 0);
 
-		} else if (val instanceof Object) {
-			text += "x: " + round(val.x, this.round) + " y: " + round(val.y, this.round) + " z: " + round(val.z, this.round);
-		} else if (val instanceof Array) {
-			text += round(this.value.reduce((a, b) => a + b, 0)/this.value.length, this.round);
-		}
+            } else if (val instanceof Object) {
+                text += "x: " + round(val.x, this.round) + " y: " + round(val.y, this.round) + " z: " + round(val.z, this.round);
+            } else if (val instanceof Array) {
+                text += round(this.value.reduce((a, b) => a + b, 0)/this.value.length, this.round);
+            }
+        }
 
 		let fontSize = 20;
 		let margin = 5;

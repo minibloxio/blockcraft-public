@@ -147,6 +147,12 @@ function updatePlayers(serverPlayers) {
 			p.dir.set({x: serverPlayers[id].dir.x, y: serverPlayers[id].dir.y, z: serverPlayers[id].dir.z});
 
 			// Update player data
+            if (serverPlayers[id].hp != p.hp) {
+                p.heartBlink = game.tick.value;
+                if (!p.lastHp || serverPlayers[id].hp > p.lastHp) {
+                    p.lastHp = p.hp;
+                }
+            }
 			p.hp = serverPlayers[id].hp;
 			if (p.hp <= 0 && p.entity.visible) {
 				p.entity.visible = false;

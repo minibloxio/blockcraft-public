@@ -218,6 +218,14 @@ module.exports = class World {
         }
     }
 
+    getDist(player, entity) {
+        const {blockSize} = this;
+        let dir = new THREE.Vector3(player.pos.x, player.pos.y, player.pos.z).sub(entity.pos);
+        dir.y -= blockSize*0.6;
+        let dist = dir.length();
+        return {dist, dir}
+    }
+
     checkItemDespawn(entity) {
         let timeLimit = 1000 * 60 * 5; // 5 minutes
         if (entity.name == "fireball") timeLimit = 1000 * 15; // 15 seconds
@@ -245,7 +253,7 @@ module.exports = class World {
         if (throwables.includes(entity.name)) {
             if (entity.name == "ender_pearl" && deltaVoxel > 1) { // ENDER PEARL
                 entity.pos.y += blockSize * 1.6;
-                players[entity.playerId].hp -= 2.5;
+                if (players[entity.playerId].mode == "survival") players[entity.playerId].hp -= 2.5;
                 io.to(`${entity.playerId}`).emit('teleport', entity)
             } else if (entity.name == "fireball" && deltaVoxel > 1) { // FIREBALL
                 if (players[entity.playerId].operator) { // Check if player is operator
@@ -256,7 +264,7 @@ module.exports = class World {
 
             if (deltaVoxel > 1) {
                 this.removeItem(entity);
-                return; 
+                return true;
             }
         } else if (entity.name != "arrow") { // Check if there is a voxel below the entity
             if (deltaVoxel) {
@@ -269,15 +277,6 @@ module.exports = class World {
                 entity.onObject = true;
             }
         }
-    }
-
-
-    getDist(player, entity) {
-        const {blockSize} = this;
-        let dir = new THREE.Vector3(player.pos.x, player.pos.y, player.pos.z).sub(entity.pos);
-        dir.y -= blockSize*0.6;
-        let dist = dir.length();
-        return {dist, dir}
     }
 
     gravitateEntity(players, entity) {
@@ -337,7 +336,6 @@ module.exports = class World {
         for (let id in players) {
             let player = players[id];
             let canHitOwnPlayer = (Date.now() - entity.t > 200) ? true : id != entity.playerId;
-
             if (player.mode == "spectator" || player.mode == "camera" || player.blocking || player.dead || entity.onObject || !canHitOwnPlayer) continue;
 
             let {dist} = this.getDist(player, entity);
@@ -365,7 +363,6 @@ module.exports = class World {
         entity.pulling = false;
 
         // Check collision with world
-        this.checkCollision(entity, players, io);
         let hit = this.checkArrowCollision(players, entity, io);
         if (hit) return;
 
@@ -383,6 +380,10 @@ module.exports = class World {
         for (let i = 0; i < iterations; i++) {
             let dv = entity.vel.clone().multiplyScalar(dt/iterations);
             entity.pos.add(dv);
+
+            let collided = this.checkCollision(entity, players, io);
+            if (collided) return;
+
             if (!entity.pulling) {
                 let hit = this.checkArrowCollision(players, entity, io);
                 if (hit) return;

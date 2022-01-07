@@ -580,3 +580,59 @@ Array.prototype.max = function() {
 Array.prototype.min = function() {
     return Math.min.apply(null, this);
 };
+
+Array.prototype.average = function() {
+    return this.reduce((a, b) => a + b, 0) / this.length;
+}
+
+Array.prototype.sum = function() {
+    return this.reduce((a, b) => a + b, 0);
+}
+
+Array.prototype.remove = function(value) {
+    var i = this.indexOf(value);
+    if (i != -1) {
+        this.splice(i, 1);
+    }
+}
+
+Array.prototype.removeAll = function(value) {
+    var i = this.indexOf(value);
+    while (i != -1) {
+        this.splice(i, 1);
+        i = this.indexOf(value);
+    }
+}
+
+Array.prototype.removeDuplicates = function() {
+    var x,
+        len=this.length,
+        out=[],
+        obj={};
+
+    for (x=0; x<len; x++) {
+        obj[this[x]]=0;
+    }
+    for (x in obj) {
+        out.push(x);
+    }
+    return out;
+}
+
+Array.prototype.removeNulls = function() {
+    return this.filter(function(el) {
+        return el != null;
+    });
+}
+
+Array.prototype.removeUndefined = function() {
+    return this.filter(function(el) {
+        return el != undefined;
+    });
+}
+
+Array.prototype.removeEmpty = function() {
+    return this.filter(function(el) {
+        return el != '';
+    });
+}

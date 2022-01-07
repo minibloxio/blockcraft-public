@@ -571,7 +571,8 @@ io.on('connection', function (socket_) {
 
 		let force = blockSize * 12 * data.force;
         let vel = new THREE.Vector3(data.dir.x, data.dir.y, data.dir.z);
-        vel.add(new THREE.Vector3().random().multiplyScalar(2).subScalar(1).multiplyScalar(0.002)); // Randomize direction
+        let spread = 0.007;
+        vel.add(new THREE.Vector3().random().multiplyScalar(2).subScalar(1).multiplyScalar(spread)); // Randomize direction
         vel.multiplyScalar(force);
 		let entityId = Function.randomString(5);
 		let entity = server.addEntity(entityId, {
@@ -791,16 +792,16 @@ io.on('connection', function (socket_) {
         if (!players[socket.id]) return;
 
         if (players[socket.id].operator) {
-            io.emit('messageAll', {
-                name: "Server",
-                text: "Killed all players",
-                color: "aqua"
-            });
             for (let id in players) {
                 io.to(`${id}`).emit('kill');
                 players[id].hp = 0;
                 players[id].dead = true;
             }
+            io.emit('messageAll', {
+                name: "Server",
+                text: "Killed all players",
+                color: "aqua"
+            });
         } else {
             socket.emit('message', {
                 name: "Server",
@@ -816,10 +817,13 @@ io.on('connection', function (socket_) {
 
         if (players[socket.id].operator) {
             for (let id in world.entities) {
-                let type = "block";
-                if (world.itemId[world.entities[id].v-1]) type = "item";
                 world.removeItem(world.entities[id]);
             }
+            io.emit('messageAll', {
+                name: "Server",
+                text: "Killed all entities",
+                color: "aqua"
+            });
         } else {
             socket.emit('message', {
                 name: "Server",
@@ -843,9 +847,16 @@ io.on('connection', function (socket_) {
 
 // Update server function
 let dt = 50;
+let ticks = [];
+let lastTick = Date.now();
 let autosaveTimer = Date.now();
 let autosaveWarningFlag = true;
 setInterval(function () {
+    // Update server tick rate info
+    ticks.push(Date.now()-lastTick);
+    if (ticks.length > 10) ticks.shift();
+    let tps = Math.round(ticks.reduce((a, b) => a + b, 0) / ticks.length);
+
 	if (!world || Object.keys(players).length == 0) {
 		autosaveTimer = Date.now(); // Don't autosave when nobody's online
 		return;
@@ -861,39 +872,7 @@ setInterval(function () {
 	}
 
 	// Update players
-	for (let id in players) {
-		let player = players[id];
-
-		if (player.hp <= 0 && !player.dead) {
-			player.dead = true;
-			let txt = player.name;
-
-
-            if (player.dmgType == "drowning") {
-                txt += " has drowned";
-            } else if (player.dmgType == "fall") {
-				txt += " fell off a cliff";
-			} else if (player.dmgType == "command") {
-				txt += " was killed by a command";
-			} else if (player.dmgType) {
-				txt += " was slain by " + player.dmgType
-			} else {
-				txt += " has died";
-			}
-				
-
-			logger.info(txt);
-
-			io.emit('messageAll', {
-				text: txt
-			})
-
-			addLog(id, "d"); // Deaths
-		} else {
-            // Update player position in biome
-            player.biome = world.generator.getColumnInfo(player.pos.x/world.blockSize, player.pos.z/world.blockSize)[2];
-        }
-	}
+    server.updatePlayers(players, world, logger, io, addLog);
 
 	// Auto save
 	let autosaveInterval = 1000 * 60 * 10; // 10 Minutes
@@ -926,12 +905,14 @@ setInterval(function () {
 		newEntities: world.newEntities,
 		entities: world.entities,
 		tick: world.tick,
-		t: Date.now()
+		t: Date.now(),
+        tps: tps
 	}
 	io.emit('update', JSON.stringify(data));
 
 	world.updatedBlocks = [];
 	world.newEntities = [];
+    lastTick = Date.now();
 }, dt)
 
 module.exports = app;

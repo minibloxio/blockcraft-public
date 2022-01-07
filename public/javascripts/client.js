@@ -257,7 +257,6 @@ function updateClient(data) {
                 world.entities[id].pos = entity.pos;
             }
 
-
 			if (world.entities[id].mesh && world.entities[id].mesh.position.length() == 0) {
 				world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z)
 			}
@@ -265,17 +264,20 @@ function updateClient(data) {
 	}
 
 	// Update client player
-	if (player) {
-		player.updateClient(serverPlayers[socket.id]);
-	}
+	if (player) player.updateClient(serverPlayers[socket.id]);
 
 	// Update tick
+    game.updates.push(Date.now()-game.lastUpdate);
+    if (game.updates.length > 20) game.updates.shift();
+    game.ups = 1000/game.updates.average();
     let tickDiff = Math.abs(data.tick - game.tick.value);
     if (tickDiff > 1000) {
         game.tick = new Ola(data.tick);
     } else {
         game.tick.value = data.tick;
     }
+    game.lastUpdate = Date.now();
+    game.tps = 1000/data.tps;
 
 	// Latency check
 	if (Date.now() - lastUpdate > 500) {
