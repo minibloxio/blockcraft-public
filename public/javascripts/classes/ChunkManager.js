@@ -283,6 +283,6 @@ class ChunkManager {
 
 		}
 		
-		console.log("Updating texture to " + getCookie("Material Texture") + "...");
+		//console.log("Updating texture to " + getCookie("Material Texture") + "...");
 	}
 }

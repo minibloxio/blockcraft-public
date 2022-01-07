@@ -200,6 +200,8 @@ module.exports = class World {
 
     destroyBlocks(x, y, z, radius) {
         let radiusSquared = radius * radius;
+
+        // Destroy blocks within radius
         for (let dx = -radius; dx <= radius; dx++) {
             for (let dy = -radius; dy <= radius; dy++) {
                 for (let dz = -radius; dz <= radius; dz++) {
@@ -214,6 +216,15 @@ module.exports = class World {
                         this.updatedBlocks.push({ x: x_, y: y_, z: z_, t: 0 });
                     }
                 }
+            }
+        }
+        // Destroy entities within radius
+        for (let id in this.entities) {
+            let entity = this.entities[id];
+            let pos = entity.pos.clone().divideScalar(this.blockSize);
+            let distSquared = pos.distanceToSquared(new THREE.Vector3(x, y, z));
+            if (distSquared <= radiusSquared) {
+                this.removeItem(entity);
             }
         }
     }

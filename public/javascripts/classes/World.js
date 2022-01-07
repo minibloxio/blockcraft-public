@@ -258,7 +258,7 @@ function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
             const cellY = Math.floor(oy / cellSize);
             const cellZ = Math.floor(oz / cellSize);
 
-            let cell = new Int8Array(4); // Int8 is enough for now (max of 256 chunk radius)
+            let cell = new Int16Array(new ArrayBuffer(4*4)); // Int8 is enough for now (max of 256 chunk radius)
             cell[0] = cellX;
             cell[1] = cellY;
             cell[2] = cellZ;

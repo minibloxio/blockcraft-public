@@ -234,8 +234,14 @@ function updateClient(data) {
     let updatedChunks = {};
 	for (let block of updatedBlocks) {
 		world.setVoxel(block.x, block.y, block.z, block.t);
-        let cellId = world.computeCellId(block.x, block.y, block.z);
-        updatedChunks[cellId] = true;
+
+        for (let offset of neighborOffsets) {
+            let ox = (block.x + offset[0]);
+            let oy = (block.y + offset[1]);
+            let oz = (block.z + offset[2]);
+            let cellId = world.computeCellId(ox, oy, oz);
+            updatedChunks[cellId] = true;
+        }
 	}
 
     for (let id in updatedChunks) {
