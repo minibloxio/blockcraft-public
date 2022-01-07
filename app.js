@@ -69,8 +69,7 @@ rl.on('line', (input) => {
     if (input === 'refresh') { // Refresh all clients
         io.emit('refresh');
     } else if (input === 'save') {
-        let path = __dirname + '/saves/test.json';
-        world.saveToFile(fs, io, path, logger);
+        world.saveToFile(fs, io, save_path, logger);
         saveToLog();
     } else if (input === 'purge') {
         world.purge(); // Purge all chunks
@@ -162,6 +161,7 @@ fs.readFile(blacklist_path, function(err, data) {
 })
 
 // Setup world
+const save_path = __dirname + '/saves/test.json';
 const world = new World();
 world.init({
     blockOrder: server.blockOrder,
@@ -172,7 +172,6 @@ worker.postMessage({ cmd: 'seed', seed: world.seed });
 worker.postMessage({ cmd: "setup", blockOrder: server.blockOrder, itemOrder: server.itemOrder });
 
 // Load save file
-let save_path = __dirname + '/saves/test.json';
 fs.readFile(save_path, function(err, data) {
     if (err || data.length == 0) {
         logger.warn("Unable to load save file from", save_path)
@@ -842,6 +841,22 @@ io.on('connection', function(socket_) {
         }
     })
 
+    // Save world
+    socket.on('saveWorld', function() {
+        if (!players[socket.id]) return;
+
+        if (players[socket.id].operator) {
+            world.saveToFile(fs, io, save_path, logger);
+            saveToLog();
+        } else {
+            socket.emit('message', {
+                name: "Server",
+                text: "You do not have operator status to save the world",
+                color: "aqua"
+            });
+        }
+    });
+
     // DISCONNECT
     socket.on('disconnect', function() {
         if (players[socket.id] && players[socket.id].connected) {
@@ -893,8 +908,7 @@ setInterval(function() {
         autosaveTimer = Date.now();
         autosaveWarningFlag = true;
 
-        let path = __dirname + '/saves/test.json';
-        world.saveToFile(fs, io, path, logger);
+        world.saveToFile(fs, io, save_path, logger);
         saveToLog();
     }
 

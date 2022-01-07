@@ -434,12 +434,12 @@ module.exports = class World {
             if (entity.type != "item") continue;
 
             // Get cell position of entity
-            let cellBlockSize = this.blockSize * this.cellSize;
-            let x = Math.floor(entity.pos.x / cellBlockSize);
-            let y = Math.floor(entity.pos.y / cellBlockSize);
-            let z = Math.floor(entity.pos.z / cellBlockSize);
-            let cellId = `${x},${y},${z}`;
-            if (!this.cells[cellId]) continue;
+            // let cellBlockSize = this.blockSize * this.cellSize;
+            // let x = Math.floor(entity.pos.x / cellBlockSize);
+            // let y = Math.floor(entity.pos.y / cellBlockSize);
+            // let z = Math.floor(entity.pos.z / cellBlockSize);
+            // let cellId = `${x},${y},${z}`;
+            // if (!this.cells[cellId]) continue;
 
             // Delete entity if too long
             this.checkItemDespawn(entity);

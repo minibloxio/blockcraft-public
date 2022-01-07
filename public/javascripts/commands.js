@@ -86,7 +86,7 @@ let commandsInit = JSON.stringify({
         "hint": "- Sets your home to your current position",
     },
     "home": {
-        "hint": "- Teleports you to your home", 
+        "hint": "- Teleports you to your home",
     },
     "msg": {
         "hint": "<player> <message> - Sends a private message to the specified player",
@@ -96,7 +96,7 @@ let commandsInit = JSON.stringify({
         "hint": "<player> <message> - Sends a private message to the specified player",
         "error": "Invalid player"
     },
-    "reply": {  
+    "reply": {
         "hint": "<message> - Replies to the last private message",
     },
     "list": {
@@ -104,6 +104,9 @@ let commandsInit = JSON.stringify({
     },
     "damage": {
         "hint": "<amount> - Damages you by the specified amount",
+    },
+    "save": {
+        "hint": "- Saves the world (requires operator status)",
     },
 })
 let commands = JSON.parse(commandsInit);
@@ -118,7 +121,7 @@ let canChangeCommand = true;
 function prevCommand() {
     canChangeCommand = false;
     if (prevCommands.length > 0) {
-        if (commandIndex < prevCommands.length-1) {
+        if (commandIndex < prevCommands.length - 1) {
             commandIndex += 1;
             let input = $("#chat-input");
 
@@ -141,7 +144,7 @@ function nextCommand() {
             commandIndex = -1;
         }
     }
-}     
+}
 
 // Update hints
 function updateHints() {
@@ -173,8 +176,8 @@ function updateHints() {
     commands.ban.hints[player.name] = "Ban yourself" // Update ban hint
     commands.unban.hints[player.name] = "Unban yourself" // Update unban hint
     commands.kill.hints[player.name] = "Kill yourself" // Update kill hint
-    commands.kill.hints['@e'] =  "Kill all server entities";
-    commands.kill.hints['@a'] =  "Kill all players";
+    commands.kill.hints['@e'] = "Kill all server entities";
+    commands.kill.hints['@a'] = "Kill all players";
 
     for (let id in world.blockId) {
         commands.setblock.hints[id] = "Set block to " + id; // Update setblock hint
@@ -219,7 +222,7 @@ function giveCommandHint(msg, autocomplete) {
                 firstArgUnique = command;
                 firstArgValue = command;
             }
-            
+
             if (autocomplete) { // Autocomplete the command
                 let extraSpace = Object.keys(commands[command]).length > 1 ? " " : "";
                 let completedCommand = chat.hintText + extraSpace;
@@ -247,7 +250,7 @@ function giveCommandHint(msg, autocomplete) {
         }
 
         // If the command exists and the command has a second argument
-        if (command == msg[0] && msg.length >= 2 && commands[command].hints) { 
+        if (command == msg[0] && msg.length >= 2 && commands[command].hints) {
             firstArgUnique = command;
             chat.hintText += msg[0] + " ";
 
@@ -301,7 +304,7 @@ function giveCommandHint(msg, autocomplete) {
                         return;
                     }
                 }
-                
+
                 // Check for third argument
                 if (hint == msg[1] && msg.length >= 3) {
                     if (msg[0] == "give") {
@@ -374,7 +377,7 @@ function giveCommandHint(msg, autocomplete) {
 function getCoord(msg, pos, decimalPlace) {
     let x, y, z;
     if (msg[0] && msg[0].includes('~')) {
-        x = round(player.position.x/world.blockSize, decimalPlace)
+        x = round(player.position.x / world.blockSize, decimalPlace)
         let dx = parseInt(msg[0].replace('~', ''));
         if (!isNaN(dx)) x += dx;
     } else if (msg[0]) {
@@ -382,15 +385,15 @@ function getCoord(msg, pos, decimalPlace) {
         x = x == 0 ? '0' : x;
     }
     if (msg[1] && msg[1].includes('~')) {
-        y = round(player.position.y/world.blockSize, decimalPlace)
+        y = round(player.position.y / world.blockSize, decimalPlace)
         let dy = parseInt(msg[1].replace('~', ''));
         if (!isNaN(dy)) y += dy;
     } else if (msg[1]) {
         y = parseInt(msg[1]);
-        y = y == 0 ? '0' : y;   
+        y = y == 0 ? '0' : y;
     }
     if (msg[2] && msg[2].includes('~')) {
-        z = round(player.position.z/world.blockSize, decimalPlace)
+        z = round(player.position.z / world.blockSize, decimalPlace)
         let dz = parseInt(msg[2].replace('~', ''));
         if (!isNaN(dz)) z += dz;
     } else if (msg[2]) {
@@ -398,7 +401,7 @@ function getCoord(msg, pos, decimalPlace) {
         z = z == 0 ? '0' : z;
     }
     if (pos) {
-        return {x: x, y: y, z: z};
+        return { x: x, y: y, z: z };
     } else {
         return "x: " + (x || "<int>") + " y: " + (y || "<int>") + " z: " + (z || "<int>");
     }
@@ -463,8 +466,8 @@ function checkCommand(msg) {
         listPlayers();
     } else if (msg[0] == "damage") {
         damagePlayer(msg);
-    } else if (msg[0] == "list") {
-        listPlayers();
+    } else if (msg[0] == "save") {
+        saveWorld();
     } else {
         chat.addChat({
             text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',
@@ -589,7 +592,7 @@ function teleport(msg) {
         let pos = getCoord(msg, true, 3);
 
         if (validCoordinates) {
-            let coord = new THREE.Vector3(pos.x*world.blockSize, pos.y*world.blockSize, pos.z*world.blockSize);
+            let coord = new THREE.Vector3(pos.x * world.blockSize, pos.y * world.blockSize, pos.z * world.blockSize);
             player.setCoords(coord);
             chat.addChat({
                 text: "Teleported to x: " + round(pos.x, 1) + ", y: " + round(pos.y, 1) + ", z: " + round(pos.z, 1)
@@ -607,7 +610,7 @@ function teleport(msg) {
         for (let id in players) {
             let p = players[id];
             if (p.name == target) {
-                exists = true; 
+                exists = true;
                 chat.addChat({
                     text: "Teleported " + player.name + " to " + p.name
                 });
@@ -763,7 +766,7 @@ function setOperator(msg, isOp) {
     for (let id in players) {
         let p = players[id];
         if (p.name == target) {
-            exists = true; 
+            exists = true;
             playerId = id;
             break;
         }
@@ -804,7 +807,7 @@ function banPlayer(msg) {
     for (let id in players) {
         let p = players[id];
         if (p.name == target) {
-            exists = true; 
+            exists = true;
             playerId = id;
             break;
         }
@@ -864,7 +867,7 @@ function kickPlayer(msg) {
     for (let id in players) {
         let p = players[id];
         if (p.name == target) {
-            exists = true; 
+            exists = true;
             playerId = id;
             break;
         }
@@ -920,7 +923,7 @@ function killPlayer(msg) {
     for (let id in players) {
         let p = players[id];
         if (p.name == target) {
-            exists = true; 
+            exists = true;
             playerId = id;
             break;
         }
@@ -968,7 +971,7 @@ function goHome() {
 }
 
 // Message a player
-function messagePlayer(msg) {   
+function messagePlayer(msg) {
     msg.shift();
     let target = msg[0];
     msg.shift();
@@ -984,7 +987,7 @@ function messagePlayer(msg) {
     for (let id in players) {
         let p = players[id];
         if (p.name == target) {
-            exists = true; 
+            exists = true;
             playerId = id;
             break;
         }
@@ -1051,12 +1054,12 @@ function listPlayers() {
     })
     for (let id in players) {
         let p = players[id];
-        let ping = round(p.ping.reduce((a, b) => a + b, 0)/p.ping.length, 0) || "disc";
+        let ping = round(p.ping.reduce((a, b) => a + b, 0) / p.ping.length, 0) || "disc";
         chat.addChat({
             text: p.name + " (" + ping + "ms ping, " + p.fps + " fps)",
         })
     }
-    let ping = round(player.ping.reduce((a, b) => a + b, 0)/player.ping.length, 0) || "disc";
+    let ping = round(player.ping.reduce((a, b) => a + b, 0) / player.ping.length, 0) || "disc";
     chat.addChat({
         text: player.name + " (" + ping + "ms ping, " + player.fps + " fps)",
     })
@@ -1076,4 +1079,15 @@ function damagePlayer(msg) {
         dmg: damage,
         type: "command",
     });
+}
+
+function saveWorld() {
+    if (!player.operator) {
+        chat.addChat({
+            text: 'Error: This command can only be used by operators',
+            color: "red"
+        });
+        return;
+    }
+    socket.emit('saveWorld');
 }
