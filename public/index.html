@@ -120,7 +120,7 @@
 							<div class="server">
 								<p>Welcome to the server select menu! Pick the server you'd like to join or enter a direct connect address.</p>
 							</div>
-							<div id="refresh-servers">Refresh</div>
+							<div id="refresh-servers" class="top-button">Refresh</div>
 							
 							<div id="server-container"></div>
 						</div>
@@ -136,6 +136,7 @@
 						</div>
 
 						<div id="video-settings" class="tabcontent" style="display: none;">
+                            <div id="reset-video" class="top-button">Reset to Default</div>
 							<!-- <div class="control-container">
 								<span id="fpsValue" class="slider-text">Max FPS: 60</span>
 								<input type="range" min="1" max="200" value="60" class="slider" id="fpsSlider" style="position: relative; float: right; width: 50%; height: 20px">
@@ -160,35 +161,6 @@
 								<span id="workersValue" class="slider-text">Web Workers: 2</span>
 								<input type="range" min="1" max="4" value="2" class="slider" id="workersSlider" style="position: relative; float: right; width: 50%; height: 20px">
 							</div> -->
-							<div class="control-container">
-								<span id="statsValue" class="slider-text">Statistics: OFF</span>
-								<input type="range" min="0" max="1" value="0" class="slider" id="statsSlider" style="position: relative; float: right; width: 40px; height: 20px">
-							</div>
-							<div class="control-container">
-								<span id="shadowValue" class="slider-text">Shadow Effect: OFF</span>
-								<input type="range" min="0" max="1" value="0" class="slider" id="shadowSlider" style="position: relative; float: right; width: 40px; height: 20px">
-							</div>
-							<div class="control-container">
-								<span id="cloudValue" class="slider-text">Clouds: ON</span>
-								<input type="range" min="0" max="1" value="1" class="slider" id="cloudSlider" style="position: relative; float: right; width: 40px; height: 20px">
-							</div>
-							<div class="control-container">
-								<span id="starsValue" class="slider-text">Stars: ON</span>
-								<input type="range" min="0" max="1" value="1" class="slider" id="starsSlider" style="position: relative; float: right; width: 40px; height: 20px">
-							</div>
-							<div class="control-container">
-								<span id="dynFovValue" class="slider-text">Dynamic FOV: ON</span>
-								<input type="range" min="0" max="1" value="1" class="slider" id="dynFovSlider" style="position: relative; float: right; width: 40px; height: 20px">
-							</div>
-                            <div class="control-container">
-								<span id="transparentLeavesValue" class="slider-text">Transparent Leaves: ON</span>
-								<input type="range" min="0" max="1" value="1" class="slider" id="transparentLeavesSlider" style="position: relative; float: right; width: 40px; height: 20px">
-							</div>
-                            <div class="control-container">
-								<span id="depthWriteValue" class="slider-text">Depth Write: OFF</span>
-								<input type="range" min="0" max="1" value="0" class="slider" id="depthWriteSlider" style="position: relative; float: right; width: 40px; height: 20px">
-							</div>
-
 
 							<div class="control-container">
 								<span id="guiSizeValue" class="slider-text">GUI Size:</span>
@@ -209,7 +181,10 @@
 								</select>
 							</div>
 							
-							<div id="reset-video" class="settings-button">Reset to Default</div>
+                            <div id="switch-container" class="flex-container">
+
+                            </div>
+							
 						</div>
 
 						<div id="keyboard-settings" class="tabcontent" style="display: none;">

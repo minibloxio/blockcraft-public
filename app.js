@@ -566,7 +566,7 @@ io.on('connection', function (socket_) {
 		if (!player) return;
 
 		let { blockSize } = world;
-		player.pickupDelay = Date.now() + 1000;  // Disable pickup while dropping items
+		player.pickupDelay = Date.now() + 500;  // Disable pickup while dropping items
 
 		world.removePlayerItem(player, "arrow");
 
