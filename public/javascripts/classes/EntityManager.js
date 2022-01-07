@@ -43,8 +43,6 @@ class EntityManager {
         let {blockSize} = world;
         if (entity.type == "item") {
             if (!entity.pos) return;
-            console.log(entity.vel);
-    
 
             if (entity.vel) entity.vel = new Ola({x: entity.vel.x, y: entity.vel.y, z: entity.vel.z});
 

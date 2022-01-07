@@ -253,7 +253,10 @@ module.exports = class World {
         if (throwables.includes(entity.name)) {
             if (entity.name == "ender_pearl" && deltaVoxel > 1) { // ENDER PEARL
                 entity.pos.y += blockSize * 1.6;
-                if (players[entity.playerId].mode == "survival") players[entity.playerId].hp -= 5;
+                if (players[entity.playerId].mode == "survival") {
+                    players[entity.playerId].hp -= 5;
+                    players[entity.playerId].dmgType = "ender_pearl";
+                }
                 io.to(`${entity.playerId}`).emit('teleport', entity)
             } else if (entity.name == "fireball" && deltaVoxel > 1) { // FIREBALL
                 if (players[entity.playerId].operator) { // Check if player is operator

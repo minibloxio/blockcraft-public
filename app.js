@@ -889,7 +889,6 @@ setInterval(function () {
 		saveToLog();
 	}
 
-	world.update(dt / 1000, players, io);
 
 	// Send updated data to client
     let data = {
@@ -902,9 +901,12 @@ setInterval(function () {
         tps: tps
 	}
 	io.emit('update', JSON.stringify(data));
+    
+	world.updatedBlocks.length = 0;
+	world.newEntities.length = 0;
 
-	world.updatedBlocks = [];
-	world.newEntities = [];
+	world.update(dt / 1000, players, io);
+
     lastTick = Date.now();
 }, dt)
 

@@ -261,13 +261,15 @@ module.exports = class World {
                 player.dead = true;
                 let txt = player.name;
                 
-                if (player.dmgType.includes("arrow")) {
+                if (player.dmgType && player.dmgType.includes("arrow")) {
                     let name = player.dmgType.replace('arrow','');
                     txt += " was sniped by " + name;
                 } else if (player.dmgType == "drowning") {
                     txt += " has drowned";
                 } else if (player.dmgType == "fall") {
                     txt += " fell off a cliff";
+                } else if (player.dmgType == "ender_pearl") {
+                    txt += " hit the ground too hard";
                 } else if (player.dmgType == "void") {
                     txt += " fell out of the world";
                 } else if (player.dmgType == "command") {

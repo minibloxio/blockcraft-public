@@ -244,10 +244,7 @@ function updateClient(data) {
     }
 
 	// Add new entities
-	let newEntities = data.newEntities;
-	for (let entity of newEntities) {
-		entityManager.addEntity(entity);
-	}
+	for (let entity of data.newEntities) entityManager.addEntity(entity);
 
 	// Update existing entities PUT THIS IN THE WORLD CLASS FUNCTION
 	let updatedEntities = data.entities;
