@@ -25,10 +25,10 @@ module.exports = class World {
 
         let woodTypes = ["spruce", "birch", "jungle", "acacia", "big_oak"];
         for (let type of woodTypes) {
-            this.blockOrder.push("log_"+type);
-            this.blockOrder.push("log_"+type+"_top");
-            this.blockOrder.push("planks_"+type);
-            this.blockOrder.push("leaves_"+type);
+            this.blockOrder.push("log_" + type);
+            this.blockOrder.push("log_" + type + "_top");
+            this.blockOrder.push("planks_" + type);
+            this.blockOrder.push("leaves_" + type);
         }
 
         for (let color of colors) {
@@ -39,47 +39,47 @@ module.exports = class World {
 
         for (let stoneType of stoneTypes) {
             this.blockOrder.push("stone_" + stoneType);
-            this.blockOrder.push("stone_" + stoneType+ "_smooth");
+            this.blockOrder.push("stone_" + stoneType + "_smooth");
         }
 
         // ITEM SPRITES
         let tools = ["pickaxe", "axe", "shovel", "sword"];
         let toolMat = ["wood", "stone", "iron", "gold", "diamond"];
         let foods = ["beef", "chicken", "porkchop", "mutton", "rabbit"];
-        this.itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "emerald", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball",  "flint", "flint_and_steel", "brick", "glowstone_dust", "snowball", "ender_pearl", "fireball", "sign"];
+        this.itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "emerald", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball", "flint", "flint_and_steel", "brick", "glowstone_dust", "snowball", "ender_pearl", "fireball", "sign"];
         for (let mat of toolMat) {
             for (let tool of tools) {
                 this.itemOrder.push(mat + "_" + tool);
             }
         }
         for (let food of foods) {
-            this.itemOrder.push(food+"_raw");
-            this.itemOrder.push(food+"_cooked");
+            this.itemOrder.push(food + "_raw");
+            this.itemOrder.push(food + "_cooked");
         }
 
         // ENTITY SPRITES
         this.entityOrder = ["arrow"];
 
         this.blockId = {};
-        for (let i = 0; i < this.blockOrder.length; i++) this.blockId[this.blockOrder[i]] = i+1;
+        for (let i = 0; i < this.blockOrder.length; i++) this.blockId[this.blockOrder[i]] = i + 1;
 
         this.itemId = {};
-        for (let i = 0; i < this.itemOrder.length; i++) this.itemId[this.itemOrder[i]] = i+1;
+        for (let i = 0; i < this.itemOrder.length; i++) this.itemId[this.itemOrder[i]] = i + 1;
 
         this.textures = {};
         let self = this;
         // Get block file names
-        fs.readdir(public_path + '/textures/blocks', function (err, data) {
-            if (err) console.log(err);
-            self.textures.blocks = data;
-        })
-        // Get item file names
-        fs.readdir(public_path + '/textures/items', function (err, data) {
-            if (err) console.log(err);
-            self.textures.items = data;
-        })
-        // Get entity file names
-        fs.readdir(public_path + '/textures/entity', function (err, data) {
+        fs.readdir(public_path + '/textures/blocks', function(err, data) {
+                if (err) console.log(err);
+                self.textures.blocks = data;
+            })
+            // Get item file names
+        fs.readdir(public_path + '/textures/items', function(err, data) {
+                if (err) console.log(err);
+                self.textures.items = data;
+            })
+            // Get entity file names
+        fs.readdir(public_path + '/textures/entity', function(err, data) {
             if (err) console.log(err);
             self.textures.entity = data;
         })
@@ -113,37 +113,37 @@ module.exports = class World {
         if (!data) data = {};
 
         let player = {
-			id: id,
-			name: data.name || ("Player"+Math.floor(Math.random()*9999)),
-			pos: {x: 0,y: 0,z: 0},
-			vel: {x: 0,y: 0,z: 0},
-			rot: {x: 0,y: 0,z: 0},
-			dir: {x: 0,y: 0,z: 0},
-			hp: 20,
-			dead: false,
-			toolbar: [
-				this.getEntity("wood_sword"), 
-				this.getEntity("wood_pickaxe"), 
-				this.getEntity("wood_axe"), 
-				this.getEntity("bow"), 
-				this.getEntity("arrow", 64),
-				this.getEntity("fireball", 16),
-                this.getEntity("ender_pearl", 16),
-			],
-			walking: false,
-			sneaking: false,
-			punching: false,
-			currSlot: 0,
-			pickupDelay: Date.now(),
-			ping: [],
-			connected: true,
-			mode: "survival",
-			fps: 0,
+            id: id,
+            name: data.name || ("Player" + Math.floor(Math.random() * 9999)),
+            pos: { x: 0, y: 0, z: 0 },
+            vel: { x: 0, y: 0, z: 0 },
+            rot: { x: 0, y: 0, z: 0 },
+            dir: { x: 0, y: 0, z: 0 },
+            hp: 20,
+            dead: false,
+            toolbar: [
+                // this.getEntity("wood_sword"),
+                // this.getEntity("wood_pickaxe"),
+                // this.getEntity("wood_axe"),
+                // this.getEntity("bow"),
+                // this.getEntity("arrow", 64),
+                // this.getEntity("fireball", 16),
+                // this.getEntity("ender_pearl", 16),
+            ],
+            walking: false,
+            sneaking: false,
+            punching: false,
+            currSlot: 0,
+            pickupDelay: Date.now(),
+            ping: [],
+            connected: true,
+            mode: "survival",
+            fps: 0,
             showInventory: false,
             token: data.token || "",
             biome: "",
             operator: this.operators.includes(data.token),
-		}
+        }
 
         return player;
     }
@@ -174,7 +174,7 @@ module.exports = class World {
 
         if (isOp && !this.operators.includes(player.token)) {
             this.operators.push(player.token);
-            fs.writeFile(__dirname + '/../operators.json', JSON.stringify(this.operators), function (err) {
+            fs.writeFile(__dirname + '/../operators.json', JSON.stringify(this.operators), function(err) {
                 if (err) console.log(err);
             });
         } else if (!isOp) {
@@ -184,7 +184,7 @@ module.exports = class World {
                     break;
                 }
             }
-            fs.writeFile(__dirname + '/../operators.json', JSON.stringify(this.operators), function (err) {
+            fs.writeFile(__dirname + '/../operators.json', JSON.stringify(this.operators), function(err) {
                 if (err) console.log(err);
             });
         }
@@ -193,7 +193,7 @@ module.exports = class World {
     // Set blacklist
     setBlacklist(fs, ban, player) {
         if (!player) return;
-        
+
         let isBanned = false;
         for (let i = 0; i < this.blacklist.length; i++) {
             if (this.blacklist[i].token == player.token || this.blacklist[i].ip == player.ip) {
@@ -208,7 +208,7 @@ module.exports = class World {
                 token: player.token,
                 ip: player.ip,
             });
-            fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function (err) {
+            fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function(err) {
                 if (err) console.log(err);
             });
             return true;
@@ -221,7 +221,7 @@ module.exports = class World {
                     break;
                 }
             }
-            fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function (err) {
+            fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function(err) {
                 if (err) console.log(err);
             });
             return success;
@@ -251,18 +251,18 @@ module.exports = class World {
     // Update players
     updatePlayers(players, world, logger, io, addLog) {
         let regenTick = world.tick % 50 == 0;
-        let voidTick = (world.tick+5) % 10 == 0;
+        let voidTick = (world.tick + 5) % 10 == 0;
 
         for (let id in players) {
             let player = players[id];
-            
+
             // Check if the player is dead
             if (player.hp <= 0 && !player.dead) {
                 player.dead = true;
                 let txt = player.name;
-                
+
                 if (player.dmgType && player.dmgType.includes("arrow")) {
-                    let name = player.dmgType.replace('arrow','');
+                    let name = player.dmgType.replace('arrow', '');
                     txt += " was sniped by " + name;
                 } else if (player.dmgType == "drowning") {
                     txt += " has drowned";
@@ -281,23 +281,23 @@ module.exports = class World {
                 } else {
                     txt += " has died";
                 }
-    
+
                 logger.info(txt);
-    
+
                 io.emit('messageAll', {
                     text: txt
                 })
-    
+
                 addLog(id, "d"); // Deaths
             } else if (!player.dead && player.hp > 0) {
                 // Update player position in biome
-                player.biome = world.generator.getColumnInfo(player.pos.x/world.blockSize, player.pos.z/world.blockSize)[2];
-                
+                player.biome = world.generator.getColumnInfo(player.pos.x / world.blockSize, player.pos.z / world.blockSize)[2];
+
                 // Regenerate health
                 if (regenTick) players[id].hp = Math.min(players[id].hp + 1, 20);
 
                 // Check if the player is in the void
-                if (voidTick && player.pos.y < -world.blockSize*64) {
+                if (voidTick && player.pos.y < -world.blockSize * 64) {
                     player.hp -= 2;
                     player.dmgType = "void";
                     io.to(`${player.id}`).emit('damage');

@@ -22,20 +22,20 @@ class ChatManager {
     // Update GUI size
     resize() {
         let size = game.guiSize;
+        this.yOffset = 20 + inventory.selectorWidth + 2 * hud.iconSize;
         if (size == 1) {
             this.maxChatWidth = 500;
-            this.maxChatHeight = Math.min(800, innerHeight - 100);
-            this.msgHeight = 25;
+            this.maxChatHeight = Math.min(canvas.height - this.yOffset - 100, innerHeight - 100);
+            this.msgHeight = 20;
         } else if (size == 2) {
             this.maxChatWidth = 500;
-            this.maxChatHeight = Math.min(600, innerHeight - 100);
-            this.msgHeight = 27;
+            this.maxChatHeight = Math.min(canvas.height - this.yOffset - 100, innerHeight - 100);
+            this.msgHeight = 25;
         } else if (size == 3) {
             this.maxChatWidth = 600;
-            this.maxChatHeight = innerHeight - 200;
+            this.maxChatHeight = Math.min(canvas.height - this.yOffset - 100, innerHeight - 100);
             this.msgHeight = 30;
         }
-        this.yOffset = 20 + inventory.selectorWidth + 2*hud.iconSize;
         this.fontSize = this.msgHeight - this.msgOffset;
         $("#chat-input").css("font-size", this.fontSize + "px");
         $("#chat-input").css("height", this.msgHeight + "px");
@@ -47,17 +47,15 @@ class ChatManager {
             return;
 
         let timer = Math.max(1000, options.timer || 5000);
-        this.chat.unshift(
-            {
-                text: options.text,
-                color: options.color,
-                name: options.name,
-                t: Date.now(), // timestamp
-                discard: options.discard,
-                timer: timer,
-                id: options.id,
-            }
-        )
+        this.chat.unshift({
+            text: options.text,
+            color: options.color,
+            name: options.name,
+            t: Date.now(), // timestamp
+            discard: options.discard,
+            timer: timer,
+            id: options.id,
+        })
         this.chatTimer = options.timer ? options.timer : undefined;
         if (this.chatTimer) this.hideChatTimer(timer);
         if (chat.length > 100) {
@@ -90,7 +88,7 @@ class ChatManager {
             color: "aqua",
             timer: 15000
         })
-        
+
         // LATEST UPDATES
         let change = changelog[0];
 
@@ -125,12 +123,12 @@ class ChatManager {
     hideChatTimer(time) {
         clearTimeout(this.hideChatId)
         let self = this;
-        this.hideChatId = setTimeout(function () {
+        this.hideChatId = setTimeout(function() {
             self.chatTimer = 0;
             if (!self.showChatBar) {
                 self.showChat = false;
 
-                for (let i = self.chat.length-1; i>=0; i--) {
+                for (let i = self.chat.length - 1; i >= 0; i--) {
                     if (self.chat[i].discard) {
                         self.chat.splice(i, 1);
                     }
@@ -145,7 +143,7 @@ class ChatManager {
 
         let currHeight = 0;
 
-        ctx.font = this.fontSize+"px Minecraft-Regular";
+        ctx.font = this.fontSize + "px Minecraft-Regular";
         let lines = [];
         for (let i = 0; i < this.chat.length; i++) {
             let msg = this.chat[i];
@@ -155,34 +153,34 @@ class ChatManager {
             if (this.showChatBar || elaspedTime < msg.timer) {
                 let opacity = 1; // Fade out
                 if (elaspedTime > msg.timer - 300) {
-                    opacity = 1 - (elaspedTime - (msg.timer - 300))/300;
+                    opacity = 1 - (elaspedTime - (msg.timer - 300)) / 300;
                 }
                 opacity = this.showChatBar ? 1 : opacity;
 
                 let text = "";
                 if (isOperator && msg.name) {
-                    text += "<"+msg.name+" [admin]> ";
+                    text += "<" + msg.name + " [admin]> ";
                 } else if (msg.name) {
-                    text += "<"+msg.name+"> ";
+                    text += "<" + msg.name + "> ";
                 }
-                
+
                 text += msg.text;
                 text = text.substring(0, 1000);;
-                let newLines = this.getLines(ctx, text, this.maxChatWidth-20, msg.color || "white", opacity).reverse();
+                let newLines = this.getLines(ctx, text, this.maxChatWidth - 20, msg.color || "white", opacity).reverse();
                 lines = lines.concat(newLines);
-                currHeight += this.msgHeight*newLines.length;
+                currHeight += this.msgHeight * newLines.length;
                 if (currHeight > this.maxChatHeight) break;
             }
         }
 
         // Draw chat background
         ctx.save();
-        drawRectangle(0, canvas.height-this.yOffset-lines.length*this.msgHeight, this.maxChatWidth, lines.length*this.msgHeight, "black", {alpha: 0.4});
+        drawRectangle(0, canvas.height - this.yOffset - lines.length * this.msgHeight, this.maxChatWidth, lines.length * this.msgHeight, "black", { alpha: 0.4 });
         ctx.clip();
 
         // Draw chat messages
         for (let i = 0; i < lines.length; i++) {
-            drawText(lines[i].text, 10, canvas.height-this.yOffset-this.msgOffset-i*this.msgHeight, this.fontSize+"px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity, true, parseInt(game.guiSize)*1.3);
+            drawText(lines[i].text, 10, canvas.height - this.yOffset - this.msgOffset - i * this.msgHeight, this.fontSize + "px Minecraft-Regular", lines[i].color, "start", "alphabetic", lines[i].opacity, true, parseInt(game.guiSize) * 1.3);
         }
         ctx.restore();
 
@@ -195,14 +193,14 @@ class ChatManager {
                 hintColor = "red";
             }
 
-            let command = $("#chat-input").val()//.removeExtraSpaces();
+            let command = $("#chat-input").val() //.removeExtraSpaces();
             let commandWidth = ctx.measureText(command).width;
             let hintWidth = ctx.measureText(text).width;
             let width = Math.max(commandWidth, hintWidth);
-            
-            drawRectangle(5, canvas.height-this.fontSize-20-5-this.msgHeight+10, width + 10, this.msgHeight, "black", {alpha: 0.7});
-            drawText(text, 10, canvas.height-this.fontSize-20, this.fontSize+"px Minecraft-Regular", hintColor, "start", "alphabetic");
-            drawText(command, 10, canvas.height-this.fontSize-20, this.fontSize+"px Minecraft-Regular", "white", "start", "alphabetic");
+
+            drawRectangle(5, canvas.height - this.fontSize - 20 - 5 - this.msgHeight + 10, width + 10, this.msgHeight, "black", { alpha: 0.7 });
+            drawText(text, 10, canvas.height - this.fontSize - 20, this.fontSize + "px Minecraft-Regular", hintColor, "start", "alphabetic");
+            drawText(command, 10, canvas.height - this.fontSize - 20, this.fontSize + "px Minecraft-Regular", "white", "start", "alphabetic");
         }
     }
 
@@ -219,7 +217,7 @@ class ChatManager {
                 currentLine += " " + word;
             } else {
                 lines.push({
-                    text:currentLine,
+                    text: currentLine,
                     color: color,
                     opacity: opacity
                 });

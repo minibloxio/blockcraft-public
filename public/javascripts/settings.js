@@ -169,6 +169,7 @@ function addVideoControls() {
     addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov")
     addSwitchControl("Transparent Leaves", "transparentLeaves", true, game, "transparentLeaves", false, updateTransparency);
     addSwitchControl("Depth Write", "depthWrite", false, game, "depthWrite", false, chunkManager.updateTexture);
+    addSwitchControl("Debug", "debug", false, game, "debug", false, updateDebug);
 
     addSelectControl("GUI Size", "guiSize", 2, game, "guiSize", updateGUISize);
     addSelectControl("Material Texture", "texture", "lambert", chunkManager, "texture", chunkManager.updateTexture);
@@ -241,4 +242,11 @@ function updateTransparency() {
         });
     }
     chunkManager.reload();
+}
+
+function updateDebug() {
+    for (let id in players) {
+        let player = players[id];
+        player.bbox.visible = game.debug;
+    }
 }

@@ -11,6 +11,7 @@ module.exports = class World {
         this.generator = new WorldGeneration(this.seed);
 
         this.tick = 0;
+        this.canUpdate = true;
 
         // Cell management
         this.blockSize = 16;
@@ -39,7 +40,7 @@ module.exports = class World {
         for (let i = 0; i < this.blockOrder.length; i++) {
             this.blockId[this.blockOrder[i]] = i + 1;
         }
-        
+
         // Item ids
         this.itemOrder = options.itemOrder || [];
         this.itemId = {};
@@ -53,7 +54,7 @@ module.exports = class World {
     loadSeed(seed, worker) {
         this.seed = seed;
         this.generator.setSeed(seed);
-	    worker.postMessage({ cmd: "seed", seed: seed });
+        worker.postMessage({ cmd: "seed", seed: seed });
     }
 
     // Load save file
@@ -103,7 +104,7 @@ module.exports = class World {
 
         let data = JSON.stringify(saveObject);
 
-        fs.writeFile(filepath, data, function (err) {
+        fs.writeFile(filepath, data, function(err) {
             if (err) throw err;
             let txt = "Server successfully saved in " + (Date.now() - t) + " ms";
             io.emit('messageAll', {
@@ -234,13 +235,13 @@ module.exports = class World {
             let pos = new THREE.Vector3(player.pos.x, player.pos.y, player.pos.z).divideScalar(this.blockSize);
             let distSquared = pos.distanceToSquared(new THREE.Vector3(x, y, z));
             if (distSquared <= radiusSquared) {
-                let damage = Math.floor((radiusSquared-distSquared) / radiusSquared * 15);
+                let damage = Math.floor((radiusSquared - distSquared) / radiusSquared * 15);
 
                 player.hp -= damage;
                 player.dmgType = "explosion";
                 io.to(id).emit("knockback", {
                     dir: pos.sub(new THREE.Vector3(x, y, z)).normalize(),
-                    force: damage * 50,
+                    force: damage * 100,
                     explosion: true,
                 });
             }
@@ -248,11 +249,11 @@ module.exports = class World {
     }
 
     getDist(player, entity) {
-        const {blockSize} = this;
+        const { blockSize } = this;
         let dir = new THREE.Vector3(player.pos.x, player.pos.y, player.pos.z).sub(entity.pos);
-        dir.y -= blockSize*0.6;
+        dir.y -= blockSize * 0.6;
         let dist = dir.length();
-        return {dist, dir}
+        return { dist, dir }
     }
 
     checkItemDespawn(entity) {
@@ -271,7 +272,7 @@ module.exports = class World {
         let delta_y = Math.floor((entity.pos.y - 6) / blockSize);
         let z = Math.floor(entity.pos.z / blockSize);
 
-        if (!entity.onObject) entity.acc = new THREE.Vector3(0, -9.81*blockSize, 0);
+        if (!entity.onObject) entity.acc = new THREE.Vector3(0, -9.81 * blockSize, 0);
 
         let deltaVoxel = this.getVoxel(x, delta_y, z); // Check if there is a voxel below the entity
         let voxel = this.getVoxel(x, y, z); // Get the voxel below the entity
@@ -322,21 +323,21 @@ module.exports = class World {
             if (player.showInventory || player.pickupDelay > Date.now() || (player.mode == "spectator" || player.mode == "camera")) continue;
 
             // Pick up item
-            let {dist, dir} = this.getDist(player, entity);
+            let { dist, dir } = this.getDist(player, entity);
 
             // Add to player if within a block distance
-            if (dist < blockSize/2) {
+            if (dist < blockSize / 2) {
                 World.addItem(player, entity);
                 this.removeItem(entity);
-                return; 
+                return;
             }
 
             // Pull when 2 blocks away
-            if (dist < blockSize * 2) { 
+            if (dist < blockSize * 2) {
                 entity.acc.set(dir.x, dir.y, dir.z);
                 let pullStrength = 3;
                 if (entity.name == "arrow") pullStrength = 16;
-                entity.acc.multiplyScalar(16*blockSize);
+                entity.acc.multiplyScalar(16 * blockSize);
                 entity.pulling = true;
             }
         }
@@ -346,8 +347,11 @@ module.exports = class World {
         const { blockSize } = this;
         if (!entity.pos || entity.name != "arrow" || entity.pulling) return;
 
+
         let pos = entity.pos.clone();
-        let vel = entity.vel.clone().normalize().multiplyScalar(blockSize/2);
+        let vel = entity.vel.clone()
+
+        vel.normalize().multiplyScalar(blockSize / 2);
         pos.add(vel).divideScalar(blockSize);
 
         if (entity.lastPos) pos = entity.lastPos;
@@ -370,7 +374,7 @@ module.exports = class World {
             let canHitOwnPlayer = (Date.now() - entity.t > 200) ? true : id != entity.playerId;
             if (player.mode == "spectator" || player.mode == "camera" || player.blocking || player.dead || entity.onObject || !canHitOwnPlayer) continue;
 
-            let {dist} = this.getDist(player, entity);
+            let { dist } = this.getDist(player, entity);
             if (dist > blockSize) continue;
 
             // Arrow hit
@@ -400,7 +404,7 @@ module.exports = class World {
 
         // Gravitate towards players
         this.gravitateEntity(players, entity);
-        
+
         // Update velocity and acceleration
         if (entity.name != "fireball") {
             let da = entity.acc.clone().multiplyScalar(dt);
@@ -410,7 +414,7 @@ module.exports = class World {
         // Apply physics iteratively
         let iterations = 8;
         for (let i = 0; i < iterations; i++) {
-            let dv = entity.vel.clone().multiplyScalar(dt/iterations);
+            let dv = entity.vel.clone().multiplyScalar(dt / iterations);
             entity.pos.add(dv);
 
             let collided = this.checkCollision(entity, players, io);
@@ -428,12 +432,20 @@ module.exports = class World {
         for (let id in this.entities) {
             let entity = this.entities[id];
             if (entity.type != "item") continue;
-            
+
+            // Get cell position of entity
+            let cellBlockSize = this.blockSize * this.cellSize;
+            let x = Math.floor(entity.pos.x / cellBlockSize);
+            let y = Math.floor(entity.pos.y / cellBlockSize);
+            let z = Math.floor(entity.pos.z / cellBlockSize);
+            let cellId = `${x},${y},${z}`;
+            if (!this.cells[cellId]) continue;
+
             // Delete entity if too long
             this.checkItemDespawn(entity);
 
             // Apply physics
-            this.applyPhysics(entity, dt, players, io);
+            if (this.canUpdate) this.applyPhysics(entity, dt, players, io);
         }
     }
 

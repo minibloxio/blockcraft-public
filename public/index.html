@@ -1,319 +1,324 @@
-
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>BlockCraft</title>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, user-scalable=yes, minimum-scale=1.0, maximum-scale=1.0">
-		<meta name=description content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!">
-		<meta name="theme-color" content="#317EFB"/>
+
+<head>
+    <title>BlockCraft</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name=description content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!">
+    <meta name="theme-color" content="#317EFB" />
 
 
-		<meta property="og:title" content="BlockCraft" />
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://blockcraft.victorwei.com" />
-		<meta property="og:image" content="https://blockcraft.victorwei.com/images/content.png" />
-		<meta property="og:description" content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!" />
-		<meta name="keywords" content="HTML, CSS, JavaScript, Three.js">
-		<meta name="author" content="Victor Wei">
+    <meta property="og:title" content="BlockCraft" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://blockcraft.victorwei.com" />
+    <meta property="og:image" content="https://blockcraft.victorwei.com/images/content.png" />
+    <meta property="og:description" content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!"
+    />
+    <meta name="keywords" content="HTML, CSS, JavaScript, Three.js">
+    <meta name="author" content="Victor Wei">
 
-		<link rel="stylesheet" href="style.css">
-		<link rel="shortcut icon" type="image/png" href="./favicon.png"/>
-	 
-	</head>
-	<body>
-		
-		<canvas id="canvas-hud"></canvas>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" type="image/png" href="./favicon.png" />
 
-		<!-- Load CDNs -->
-		<script src="https://cdn.jsdelivr.net/npm/ola"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
 
-		<!-- Load Resources -->
-		<script src="javascripts/resources/three.js"></script>
-		<script src="javascripts/resources/SVGLoader.js"></script>
-		<script src="javascripts/resources/socket.io.js"></script>
-		<script src="javascripts/resources/stats.js"></script>
-		<script src="javascripts/resources/perlin.js"></script>
-		<script src="javascripts/resources/simplex.js"></script>
-		<script src="javascripts/resources/matrix.js"></script>
-		<script src="javascripts/resources/sizeof.js"></script>
-		<script src="javascripts/resources/cookie.js"></script>
-		<script src="javascripts/resources/rle-encoding.js"></script>
-		<script src="javascripts/resources/TextureMerger.js"></script>
-		<script src="javascripts/resources/TextGeometry.js"></script>
-		<script src="javascripts/resources/FontLoader.js"></script>
+<body>
 
-		<!-- Load JSON files -->
-		<script type="text/javascript" src="json/changelog.json"></script>
-		<script type="text/javascript" src="json/keymap.json"></script>
-		<script type="text/javascript" src="json/recipes.json"></script>
+    <canvas id="canvas-hud"></canvas>
 
-		<!-- Load Postprocessing -->
-		<script src="javascripts/postprocessing/EffectComposer.js"></script>
-		<script src="javascripts/postprocessing/RenderPass.js"></script>
-		<script src="javascripts/postprocessing/ShaderPass.js"></script>
-		<script src="javascripts/postprocessing/CopyShader.js"></script>
+    <!-- Load CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/ola"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-		<!-- Load Classes -->
-		<script src="javascripts/classes/World.js"></script>
-		<script src="javascripts/classes/Stage.js"></script>
-		<script src="javascripts/classes/ChunkManager.js"></script>
-		<script src="javascripts/classes/TextureManager.js"></script>
-        <script src="javascripts/classes/EntityManager.js"></script>
-		<script src="javascripts/classes/ChatManager.js"></script>
-		<script src="javascripts/classes/RecipeChecker.js"></script>
-		<script src="javascripts/classes/Player.js"></script>
-		<script src="javascripts/classes/Inventory.js"></script>
-        <script src="javascripts/classes/HUD.js"></script>
-		<script src="javascripts/classes/Stats.js"></script>
+    <!-- Load Resources -->
+    <script src="javascripts/resources/three.js"></script>
+    <script src="javascripts/resources/SVGLoader.js"></script>
+    <script src="javascripts/resources/socket.io.js"></script>
+    <script src="javascripts/resources/stats.js"></script>
+    <script src="javascripts/resources/perlin.js"></script>
+    <script src="javascripts/resources/simplex.js"></script>
+    <script src="javascripts/resources/matrix.js"></script>
+    <script src="javascripts/resources/sizeof.js"></script>
+    <script src="javascripts/resources/cookie.js"></script>
+    <script src="javascripts/resources/rle-encoding.js"></script>
+    <script src="javascripts/resources/TextureMerger.js"></script>
+    <script src="javascripts/resources/TextGeometry.js"></script>
+    <script src="javascripts/resources/FontLoader.js"></script>
 
-		<!-- Load Game Files -->
-		<script src="javascripts/auth.js"></script>
-		<script src="javascripts/pointerlock.js"></script>
-		<script src="javascripts/server.js"></script>
-		<script src="javascripts/core.js"></script>
-		<script src="javascripts/textures.js"></script>
-		<script src="javascripts/client.js"></script>
-		<script src="javascripts/input.js"></script>
-		<script src="javascripts/helper.js"></script>
-		<script src="javascripts/hud.js"></script>
-		<script src="javascripts/settings.js"></script>
-		<script src="javascripts/commands.js"></script>
-		
+    <!-- Load JSON files -->
+    <script type="text/javascript" src="json/changelog.json"></script>
+    <script type="text/javascript" src="json/keymap.json"></script>
+    <script type="text/javascript" src="json/recipes.json"></script>
 
-		<div id="blocker">
-			<div id="background-image"></div>
-			
-			<div class="outer-container">
-				<div class="container">
-					<!-- Menu -->
-					<div id="menu" class="tab-container">
-						<div id="nav">
-							<button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
-							<button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
-						</div>
+    <!-- Load Postprocessing -->
+    <script src="javascripts/postprocessing/EffectComposer.js"></script>
+    <script src="javascripts/postprocessing/RenderPass.js"></script>
+    <script src="javascripts/postprocessing/ShaderPass.js"></script>
+    <script src="javascripts/postprocessing/CopyShader.js"></script>
 
-						<div id="welcome" class="tabcontent">
-							<!-- <h1 id="title">BlockCraft</h1> -->
-							<p>BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!</p>
-							<p>BlockCraft is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way. Any assets from Minecraft are used under fair use and in accordance with <a cross-origin="anonymous" href="https://account.mojang.com/documents/minecraft_eula" style="color: white" target="_blank" rel="noopener">Minecraft's EULA.</a></a></p>
-							<p>Supported browsers: Chrome, Safari, Edge</p>
-                            <p>Feel free to join the <a cross-origin="anonymous" href="https://discord.gg/uKYXPeA">Discord server</a> for updates on the game's development.</p>
-							<p>You can view my development journey <a cross-origin="anonymous" href="https://victorwei.com/blog/blockcraft.pdf">on my blog.</a></p>
-							<p>Analytics for the server can be viewed <a cross-origin="anonymous" href="https://analytics.victorwei.com">here.</a></p>
-							<p>This project is open source and the source code can be accessed through <a cross-origin="anonymous"href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank" rel="noopener">Github.</a></p>
-							<p>You can view my other projects <a cross-origin="anonymous"href="https://victorwei.com" target="_blank" rel="noopener">on my personal website.</a></p>
-							<p></p>This site uses cookies to enhance your experience on BlockCraft. Have fun!</p>
-						</div>
+    <!-- Load Classes -->
+    <script src="javascripts/classes/World.js"></script>
+    <script src="javascripts/classes/Stage.js"></script>
+    <script src="javascripts/classes/ChunkManager.js"></script>
+    <script src="javascripts/classes/TextureManager.js"></script>
+    <script src="javascripts/classes/EntityManager.js"></script>
+    <script src="javascripts/classes/ChatManager.js"></script>
+    <script src="javascripts/classes/RecipeChecker.js"></script>
+    <script src="javascripts/classes/Player.js"></script>
+    <script src="javascripts/classes/Inventory.js"></script>
+    <script src="javascripts/classes/HUD.js"></script>
+    <script src="javascripts/classes/Stats.js"></script>
 
-						<div id="changelog" class="tabcontent" style="display: none;"></div>
-					</div>
+    <!-- Load Game Files -->
+    <script src="javascripts/auth.js"></script>
+    <script src="javascripts/pointerlock.js"></script>
+    <script src="javascripts/server.js"></script>
+    <script src="javascripts/core.js"></script>
+    <script src="javascripts/textures.js"></script>
+    <script src="javascripts/client.js"></script>
+    <script src="javascripts/input.js"></script>
+    <script src="javascripts/helper.js"></script>
+    <script src="javascripts/hud.js"></script>
+    <script src="javascripts/settings.js"></script>
+    <script src="javascripts/commands.js"></script>
 
-					<!-- Server select -->
-					<div id="server-select" class="tab-container"style="display:none">
-						<div id="nav">
-							<button class="tablinks" style="width: 100%;" onclick="changeTab(event, 'server-list')" id="server-button">Server Select</button>
-						</div>
-		
-						<div id="server-list" class="tabcontent">
-							<div class="server">
-								<p>Welcome to the server select menu! Pick the server you'd like to join or enter a direct connect address.</p>
-							</div>
-							<div id="refresh-servers" class="top-button">Refresh</div>
-							
-							<div id="server-container"></div>
-						</div>
-		
-						<div id="changelog" class="tabcontent" style="display: none;"></div>
-					</div>
 
-					<!-- Settings -->
-					<div id="settings" class="tab-container" style="display:none">
-						<div id="nav">
-							<button class="tablinks" onclick="changeTab(event, 'video-settings')" id="video-button">Video</button>
-							<button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
-						</div>
+    <div id="blocker">
+        <div id="background-image"></div>
 
-						<div id="video-settings" class="tabcontent" style="display: none;">
-                            <div id="reset-video" class="top-button">Reset to Default</div>
-							<!-- <div class="control-container">
+        <div class="outer-container">
+            <div class="container">
+                <!-- Menu -->
+                <div id="menu" class="tab-container">
+                    <div id="nav">
+                        <button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
+                        <button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
+                    </div>
+
+                    <div id="welcome" class="tabcontent">
+                        <!-- <h1 id="title">BlockCraft</h1> -->
+                        <p>BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and
+                            much more!</p>
+                        <p>BlockCraft is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way. Any assets from Minecraft are used under fair use and in accordance with <a cross-origin="anonymous" href="https://account.mojang.com/documents/minecraft_eula"
+                                style="color: white" target="_blank" rel="noopener">Minecraft's EULA.</a></a>
+                        </p>
+                        <p>Supported browsers: Chrome, Safari, Edge</p>
+                        <p>Feel free to join the <a cross-origin="anonymous" href="https://discord.gg/uKYXPeA">Discord server</a> for updates on the game's development.</p>
+                        <p>You can view my development journey <a cross-origin="anonymous" href="https://victorwei.com/blog/blockcraft.pdf">on my blog.</a></p>
+                        <p>Analytics for the server can be viewed <a cross-origin="anonymous" href="https://analytics.victorwei.com">here.</a></p>
+                        <p>This project is open source and the source code can be accessed through <a cross-origin="anonymous" href="https://github.com/victoryqwei/blockcraft/" style="color: white" target="_blank" rel="noopener">Github.</a></p>
+                        <p>You can view my other projects <a cross-origin="anonymous" href="https://victorwei.com" target="_blank" rel="noopener">on my personal website.</a></p>
+                        <p></p>This site uses cookies to enhance your experience on BlockCraft. Have fun!</p>
+                    </div>
+
+                    <div id="changelog" class="tabcontent" style="display: none;"></div>
+                </div>
+
+                <!-- Server select -->
+                <div id="server-select" class="tab-container" style="display:none">
+                    <div id="nav">
+                        <button class="tablinks" style="width: 100%;" onclick="changeTab(event, 'server-list')" id="server-button">Server Select</button>
+                    </div>
+
+                    <div id="server-list" class="tabcontent">
+                        <div class="server">
+                            <p>Welcome to the server select menu! Pick the server you'd like to join or enter a direct connect address.</p>
+                        </div>
+                        <div id="refresh-servers" class="top-button">Refresh</div>
+
+                        <div id="server-container"></div>
+                    </div>
+
+                    <div id="changelog" class="tabcontent" style="display: none;"></div>
+                </div>
+
+                <!-- Settings -->
+                <div id="settings" class="tab-container" style="display:none">
+                    <div id="nav">
+                        <button class="tablinks" onclick="changeTab(event, 'video-settings')" id="video-button">Video</button>
+                        <button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
+                    </div>
+
+                    <div id="video-settings" class="tabcontent" style="display: none;">
+                        <div id="reset-video" class="top-button">Reset to Default</div>
+                        <!-- <div class="control-container">
 								<span id="fpsValue" class="slider-text">Max FPS: 60</span>
 								<input type="range" min="1" max="200" value="60" class="slider" id="fpsSlider" style="position: relative; float: right; width: 50%; height: 20px">
 							</div> -->
-							<div class="control-container">
-								<span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
-								<input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px">
-							</div>
-							<div class="control-container">
-								<span id="fovValue" class="slider-text">FOV: 75</span>
-								<input type="range" min="15" max="160" value="75" class="slider" id="fovSlider" style="position: relative; float: right; width: 50%; height: 20px">
-							</div>
-							<div class="control-container">
-								<span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
-								<input type="range" min="1" max="32" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px">
-							</div>
-							<div class="control-container">
-								<span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
-								<input type="range" min="0" max="20" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px">
-							</div>
-							<!-- <div class="control-container">
+                        <div class="control-container">
+                            <span id="sensitivityValue" class="slider-text">Sensitivity: 50</span>
+                            <input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider" style="position: relative; float: right; width: 50%; height: 20px">
+                        </div>
+                        <div class="control-container">
+                            <span id="fovValue" class="slider-text">FOV: 75</span>
+                            <input type="range" min="15" max="160" value="75" class="slider" id="fovSlider" style="position: relative; float: right; width: 50%; height: 20px">
+                        </div>
+                        <div class="control-container">
+                            <span id="renderDistanceValue" class="slider-text">Render Distance: 8</span>
+                            <input type="range" min="1" max="32" value="8" class="slider" id="renderDistanceSlider" style="position: relative; float: right; width: 50%; height: 20px">
+                        </div>
+                        <div class="control-container">
+                            <span id="chunkLoadingRateValue" class="slider-text">Chunk Loading Rate: 1</span>
+                            <input type="range" min="0" max="20" value="1" class="slider" id="chunkLoadingRateSlider" style="position: relative; float: right; width: 50%; height: 20px">
+                        </div>
+                        <!-- <div class="control-container">
 								<span id="workersValue" class="slider-text">Web Workers: 2</span>
 								<input type="range" min="1" max="4" value="2" class="slider" id="workersSlider" style="position: relative; float: right; width: 50%; height: 20px">
 							</div> -->
 
-							<div class="control-container">
-								<span id="guiSizeValue" class="slider-text">GUI Size:</span>
-								<select id="guiSizeSelect" type="select" class="select" style="position: relative; float: right; width: 130px; height: 30px">
+                        <div class="control-container">
+                            <span id="guiSizeValue" class="slider-text">GUI Size:</span>
+                            <select id="guiSizeSelect" type="select" class="select" style="position: relative; float: right; width: 130px; height: 30px">
 									<option value="1">Small</option>
 									<option value="2" selected="selected">Medium</option>
 									<option value="3">Large</option>
 								</select>
-							</div>
-							<div class="control-container">
-								<span id="textureValue" class="slider-text">Material Texture:</span>
-								<select id="textureSelect" type="select" class="select" style="position: relative; float: right; width: 130px; height: 30px">
+                        </div>
+                        <div class="control-container">
+                            <span id="textureValue" class="slider-text">Material Texture:</span>
+                            <select id="textureSelect" type="select" class="select" style="position: relative; float: right; width: 130px; height: 30px">
 									<option value="basic">Basic</option>
 									<option value="lambert" selected="selected">Lambert</option>
 									<option value="phong">Phong</option>
 									<option value="standard">Standard</option>
 									<option value="toon">Toon</option>
 								</select>
-							</div>
-							
-                            <div id="switch-container" class="flex-container">
+                        </div>
 
-                            </div>
-							
-						</div>
+                        <div id="switch-container" class="flex-container">
 
-						<div id="keyboard-settings" class="tabcontent" style="display: none;">
-						</div>
-					</div>
-				</div>
-				<!-- User Input and Start Button -->
-				<div id ="input-container">
-					<input autocomplete="off" id="name-input" class="input" type="text" placeholder="Enter Username" maxlength="20" onkeypress="return /[a-z ]/i.test(event.key)">
-					<input autocomplete="off" id="direct-connect-input" class="input" type="text" placeholder="Direct Connect (optional)" maxlength="50" style="display: none;">
-					<br />
-					<div id="start-button">
-						<div id="continue-bar" class="bar menu-button">Continue</div>
-						<div id="loading-bar" class="bar menu-button" style="display: none;">
-							Connecting to server...
-						</div>
-						<div id="ingame-bar" class="menu-button" style="display: none;">
-							<div id="disconnect-bar" class="bar">
-								Disconnect
-							</div>
-							<div id="return-bar" class="bar">
-								Return to game
-							</div>
-						</div> 
-						<div id="disconnecting-bar" class="bar menu-button" style="display: none;">
-							Disconnecting...
-						</div>
-					</div>
-				</div>
-			</div>
+                        </div>
 
-			
-		</div>
+                    </div>
 
-		<input spellcheck="false" autocomplete="off" id="chat-input" type="text" placeholder="> Press Enter to Chat" maxlength="100">
-		<input spellcheck="false" autocomplete="off" id="search-input" type="text" placeholder="Search Items" maxlength="100">
+                    <div id="keyboard-settings" class="tabcontent" style="display: none;">
+                    </div>
+                </div>
+            </div>
+            <!-- User Input and Start Button -->
+            <div id="input-container">
+                <input autocomplete="off" id="name-input" class="input" type="text" placeholder="Enter Username" maxlength="20" onkeypress="return /[a-z ]/i.test(event.key)">
+                <input autocomplete="off" id="direct-connect-input" class="input" type="text" placeholder="Direct Connect (optional)" maxlength="50" style="display: none;">
+                <br />
+                <div id="start-button">
+                    <div id="continue-bar" class="bar menu-button">Continue</div>
+                    <div id="loading-bar" class="bar menu-button" style="display: none;">
+                        Connecting to server...
+                    </div>
+                    <div id="ingame-bar" class="menu-button" style="display: none;">
+                        <div id="disconnect-bar" class="bar">
+                            Disconnect
+                        </div>
+                        <div id="return-bar" class="bar">
+                            Return to game
+                        </div>
+                    </div>
+                    <div id="disconnecting-bar" class="bar menu-button" style="display: none;">
+                        Disconnecting...
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
-		<script>
-			class Counter {
-				constructor(element) {
-					// Remember a weak reference to the DOM element
-					this.ref = new WeakRef(element);
-					this.start();
-				}
+    </div>
 
-				start() {
-					if (this.timer) {
-						return;
-					}
+    <input spellcheck="false" autocomplete="off" id="chat-input" type="text" placeholder="> Press Enter to Chat" maxlength="100">
+    <input spellcheck="false" autocomplete="off" id="search-input" type="text" placeholder="Search Items" maxlength="100">
 
-					this.count = 0;
 
-					const tick = () => {
-						// Get the element from the weak reference, if it still exists
-						const element = this.ref.deref();
-						if (element) {
-							element.textContent = ++this.count;
-						} else {
-							// The element doesn't exist anymore
-							console.log("The element is gone.", this.count);
-							this.stop();
-							this.ref = null;
-						}
-					};
+    <script>
+        class Counter {
+            constructor(element) {
+                // Remember a weak reference to the DOM element
+                this.ref = new WeakRef(element);
+                this.start();
+            }
 
-					tick();
-					this.timer = setInterval(tick, 1000);
-				}
+            start() {
+                if (this.timer) {
+                    return;
+                }
 
-				stop() {
-					if (this.timer) {
-					clearInterval(this.timer);
-					this.timer = 0;
-					}
-				}
-			}
+                this.count = 0;
 
-			$("#welcome-button")[0].click();
-			// Prevent right-click
-			//document.addEventListener('contextmenu', event => event.preventDefault());
-			let cookieExpiryTime = 14; // 14 days
-			
-			// Change tab
-			function changeTab(evt, cityName) {
-			  // Declare all variables
-			  var i, tabcontent, tablinks;
+                const tick = () => {
+                    // Get the element from the weak reference, if it still exists
+                    const element = this.ref.deref();
+                    if (element) {
+                        element.textContent = ++this.count;
+                    } else {
+                        // The element doesn't exist anymore
+                        console.log("The element is gone.", this.count);
+                        this.stop();
+                        this.ref = null;
+                    }
+                };
 
-			  // Get all elements with class="tabcontent" and hide them
-			  tabcontent = document.getElementsByClassName("tabcontent");
-			  for (i = 0; i < tabcontent.length; i++) {
-			    tabcontent[i].style.display = "none";
-			  }
+                tick();
+                this.timer = setInterval(tick, 1000);
+            }
 
-			  // Get all elements with class="tablinks" and remove the class "active"
-			  tablinks = document.getElementsByClassName("tablinks");
-			  for (i = 0; i < tablinks.length; i++) {
-			    tablinks[i].className = tablinks[i].className.replace(" active", "");
-			  }
+            stop() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = 0;
+                }
+            }
+        }
 
-			  // Show the current tab, and add an "active" class to the button that opened the tab
-			  document.getElementById(cityName).style.display = "block";
-			  evt.currentTarget.className += " active";
-			}
+        $("#welcome-button")[0].click();
+        // Prevent right-click
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        let cookieExpiryTime = 14; // 14 days
 
-			// Load the changelog
-			for (let change of changelog) {
-				let date = change.date;
-				let version = change.version;
-				let changes = change.changes.split("|");
+        // Change tab
+        function changeTab(evt, cityName) {
+            // Declare all variables
+            var i, tabcontent, tablinks;
 
-				let message = $("<span>v" + version + " | " + date + "</span><br><br>");
-				$("#changelog").append(message);
+            // Get all elements with class="tabcontent" and hide them
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
 
-				for (let comment of changes) {
-					
-					let message = $("<span>- " + comment + "</span><br>");
-					$("#changelog").append(message);
-				}
+            // Get all elements with class="tablinks" and remove the class "active"
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
 
-		        $("#changelog").append($("<br>"));
-			}
+            // Show the current tab, and add an "active" class to the button that opened the tab
+            document.getElementById(cityName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
 
-			// Get cookie username
+        // Load the changelog
+        for (let change of changelog) {
+            let date = change.date;
+            let version = change.version;
+            let changes = change.changes.split("|");
 
-			let name = getCookie("Name");
-			if (name)
-				$("#name-input").val(name);
+            let message = $("<span>v" + version + " | " + date + "</span><br><br>");
+            $("#changelog").append(message);
 
-		</script>
-	</body>
+            for (let comment of changes) {
+
+                let message = $("<span>- " + comment + "</span><br>");
+                $("#changelog").append(message);
+            }
+
+            $("#changelog").append($("<br>"));
+        }
+
+        // Get cookie username
+
+        let name = getCookie("Name");
+        if (name)
+            $("#name-input").val(name);
+    </script>
+</body>
+
 </html>
