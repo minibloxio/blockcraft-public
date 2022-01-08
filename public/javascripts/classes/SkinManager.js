@@ -113,11 +113,11 @@ class SkinManager {
         this.skins[name].armC = [];
         this.skins[name].armC.push(
             this.createMat(name, x, y + 4, 4, 12, true), // Right
-            this.createMat(name, x + 8, y + 4, 4, 12), // Left
+            this.createMat(name, x + 4, y, 4, 4), // Top
             this.createMat(name, x + 4, y, 4, 4), // Top
             this.createMat(name, x + 4, y + 4, 4, 12), // Front
-            this.createMat(name, x + 12, y + 4, 4, 12), // Back
-            this.createMat(name, x + 4, y + 4, 4, 12), // Front
+            this.createMat(name, x + 4, y, 4, 4), // Top
+            this.createMat(name, x + 4, y, 4, 4), // Top
         )
     }
 

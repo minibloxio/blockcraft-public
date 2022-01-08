@@ -90,6 +90,8 @@ socket.on('joinResponse', function(data) {
     player.init();
     player.join(data);
 
+    axesHelper.visible = game.debug;
+
     // Receive current server players
     players = {};
     let serverPlayers = data.serverPlayers;

@@ -5,13 +5,14 @@ $('html').mousedown(function(event) {
     if (!player.controls.enabled || inventory.showInventory)
         return;
     switch (event.which) {
-        case 1:
+        case 1: // Left click
             player.punch();
             break;
-        case 2:
-
+        case 2: // Middle click
+            event.preventDefault();
+            player.getBlock();
             break;
-        case 3:
+        case 3: // Right click
             player.place = true;
             player.key.rightClick = Date.now();
             if (!player.key.lastRightClick)

@@ -126,7 +126,7 @@ module.exports = class World {
                 this.getEntity("wood_pickaxe"),
                 this.getEntity("wood_axe"),
                 this.getEntity("bow"),
-                this.getEntity("log_spruce", 64),
+                this.getEntity("log_oak", 64),
                 this.getEntity("arrow", 64),
                 this.getEntity("ender_pearl", 16),
             ],

@@ -475,11 +475,11 @@ class Player {
 
         let intersects;
 
-        // update the picking ray with the camera and mouse position
+        // Update the picking ray with the camera and mouse position
         this.raycaster.setFromCamera(new THREE.Vector3(0, 0, 0), camera);
         this.raycaster.far = blockSize * 5;
 
-        // calculate blocks intersecting the picking ray
+        // Calculate blocks intersecting the picking ray
         this.nearbyMeshes.length = 0;
         let cellPos = chunkManager.cellPos;
         for (let offset of player.neighborOffsets) {
@@ -599,6 +599,49 @@ class Player {
                 setTimeout(function() {
                     if (players[playerId]) players[playerId].invulnerable = false;
                 }, 400)
+            }
+        }
+    }
+
+    getBlock() {
+        if (this.mode != "creative") return;
+
+        if (this.closest.point && this.closest.face) {
+            let { blockSize } = world;
+
+            let x = Math.floor((this.closest.point.x - this.closest.face.normal.x) / blockSize);
+            let y = Math.floor((this.closest.point.y - this.closest.face.normal.y) / blockSize);
+            let z = Math.floor((this.closest.point.z - this.closest.face.normal.z) / blockSize);
+
+            let voxel = world.getVoxel(x, y, z);
+            if (voxel <= 0)
+                return;
+
+            let exists = false;
+            let total = 0;
+            for (let i = 0; i < this.toolbar.length; i++) {
+                let t = this.toolbar[i];
+                if (t && t.v == voxel && t.c > 0 && t.class == "block") {
+                    this.currentSlot = i;
+                    exists = true;
+                    break;
+                } else if (t && t.c > 0) {
+                    total++;
+                }
+            }
+            if (!exists && total < 9) { // Add the block to the toolbar
+                for (let i = 0; i < 9; i++) {
+                    let t = this.toolbar[i];
+                    if ((t && t.c == 0) || !t) {
+                        this.currentSlot = i;
+                        this.toolbar[i] = { v: voxel, c: 1, class: "block" };
+                        socket.emit('updateInventory', this.toolbar);
+                        break;
+                    }
+                }
+            } else if (!exists && total == 9) { // Replace current slot with selected block
+                this.toolbar[this.currentSlot] = { v: voxel, c: 1, class: "block" };
+                socket.emit('updateInventory', this.toolbar);
             }
         }
     }
@@ -1157,10 +1200,7 @@ class Player {
     update(delta) {
         if (player.hp <= 0 || !initialized || !joined || !isState("inGame")) return;
 
-        if (Date.now() - this.lastRaycast > 100) {
-            this.select(true);
-            this.lastRaycast = Date.now();
-        }
+        this.select(true);
 
         this.mine();
         this.placeBlock();
