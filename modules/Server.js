@@ -191,12 +191,12 @@ module.exports = class World {
     }
 
     // Set blacklist
-    setBlacklist(fs, ban, player) {
+    setBlacklist(fs, ban, player, ip) {
         if (!player) return;
 
         let isBanned = false;
         for (let i = 0; i < this.blacklist.length; i++) {
-            if (this.blacklist[i].token == player.token || this.blacklist[i].ip == player.ip) {
+            if (this.blacklist[i].token == player.token || this.blacklist[i].ip == ip) {
                 isBanned = true;
                 break;
             }
@@ -206,7 +206,7 @@ module.exports = class World {
             this.blacklist.push({
                 name: player.name,
                 token: player.token,
-                ip: player.ip,
+                ip: ip,
             });
             fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function(err) {
                 if (err) console.log(err);

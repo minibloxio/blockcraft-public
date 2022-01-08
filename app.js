@@ -127,6 +127,7 @@ let server = new GameServer();
 
 // Players
 let players = {};
+let player_ips = {};
 
 // Operators
 let operator_path = __dirname + '/operators.json';
@@ -280,7 +281,7 @@ io.on('connection', function(socket_) {
         // Set player object
         players[socket.id] = server.addPlayer(socket.id, data);
         let player = players[socket.id];
-        players[socket.id].ip = address;
+        player_ips[socket.id] = address;
 
         // Log player connection
         addLog(socket.id, "ip", address);
@@ -712,7 +713,7 @@ io.on('connection', function(socket_) {
             server.setOperator(fs, false, players[data.id]);
 
             // Set ban status
-            let success = server.setBlacklist(fs, true, players[data.id]);
+            let success = server.setBlacklist(fs, true, players[data.id], player_ips[data.id]);
             if (success) {
                 io.emit('messageAll', {
                     name: "Server",
@@ -732,7 +733,7 @@ io.on('connection', function(socket_) {
             io.to(`${data.id}`).disconnectSockets();
         } else if (players[socket.id].operator && !data.isBanned) {
             // Check if player is banned
-            let success = server.setBlacklist(fs, false, data);
+            let success = server.setBlacklist(fs, false, data, player_ips[data.id]);
             if (success) {
                 io.emit('messageAll', {
                     name: "Server",

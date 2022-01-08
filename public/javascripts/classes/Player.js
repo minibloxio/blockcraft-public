@@ -976,7 +976,7 @@ class Player {
 
                         if (jumpDiff > 0 && jumpDiff < 500 && this.mode == "survival" && !this.god) { // Fall damage
                             socket.emit('takeDamage', {
-                                dmg: jumpDiff * 0.5,
+                                dmg: jumpDiff,
                                 type: 'fall'
                             })
                             camera.rotation.order = "YXZ"

@@ -173,8 +173,6 @@ function updateHints() {
     }
     commands.op.hints[player.name] = "Make yourself an operator"; // Update op hint
     commands.deop.hints[player.name] = "Remove your operator status"; // Update deop hint
-    commands.ban.hints[player.name] = "Ban yourself" // Update ban hint
-    commands.unban.hints[player.name] = "Unban yourself" // Update unban hint
     commands.kill.hints[player.name] = "Kill yourself" // Update kill hint
     commands.kill.hints['@e'] = "Kill all server entities";
     commands.kill.hints['@a'] = "Kill all players";
