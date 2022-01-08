@@ -154,13 +154,19 @@ class Player {
         scene.add(this.controls.getObject());
     }
 
-    join(startPos) {
+    join(data) {
         // Inventory
         this.currentSlot = 0;
         this.toolbar = [];
 
         // Spawn
-        this.respawn(world.blockSize, startPos);
+        this.respawn(world.blockSize, data.startPos);
+
+        // Check if operator
+        if (data.operator) {
+            this.operator = true;
+            this.mode = "creative";
+        }
     }
 
     respawn(blockSize, pos) {
@@ -783,13 +789,6 @@ class Player {
         }
     }
 
-    move(delta) {
-        this.updateVelocities(delta);
-        this.updateMoveAxis(delta);
-        this.applyKnockback(delta);
-        this.checkCollision(delta);
-    }
-
     updateVelocities(delta) {
         let { blockSize } = world;
 
@@ -1120,6 +1119,14 @@ class Player {
 
         camera.fov = game.fov + this.deltaFov;
         camera.updateProjectionMatrix();
+    }
+
+    // Update player movement
+    move(delta) {
+        this.updateVelocities(delta);
+        this.updateMoveAxis(delta);
+        this.applyKnockback(delta);
+        this.checkCollision(delta);
     }
 
     // Update vitals

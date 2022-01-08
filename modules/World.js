@@ -352,7 +352,7 @@ module.exports = class World {
         let pos = entity.pos.clone();
         let vel = entity.vel.clone()
 
-        vel.normalize().multiplyScalar(blockSize / 2);
+        vel.normalize().multiplyScalar(7);
         pos.add(vel).divideScalar(blockSize);
 
         if (entity.lastPos) pos = entity.lastPos;

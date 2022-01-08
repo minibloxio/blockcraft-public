@@ -87,7 +87,7 @@ socket.on('joinResponse', function(data) {
     Object.assign(world, data.world);
 
     // Initalize player
-    player.join(data.startPos);
+    player.join(data);
 
     // Receive current server players
     players = {};

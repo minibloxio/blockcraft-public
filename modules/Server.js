@@ -115,7 +115,7 @@ module.exports = class World {
         let player = {
             id: id,
             name: data.name || ("Player" + Math.floor(Math.random() * 9999)),
-            pos: { x: 0, y: 0, z: 0 },
+            pos: data.pos || { x: 0, y: 0, z: 0 },
             vel: { x: 0, y: 0, z: 0 },
             rot: { x: 0, y: 0, z: 0 },
             dir: { x: 0, y: 0, z: 0 },

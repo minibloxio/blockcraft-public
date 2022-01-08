@@ -37,6 +37,7 @@ const worker = new Worker('./worker.js');
 const Function = require('./modules/Function.js');
 const World = require('./modules/World.js');
 const GameServer = require('./modules/Server.js');
+const Bot = require('./modules/Bot.js');
 const THREE = require('three');
 var filter = require('leo-profanity');
 
@@ -129,6 +130,8 @@ let server = new GameServer();
 let players = {};
 let player_ips = {};
 let player_tokens = {};
+
+let bots = {};
 
 // Operators
 let operator_path = __dirname + '/operators.json';
@@ -339,6 +342,7 @@ io.on('connection', function(socket_) {
                 z: randomZ * world.blockSize
             },
             info: config,
+            operator: player.operator
         });
     })
 
@@ -863,6 +867,32 @@ io.on('connection', function(socket_) {
         }
     });
 
+    // Spawn bot
+    socket.on('spawnBot', function() {
+        if (!players[socket.id]) return;
+
+        if (players[socket.id].operator) {
+            let id = Function.randomString(10);
+            players[id] = server.addPlayer(id, {
+                name: "Bot",
+                pos: players[socket.id].pos,
+            });
+            bots[id] = new Bot(players[id], world);
+            io.emit('addPlayer', players[id]);
+            io.emit('messageAll', {
+                name: "Server",
+                text: "Spawned bot",
+                color: "aqua"
+            });
+        } else {
+            socket.emit('message', {
+                name: "Server",
+                text: "You do not have operator status to spawn bots",
+                color: "aqua",
+            });
+        }
+    })
+
     // DISCONNECT
     socket.on('disconnect', function() {
         if (players[socket.id] && players[socket.id].connected) {
@@ -896,6 +926,11 @@ setInterval(function() {
 
     // Update players
     server.updatePlayers(players, world, logger, io, addLog);
+
+    // Update bots
+    for (let id in bots) {
+        bots[id].update(world);
+    }
 
     // Auto save
     let autosaveInterval = 1000 * 60 * 10; // 10 Minutes

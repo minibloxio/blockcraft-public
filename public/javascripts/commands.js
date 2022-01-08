@@ -108,6 +108,9 @@ let commandsInit = JSON.stringify({
     "save": {
         "hint": "- Saves the world (requires operator status)",
     },
+    "spawn": {
+        "hint": "- Spawns a bot (requires operator status)",
+    }
 })
 let commands = JSON.parse(commandsInit);
 let prevCommands = [
@@ -466,6 +469,8 @@ function checkCommand(msg) {
         damagePlayer(msg);
     } else if (msg[0] == "save") {
         saveWorld();
+    } else if (msg[0] == "spawn") {
+        spawnBot();
     } else {
         chat.addChat({
             text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',
@@ -1063,6 +1068,7 @@ function listPlayers() {
     })
 }
 
+// Damage player
 function damagePlayer(msg) {
     msg.shift();
     let damage = parseFloat(msg[0]);
@@ -1079,6 +1085,7 @@ function damagePlayer(msg) {
     });
 }
 
+// Save world
 function saveWorld() {
     if (!player.operator) {
         chat.addChat({
@@ -1088,4 +1095,16 @@ function saveWorld() {
         return;
     }
     socket.emit('saveWorld');
+}
+
+// Spawn an entity
+function spawnBot() {
+    if (!player.operator) {
+        chat.addChat({
+            text: 'Error: This command can only be used by operators',
+            color: "red"
+        });
+        return;
+    }
+    socket.emit('spawnBot');
 }
