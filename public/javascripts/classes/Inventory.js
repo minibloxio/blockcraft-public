@@ -14,8 +14,8 @@ class Inventory {
         this.craftingOutput = undefined;
 
         // Toolbar
-        this.toolbarX = this.halfW-this.hotboxWidth*4;
-        this.toolbarSelectorX = this.halfW-this.hotboxWidth*3.5-2.5;
+        this.toolbarX = this.halfW - this.hotboxWidth * 4;
+        this.toolbarSelectorX = this.halfW - this.hotboxWidth * 3.5 - 2.5;
 
         // Highlight boxes
         this.highlightBoxes = [];
@@ -33,8 +33,8 @@ class Inventory {
         canvas.width = $("html").innerWidth();
         canvas.height = $("html").innerHeight();
 
-        this.halfW = canvas.width/2;
-        this.halfH = canvas.height/2;
+        this.halfW = canvas.width / 2;
+        this.halfH = canvas.height / 2;
 
         let size = game.guiSize;
         if (size == 1) {
@@ -43,8 +43,8 @@ class Inventory {
             this.boxSize = 48;
             this.hotboxWidth = 60;
             this.selectorWidth = 65;
-            this.boxRatio = 8/9.2;
-            this.toolbarRatio = 8/9.1;
+            this.boxRatio = 8 / 9.2;
+            this.toolbarRatio = 8 / 9.1;
             this.margin = 4;
 
             this.width = 480;
@@ -55,19 +55,19 @@ class Inventory {
             this.boxSize = 58;
             this.hotboxWidth = 80;
             this.selectorWidth = 85;
-            this.boxRatio = 8/9.2;
-            this.toolbarRatio = 8/9.1;
+            this.boxRatio = 8 / 9.2;
+            this.toolbarRatio = 8 / 9.1;
             this.margin = 5;
 
             this.width = 640;
             this.height = 680;
         } else if (size == 3) {
-            
+
         }
 
-        
-        this.toolbarX = this.halfW-this.hotboxWidth*4;
-        this.toolbarSelectorX = this.halfW-this.hotboxWidth*3.5-2.5;
+
+        this.toolbarX = this.halfW - this.hotboxWidth * 4;
+        this.toolbarSelectorX = this.halfW - this.hotboxWidth * 3.5 - 2.5;
     }
 
     // Get entity by name
@@ -96,7 +96,7 @@ class Inventory {
 
     // Update crafting output
     updateCraftingOutput(remove) {
-        let {craftingGrid, craftingTableGrid, showCraftingTable} = this;
+        let { craftingGrid, craftingTableGrid, showCraftingTable } = this;
 
         let grid = undefined;
         let size = 4;
@@ -108,8 +108,8 @@ class Inventory {
             size = 3;
         }
 
-        let craftingSize = grid.filter(n=> n == 0 || n ).length;
-        
+        let craftingSize = grid.filter(n => n == 0 || n).length;
+
         let outputs = [];
         // Loop through recipes
         for (let recipe of recipes) {
@@ -118,7 +118,7 @@ class Inventory {
 
             // Shapeless recipe check
             if (recipe.shapeless) {
-                let {same, recipeSize} = Recipe.checkShapelessRecipe(recipe, grid);
+                let { same, recipeSize } = Recipe.checkShapelessRecipe(recipe, grid);
                 if (same) {
                     this.addRecipeToOutput(recipe, recipeSize, outputs);
                     continue;
@@ -127,10 +127,10 @@ class Inventory {
 
             // Loop through crafting grid
             let foundRecipe = false;
-            for (let i = 0; i < size-rows; i++) {
-                for (let j = 0; j < size-columns; j++) {
+            for (let i = 0; i < size - rows; i++) {
+                for (let j = 0; j < size - columns; j++) {
                     for (let k = 0; k < (recipe.mirrored ? 2 : 1); k++) {
-                        var {same, recipeSize} = Recipe.checkRecipe(recipe, grid, rows, columns, i, j, size, k);
+                        var { same, recipeSize } = Recipe.checkRecipe(recipe, grid, rows, columns, i, j, size, k);
                         if (!same) continue;
 
                         this.addRecipeToOutput(recipe, recipeSize, outputs);
@@ -155,7 +155,7 @@ class Inventory {
 
 
         // Remove 1 item from crafting grid
-        if (outputItem && remove) { 
+        if (outputItem && remove) {
             for (let i = 0; i < grid.length; i++) {
                 if (!grid[i]) continue;
                 grid[i].c -= 1;
@@ -168,13 +168,13 @@ class Inventory {
 
     // Check if mouse is within inventory
     withinInventory() {
-        let {width, height, halfW, halfH} = this;
-        return mouse.x > halfW - width/2 && mouse.x < halfW + width/2 && mouse.y > halfH - height/2 && mouse.y < halfH + height/2;
+        let { width, height, halfW, halfH } = this;
+        return mouse.x > halfW - width / 2 && mouse.x < halfW + width / 2 && mouse.y > halfH - height / 2 && mouse.y < halfH + height / 2;
     }
 
     // Check if mouse is within item frame
     withinItemFrame(xPos, yPos) {
-        let {boxSize} = this;
+        let { boxSize } = this;
 
         xPos -= this.margin;
         yPos -= this.margin;
@@ -183,7 +183,7 @@ class Inventory {
 
     // Unselect item
     unselect() {
-        let {selectedItem, selectedBoxes} = this;
+        let { selectedItem, selectedBoxes } = this;
 
         this.pickup = false;
         this.drop = false;
@@ -228,10 +228,10 @@ class Inventory {
 
     // Update item in inventory
     updateItem(block, i, type, xPos, yPos, firstClick) {
-        let {searchBlocks, searchItems, craftingGrid, craftingTableGrid, currentRow} = this;
+        let { searchBlocks, searchItems, craftingGrid, craftingTableGrid, currentRow } = this;
 
         if (block == "creative" && firstClick) { // CREATIVE MODE
-            i = i + currentRow*9;
+            i = i + currentRow * 9;
             if (type == "left") { // Left click item
                 let entity = {}
                 if (i < searchBlocks.length) {
@@ -240,14 +240,14 @@ class Inventory {
 
                     let block = world.blockId[searchBlocks[i]]; // Get block id
                     entity.v = block;
-                } else if (i < searchBlocks.length+searchItems.length) {
+                } else if (i < searchBlocks.length + searchItems.length) {
                     entity.class = "item";
                     entity.c = map[16] ? 64 : 1;
 
-                    let item = world.itemId[searchItems[i-searchBlocks.length]]; // Get item id
+                    let item = world.itemId[searchItems[i - searchBlocks.length]]; // Get item id
                     entity.v = item;
                 }
-                if (!this.selectedItem ) {
+                if (!this.selectedItem) {
                     // Pick up item
                     this.selectedItem = JSON.parse(JSON.stringify(entity));
                 } else if (this.selectedItem && this.selectedItem.c > 0) {
@@ -263,14 +263,14 @@ class Inventory {
                     // Split item stack
                     this.selectedItem = {
                         v: block[i].v,
-                        c: Math.ceil(block[i].c/2),
+                        c: Math.ceil(block[i].c / 2),
                         class: block[i].class
                     };
-                    block[i].c -= Math.ceil(block[i].c/2);
+                    block[i].c -= Math.ceil(block[i].c / 2);
                 } else if (this.selectedItem && this.selectedItem.c > 0 && (!block[i] || block[i].c == 0)) {
                     // Drop 1 item
                     block[i] = {
-                        v: this.selectedItem.v, 
+                        v: this.selectedItem.v,
                         c: 1,
                         class: this.selectedItem.class
                     };
@@ -288,19 +288,19 @@ class Inventory {
                 }
             }
         } else if (block == "creative" && type == "hover") {
-            i = i + currentRow*9;
+            i = i + currentRow * 9;
             let name = "";
             let entity = {};
             if (i < searchBlocks.length) {
                 name = searchBlocks[i];
                 entity.v = world.blockId[name];
                 entity.class = "block";
-            } else if (i < searchBlocks.length+searchItems.length) {
-                name = searchItems[i-searchBlocks.length]; 
+            } else if (i < searchBlocks.length + searchItems.length) {
+                name = searchItems[i - searchBlocks.length];
                 entity.v = world.itemId[name];
                 entity.class = "item";
             }
-            
+
             this.drawHintBox(name, entity);
         } else if (block != "creative") { // SURVIVAL MODE
             let selectedExists = this.selectedItem && this.selectedItem.c > 0;
@@ -326,10 +326,10 @@ class Inventory {
                 if (!selectedExists && blockExists && firstClick) { // Split item stack
                     this.selectedItem = {
                         v: block[i].v,
-                        c: Math.ceil(block[i].c/2),
+                        c: Math.ceil(block[i].c / 2),
                         class: block[i].class
                     };
-                    block[i].c -= Math.ceil(block[i].c/2);
+                    block[i].c -= Math.ceil(block[i].c / 2);
                 } else if (selectedExists && (!blockExists || blockEqualsSelected)) { // Drop 1 item
                     let total = 1;
 
@@ -344,7 +344,7 @@ class Inventory {
                     if (!exists) {
                         if (blockExists) total += block[i].c;
                         block[i] = {
-                            v: this.selectedItem.v, 
+                            v: this.selectedItem.v,
                             c: total,
                             class: this.selectedItem.class
                         };
@@ -380,7 +380,7 @@ class Inventory {
                 total += this.compareItems(inventory, itemToCompare, i);
 
                 this.selectedItem = {
-                    v: itemToCompare.v, 
+                    v: itemToCompare.v,
                     c: total,
                     class: itemToCompare.class
                 }
@@ -390,11 +390,11 @@ class Inventory {
                 let entity = block[i];
                 if (entity) {
                     if (entity.class == "block") {
-                        name = world.blockOrder[entity.v-1];
+                        name = world.blockOrder[entity.v - 1];
                     } else if (entity.class == "item") {
-                        name = world.itemOrder[entity.v-1];
+                        name = world.itemOrder[entity.v - 1];
                     }
-                    
+
                     this.drawHintBox(name, entity);
                 }
             }
@@ -424,39 +424,39 @@ class Inventory {
 
     // Get position in inventory menu
     getPos(type, i, j, addMargin) {
-        let {hotboxWidth, blockWidth, boxSize, height, margin} = this;
+        let { hotboxWidth, blockWidth, boxSize, height, margin } = this;
 
         let xPos, yPos;
-        let startX = this.halfW-hotboxWidth*4+(hotboxWidth-blockWidth)/2+3;
-        let startY = this.halfH+height/2;
-        let startY_ = this.halfH-150;
+        let startX = this.halfW - hotboxWidth * 4 + (hotboxWidth - blockWidth) / 2 + 3;
+        let startY = this.halfH + height / 2;
+        let startY_ = this.halfH - 150;
 
         if (type == "inventory") {
-            xPos = startX+(i%9)*hotboxWidth*this.boxRatio;
-            yPos = startY-boxSize;
-            if (i > 8) yPos = startY-boxSize-hotboxWidth*3*this.boxRatio+hotboxWidth*Math.floor((i-9)/9)*this.boxRatio-8;
+            xPos = startX + (i % 9) * hotboxWidth * this.boxRatio;
+            yPos = startY - boxSize;
+            if (i > 8) yPos = startY - boxSize - hotboxWidth * 3 * this.boxRatio + hotboxWidth * Math.floor((i - 9) / 9) * this.boxRatio - 8;
         } else if (type == "crafting") {
-            xPos = startX+i*hotboxWidth*this.boxRatio+hotboxWidth*2;
-            yPos = startY_-hotboxWidth*this.boxRatio+j*hotboxWidth*this.boxRatio;
+            xPos = startX + i * hotboxWidth * this.boxRatio + hotboxWidth * 2;
+            yPos = startY_ - hotboxWidth * this.boxRatio + j * hotboxWidth * this.boxRatio;
         } else if (type == "craftingOutput") {
-            xPos = startX+hotboxWidth*5;
-            yPos = startY_-hotboxWidth*0.5;
+            xPos = startX + hotboxWidth * 5;
+            yPos = startY_ - hotboxWidth * 0.5;
         } else if (type == "craftingTable") {
-            xPos = startX+i*hotboxWidth*this.boxRatio+hotboxWidth;
-            yPos = startY_-hotboxWidth*this.boxRatio+j*hotboxWidth*this.boxRatio;
+            xPos = startX + i * hotboxWidth * this.boxRatio + hotboxWidth;
+            yPos = startY_ - hotboxWidth * this.boxRatio + j * hotboxWidth * this.boxRatio;
         } else if (type == "craftingTableOutput") {
-            xPos = startX+hotboxWidth*5;
+            xPos = startX + hotboxWidth * 5;
             yPos = startY_;
         } else if (type == "creative") {
-            xPos = startX+i*hotboxWidth*this.boxRatio;
-            yPos = this.halfH-boxSize-j*hotboxWidth*this.boxRatio;
+            xPos = startX + i * hotboxWidth * this.boxRatio;
+            yPos = this.halfH - boxSize - j * hotboxWidth * this.boxRatio;
         } else if (type == "item") {
-            xPos = startX+(i%9)*hotboxWidth*this.boxRatio;
-            yPos = this.halfH-boxSize-hotboxWidth*2*this.boxRatio+Math.floor((i-9)/9)*hotboxWidth*this.boxRatio;
+            xPos = startX + (i % 9) * hotboxWidth * this.boxRatio;
+            yPos = this.halfH - boxSize - hotboxWidth * 2 * this.boxRatio + Math.floor((i - 9) / 9) * hotboxWidth * this.boxRatio;
         } else if (type == "background") {
-            xPos = startX+i*hotboxWidth*this.boxRatio;
-            yPos = startY-boxSize-j*hotboxWidth*this.boxRatio;
-            if (j!=0) yPos -= 8;
+            xPos = startX + i * hotboxWidth * this.boxRatio;
+            yPos = startY - boxSize - j * hotboxWidth * this.boxRatio;
+            if (j != 0) yPos -= 8;
         }
 
         if (addMargin) {
@@ -468,20 +468,20 @@ class Inventory {
         xPos = Math.floor(xPos);
         yPos = Math.floor(yPos);
 
-        return {xPos, yPos};
+        return { xPos, yPos };
     }
 
     // Select inventory item
     selectInventory(type, firstClick) {
         if (!this.showInventory) return;
 
-        let {craftingGrid, craftingTableGrid, showCraftingTable, craftingOutput, selectedItem} = this;
+        let { craftingGrid, craftingTableGrid, showCraftingTable, craftingOutput, selectedItem } = this;
 
         // Check if click is outside of inventory
         if (type != "hover" && !this.withinInventory() && !this.drop && !this.pickup && selectedItem && selectedItem.c > 0) {
             if (type == "left") { // Drop all items from hand
                 socket.emit('dropItems', getDroppedItems([this.selectedItem]));
-               
+
                 this.selectedItem = undefined;
             } else if (type == "right") { // Drop one item from hand
                 socket.emit('dropItems', getDroppedItems([this.selectedItem], 1));
@@ -496,7 +496,7 @@ class Inventory {
 
         // Select from inventory
         for (let i = 0; i < 36; i++) {
-            let {xPos, yPos} = this.getPos("inventory", i);
+            let { xPos, yPos } = this.getPos("inventory", i);
             if (!this.withinItemFrame(xPos, yPos)) continue;
 
             this.updateItem(this.inventory, i, type, xPos, yPos, firstClick);
@@ -508,21 +508,21 @@ class Inventory {
             if (showCraftingTable) {
                 // Add crafting table items
                 let gridSize = 3;
-                this.loop(gridSize, function (i, j, self) {
-                    let {xPos, yPos} = self.getPos("craftingTable", i, j);
+                this.loop(gridSize, function(i, j, self) {
+                    let { xPos, yPos } = self.getPos("craftingTable", i, j);
                     if (!self.withinItemFrame(xPos, yPos)) return;
 
-                    self.updateItem(craftingTableGrid, i+j*gridSize, type, xPos, yPos, firstClick);
+                    self.updateItem(craftingTableGrid, i + j * gridSize, type, xPos, yPos, firstClick);
                     self.addHighlightBox(xPos, yPos);
                 })
             } else {
                 // Add crafting grid items
                 let gridSize = 2;
-                this.loop(gridSize, function (i, j, self) {
-                    let {xPos, yPos} = self.getPos("crafting", i, j);
+                this.loop(gridSize, function(i, j, self) {
+                    let { xPos, yPos } = self.getPos("crafting", i, j);
                     if (!self.withinItemFrame(xPos, yPos)) return;
 
-                    self.updateItem(craftingGrid, i+j*gridSize, type, xPos, yPos, firstClick);
+                    self.updateItem(craftingGrid, i + j * gridSize, type, xPos, yPos, firstClick);
                     self.addHighlightBox(xPos, yPos);
                 })
             }
@@ -530,7 +530,7 @@ class Inventory {
             // Select from survival crafting output
             if (type == "left" && firstClick) {
                 let block = craftingOutput;
-                let {xPos, yPos} = showCraftingTable ? this.getPos("craftingTableOutput") : this.getPos("craftingOutput");
+                let { xPos, yPos } = showCraftingTable ? this.getPos("craftingTableOutput") : this.getPos("craftingOutput");
 
                 if (this.withinItemFrame(xPos, yPos)) {
                     if (!this.selectedItem && block && block.c > 0) {
@@ -552,22 +552,22 @@ class Inventory {
             // Add background boxes
             for (let j = 0; j < 4; j++) {
                 for (let i = 0; i < 9; i++) {
-                    let {xPos, yPos} = this.getPos("creative", i, j);
+                    let { xPos, yPos } = this.getPos("creative", i, j);
 
                     if (this.withinItemFrame(xPos, yPos)) {
-                        this.updateItem("creative", i+(3-j)*9, type, xPos, yPos, firstClick);
+                        this.updateItem("creative", i + (3 - j) * 9, type, xPos, yPos, firstClick);
                         this.addHighlightBox(xPos, yPos);
                     }
                 }
             }
         }
-        
+
         if (type != "hover") socket.emit('updateInventory', inventory.inventory);
     }
 
     // Add highlight box
     addHighlightBox(x, y) {
-        let {margin} = this;
+        let { margin } = this;
         let xPos = x - margin;
         let yPos = y - margin;
 
@@ -578,8 +578,8 @@ class Inventory {
         }
 
         this.highlightBoxes.push({
-            x: x-margin,
-            y: y-margin,
+            x: x - margin,
+            y: y - margin,
         })
     }
 
@@ -589,7 +589,7 @@ class Inventory {
         for (let i = 0; i < this.selectedBoxes.length; i++) {
             if (this.selectedBoxes[i].x == x && this.selectedBoxes[i].y == y) return;
         }
-        this.selectedBoxes.push({x, y, block, i, item, left})
+        this.selectedBoxes.push({ x, y, block, i, item, left })
     }
 
     // Update item search
@@ -617,18 +617,18 @@ class Inventory {
     // Scroll through inventory
     scroll(dir) {
         let numOfItems = this.searchBlocks.length + this.searchItems.length;
-        let maxScroll = Math.floor(numOfItems/9)-3;
+        let maxScroll = Math.floor(numOfItems / 9) - 3;
 
-        if(dir > 0) {
-			this.currentRow = Math.max(this.currentRow - 1, 0);
-		} else {
-			this.currentRow = Math.min(this.currentRow + 1, maxScroll);
-		}
+        if (dir > 0) {
+            this.currentRow = Math.max(this.currentRow - 1, 0);
+        } else {
+            this.currentRow = Math.min(this.currentRow + 1, maxScroll);
+        }
     }
 
     // Selected box exist in inventory
     selectedBoxExists(block, i) {
-        let {selectedBoxes} = this;
+        let { selectedBoxes } = this;
         let exists = false;
         if (selectedBoxes.left) {
             for (let j = 0; j < selectedBoxes.length; j++) {
@@ -644,30 +644,30 @@ class Inventory {
 
     // Animate scrollbar
     animateScrollbar() {
-        let {boxSize, hotboxWidth, margin, searchBlocks, searchItems, width, height, currentRow} = this;
+        let { boxSize, hotboxWidth, margin, searchBlocks, searchItems, width, height, currentRow } = this;
         // SCROLLBAR
         let scrollMargin = 2;
-        let scrollHeight = boxSize+3*hotboxWidth*this.boxRatio-scrollMargin*2;
-        let maxScroll = Math.floor((searchBlocks.length+searchItems.length)/9)-2;
+        let scrollHeight = boxSize + 3 * hotboxWidth * this.boxRatio - scrollMargin * 2;
+        let maxScroll = Math.floor((searchBlocks.length + searchItems.length) / 9) - 2;
         maxScroll = Math.max(maxScroll, 1);
 
         // Draw scroll bar area
-        drawRectangle(this.halfW+width/2, this.halfH-height/2, 40, height, this.backgroundColor)
-        // Draw scroll bar background
-        drawRectangle(this.halfW+width/2+5, this.halfH-scrollHeight-scrollMargin*2-margin, 30, scrollHeight+scrollMargin*2, "grey")
-        // Draw scroll bar thumb
-        drawRectangle(this.halfW+width/2+7, this.halfH-scrollHeight-margin-scrollMargin+currentRow*scrollHeight/maxScroll, 26, scrollHeight/maxScroll, this.backgroundColor)
+        drawRectangle(this.halfW + width / 2, this.halfH - height / 2, 40, height, this.backgroundColor)
+            // Draw scroll bar background
+        drawRectangle(this.halfW + width / 2 + 5, this.halfH - scrollHeight - scrollMargin * 2 - margin, 30, scrollHeight + scrollMargin * 2, "grey")
+            // Draw scroll bar thumb
+        drawRectangle(this.halfW + width / 2 + 7, this.halfH - scrollHeight - margin - scrollMargin + currentRow * scrollHeight / maxScroll, 26, scrollHeight / maxScroll, this.backgroundColor)
 
         // Move scroll bar
-        if (mouse.x > this.halfW+width/2 && mouse.x < this.halfW+width/2+40 && mouse.y > this.halfH-height/2 && mouse.y < this.halfH-height/2+height) {
+        if (mouse.x > this.halfW + width / 2 && mouse.x < this.halfW + width / 2 + 40 && mouse.y > this.halfH - height / 2 && mouse.y < this.halfH - height / 2 + height) {
             if (mouseLeft) {
                 this.scrolling = true;
-                let scrollBarY = clamp(mouse.y-(this.halfH-scrollHeight-scrollMargin*2), 0, scrollHeight+scrollMargin*2);
-                this.currentRow = Math.min(maxScroll-1, Math.round(scrollBarY/(scrollHeight)*(maxScroll)));
+                let scrollBarY = clamp(mouse.y - (this.halfH - scrollHeight - scrollMargin * 2), 0, scrollHeight + scrollMargin * 2);
+                this.currentRow = Math.min(maxScroll - 1, Math.round(scrollBarY / (scrollHeight) * (maxScroll)));
             }
         } else if (mouseLeft && this.scrolling) {
-            let scrollBarY = clamp(mouse.y-(this.halfH-scrollHeight-scrollMargin*2), 0, scrollHeight+scrollMargin*2);
-            this.currentRow = Math.min(maxScroll-1, Math.round(scrollBarY/(scrollHeight)*(maxScroll)));
+            let scrollBarY = clamp(mouse.y - (this.halfH - scrollHeight - scrollMargin * 2), 0, scrollHeight + scrollMargin * 2);
+            this.currentRow = Math.min(maxScroll - 1, Math.round(scrollBarY / (scrollHeight) * (maxScroll)));
         } else {
             this.scrolling = false;
         }
@@ -675,7 +675,7 @@ class Inventory {
 
     // Display inventory background
     displayInventoryBackground() {
-        let {searchBlocks, searchItems, craftingOutput, hotboxWidth, currentRow, showCraftingTable} = this;
+        let { searchBlocks, searchItems, craftingOutput, hotboxWidth, currentRow, showCraftingTable } = this;
         $("#search-input").hide();
 
         let padding = 10;
@@ -684,53 +684,53 @@ class Inventory {
         drawRectangle(0, 0, canvas.width, canvas.height, "rgba(0, 0, 0, 0.5)")
         drawRect(this.halfW, this.halfH, this.width, this.height, 0, this.backgroundColor)
         let title = (player.mode == "survival" || showCraftingTable) ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode"
-        drawText(title, this.halfW, this.halfH-this.height/2+padding, "25px Minecraft-Regular", "grey", "center", "top")
+        drawText(title, this.halfW, this.halfH - this.height / 2 + padding, "25px Minecraft-Regular", "grey", "center", "top")
 
         // Add background boxes
-        this.loop(4, 9, function (i, j, self) {
-            let {xPos, yPos} = self.getPos("background", i, j, true);
+        this.loop(4, 9, function(i, j, self) {
+            let { xPos, yPos } = self.getPos("background", i, j, true);
             self.drawBackgroundBox(xPos, yPos);
         })
 
         if (showCraftingTable) {
             // Add crafting grid background boxes
-            this.loop(3, function (i, j, self) {
-                let {xPos, yPos} = self.getPos("craftingTable", i, j, true);
+            this.loop(3, function(i, j, self) {
+                let { xPos, yPos } = self.getPos("craftingTable", i, j, true);
                 self.drawBackgroundBox(xPos, yPos);
             })
 
             // Add crafting output background box
-            let {xPos, yPos} = this.getPos("craftingTableOutput", 0, 0, true);
+            let { xPos, yPos } = this.getPos("craftingTableOutput", 0, 0, true);
             this.drawBackgroundBox(xPos, yPos);
             this.drawHighlightBoxes();
             this.drawSelectedBoxes();
-            this.drawItem(xPos+this.margin, yPos+this.margin, craftingOutput); // Draw crafting output
+            this.drawItem(xPos + this.margin, yPos + this.margin, craftingOutput); // Draw crafting output
             return;
         }
-        
+
         if (player.mode == "survival") { // SURVIVAL MODE
             // Add crafting grid background boxes
-            this.loop(2, function (i, j, self) {
-                let {xPos, yPos} = self.getPos("crafting", i, j, true);
+            this.loop(2, function(i, j, self) {
+                let { xPos, yPos } = self.getPos("crafting", i, j, true);
                 self.drawBackgroundBox(xPos, yPos);
             })
 
             // Add crafting output background box
-            let {xPos, yPos} = this.getPos("craftingOutput", 0, 0, true);
+            let { xPos, yPos } = this.getPos("craftingOutput", 0, 0, true);
             this.drawBackgroundBox(xPos, yPos);
-            this.drawItem(xPos+this.margin, yPos+this.margin, craftingOutput); // Draw crafting output
+            this.drawItem(xPos + this.margin, yPos + this.margin, craftingOutput); // Draw crafting output
             this.drawHighlightBoxes();
         } else if (player.mode == "creative") { // CREATIVE MODE
             this.animateScrollbar();
 
             $("#search-input").show();
-            $("#search-input").css("top", this.halfH-this.height/2+padding*2);
-            $("#search-input").css("left", this.halfW-hotboxWidth*4+padding);
-            $("#search-input").css("width", this.width-2.5*padding);
-            
+            $("#search-input").css("top", this.halfH - this.height / 2 + padding * 2);
+            $("#search-input").css("left", this.halfW - hotboxWidth * 4 + padding);
+            $("#search-input").css("width", this.width - 2.5 * padding);
+
             // Add background boxes
-            this.loop(4, 9, function (i, j, self) {
-                let {xPos, yPos} = self.getPos("creative", i, j, true);
+            this.loop(4, 9, function(i, j, self) {
+                let { xPos, yPos } = self.getPos("creative", i, j, true);
                 self.drawBackgroundBox(xPos, yPos);
             })
             this.drawHighlightBoxes();
@@ -738,9 +738,9 @@ class Inventory {
             // Draw items in inventory
             let index = 0;
             let blocks = searchBlocks || world.blockOrder;
-            index = this.drawItems(blocks, currentRow*9, "block", index);
-            
-            let offset = Math.max(0, currentRow*9-blocks.length);
+            index = this.drawItems(blocks, currentRow * 9, "block", index);
+
+            let offset = Math.max(0, currentRow * 9 - blocks.length);
             let items = searchItems || world.itemOrder;
             index = this.drawItems(items, offset, "item", index);
         }
@@ -749,7 +749,7 @@ class Inventory {
 
     // Display inventory
     displayInventory() {
-        let {showInventory, showCraftingTable, inventory, craftingGrid, craftingTableGrid, selectedItem, selectedBoxes} = this;
+        let { showInventory, showCraftingTable, inventory, craftingGrid, craftingTableGrid, selectedItem, selectedBoxes } = this;
 
         if (showInventory) {
             this.displayInventoryBackground();
@@ -763,39 +763,39 @@ class Inventory {
             // Draw items in inventory
             for (let i = 0; i < inventory.length; i++) {
                 let block = inventory[i];
-                if (!block || block.c == 0 ) continue;
+                if (!block || block.c == 0) continue;
                 let exists = this.selectedBoxExists(block, i);
                 if (exists) continue;
-                let {xPos, yPos} = this.getPos("inventory", i);
+                let { xPos, yPos } = this.getPos("inventory", i);
                 this.drawItem(xPos, yPos, block);
             }
 
             // Draw crafting table items
             if (showCraftingTable) {
                 let gridSize = 3;
-                this.loop(gridSize, function (i, j, self) {
-                    let block = craftingTableGrid[i+j*gridSize];
+                this.loop(gridSize, function(i, j, self) {
+                    let block = craftingTableGrid[i + j * gridSize];
                     if (!block || block.c == 0) return;
-                    let exists = self.selectedBoxExists(block, i+j*gridSize);
+                    let exists = self.selectedBoxExists(block, i + j * gridSize);
                     if (exists) return;
-                    let {xPos, yPos} = self.getPos("craftingTable", i, j);
+                    let { xPos, yPos } = self.getPos("craftingTable", i, j);
                     self.drawItem(xPos, yPos, block);
                 })
             }
-            
+
             // Draw items in crafting grid
             if (player.mode == "survival" && !showCraftingTable) {
                 let gridSize = 2;
-                this.loop(gridSize, function (i, j, self) {
-                    let block = craftingGrid[i+j*gridSize];
+                this.loop(gridSize, function(i, j, self) {
+                    let block = craftingGrid[i + j * gridSize];
                     if (!block || block.c == 0) return;
-                    let exists = self.selectedBoxExists(block, i+j*gridSize);
+                    let exists = self.selectedBoxExists(block, i + j * gridSize);
                     if (exists) return;
-                    let {xPos, yPos} = self.getPos("crafting", i, j);
+                    let { xPos, yPos } = self.getPos("crafting", i, j);
                     self.drawItem(xPos, yPos, block);
                 })
             }
-            
+
             // Draw selected item
             if (selectedItem) {
                 let remainder = selectedItem.c;
@@ -820,28 +820,28 @@ class Inventory {
     drawItem(xPos, yPos, entity) {
         if (!entity) return;
 
-        let {blockWidth} = this;
+        let { blockWidth } = this;
 
         // Floor xPos and yPos
         xPos = Math.floor(xPos);
         yPos = Math.floor(yPos);
 
-        let index = entity.v-1;
+        let index = entity.v - 1;
         let atlas = textureManager.getTextureAtlas(entity.class);
-        
-        ctx.drawImage(atlas, 
-            index*16, 0, 
-            16, 16, 
-            xPos, 
-            yPos, 
+
+        ctx.drawImage(atlas,
+            index * 16, 0,
+            16, 16,
+            xPos,
+            yPos,
             blockWidth, blockWidth
         );
-        drawText(entity.c == 1 ? "" : entity.c, 
-            xPos+blockWidth+2,
-            yPos+blockWidth+5, 
-            Math.floor(blockWidth/2)+5 + "px Minecraft-Regular", 
+        drawText(entity.c == 1 ? "" : entity.c,
+            xPos + blockWidth + 2,
+            yPos + blockWidth + 5,
+            Math.floor(blockWidth / 2) + 5 + "px Minecraft-Regular",
             entity.c ? "white" : "yellow",
-            "right", "bottom", 1, true, parseInt(game.guiSize)*1.7
+            "right", "bottom", 1, true, parseInt(game.guiSize) * 1.7
         );
     }
 
@@ -857,7 +857,7 @@ class Inventory {
 
             if (!voxel) continue;
 
-            let {xPos, yPos} = this.getPos("item", index);
+            let { xPos, yPos } = this.getPos("item", index);
 
             this.drawItem(xPos, yPos, {
                 v: voxel,
@@ -872,18 +872,18 @@ class Inventory {
 
     // Draw highlight boxes
     drawHighlightBoxes() {
-        let {highlightBoxes, boxSize} = this;
+        let { highlightBoxes, boxSize } = this;
         if (highlightBoxes && highlightBoxes.length > 0) {
             for (let i = 0; i < highlightBoxes.length; i++) {
                 let box = highlightBoxes[i];
-                drawRectangle(box.x,box.y, boxSize, boxSize, this.highlightBoxColor)
+                drawRectangle(box.x, box.y, boxSize, boxSize, this.highlightBoxColor)
             }
         }
     }
 
     // Draw selected boxes
     drawSelectedBoxes() {
-        let {selectedBoxes, selectedItem} = this;
+        let { selectedBoxes, selectedItem } = this;
         if (selectedBoxes && selectedBoxes.left && selectedBoxes.length > 1 && selectedItem) {
             let quotient = Math.floor(selectedItem.c / selectedBoxes.length);
 
@@ -903,10 +903,10 @@ class Inventory {
 
     // Draw background box
     drawBackgroundBox(xPos, yPos) {
-        let {boxSize} = this;
+        let { boxSize } = this;
         let outline = 1;
-        drawRectangle(xPos-outline,yPos-outline,boxSize+outline*2,boxSize+outline*2,"grey");
-        drawRectangle(xPos,yPos,boxSize,boxSize,this.backgroundBoxColor)
+        drawRectangle(xPos - outline, yPos - outline, boxSize + outline * 2, boxSize + outline * 2, "grey");
+        drawRectangle(xPos, yPos, boxSize, boxSize, this.backgroundBoxColor)
     }
 
     // Draw hover box
@@ -915,12 +915,12 @@ class Inventory {
         //if (!map[16]) return;
 
         let hoverBoxPadding = 10;
-        let hoverBoxWidth = Math.max(ctx.measureText(name).width + hoverBoxPadding*2, 60);
+        let hoverBoxWidth = Math.max(ctx.measureText(name).width + hoverBoxPadding * 2, 60);
         let hoverBoxHeight = 30;
         let hoverBoxMargin = 20;
         let direction = 1;
-        drawRectangle(mouse.x+hoverBoxMargin, mouse.y-hoverBoxHeight*direction-hoverBoxMargin, hoverBoxWidth, hoverBoxHeight, "rgba(0, 0, 0, 0.5");
-        drawText(name, mouse.x+hoverBoxWidth/2+hoverBoxMargin, mouse.y-hoverBoxHeight*direction-hoverBoxMargin+6, "white", "25px Minecraft-Regular", "center", "top");
+        drawRectangle(mouse.x + hoverBoxMargin, mouse.y - hoverBoxHeight * direction - hoverBoxMargin, hoverBoxWidth, hoverBoxHeight, "rgba(0, 0, 0, 0.5");
+        drawText(name, mouse.x + hoverBoxWidth / 2 + hoverBoxMargin, mouse.y - hoverBoxHeight * direction - hoverBoxMargin + 6, "white", "25px Minecraft-Regular", "center", "top");
     }
 
     // Display toolbar
@@ -928,22 +928,21 @@ class Inventory {
         if (!initialized || !player.toolbar) return;
         if (player.mode == "spectator" || player.mode == "camera") return;
 
-        let {toolbarX, toolbarSelectorX, hotboxWidth, selectorWidth, showInventory} = this;
-        ctx.imageSmoothingEnabled = false;
+        let { toolbarX, toolbarSelectorX, hotboxWidth, selectorWidth, showInventory } = this;
 
         drawImageTopLeft(
-            toolbar, 
-            toolbarX, 
-            canvas.height-hotboxWidth-10, 
-            hotboxWidth*8, 
+            toolbar,
+            toolbarX,
+            canvas.height - hotboxWidth - 10,
+            hotboxWidth * 8,
             hotboxWidth
         );
         drawImage(
-            toolbar_selector, 
-            toolbarSelectorX+(player.currentSlot*hotboxWidth)*(this.toolbarRatio), 
-            canvas.height-hotboxWidth/2-10, 
-            selectorWidth/2, 
-            selectorWidth/2
+            toolbar_selector,
+            toolbarSelectorX + (player.currentSlot * hotboxWidth) * (this.toolbarRatio),
+            canvas.height - hotboxWidth / 2 - 10,
+            selectorWidth / 2,
+            selectorWidth / 2
         );
 
         for (let i = 0; i < 9; i++) {
@@ -951,22 +950,22 @@ class Inventory {
             if (showInventory)
                 entity = this.inventory[i];
             if (entity && entity.c > 0) {
-                let index = entity.v-1;
+                let index = entity.v - 1;
                 let atlas = textureManager.getTextureAtlas(entity.class);
 
-                let xPos = toolbarX+(hotboxWidth-this.toolbarBlockWidth)/2+i*hotboxWidth*this.toolbarRatio;
-                let yPos = canvas.height-hotboxWidth+(hotboxWidth-this.toolbarBlockWidth)/8;
+                let xPos = toolbarX + (hotboxWidth - this.toolbarBlockWidth) / 2 + i * hotboxWidth * this.toolbarRatio;
+                let yPos = canvas.height - hotboxWidth + (hotboxWidth - this.toolbarBlockWidth) / 8;
 
-                ctx.drawImage(atlas, 
-                    index*16, 0, 16, 16, 
-                    xPos, 
-                    yPos, 
+                ctx.drawImage(atlas,
+                    index * 16, 0, 16, 16,
+                    xPos,
+                    yPos,
                     this.toolbarBlockWidth, this.toolbarBlockWidth
                 );
-                drawText(entity.c == 1 ? "" : entity.c, 
-                    xPos+this.toolbarBlockWidth+2,
-                    yPos+this.toolbarBlockWidth+5, 
-                    Math.floor(this.toolbarBlockWidth/2)+5 + "px Minecraft-Regular", "white", "right", "bottom", 1, true, parseInt(game.guiSize)*1.7
+                drawText(entity.c == 1 ? "" : entity.c,
+                    xPos + this.toolbarBlockWidth + 2,
+                    yPos + this.toolbarBlockWidth + 5,
+                    Math.floor(this.toolbarBlockWidth / 2) + 5 + "px Minecraft-Regular", "white", "right", "bottom", 1, true, parseInt(game.guiSize) * 1.7
                 );
             }
         }

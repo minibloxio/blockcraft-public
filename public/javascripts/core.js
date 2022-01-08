@@ -10,13 +10,14 @@ let game = new Game(); // Add game
 
 // Update GUI size
 function updateGUISize() {
-    console.log("Updating GUI size...");
     inventory.resize();
     chat.resize();
     hud.resize();
 }
 
-const axesHelper = new THREE.AxesHelper(3);
+const axesHelper = new THREE.AxesHelper(0.5);
+axesHelper.position.z -= 3;
+const localToCameraAxesPlacement = new THREE.Vector3(0, 0, -3); // make sure to update this on window resize
 
 // Initialize game
 function init() {
@@ -27,7 +28,7 @@ function init() {
     scene = new THREE.Scene(); // Add scene
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000000); // Camera
 
-    scene.add(axesHelper);
+    camera.add(axesHelper);
 
     world = new World(); // Init world
     chunkManager = new ChunkManager(); // Add chunk manager
@@ -130,9 +131,13 @@ function animate() {
     stage.update();
     stats.update();
 
+    axesHelper.lookAt(new THREE.Vector3(0, 0, 100000000))
+
     composer.render(scene, camera);
 
     updateHUD(); // Update the HUD
+
+
 
     prevTime = time;
 

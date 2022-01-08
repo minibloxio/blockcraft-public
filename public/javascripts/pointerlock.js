@@ -198,9 +198,7 @@ THREE.PointerLockControls = function(camera) {
     };
 
     this.dispose = function() {
-
         document.removeEventListener('mousemove', onMouseMove, false);
-
     };
 
     document.addEventListener('mousemove', onMouseMove, false);
@@ -212,18 +210,15 @@ THREE.PointerLockControls = function(camera) {
     };
 
     this.getDirection = function() {
-
         // assumes the camera itself is not rotated
-        var direction = new THREE.Vector3(0, 1, 0);
+        var direction = new THREE.Vector3(0, 0, 1);
         var rotation = new THREE.Euler(0, 0, 0, 'YXZ');
 
         return function(v) {
-
             rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
             v.copy(direction).applyEuler(rotation);
             return v;
         };
-
     }();
 
 };

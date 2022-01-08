@@ -254,4 +254,6 @@ function updateDebug() {
         let entity = world.entities[id];
         entity.bbox.visible = game.debug;
     }
+
+    axesHelper.visible = game.debug;
 }
