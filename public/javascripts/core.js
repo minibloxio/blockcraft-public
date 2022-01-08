@@ -56,9 +56,14 @@ function initStatistics() {
     statistics.push(new Stat("Server", game, "region"));
     statistics.push(new Stat("Socket ID", socket, "id"));
     statistics.push(new Stat("Token", game, "token"));
-    statistics.push(new Stat("FPS", game, "fps", 0));
-    statistics.push(new Stat("UPS", game, "ups", 1));
-    statistics.push(new Stat("TPS", game, "tps", 1));
+    statistics.push([
+        new Stat("FPS", game, "fps", 0),
+        new Stat("UPS", game, "ups", 1),
+        new Stat("TPS", game, "tps", 1),
+        new Stat("Ping", function(key) {
+            return player[key] ? player[key].average() : 0;
+        }, "ms", 1, "ping"),
+    ]);
     statistics.push(new Stat("MEM", function() {
         return Math.round(performance.memory.usedJSHeapSize / 1048576);
     }, "mb", 0));
@@ -73,10 +78,13 @@ function initStatistics() {
     statistics.push(new Stat("Vel", player.velocity, false, 1));
     statistics.push(new Stat("Speed", player, "speed", 2));
     statistics.push(new Stat("Fly", player, "fly"));
-    statistics.push(new Stat("FOV", camera, "fov"));
-    statistics.push(new Stat("Base FOV", game, "fov"));
-    statistics.push(new Stat("Delta FOV", player, "deltaFov", 2));
+    statistics.push([
+        new Stat("FOV", camera, "fov"),
+        new Stat("Base", game, "fov"),
+        new Stat("Delta", player, "deltaFov", 2)
+    ]);
     statistics.push(new Stat("Bow", player, "drawingBow"));
+    statistics.push(new Stat("Facing", player, "facing"));
 }
 
 // Initalize the renderer

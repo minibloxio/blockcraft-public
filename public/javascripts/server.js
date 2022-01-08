@@ -384,7 +384,7 @@ function animateServerEntities(delta) {
             let mesh = entity.mesh.children;
 
             if (entity.onObject) { // Animate server entities on the ground
-                let offset = Math.sin(Date.now() / 1000 * (Math.PI)) * 3;
+                let offset = (Math.sin((Date.now() - entity.t + 500) / 1000 * (Math.PI))) * 2 - 2;
                 if (entity.class == "item") {
                     let target = new THREE.Vector3(0, offset, 0);
                     mesh[1].position.lerp(target, delta * 10);
@@ -398,8 +398,6 @@ function animateServerEntities(delta) {
             } else {
                 mesh[1].position.y = 0;
             }
-
-
         } else if (entity.name == "arrow") {
             let dir = new THREE.Vector3(entity.vel.x, entity.vel.y, entity.vel.z).normalize();
             let mx = new THREE.Matrix4().lookAt(dir, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0));

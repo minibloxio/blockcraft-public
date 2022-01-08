@@ -394,7 +394,7 @@ io.on('connection', function(socket_) {
         if (data.t == 0 && player.mode == "survival") { // BLOCK MINED
             // Add block as server-side entity
             let entityId = Function.randomString(5);
-            data.pos = { x: (data.x + 0.5) * blockSize - blockSize / 8, y: (data.y + 0.5) * blockSize - blockSize / 8, z: (data.z + 0.5) * blockSize - blockSize / 8 };
+            data.pos = { x: (data.x + 0.6) * blockSize - blockSize / 8, y: (data.y + 0.6) * blockSize - blockSize / 8, z: (data.z + 0.6) * blockSize - blockSize / 8 };
             data.vel = { x: Function.random(5, -5), y: blockSize * 2, z: Function.random(5, -5) };
             world.entities[entityId] = server.addEntity(entityId, data)
             world.newEntities.push(world.entities[entityId])

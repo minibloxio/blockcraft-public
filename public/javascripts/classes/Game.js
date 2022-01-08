@@ -19,4 +19,8 @@ class Game {
         this.debug = getCookie("debug") || false;
         this.transparentLeaves = getCookie("transparentLeaves");
     }
+
+    update() {
+
+    }
 }

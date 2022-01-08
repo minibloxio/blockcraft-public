@@ -1,23 +1,24 @@
 class Stat {
-	constructor(name, value, key, round, func = []) {
-		this.name = name;
-		this.value = value;
+    constructor(name, value, key, round, func) {
+        this.name = name;
+        this.value = value;
 
-		this.key = key;
-		this.round = round;
+        this.key = key;
+        this.round = round;
 
-		this.func = func;
-	}
+        this.func = func;
+        this.array = [];
+    }
 
-	display(index) {
-		let text = this.name + ": ";
-
+    getText() {
+        let text = this.name + ": ";
         let val = this.value;
+        let dp = this.round || 0; // Decimal place
 
         if (typeof val === 'function') {
-            this.func.push(val())
-            if (this.func.length > 100) this.func.shift();
-            text += round(this.func.average(), this.amount) + this.key;
+            this.array.push(val(this.func))
+            if (this.array.length > 100) this.array.shift();
+            text += round(this.array.average(), dp).toFixed(dp) + this.key;
         } else {
             if (typeof this.func === 'function' && this.key) {
                 val = this.func(this.value[this.key]);
@@ -33,18 +34,38 @@ class Stat {
                 else if (type == "string")
                     text += val
                 else
-                    text += round(val, this.round || 0);
+                    text += round(val, dp).toFixed(dp);
 
             } else if (val instanceof Object) {
-                text += "x: " + round(val.x, this.round) + " y: " + round(val.y, this.round) + " z: " + round(val.z, this.round);
+                text += "x: " + round(val.x, dp).toFixed(dp) + " y: " + round(val.y, dp).toFixed(dp) + " z: " + round(val.z, dp).toFixed(dp);
             } else if (val instanceof Array) {
-                text += round(this.value.reduce((a, b) => a + b, 0)/this.value.length, this.round);
+
+                text += round(this.value.reduce((a, b) => a + b, 0) / this.value.length, dp).toFixed(dp);
+                console.log(text)
             }
         }
 
-		let fontSize = 20;
-		let margin = 5;
-		drawRectangle(10-margin, index*fontSize+55, ctx.measureText(text).width+margin*2, fontSize, "black", {alpha: 0.2});
-		drawText(text, 10, index*fontSize+55, fontSize+"px Minecraft-Regular", "white", "left", "top");
-	}
+        return text;
+    }
+
+    display(index, offset = 0) {
+
+        let text = this.getText();
+
+        let fontSize = 20;
+        let margin = 5;
+        let width = ctx.measureText(text).width + margin * 2;
+        drawRectangle(
+            10 - margin + offset, index * fontSize + 55,
+            width, fontSize,
+            "black", { alpha: 0.2 }
+        );
+        drawText(
+            text,
+            10 + offset, index * fontSize + 55,
+            fontSize + "px Minecraft-Regular", "white", "left", "top"
+        );
+
+        return width;
+    }
 }

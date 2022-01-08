@@ -1137,7 +1137,7 @@ class Player {
 
         if (this.oxygen < -20) {
             socket.emit('takeDamage', {
-                dmg: 0.5,
+                dmg: 1,
                 type: 'drowning'
             })
             this.oxygen = 0;

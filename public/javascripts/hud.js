@@ -14,9 +14,18 @@ let inventory = new Inventory();
 // Stats
 function displayStats() {
     if (hud.showStats) {
+        let index = 0;
         for (let i = 0; i < statistics.length; i++) {
             let stat = statistics[i];
-            stat.display(i);
+            if (stat instanceof Array) {
+                let offset = 0;
+                for (let j = 0; j < stat.length; j++) {
+                    offset += stat[j].display(index, offset);
+                }
+            } else {
+                stat.display(index);
+            }
+            index += 1;
         }
     }
 }
