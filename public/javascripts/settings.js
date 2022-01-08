@@ -256,4 +256,9 @@ function updateDebug() {
     }
 
     axesHelper.visible = game.debug;
+
+    for (let id in chunkManager.debugLines) {
+        let line = chunkManager.debugLines[id];
+        line.visible = game.debug;
+    }
 }

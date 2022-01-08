@@ -30,21 +30,22 @@ class ChunkManager {
 
     addDebugLine(chunkX, chunkZ, color) {
         let chunkId = chunkX + "," + chunkZ;
-        if (!chunkManager.debugLines[chunkId]) {
-            const line_material = new THREE.LineBasicMaterial({ color: color || "white" });
-            const points = [];
-            let worldX = chunkX * world.cellSize * world.blockSize;
-            let worldZ = chunkZ * world.cellSize * world.blockSize;
-            let worldHeight = world.buildHeight * world.blockSize;
+        if (chunkManager.debugLines[chunkId]) return;
 
-            points.push(new THREE.Vector3(worldX, 0, worldZ));
-            points.push(new THREE.Vector3(worldX, worldHeight, worldZ));
+        const line_material = new THREE.LineBasicMaterial({ color: color || "white" });
+        const points = [];
+        let worldX = chunkX * world.cellSize * world.blockSize;
+        let worldZ = chunkZ * world.cellSize * world.blockSize;
+        let worldHeight = world.buildHeight * world.blockSize;
 
-            const line_geometry = new THREE.BufferGeometry().setFromPoints(points);
+        points.push(new THREE.Vector3(worldX, 0, worldZ));
+        points.push(new THREE.Vector3(worldX, worldHeight, worldZ));
 
-            chunkManager.debugLines[chunkId] = new THREE.Line(line_geometry, line_material);
-            scene.add(chunkManager.debugLines[chunkId]);
-        }
+        const line_geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+        chunkManager.debugLines[chunkId] = new THREE.Line(line_geometry, line_material);
+        chunkManager.debugLines[chunkId].visible = game.debug || false;
+        scene.add(chunkManager.debugLines[chunkId]);
     }
 
     setDebugLineColor(chunkX, chunkZ, color) {

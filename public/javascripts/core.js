@@ -84,7 +84,6 @@ function initStatistics() {
         new Stat("Base", game, "fov"),
         new Stat("Delta", player, "deltaFov", 2)
     ]);
-    statistics.push(new Stat("Bow", player, "drawingBow"));
     statistics.push(new Stat("Facing", function() {
         let compass = new THREE.Vector3(0, 0, 0);
         camera.getWorldDirection(compass);
