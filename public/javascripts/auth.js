@@ -100,12 +100,20 @@ function refreshServers() {
             // Update server info
             servers[data.link].info = data;
 
+            // Player names
+            let playerNames = [];
+            for (id in data.players) playerNames.push(data.players[id]);
+            if (playerNames.length > 0) {
+                playerNames = "Usernames: " + playerNames.join(", ");
+            }
+
             // Update server list
             let latency = Date.now() - data.ping;
             let serverHTML = $(`
                 <div class='server' data-link='${data.link}' onClick='clickServer(event)'  ondblclick='clickServer(event, true)'>
                     <p>Region: ${serverNames[data.region]}</p>
                     <p>Players: ${Object.keys(data.players).length}/20</p>
+                    <div class="animated"><p id="player-names">${playerNames}</p></div>
                     <div>
                         <p class="serverInfo">${latency}ms</p>
                         <canvas id="${data.region}" class="serverBar" width="30" height="24"></canvas>
