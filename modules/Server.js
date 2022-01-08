@@ -109,8 +109,8 @@ module.exports = class World {
     }
 
     // Add player
-    addPlayer(id, data) {
-        if (!data) data = {};
+    addPlayer(id, data = {}) {
+        if (data.skin != 'steve' && data.skin != 'alex') data.skin = 'steve';
 
         let player = {
             id: id,
@@ -142,6 +142,7 @@ module.exports = class World {
             showInventory: false,
             biome: "",
             operator: this.operators.includes(data.token),
+            skin: data.skin,
         }
 
         return player;

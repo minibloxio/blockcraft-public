@@ -153,8 +153,6 @@ function animate() {
 
     updateHUD(); // Update the HUD
 
-
-
     prevTime = time;
 
     // Update fps

@@ -141,7 +141,7 @@ a {
     text-align: center;
     top: calc(62vh + 60px);
     z-index: 3;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(30, 30, 30, 0.8);
 }
 
 .input {
@@ -187,7 +187,7 @@ a {
 }
 
 .bar {
-    width: 0%;
+    width: 100%;
     height: 100%;
     background-color: green;
     text-align: center;
@@ -197,7 +197,19 @@ a {
 }
 
 #continue-bar {
-    width: 100%;
+    overflow: hidden;
+}
+
+#steve-bar {
+    width: 50%;
+    background-color: #6ca0dc;
+    float: left;
+}
+
+#alex-bar {
+    width: 50%;
+    background-color: #FF007F;
+    float: right;
 }
 
 #ingame-bar {
@@ -224,7 +236,6 @@ a {
 
 #welcome {
     overflow-y: scroll;
-    height: 100%;
 }
 
 #welcome p {
@@ -473,11 +484,11 @@ input:checked+.slider-span:before {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(200, 200, 200, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(200, 200, 200, 0.7);
 }
 
 

@@ -172,8 +172,8 @@ function refreshServers() {
 // Set join button
 function setJoinButton(server) {
     if (isState("serverSelect") && !$("#direct-connect-input").val().length) {
-        $("#continue-bar").text(`Join server (${server.region})`);
-        $("#continue-bar").css({ "background-color": "green" });
+        $("#server-bar").text(`Join server (${server.region})`);
+        $("#server-bar").css({ "background-color": "green" });
     }
 }
 
@@ -222,30 +222,31 @@ function connect(url) {
 // Error connecting to server
 function connectError(type, reason) {
     reason = reason ? " (" + reason + ")" : "";
+    let bar = $("#server-bar");
     if (type == "banned") {
-        $("#continue-bar").text("Banned from server" + reason);
-        $("#continue-bar").css({ "background-color": "red" });
+        bar.text("Banned from server" + reason);
+        bar.css({ "background-color": "red" });
     } else if (type == "kicked") {
-        $("#continue-bar").text("Kicked from server" + reason);
-        $("#continue-bar").css({ "background-color": "red" });
+        bar.text("Kicked from server" + reason);
+        bar.css({ "background-color": "red" });
     } else {
         console.error("Error connecting to server!");
         $("#direct-connect-input").val('');
         deleteCookie('directConnect');
 
-        $("#continue-bar").text("Connection failed");
-        $("#continue-bar").css({ "background-color": "red" });
+        bar.text("Connection failed");
+        bar.css({ "background-color": "red" });
     }
 
     setTimeout(function() {
         if ($("#direct-connect-input").val()) {
-            $("#continue-bar").text(`Direct Connect`);
+            bar.text(`Direct Connect`);
         } else if (currentServer) {
-            $("#continue-bar").text(`Join server (${currentServer.region})`);
+            bar.text(`Join server (${currentServer.region})`);
         } else {
-            $("#continue-bar").text(`Join server`);
+            bar.text(`Join server`);
         }
-        $("#continue-bar").css({ "background-color": "green" });
+        bar.css({ "background-color": "green" });
 
         if (!type) state -= 1;
     }, connectionDelay);
@@ -259,6 +260,7 @@ function joinServer() {
         let joinInfo = {
             name: name,
             token: getCookie('token'),
+            skin: player.skin,
         }
         socket.emit('join', joinInfo)
         loaded += 1;
@@ -347,11 +349,11 @@ $(document).ready(function() {
         let val = $("#direct-connect-input").val();
         setCookie("directConnect", val, 365);
         if (val) {
-            $("#continue-bar").text(`Direct Connect`);
-            $("#continue-bar").css({ "background-color": "green" });
+            $("#server-bar").text(`Direct Connect`);
+            $("#server-bar").css({ "background-color": "green" });
         } else if (currentServer) {
-            $("#continue-bar").text(`Join server (${currentServer.region})`);
-            $("#continue-bar").css({ "background-color": "green" });
+            $("#server-bar").text(`Join server (${currentServer.region})`);
+            $("#server-bar").css({ "background-color": "green" });
         }
 
     })
@@ -360,6 +362,15 @@ $(document).ready(function() {
 // Menu progression states
 function nextState(e) {
     if (isState("start")) { // Start Menu -> Server Select
+        let x = e.pageX;
+        let y = e.pageY;
+        let offset = $("#steve-bar").offset();
+        let steve = x > offset.left && x < offset.left + $("#steve-bar").width() && y > offset.top && y < offset.top + $("#steve-bar").height();
+        if (steve) {
+            player.skin = "steve";
+        } else {
+            player.skin = "alex";
+        }
         showServerSelect();
 
         state += 1;
@@ -372,8 +383,8 @@ function nextState(e) {
             connect(currentServer.link);
         }
 
-        $("#continue-bar").text(`Connecting to server...`);
-        $("#continue-bar").css({ "background-color": "orange" });
+        $("#server-bar").text(`Connecting to server...`);
+        $("#server-bar").css({ "background-color": "orange" });
 
         // Wait for connection to server
         state += 1;
@@ -438,15 +449,15 @@ function showServerSelect() {
     let directConnect = getCookie("directConnect");
     if (directConnect) {
         $("#direct-connect-input").val(directConnect).focus();
-        $("#continue-bar").text(`Direct Connect`);
-        $("#continue-bar").css({ "background-color": "green" });
+        $("#server-bar").text(`Direct Connect`);
+        $("#server-bar").css({ "background-color": "green" });
     } else {
-        $("#continue-bar").text("Finding Servers...");
-        $("#continue-bar").css({ "background-color": "orange" });
+        $("#server-bar").text("Finding Servers...");
+        $("#server-bar").css({ "background-color": "orange" });
     }
 
     $("#direct-connect-input").show();
-    $("#continue-bar").show();
+    $("#server-bar").show();
 
     $("#server-select").show();
     $("#server-button")[0].click();

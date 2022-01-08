@@ -99,10 +99,11 @@ class Player {
             torso: 0.5 * blockSize,
             torsoHeight: 0.75 * blockSize,
             armSize: 0.25 * blockSize,
+            armSizeSlim: 0.18 * blockSize,
             armHeight: 0.75 * blockSize,
             legSize: 0.25 * blockSize,
             legHeight: 0.75 * blockSize,
-            headSize: 0.55 * blockSize,
+            headSize: 0.5 * blockSize,
             height: 1.8 * blockSize
         }
     }
@@ -311,7 +312,7 @@ class Player {
             this.arm.position.set(3, -7, -8);
         } else {
             // Display hand if empty
-            this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin('steve').armC);
+            this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin(this.skin).armC);
             this.arm.position.set(2, -2, -2.5);
             this.arm.rotation.set(Math.PI, Math.PI, 0)
         }
@@ -458,11 +459,10 @@ class Player {
                 this.stoppedPunching = true;
             }
         }
-
     }
 
     addArm() {
-        this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin('steve').armC);
+        this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin(this.skin).armC);
         this.arm.castShadow = true;
         this.arm.receiveShadow = true;
         camera.add(this.arm);

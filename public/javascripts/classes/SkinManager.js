@@ -16,7 +16,6 @@ class SkinManager {
     }
 
     loadSkin(name) {
-        console.log("Loading skin: " + name);
         this.skins[name] = {};
 
         let self = this;
@@ -87,14 +86,25 @@ class SkinManager {
         let x = 40;
         let y = 16;
         this.skins[name].arm = [];
-        this.skins[name].arm.push(
-            this.createMat(name, x, y + 4, 4, 12), // Right
-            this.createMat(name, x + 8, y + 4, 4, 12), // Left
-            this.createMat(name, x + 4, y, 4, 4), // Top
-            this.createMat(name, x + 8, y, 4, 4), // Bottom
-            this.createMat(name, x + 12, y + 4, 4, 12), // Back
-            this.createMat(name, x + 4, y + 4, 4, 12), // Front
-        )
+        if (name == 'alex') { // Skinny arms
+            this.skins[name].arm.push(
+                this.createMat(name, x, y + 4, 4, 12), // Right
+                this.createMat(name, x + 7, y + 4, 4, 12), // Left
+                this.createMat(name, x + 4, y, 3, 4), // Top
+                this.createMat(name, x + 7, y, 3, 4), // Bottom
+                this.createMat(name, x + 10, y + 4, 3, 12), // Back
+                this.createMat(name, x + 4, y + 4, 3, 12), // Front
+            )
+        } else {
+            this.skins[name].arm.push(
+                this.createMat(name, x, y + 4, 4, 12), // Right
+                this.createMat(name, x + 8, y + 4, 4, 12), // Left
+                this.createMat(name, x + 4, y, 4, 4), // Top
+                this.createMat(name, x + 8, y, 4, 4), // Bottom
+                this.createMat(name, x + 12, y + 4, 4, 12), // Back
+                this.createMat(name, x + 4, y + 4, 4, 12), // Front
+            )
+        }
     }
 
     loadArmC(name) {

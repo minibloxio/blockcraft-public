@@ -197,7 +197,17 @@
                 <input autocomplete="off" id="direct-connect-input" class="input" type="text" placeholder="Direct Connect (optional)" maxlength="50" style="display: none;">
                 <br />
                 <div id="start-button">
-                    <div id="continue-bar" class="bar menu-button">Continue</div>
+                    <div id="start-bar" class="menu-button">
+                        <div id="steve-bar" class="bar">
+                            Steve
+                        </div>
+                        <div id="alex-bar" class="bar">
+                            Alex
+                        </div>
+                    </div>
+                    <div id="server-bar" class="bar menu-button" style="display: none;">
+                        Join server
+                    </div>
                     <div id="loading-bar" class="bar menu-button" style="display: none;">
                         Connecting to server...
                     </div>
@@ -224,49 +234,10 @@
 
 
     <script>
-        class Counter {
-            constructor(element) {
-                // Remember a weak reference to the DOM element
-                this.ref = new WeakRef(element);
-                this.start();
-            }
-
-            start() {
-                if (this.timer) {
-                    return;
-                }
-
-                this.count = 0;
-
-                const tick = () => {
-                    // Get the element from the weak reference, if it still exists
-                    const element = this.ref.deref();
-                    if (element) {
-                        element.textContent = ++this.count;
-                    } else {
-                        // The element doesn't exist anymore
-                        console.log("The element is gone.", this.count);
-                        this.stop();
-                        this.ref = null;
-                    }
-                };
-
-                tick();
-                this.timer = setInterval(tick, 1000);
-            }
-
-            stop() {
-                if (this.timer) {
-                    clearInterval(this.timer);
-                    this.timer = 0;
-                }
-            }
-        }
-
         $("#welcome-button")[0].click();
         // Prevent right-click
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        let cookieExpiryTime = 14; // 14 days
+        //document.addEventListener('contextmenu', event => event.preventDefault());
+        let cookieExpiryTime = 30; // 30 days
 
         // Change tab
         function changeTab(evt, cityName) {

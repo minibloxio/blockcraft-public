@@ -96,9 +96,8 @@ socket.on('joinResponse', function(data) {
     for (let id in serverPlayers) {
         if (id != socket.id) {
             players[id] = serverPlayers[id];
-            if (players[id]) {
-                addPlayer(players, id);
-            }
+            if (!players[id]) continue;
+            addPlayer(players, id);
         }
     }
 

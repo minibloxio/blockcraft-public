@@ -39,7 +39,8 @@ function addPlayer(players, id) {
 
     let p = players[id];
 
-    let playerMat = skinManager.getSkin('alex');
+    let skinName = p.skin || 'steve';
+    let playerMat = skinManager.getSkin(skinName);
 
     // Set position of entity
     p.pos = Ola({ x: 0, y: 0, z: 0 });
@@ -48,7 +49,7 @@ function addPlayer(players, id) {
 
     // Add head
     p.head = addMesh(new THREE.BoxGeometry(player.dim.headSize, player.dim.headSize, player.dim.headSize), playerMat.head);
-    p.head.position.set(0, blockSize * 0.2, 0);
+    p.head.position.set(0, blockSize * 0.175, 0);
 
     p.neck = new THREE.Object3D();
     p.neck.add(p.head);
@@ -58,11 +59,19 @@ function addPlayer(players, id) {
     p.body.position.set(0, -blockSize * 0.45, 0);
 
     // Add arms
-    p.leftArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), playerMat.arm)
-    p.leftArm.position.set(-player.dim.armSize * 3 / 2, -blockSize * 0.45, 0);
+    if (skinName == 'alex') {
+        p.leftArm = addMesh(new THREE.BoxGeometry(player.dim.armSizeSlim, player.dim.armHeight, player.dim.armSize), playerMat.arm)
+        p.rightArm = addMesh(new THREE.BoxGeometry(player.dim.armSizeSlim, player.dim.armHeight, player.dim.armSize), playerMat.arm)
 
-    p.rightArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), playerMat.arm)
-    p.rightArm.position.set(0, -blockSize * 0.3, 0);
+        p.leftArm.position.set(-5.45, -blockSize * 0.45, 0);
+        p.rightArm.position.set(-0.55, -blockSize * 0.3, 0);
+    } else {
+        p.leftArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), playerMat.arm)
+        p.rightArm = addMesh(new THREE.BoxGeometry(player.dim.armSize, player.dim.armHeight, player.dim.armSize), playerMat.arm)
+
+        p.leftArm.position.set(-player.dim.armSize * 3 / 2, -blockSize * 0.45, 0);
+        p.rightArm.position.set(0, -blockSize * 0.3, 0);
+    }
 
     // Shoulder joints
     p.rightShoulder = new THREE.Object3D();

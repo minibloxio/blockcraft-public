@@ -1,7 +1,4 @@
-function drawCircle(x, y, r, c, options) {
-    if (!options)
-        options = {};
-
+function drawCircle(x, y, r, c, options = {}) {
     let _ctx = options.ctx || ctx;
     _ctx.save();
     _ctx.beginPath();
@@ -23,10 +20,7 @@ function drawCircle(x, y, r, c, options) {
     _ctx.restore();
 }
 
-function drawRectangle(x, y, w, h, c, options) {
-    if (!options)
-        options = {};
-
+function drawRectangle(x, y, w, h, c, options = {}) {
     let _ctx = options.ctx || ctx;
     _ctx.save();
     _ctx.translate(x, y);
@@ -45,10 +39,7 @@ function drawRectangle(x, y, w, h, c, options) {
 }
 
 // Draw rectangle but centered
-function drawRect(x, y, w, h, d, c, options) {
-    if (!options)
-        options = {};
-
+function drawRect(x, y, w, h, d, c, options = {}) {
     let _ctx = options.ctx || ctx;
     _ctx.translate(x, y)
     _ctx.rotate(d);
@@ -64,7 +55,7 @@ function drawRect(x, y, w, h, d, c, options) {
     _ctx.resetTransform();
 }
 
-function drawRoundedRect(x, y, w, h, r, c, options) {
+function drawRoundedRect(x, y, w, h, r, c, options = {}) {
     // Draw rounded rectangle
     let _ctx = options.ctx || ctx;
     _ctx.beginPath();
@@ -83,10 +74,7 @@ function drawRoundedRect(x, y, w, h, r, c, options) {
     _ctx.globalAlpha = 1;
 }
 
-function drawRotatedRoundedRect(x, y, w, h, r, c, d, options) {
-    if (!options)
-        options = {};
-    let _ctx = options.ctx || ctx;
+function drawRotatedRoundedRect(x, y, w, h, r, c, d, options = {}) {    let _ctx = options.ctx || ctx;
     _ctx.translate(x, y);
     _ctx.rotate(d);
 
@@ -630,4 +618,43 @@ Array.prototype.removeEmpty = function() {
     return this.filter(function(el) {
         return el != '';
     });
+}
+
+class Counter {
+    constructor(element) {
+        // Remember a weak reference to the DOM element
+        this.ref = new WeakRef(element);
+        this.start();
+    }
+
+    start() {
+        if (this.timer) {
+            return;
+        }
+
+        this.count = 0;
+
+        const tick = () => {
+            // Get the element from the weak reference, if it still exists
+            const element = this.ref.deref();
+            if (element) {
+                element.textContent = ++this.count;
+            } else {
+                // The element doesn't exist anymore
+                console.log("The element is gone.", this.count);
+                this.stop();
+                this.ref = null;
+            }
+        };
+
+        tick();
+        this.timer = setInterval(tick, 1000);
+    }
+
+    stop() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = 0;
+        }
+    }
 }

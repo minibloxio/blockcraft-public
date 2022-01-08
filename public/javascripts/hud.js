@@ -15,6 +15,11 @@ let inventory = new Inventory();
 function displayStats() {
     if (hud.showStats) {
         let index = 0;
+        drawText(
+            "",
+            10, 55,
+            "20px Minecraft-Regular", "white", "left", "top"
+        );
         for (let i = 0; i < statistics.length; i++) {
             let stat = statistics[i];
             if (stat instanceof Array) {
