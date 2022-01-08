@@ -84,7 +84,15 @@ function initStatistics() {
         new Stat("Delta", player, "deltaFov", 2)
     ]);
     statistics.push(new Stat("Bow", player, "drawingBow"));
-    statistics.push(new Stat("Facing", player, "facing"));
+    statistics.push(new Stat("Facing", function() {
+        let compass = new THREE.Vector3(0, 0, 0);
+        camera.getWorldDirection(compass);
+        if (Math.abs(compass.x) > Math.abs(compass.z)) {
+            return compass.x > 0 ? "East  (→)" : "West  (←)";
+        } else {
+            return compass.z > 0 ? "South (↓)" : "North (↑)";
+        }
+    }));
 }
 
 // Initalize the renderer
@@ -93,7 +101,6 @@ function initRenderer() {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    //renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Add statistics
     stats = new Stats();

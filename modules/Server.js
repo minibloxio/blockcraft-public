@@ -140,7 +140,6 @@ module.exports = class World {
             mode: "survival",
             fps: 0,
             showInventory: false,
-            token: data.token || "",
             biome: "",
             operator: this.operators.includes(data.token),
         }
@@ -169,17 +168,17 @@ module.exports = class World {
     }
 
     // Add server operator
-    setOperator(fs, isOp, player) {
+    setOperator(fs, isOp, player, token) {
         if (!player) return;
 
-        if (isOp && !this.operators.includes(player.token)) {
-            this.operators.push(player.token);
+        if (isOp && !this.operators.includes(token)) {
+            this.operators.push(token);
             fs.writeFile(__dirname + '/../operators.json', JSON.stringify(this.operators), function(err) {
                 if (err) console.log(err);
             });
         } else if (!isOp) {
             for (let i = 0; i < this.operators.length; i++) {
-                if (this.operators[i] == player.token) {
+                if (this.operators[i] == token) {
                     this.operators.splice(i, 1);
                     break;
                 }
@@ -191,12 +190,12 @@ module.exports = class World {
     }
 
     // Set blacklist
-    setBlacklist(fs, ban, player, ip) {
+    setBlacklist(fs, ban, player, ip, token) {
         if (!player) return;
 
         let isBanned = false;
         for (let i = 0; i < this.blacklist.length; i++) {
-            if (this.blacklist[i].token == player.token || this.blacklist[i].ip == ip) {
+            if (this.blacklist[i].token == token || this.blacklist[i].ip == ip) {
                 isBanned = true;
                 break;
             }
@@ -205,7 +204,7 @@ module.exports = class World {
         if (ban && !isBanned) {
             this.blacklist.push({
                 name: player.name,
-                token: player.token,
+                token: token,
                 ip: ip,
             });
             fs.writeFile(__dirname + '/../blacklist.json', JSON.stringify(this.blacklist), function(err) {

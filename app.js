@@ -128,6 +128,7 @@ let server = new GameServer();
 // Players
 let players = {};
 let player_ips = {};
+let player_tokens = {};
 
 // Operators
 let operator_path = __dirname + '/operators.json';
@@ -282,6 +283,7 @@ io.on('connection', function(socket_) {
         players[socket.id] = server.addPlayer(socket.id, data);
         let player = players[socket.id];
         player_ips[socket.id] = address;
+        player_tokens[socket.id] = data.token;
 
         // Log player connection
         addLog(socket.id, "ip", address);
@@ -687,7 +689,7 @@ io.on('connection', function(socket_) {
                 text: (data.isOp ? "Enabled" : "Disabled") + " operator status for " + players[data.id].name,
                 color: "aqua"
             });
-            server.setOperator(fs, data.isOp, players[data.id]);
+            server.setOperator(fs, data.isOp, players[data.id], player_tokens[data.id]);
         } else if (data.password != password) { // Wrong password
             socket.emit('message', {
                 name: "Server",
@@ -710,10 +712,10 @@ io.on('connection', function(socket_) {
         if (players[socket.id].operator && data.isBanned) {
             // Revoke operator status
             players[data.id].operator = false;
-            server.setOperator(fs, false, players[data.id]);
+            server.setOperator(fs, false, players[data.id], player_tokens[data.id]);
 
             // Set ban status
-            let success = server.setBlacklist(fs, true, players[data.id], player_ips[data.id]);
+            let success = server.setBlacklist(fs, true, players[data.id], player_ips[data.id], player_tokens[data.id]);
             if (success) {
                 io.emit('messageAll', {
                     name: "Server",
@@ -733,7 +735,7 @@ io.on('connection', function(socket_) {
             io.to(`${data.id}`).disconnectSockets();
         } else if (players[socket.id].operator && !data.isBanned) {
             // Check if player is banned
-            let success = server.setBlacklist(fs, false, data, player_ips[data.id]);
+            let success = server.setBlacklist(fs, false, data, player_ips[data.id], player_tokens[data.id]);
             if (success) {
                 io.emit('messageAll', {
                     name: "Server",

@@ -16,14 +16,20 @@ class Stat {
         let dp = this.round || 0; // Decimal place
 
         if (typeof val === 'function') {
-            this.array.push(val(this.func))
-            if (this.array.length > 100) this.array.shift();
-            text += round(this.array.average(), dp).toFixed(dp) + this.key;
+            let a = val(this.func);
+            if (typeof a == 'number') {
+                this.array.push(a);
+                if (this.array.length > 100) this.array.shift();
+                text += round(this.array.average(), dp).toFixed(dp) + (this.key || "");
+            } else {
+                text += a;
+            }
+
         } else {
             if (typeof this.func === 'function' && this.key) {
                 val = this.func(this.value[this.key]);
             } else if (typeof this.func === 'function') {
-                val = this.func(this.value)
+                val = this.func(this.value);
             }
 
             if (this.key) {
@@ -39,9 +45,7 @@ class Stat {
             } else if (val instanceof Object) {
                 text += "x: " + round(val.x, dp).toFixed(dp) + " y: " + round(val.y, dp).toFixed(dp) + " z: " + round(val.z, dp).toFixed(dp);
             } else if (val instanceof Array) {
-
                 text += round(this.value.reduce((a, b) => a + b, 0) / this.value.length, dp).toFixed(dp);
-                console.log(text)
             }
         }
 
