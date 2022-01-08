@@ -32,6 +32,8 @@ module.exports = class Bot {
 
         bot.vel = vel;
         bot.pos = pos;
+
+        bot.punching = true;
     }
 
     collideVoxel(x, y, z) {

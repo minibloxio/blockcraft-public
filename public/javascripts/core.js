@@ -1,5 +1,5 @@
 // Three.js
-let scene, camera, renderer, world, chunkManager, entityManager, textureManager, workerManager, stage, stats, composer, player, players;
+let scene, camera, renderer, world, chunkManager, entityManager, textureManager, skinManager, workerManager, stage, stats, composer, player, players;
 
 // Stats
 let prevTime = performance.now();
@@ -36,6 +36,7 @@ function init() {
     entityManager = new EntityManager(); // Add entity manager
     textureManager = new TextureManager(); // Add texture manager
     workerManager = new WorkerManager(); // Web worker manager
+    skinManager = new SkinManager(); // Skin manager
     player = new Player(camera); // Add player
     stage = new Stage(); // Initialize the stage (light, sun, moon, stars, etc.)
 
@@ -182,4 +183,26 @@ function onWindowResize() {
     $("#crosshair").css("top", height / 2 - crosshairSize / 2);
 
     updateGUISize();
+}
+
+// Send packet to server
+function sendPacket() {
+    if (Date.now() - game.lastPacket > game.packetDelay) {
+        game.lastPacket = Date.now();
+        socket.emit('packet', {
+            pos: player.position,
+            vel: player.velocity,
+            onObject: player.onObject,
+            rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
+            dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
+            walking: (new Vector(player.velocity.x, player.velocity.z)).getMag() > 2,
+            sneaking: player.key.sneak,
+            punching: player.punchT < 2,
+            blocking: player.blockT > 0,
+            currSlot: player.currentSlot,
+            mode: player.mode,
+            fps: round(stats.fps, 1),
+            showInventory: inventory.showInventory,
+        });
+    }
 }

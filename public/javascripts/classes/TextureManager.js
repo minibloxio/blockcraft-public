@@ -1,27 +1,27 @@
 // Texture class
 class Texture {
-	constructor(loader, textureUrl, material) {
-		if (material) {
-			this.material = material;
-			this.mat = material;
-		} else {
+    constructor(loader, textureUrl, material) {
+        if (material) {
+            this.material = material;
+            this.mat = material;
+        } else {
             this.texture = loader.load(textureUrl);
             this.texture.magFilter = THREE.NearestFilter;
             this.texture.minFilter = THREE.NearestFilter;
             this.material = new THREE.MeshLambertMaterial({
-                map: this.texture, 
+                map: this.texture,
                 side: THREE.DoubleSide,
                 shadowSide: THREE.DoubleSide,
                 alphaTest: 0.1,
                 transparent: true
             })
-				
-			this.material.side = THREE.FrontSide;
-			this.material.metalness = 0;
-			this.material.roughness = 0.5;
-			this.material.transparent = true;
-		}
-	}
+
+            this.material.side = THREE.FrontSide;
+            this.material.metalness = 0;
+            this.material.roughness = 0.5;
+            this.material.transparent = true;
+        }
+    }
 }
 
 class TextureManager {
@@ -48,7 +48,7 @@ class TextureManager {
         // Materials (used for rendering)
         this.material = undefined;
         this.materialTransparent = undefined;
-        
+
         // Setup configuration
         this.config();
     }
@@ -122,12 +122,12 @@ class TextureManager {
     loadTextures(data) {
         let self = this;
         let t = Date.now();
-        
+
         this.loadBlockImages(data.blocks, data.blockOrder)
         this.loadItemImages(data.items, data.itemOrder);
         this.loadEntityImages(data.entity, data.entityOrder);
 
-        this.fontLoader.load( './textures/font/Minecraft_Regular.json', function ( font ) {
+        this.fontLoader.load('./textures/font/Minecraft_Regular.json', function(font) {
             self.minecraft_font = font;
             loaded += 1;
             console.log("Done loading font in " + (Date.now() - t) + "ms");
@@ -141,9 +141,9 @@ class TextureManager {
         let loading_index = 0;
 
         for (let name of entity_names) {
-            this.entityFaces[name.slice(0, -4)] = this.loader.load(name, function () {
+            this.entityFaces[name.slice(0, -4)] = this.loader.load(name, function() {
                 loading_index += 1;
-                
+
                 if (loading_index == entity_names.length) {
                     loaded += 1;
                     self.mergeEntityTextures(entity_order); // Merge block textures
@@ -158,31 +158,31 @@ class TextureManager {
         let ctx_ = canvas.getContext("2d");
         canvas.width = world.tileTextureWidth;
         canvas.height = world.tileTextureHeight;
-      
+
         let index = 0;
         for (let entity of order) {
             let b = this.entities[entity];
             if (b instanceof Array) {
                 for (let i = 0; i < b.length; i++) {
-                ctx_.drawImage(this.entityFaces[b[i]].image, index*16, i*16)
+                    ctx_.drawImage(this.entityFaces[b[i]].image, index * 16, i * 16)
                 }
             } else {
-                ctx_.drawImage(this.entityFaces[entity].image, index*16, 0)
+                ctx_.drawImage(this.entityFaces[entity].image, index * 16, 0)
             }
             index++;
         }
-      
+
         canvas = TextureManager.makeCanvasPowerOfTwo(canvas);
-      
+
         let texture = new THREE.CanvasTexture(canvas);
         texture.minFilter = THREE.NearestFilter;
         texture.magFilter = THREE.NearestFilter;
         texture.wrapS = undefined;
         texture.wrapT = undefined;
         texture.needsUpdate = true;
-      
+
         this.entity_atlas = texture.image;
-      
+
         loaded += 1;
         console.log("Done stitching entity textures in " + (Date.now() - this.t) + "ms");
     }
@@ -194,9 +194,9 @@ class TextureManager {
         let loading_index = 0;
 
         for (let name of block_names) {
-            this.blockFaces[name.slice(0, -4)] = this.loader.load(name, function () {
+            this.blockFaces[name.slice(0, -4)] = this.loader.load(name, function() {
                 loading_index += 1;
-                
+
                 if (loading_index == block_names.length) {
                     loaded += 1;
                     self.setTexture(block_order); // Merge block textures
@@ -204,7 +204,7 @@ class TextureManager {
             })
         }
     }
-    
+
     // Set the texture atlas
     setTexture(order) {
         let canvas = document.createElement("canvas");
@@ -233,27 +233,27 @@ class TextureManager {
 
         switch (textureType) {
             case "basic":
-            this.material = new THREE.MeshBasicMaterial(settings);
-            this.materialTransparent = new THREE.MeshBasicMaterial(settings);
-            break;
+                this.material = new THREE.MeshBasicMaterial(settings);
+                this.materialTransparent = new THREE.MeshBasicMaterial(settings);
+                break;
             case "lambert":
-            this.material = new THREE.MeshLambertMaterial(settings);
-            this.materialTransparent = new THREE.MeshLambertMaterial(settings);
-            break;
+                this.material = new THREE.MeshLambertMaterial(settings);
+                this.materialTransparent = new THREE.MeshLambertMaterial(settings);
+                break;
             case "phong":
-            this.material = new THREE.MeshPhongMaterial(settings);
-            this.materialTransparent = new THREE.MeshPhongMaterial(settings);
-            break;
+                this.material = new THREE.MeshPhongMaterial(settings);
+                this.materialTransparent = new THREE.MeshPhongMaterial(settings);
+                break;
             case "standard":
-            this.material = new THREE.MeshStandardMaterial(settings);
-            this.materialTransparent = new THREE.MeshStandardMaterial(settings);
-            break;
+                this.material = new THREE.MeshStandardMaterial(settings);
+                this.materialTransparent = new THREE.MeshStandardMaterial(settings);
+                break;
             case "toon":
-            this.material = new THREE.MeshToonMaterial(settings);
-            this.materialTransparent = new THREE.MeshToonMaterial(settings);
-            break;
+                this.material = new THREE.MeshToonMaterial(settings);
+                this.materialTransparent = new THREE.MeshToonMaterial(settings);
+                break;
         }
-        
+
         this.materialTransparent.side = THREE.DoubleSide;
         this.materialTransparent.transparent = true;
         this.materialTransparent.depthWrite = game.depthWrite;
@@ -275,37 +275,37 @@ class TextureManager {
         for (let entity of order) {
             let b = entities[entity];
             //console.log(entity);
-            
+
             if (b instanceof Array) { // Unique block faces
                 for (let i = 0; i < 3; i++) {
                     if (b[i] != "grass_side") {
-                        ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)
+                        ctx_.drawImage(this.blockFaces[b[i]].image, index * 16, i * 16)
 
                         if (Object.keys(this.colormap).includes(b[i])) {
 
-                            let imageData = ctx_.getImageData(index*16, i*16, 16, 16);
-                                
+                            let imageData = ctx_.getImageData(index * 16, i * 16, 16, 16);
+
                             this.tintImageData(imageData.data, this.colormap["grass_top"]);
-                            ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16)
-                            ctx_.putImageData(imageData, index*16, i*16);
+                            ctx_.drawImage(this.blockFaces[b[i]].image, index * 16, i * 16)
+                            ctx_.putImageData(imageData, index * 16, i * 16);
                         }
                     } else {
-                        ctx_.drawImage(this.blockFaces[b[i]].image, index*16, i*16);
-                        ctx_.drawImage(this.blockFaces[b[3]].image, index*16, i*16)
-                        let imageData = ctx_.getImageData(index*16, i*16, 16, 16);
+                        ctx_.drawImage(this.blockFaces[b[i]].image, index * 16, i * 16);
+                        ctx_.drawImage(this.blockFaces[b[3]].image, index * 16, i * 16)
+                        let imageData = ctx_.getImageData(index * 16, i * 16, 16, 16);
                         this.tintImageData(imageData.data, this.colormap["grass_top"], true);
-                        ctx_.putImageData(imageData, index*16, i*16);
+                        ctx_.putImageData(imageData, index * 16, i * 16);
                     }
 
                 }
-                
+
             } else if (b) { // Single block face with custom name
                 this.drawImage(ctx_, this.blockFaces[b].image, index);
             } else if (Object.keys(this.colormap).includes(entity)) { // Custom color
                 let color = this.colormap[entity];
 
-                ctx_.drawImage(this.blockFaces[entity].image, index*16, 0);
-                let imageData = ctx_.getImageData(index*16, 0, 16, 16);
+                ctx_.drawImage(this.blockFaces[entity].image, index * 16, 0);
+                let imageData = ctx_.getImageData(index * 16, 0, 16, 16);
 
                 this.tintImageData(imageData.data, color);
                 this.drawImage(ctx_, imageData, index, true);
@@ -320,38 +320,38 @@ class TextureManager {
     tintImageData(data, color, firstFourRows) {
         for (var i = 0; i < data.length; i += 4) {
             if (i > 256 && firstFourRows) return;
-            let sameColor = data[i] == data[i+1] && data[i+1] == data[i+2];
-            if (data[i+3] != 0 && sameColor) {
+            let sameColor = data[i] == data[i + 1] && data[i + 1] == data[i + 2];
+            if (data[i + 3] != 0 && sameColor) {
                 data[i] = data[i] / 255 * color[0];
-                data[i+1] = data[i+1] / 255 * color[1];
-                data[i+2] = data[i+2] / 255 * color[2];
+                data[i + 1] = data[i + 1] / 255 * color[1];
+                data[i + 2] = data[i + 2] / 255 * color[2];
             }
-        } 
+        }
     }
 
     drawImage(ctx_, image, index, put) {
         if (put) {
-            ctx_.putImageData(image, index*16, 0);
-            ctx_.putImageData(image, index*16, 16);
-            ctx_.putImageData(image, index*16, 32);
+            ctx_.putImageData(image, index * 16, 0);
+            ctx_.putImageData(image, index * 16, 16);
+            ctx_.putImageData(image, index * 16, 32);
         } else {
-            ctx_.drawImage(image, index*16, 0);
-            ctx_.drawImage(image, index*16, 16);
-            ctx_.drawImage(image, index*16, 32);
+            ctx_.drawImage(image, index * 16, 0);
+            ctx_.drawImage(image, index * 16, 16);
+            ctx_.drawImage(image, index * 16, 32);
         }
     }
 
     // Load item images
     loadItemImages(item_names, item_order) {
         let self = this;
-        loader.setPath("textures/items/");
+        this.loader.setPath("textures/items/");
         let loading_index = 0;
         this.t = Date.now();
 
         for (let name of item_names) {
-            this.itemFaces[name.slice(0, -4)] = loader.load(name, function () {
+            this.itemFaces[name.slice(0, -4)] = this.loader.load(name, function() {
                 loading_index += 1;
-                
+
                 if (loading_index == item_names.length) {
                     loaded += 1;
                     self.mergeItemTextures(item_order);
@@ -366,36 +366,36 @@ class TextureManager {
         let ctx_ = canvas.getContext("2d");
         canvas.width = world.tileTextureWidth;
         canvas.height = world.tileTextureHeight;
-      
+
         let index = 0;
         for (let item of order) {
             let b = this.items[item];
             //console.log(item);
             if (b instanceof Array) {
                 for (let i = 0; i < b.length; i++) {
-                ctx_.drawImage(this.itemFaces[b[i]].image, index*16, i*16)
+                    ctx_.drawImage(this.itemFaces[b[i]].image, index * 16, i * 16)
                 }
             } else {
-                ctx_.drawImage(this.itemFaces[item].image, index*16, 0)
+                ctx_.drawImage(this.itemFaces[item].image, index * 16, 0)
             }
             index++;
         }
-      
+
         canvas = TextureManager.makeCanvasPowerOfTwo(canvas);
-      
+
         let texture = new THREE.CanvasTexture(canvas);
         texture.minFilter = THREE.NearestFilter;
         texture.magFilter = THREE.NearestFilter;
         texture.wrapS = undefined;
         texture.wrapT = undefined;
         texture.needsUpdate = true;
-      
+
         this.item_atlas = texture.image;
-      
+
         loaded += 1;
         console.log("Done stitching item textures in " + (Date.now() - this.t) + "ms");
     }
-    
+
     // Make canvas power of two
     static makeCanvasPowerOfTwo(canvas) {
         let oldWidth = canvas.width;
@@ -411,9 +411,9 @@ class TextureManager {
 
     // Load sprite
     static loadSprite(path) {
-        let map = loader.load( path );
-        let material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
-        let sprite = new THREE.Sprite( material );
+        let map = textureManager.loader.load(path);
+        let material = new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false });
+        let sprite = new THREE.Sprite(material);
         sprite.scale.set(4000, 4000);
         return sprite;
     }

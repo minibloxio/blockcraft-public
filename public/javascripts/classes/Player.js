@@ -105,13 +105,11 @@ class Player {
             headSize: 0.55 * blockSize,
             height: 1.8 * blockSize
         }
-
-        this.init(blockSize);
     }
 
-    init(blockSize) {
+    init() {
         // Player appearance
-
+        let blockSize = 16;
         this.halfWidth = blockSize * 0.3;
         this.halfDepth = blockSize * 0.3;
         this.halfHeight = blockSize * 0.8;
@@ -313,7 +311,7 @@ class Player {
             this.arm.position.set(3, -7, -8);
         } else {
             // Display hand if empty
-            this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), armC.material);
+            this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin('steve').armC);
             this.arm.position.set(2, -2, -2.5);
             this.arm.rotation.set(Math.PI, Math.PI, 0)
         }
@@ -464,7 +462,7 @@ class Player {
     }
 
     addArm() {
-        this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), armC.material);
+        this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin('steve').armC);
         this.arm.castShadow = true;
         this.arm.receiveShadow = true;
         camera.add(this.arm);
@@ -562,25 +560,28 @@ class Player {
 
         // Get the closest intersection
         let closest = {
-            distance: Infinity
+            distance: Infinity,
+            object: {},
         };
         for (let i = 0; i < this.picked.length; i++) {
-            if (closest.distance > this.picked[i].distance) {
-                closest = this.picked[i]
-            }
-        }
-        if (closest.object) {
 
             // Get id of player
-            let playerId = closest.object.parent;
-            if (!playerId) return;
-            while (!playerId.name) {
+            let playerId = this.picked[i].object.parent;
+            if (!playerId) continue;
+            while (playerId.name == "") {
                 playerId = playerId.parent;
-                if (playerId == null) return;
+                if (playerId == null) break;
             }
-
             playerId = playerId.name;
 
+            if (closest.distance > this.picked[i].distance && players[playerId].hp > 0) {
+                closest = this.picked[i];
+                closest.id = playerId;
+            }
+        }
+        if (closest.id) {
+
+            let playerId = closest.id;
             if (!players[playerId].invulnerable) {
                 players[playerId].invulnerable = true;
 
@@ -731,7 +732,6 @@ class Player {
                 	pointLight.position.multiplyScalar(blockSize);
                 	stage.torches.push(pointLight);
                 	scene.add(pointLight)
-                	console.log("ADD LIGHT")
                 }*/
 
                 if (this.collides()) {
