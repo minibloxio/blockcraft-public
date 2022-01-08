@@ -166,8 +166,7 @@ function initPointerLock() {
 }
 
 THREE.PointerLockControls = function(camera) {
-
-    var scope = this;
+    var self = this;
 
     camera.rotation.set(0, 0, 0);
 
@@ -181,8 +180,7 @@ THREE.PointerLockControls = function(camera) {
     var PI_2 = Math.PI / 2;
 
     var onMouseMove = function(event) {
-
-        if (scope.enabled === false) return;
+        if (self.enabled === false) return;
 
         var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
         var movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;

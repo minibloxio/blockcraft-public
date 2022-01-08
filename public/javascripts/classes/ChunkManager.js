@@ -4,6 +4,7 @@ class ChunkManager {
         this.reqChunks = {};
         this.currChunks = {};
         this.visibleChunks = {};
+        this.debugLines = {};
 
         this.chunksToRequest = [];
         this.requestedChunks = [];
@@ -25,6 +26,49 @@ class ChunkManager {
             [0, 0, -1], // back
             [0, 0, 1], // front
         ];
+    }
+
+    addDebugLine(chunkX, chunkZ, color) {
+        let chunkId = chunkX + "," + chunkZ;
+        if (!chunkManager.debugLines[chunkId]) {
+            const line_material = new THREE.LineBasicMaterial({ color: color || "white" });
+            const points = [];
+            let worldX = chunkX * world.cellSize * world.blockSize;
+            let worldZ = chunkZ * world.cellSize * world.blockSize;
+            let worldHeight = world.buildHeight * world.blockSize;
+
+            points.push(new THREE.Vector3(worldX, 0, worldZ));
+            points.push(new THREE.Vector3(worldX, worldHeight, worldZ));
+
+            const line_geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+            chunkManager.debugLines[chunkId] = new THREE.Line(line_geometry, line_material);
+            scene.add(chunkManager.debugLines[chunkId]);
+        }
+    }
+
+    setDebugLineColor(chunkX, chunkZ, color) {
+        let chunkId = chunkX + "," + chunkZ;
+        if (this.debugLines[chunkId]) {
+            this.debugLines[chunkId].material.color.set(color);
+        } else {
+            this.addDebugLine(chunkX, chunkZ, color);
+        }
+    }
+
+    removeDebugLine(chunkX, chunkZ) {
+        let chunkId = chunkX + "," + chunkZ;
+        if (this.debugLines[chunkId]) {
+            scene.remove(this.debugLines[chunkId]);
+            delete this.debugLines[chunkId];
+        }
+    }
+
+    removeAllDebugLines() {
+        for (let line in this.debugLines) {
+            scene.remove(this.debugLines[line]);
+            delete this.debugLines[line];
+        }
     }
 
     requestChunks() { // OPTIMIZE
@@ -59,7 +103,7 @@ class ChunkManager {
                         x: cellX,
                         y: cellY,
                         z: cellZ
-                    })
+                    });
                 }
                 requests++;
             } else if (revisible < maxChunkRevisible && !this.currChunks[chunkId] && Number.isInteger(cellX)) { // Check if chunk is loaded
@@ -76,6 +120,8 @@ class ChunkManager {
                     if (opaqueMesh) opaqueMesh.visible = true;
                     if (transparentMesh) transparentMesh.visible = true;
                 }
+
+                this.setDebugLineColor(cellX, cellZ, "lime");
                 revisible++;
             } else if (requests > this.chunkLoadingRate) {
                 break;
@@ -123,6 +169,8 @@ class ChunkManager {
         for (let chunk of this.chunksToRequest) {
             if (chunk) {
                 this.requestedChunks.push(chunk);
+
+                this.addDebugLine(chunk.x, chunk.z, "blue");
             }
         }
 
@@ -148,7 +196,9 @@ class ChunkManager {
 
                 chunk.pos.id = cellId;
 
-                chunkManager.chunksToLoad.push(chunk.pos)
+                chunkManager.chunksToLoad.push(chunk.pos);
+
+                this.addDebugLine(chunk.pos.x, chunk.pos.z);
             }
 
             // Update information to each voxel worker
@@ -173,8 +223,11 @@ class ChunkManager {
             let chunk = this.chunksToLoad[i];
             if (!chunk) continue;
 
+            this.setDebugLineColor(chunk.x, chunk.z, "yellow");
+
             updateVoxelGeometry(chunk.x * cellSize, chunk.y * cellSize, chunk.z * cellSize);
             this.chunksToLoad.splice(i, 1);
+
         }
     }
 
@@ -189,6 +242,8 @@ class ChunkManager {
             this.currChunks[`${chunkX},${chunkZ}`] = [chunkX, chunkZ];
             updateCellMesh(chunk, true)
             this.chunksToRender.splice(i, 1);
+
+            this.setDebugLineColor(chunkX, chunkZ, "lime");
         }
     }
 
@@ -222,6 +277,8 @@ class ChunkManager {
                     z: cz,
                 })
 
+                this.setDebugLineColor(cx, cz, "red");
+
                 delete this.currChunks[id];
             }
         }
@@ -232,6 +289,7 @@ class ChunkManager {
             if (chunk) {
                 world.deleteChunk(chunk, all);
                 this.chunksToUnload.splice(i, 1);
+                if (all) this.removeDebugLine(chunk.x, chunk.z);
             }
         }
     }

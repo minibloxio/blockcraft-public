@@ -29,6 +29,7 @@ function init() {
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000000); // Camera
 
     camera.add(axesHelper);
+    axesHelper.visible = game.debug;
 
     world = new World(); // Init world
     chunkManager = new ChunkManager(); // Add chunk manager
@@ -146,7 +147,7 @@ function animate() {
     stage.update();
     stats.update();
 
-    axesHelper.lookAt(new THREE.Vector3(0, 0, 100000000))
+    axesHelper.lookAt(new THREE.Vector3(0, 0, 100000000));
 
     composer.render(scene, camera);
 

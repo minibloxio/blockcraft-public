@@ -19,11 +19,12 @@ let states = {
     "inGame": 5,
     "disconnecting": 6,
 };
-function isState(check) {return state == states[check];}
+
+function isState(check) { return state == states[check]; }
 
 let socket = io({
-	autoConnect: false,
-	forceNew: true,
+    autoConnect: false,
+    forceNew: true,
     reconnectionAttempts: 2
 });
 
@@ -47,7 +48,7 @@ let disconnected = 0; // Disconnection progress
 let disconnectedAnimate = new Ola(0); // Disconnection progress
 let maxDisconnected = 5;
 let connectionDelay = 2000;
-let lastConnection = Date.now()-connectionDelay;
+let lastConnection = Date.now() - connectionDelay;
 
 function refreshServers() {
     // Disconnect servers
@@ -55,7 +56,7 @@ function refreshServers() {
         let server = servers[link];
         server.socket.disconnect();
     }
-    
+
     // Connect to servers
     servers = {};
     currentServer = undefined;
@@ -75,32 +76,32 @@ function refreshServers() {
         let server = servers[serverLink];
 
         // Connected to server
-        server.socket.on('connect', function () {
-            setTimeout(function () {
+        server.socket.on('connect', function() {
+            setTimeout(function() {
                 server.socket.emit('serverInfoRequest', Date.now())
             }, 500);
         });
 
         // Error connecting to server
-        server.socket.on('connect_error', function (error) {
+        server.socket.on('connect_error', function(error) {
             //console.error(error);
         });
 
         // Disconnected from server
-        server.socket.on('disconnect', function (reason) {
-            if (reason == "transport close") {  
+        server.socket.on('disconnect', function(reason) {
+            if (reason == "transport close") {
                 console.log("Server down!");
                 server.socket.disconnect();
             }
         })
 
         // Received server info
-        server.socket.on('serverInfoResponse', function (data) {
+        server.socket.on('serverInfoResponse', function(data) {
             // Update server info
             servers[data.link].info = data;
 
             // Update server list
-            let latency = Date.now()-data.ping;
+            let latency = Date.now() - data.ping;
             let serverHTML = $(`
                 <div class='server' data-link='${data.link}' onClick='clickServer(event)'  ondblclick='clickServer(event, true)'>
                     <p>Region: ${serverNames[data.region]}</p>
@@ -128,11 +129,11 @@ function refreshServers() {
                     "outline": "2px solid white",
                 });
             }
-            
+
             $("#server-container").append(serverHTML);
 
-            let ctx_ = $("#"+data.region)[0].getContext("2d");
-            let numOfBars = Math.max(5-Math.floor(latency/60), 1);
+            let ctx_ = $("#" + data.region)[0].getContext("2d");
+            let numOfBars = Math.max(5 - Math.floor(latency / 60), 1);
             let color;
             switch (numOfBars) {
                 case 1:
@@ -152,16 +153,16 @@ function refreshServers() {
                     break;
             }
             for (let i = 0; i < numOfBars; i++) {
-                drawRectangle(i*6, 16-i*4, 5, (i+1)*4, color, {ctx: ctx_});
+                drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, color, { ctx: ctx_ });
             }
             for (let i = numOfBars; i < 5; i++) {
-                drawRectangle(i*6, 16-i*4, 5, (i+1)*4, "grey", {ctx: ctx_});
+                drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, "grey", { ctx: ctx_ });
             }
 
-            ctx_ = $("#"+data.region+"-2")[0].getContext("2d");
-            drawCircle(15, 12, 11, "white", {ctx: ctx_, fill: false, outline: true, outlineColor: "white", outlineWidth: 2});
-            drawCircle(15, 12, 2, "white", {ctx: ctx_});
-            drawRectangle(14, 3, 2, 7, "white", {ctx: ctx_});
+            ctx_ = $("#" + data.region + "-2")[0].getContext("2d");
+            drawCircle(15, 12, 11, "white", { ctx: ctx_, fill: false, outline: true, outlineColor: "white", outlineWidth: 2 });
+            drawCircle(15, 12, 2, "white", { ctx: ctx_ });
+            drawRectangle(14, 3, 2, 7, "white", { ctx: ctx_ });
 
             server.socket.disconnect();
         })
@@ -172,7 +173,7 @@ function refreshServers() {
 function setJoinButton(server) {
     if (isState("serverSelect") && !$("#direct-connect-input").val().length) {
         $("#continue-bar").text(`Join server (${server.region})`);
-        $("#continue-bar").css({"background-color": "green"});
+        $("#continue-bar").css({ "background-color": "green" });
     }
 }
 
@@ -197,7 +198,7 @@ function clickServer(event, doubleClick) {
     // Remove direct connect cookie
     $("#direct-connect-input").val('');
     deleteCookie('directConnect');
-    
+
     // Set join button
     setJoinButton(currentServer.info);
 
@@ -223,20 +224,20 @@ function connectError(type, reason) {
     reason = reason ? " (" + reason + ")" : "";
     if (type == "banned") {
         $("#continue-bar").text("Banned from server" + reason);
-        $("#continue-bar").css({"background-color": "red"});
+        $("#continue-bar").css({ "background-color": "red" });
     } else if (type == "kicked") {
         $("#continue-bar").text("Kicked from server" + reason);
-        $("#continue-bar").css({"background-color": "red"});
+        $("#continue-bar").css({ "background-color": "red" });
     } else {
         console.error("Error connecting to server!");
         $("#direct-connect-input").val('');
         deleteCookie('directConnect');
-        
+
         $("#continue-bar").text("Connection failed");
-        $("#continue-bar").css({"background-color": "red"});
+        $("#continue-bar").css({ "background-color": "red" });
     }
 
-    setTimeout(function () {
+    setTimeout(function() {
         if ($("#direct-connect-input").val()) {
             $("#continue-bar").text(`Direct Connect`);
         } else if (currentServer) {
@@ -244,7 +245,7 @@ function connectError(type, reason) {
         } else {
             $("#continue-bar").text(`Join server`);
         }
-        $("#continue-bar").css({"background-color": "green"});
+        $("#continue-bar").css({ "background-color": "green" });
 
         if (!type) state -= 1;
     }, connectionDelay);
@@ -252,17 +253,17 @@ function connectError(type, reason) {
 
 // Join server
 function joinServer() {
-	if (!initialized) {
-		let name = $("#name-input").val() || "";
+    if (!initialized) {
+        let name = $("#name-input").val() || "";
 
-		let joinInfo = {
-			name: name,
+        let joinInfo = {
+            name: name,
             token: getCookie('token'),
-		}
-		socket.emit('join', joinInfo)
-		loaded += 1;
-		console.log("Joining server...")
-	}
+        }
+        socket.emit('join', joinInfo)
+        loaded += 1;
+        console.log("Joining server...")
+    }
 }
 
 // Disconnect server
@@ -279,7 +280,7 @@ function disconnectServer() {
     maxDisconnected = Object.keys(chunkManager.currChunks).length;
     disconnectedAnimate = new Ola(0);
     socket.disconnect();
-    
+
     console.log("Disconnecting from server... (Cells to unload: " + maxDisconnected + ")");
 
     // Remove all chunks
@@ -288,7 +289,7 @@ function disconnectServer() {
     // Remove all players
     for (let id in players) {
         scene.remove(players[id].entity);
-	    delete players[id];
+        delete players[id];
     }
 
     // Remove all entities
@@ -308,7 +309,7 @@ function disconnectServer() {
             mesh.material.dispose();
             scene.remove(mesh);
         }
-        
+
         delete world.entities[id];
     }
 
@@ -317,27 +318,27 @@ function disconnectServer() {
 
 
 // Menu progression logic
-$(document).ready(function () {
+$(document).ready(function() {
     // Initialize game
     init();
 
     // Refresh servers
-    $("#refresh-servers").click(function () {
+    $("#refresh-servers").click(function() {
         refreshServers()
     })
 
     // Menu progression (0: Start Menu, 1: Server Select, 2: Loading Game, 3: In Game)
-    $("#start-button").click(function (event) {
+    $("#start-button").click(function(event) {
         nextState(event);
     })
 
     // Enter username input
-    $("#name-input").keyup(function (event) {
+    $("#name-input").keyup(function(event) {
         if (event.keyCode == 13) nextState();
     })
 
     // Enter direct connect input
-    $("#direct-connect-input").keyup(function (event) {
+    $("#direct-connect-input").keyup(function(event) {
         if (event.keyCode == 13) {
             nextState();
             return;
@@ -347,12 +348,12 @@ $(document).ready(function () {
         setCookie("directConnect", val, 365);
         if (val) {
             $("#continue-bar").text(`Direct Connect`);
-            $("#continue-bar").css({"background-color": "green"});
+            $("#continue-bar").css({ "background-color": "green" });
         } else if (currentServer) {
             $("#continue-bar").text(`Join server (${currentServer.region})`);
-            $("#continue-bar").css({"background-color": "green"});
+            $("#continue-bar").css({ "background-color": "green" });
         }
-        
+
     })
 })
 
@@ -362,17 +363,17 @@ function nextState(e) {
         showServerSelect();
 
         state += 1;
-    } else if (isState("serverSelect") && (currentServer || $("#direct-connect-input").val()) && Date.now()-lastConnection > connectionDelay) { // Server Select -> Connecting to Server
+    } else if (isState("serverSelect") && (currentServer || $("#direct-connect-input").val()) && Date.now() - lastConnection > connectionDelay) { // Server Select -> Connecting to Server
         // Direct connection
         let directConnect = $("#direct-connect-input").val();
-        if (directConnect) {  
+        if (directConnect) {
             connect(directConnect);
         } else {
             connect(currentServer.link);
         }
 
         $("#continue-bar").text(`Connecting to server...`);
-        $("#continue-bar").css({"background-color": "orange"});
+        $("#continue-bar").css({ "background-color": "orange" });
 
         // Wait for connection to server
         state += 1;
@@ -390,7 +391,7 @@ function nextState(e) {
         $("#ingame-bar").show();
         state += 1;
     } else if (isState("inGame")) { // In Game
-        
+
         if (e) {
             let x = e.pageX;
             let y = e.pageY;
@@ -405,7 +406,7 @@ function nextState(e) {
             requestPointerLock();
         }
     } else if (isState("disconnecting")) { // Disconnecting from server
-        
+
     }
 }
 
@@ -413,35 +414,35 @@ function prevState() {
     if (isState("loading")) { // Go back to server select menu
         showServerSelect();
 
-        state = 1; 
+        state = 1;
     } else if (isState("loadingChunks")) {
         showServerSelect();
 
         state = 1;
     } else if (isState("disconnecting")) { // Go back to server select menu
         showServerSelect();
-        
+
         loaded -= 1;
-        state -= 5; 
+        state -= 5;
     }
 }
 
 // Show server select page
 function showServerSelect() {
     refreshServers();
-        
+
     $(".input").hide(); // Hide input fields
     $(".menu-button").hide(); // Hide menu buttons
     $(".tab-container").hide(); // Hide tab containers
-    
+
     let directConnect = getCookie("directConnect");
     if (directConnect) {
         $("#direct-connect-input").val(directConnect).focus();
         $("#continue-bar").text(`Direct Connect`);
-        $("#continue-bar").css({"background-color": "green"});
+        $("#continue-bar").css({ "background-color": "green" });
     } else {
         $("#continue-bar").text("Finding Servers...");
-        $("#continue-bar").css({"background-color": "orange"});
+        $("#continue-bar").css({ "background-color": "orange" });
     }
 
     $("#direct-connect-input").show();
@@ -469,7 +470,7 @@ function showSettings() {
 
 // Update menu state
 function updateMenu() {
-    
+
     // Animate menu
     if (isState("serverSelect")) { // Server select
 
@@ -484,40 +485,41 @@ function updateMenu() {
                 joinServer();
             }
         } else if (loadedAnimate.value < maxLoaded && !$("#loading-bar").text().includes("Spawn")) {
-            let text = Math.min(100, round(loadedAnimate.value/maxLoaded*100, 0));
+            let text = Math.min(100, round(loadedAnimate.value / maxLoaded * 100, 0));
             $("#loading-bar").text("Loading " + text + "%")
         }
 
         // Set loading progress
-		loadedAnimate.value = loaded;
-		$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxLoaded)/maxLoaded)+"%")
+        loadedAnimate.value = loaded;
+        $("#loading-bar").width(100 * (Math.min(loadedAnimate.value, maxLoaded) / maxLoaded) + "%")
 
     } else if (isState("loadingChunks")) { // Loading chunks
 
-		let chunksLoaded = Object.keys(chunkManager.currChunks).length;
-		loadedAnimate.value = chunksLoaded;
-		$("#loading-bar").width(100*(Math.min(loadedAnimate.value, maxChunks)/maxChunks)+"%");
-		$("#loading-bar").text("Chunks Loaded (" + chunksLoaded + "/" + maxChunks + ")");
+        let chunksLoaded = Object.keys(chunkManager.currChunks).length;
+        loadedAnimate.value = chunksLoaded;
+        $("#loading-bar").width(100 * (Math.min(loadedAnimate.value, maxChunks) / maxChunks) + "%");
+        $("#loading-bar").text("Chunks Loaded (" + chunksLoaded + "/" + maxChunks + ")");
 
-		if (chunksLoaded >= maxChunks) {
-			nextState();
-		}
-	} else if (initialized && isState("inGame") && !player.controls.enabled) { // In game
+        if (chunksLoaded >= maxChunks) {
+            nextState();
+        }
+    } else if (initialized && isState("inGame") && !player.controls.enabled) { // In game
 
-		$("#loading-bar").text("Return to game");
-		$("#loading-bar").width(100+"%");
+        $("#loading-bar").text("Return to game");
+        $("#loading-bar").width(100 + "%");
 
-	} else if (isState("disconnecting")) { // Disconnecting
+    } else if (isState("disconnecting")) { // Disconnecting
 
         disconnectedAnimate.value = maxDisconnected - chunkManager.chunksToUnload.length;
-        let text = Math.min(100, round(disconnectedAnimate.value/maxDisconnected*100, 0));
+        let text = Math.min(100, round(disconnectedAnimate.value / maxDisconnected * 100, 0));
         $("#disconnecting-bar").text("Disconnecting " + text + "%");
-        $("#disconnecting-bar").width(100*(Math.min(disconnectedAnimate.value, maxDisconnected)/maxDisconnected)+"%");
-        
+        $("#disconnecting-bar").width(100 * (Math.min(disconnectedAnimate.value, maxDisconnected) / maxDisconnected) + "%");
+
         if (disconnectedAnimate.value >= maxDisconnected) {
             for (let id in cellIdToMesh) { // Dispose of all remaining meshes
                 world.deleteCell(id, true);
             }
+            chunkManager.removeAllDebugLines();
             prevState();
         }
     }

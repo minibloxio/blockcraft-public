@@ -313,23 +313,6 @@ function updateCellMesh(data) {
             setChunkMesh(cellX, cellY, cellZ, cellId, meshT);
         }
     }
-
-    const line_material = new THREE.LineBasicMaterial({
-        color: 0x0000ff
-    });
-
-    const points = [];
-    let worldX = cellX * world.cellSize * world.blockSize;
-    let worldZ = cellZ * world.cellSize * world.blockSize;
-    let worldHeight = world.buildHeight * world.blockSize;
-
-    points.push(new THREE.Vector3(worldX, 0, worldZ));
-    points.push(new THREE.Vector3(worldX, 10000000, worldZ));
-
-    const line_geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-    cellIdToMesh[cellId].line = new THREE.Line(line_geometry, line_material);
-    //scene.add(cellIdToMesh[cellId].line);
 }
 
 // Set the geometry of the mesh
