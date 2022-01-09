@@ -2,41 +2,80 @@ class SkinManager {
     constructor() {
         // Skin Loader
         this.loader = new THREE.TextureLoader();
-        this.loader.setPath("textures/entity/");
 
         this.skins = {};
+        this.armor = {};
         this.currentSkin = null;
 
         this.loadSkin('steve');
         this.loadSkin('alex');
+
+        this.loadArmor('leather');
+        this.loadArmor('chainmail');
+        this.loadArmor('gold');
+        this.loadArmor('iron');
+        this.loadArmor('diamond');
     }
 
     getSkin(name) {
         return this.skins[name];
     }
 
+    getArmor(name) {
+        return this.armor[name];
+    }
+
+    // Load skin textures
     loadSkin(name) {
+        this.loader.setPath("textures/entity/");
         this.skins[name] = {};
 
-        let self = this;
+        let skin = this.skins[name];
         this.loader.load(name + '.png', (texture) => {
-            self.skins[name].atlas = texture.image;
+            skin.atlas = texture.image;
+            skin.name = name;
 
-            this.loadHead(name);
-            this.loadBody(name);
-            this.loadArm(name);
-            this.loadLeg(name);
-            this.loadArmC(name);
+            SkinManager.loadHead(skin);
+            SkinManager.loadBody(skin);
+            SkinManager.loadArm(skin);
+            SkinManager.loadLeg(skin);
+            SkinManager.loadArmClient(skin);
         });
     }
 
-    createMat(name, x, y, w, h, rotate) {
-        let atlas = this.skins[name].atlas;
+    // Load armor textures
+    loadArmor(name) {
+        this.loader.setPath("textures/models/armor/");
+        this.armor[name] = {};
+
+        let armor = this.armor[name];
+        armor.name = name;
+        armor.isArmor = true;
+
+        this.loader.load(name + '_layer_1.png', (texture) => {
+            armor.atlas = texture.image;
+            SkinManager.loadHead(armor);
+            SkinManager.loadBody(armor);
+            SkinManager.loadArm(armor);
+            SkinManager.loadArmPlates(armor);
+            SkinManager.loadBoots(armor);
+        });
+
+        this.loader.load(name + '_layer_2.png', (texture) => {
+            armor.atlas2 = texture.image;
+            SkinManager.loadLeggings(armor);
+            SkinManager.loadLeggingsTop(armor);
+        });
+    }
+
+    // Create material from canvas texture
+    static createMat(skin, x, y, w, h, options = {}, type = {}) {
+        let atlas = type.leggings ? skin.atlas2 : skin.atlas;
 
         let canvas = document.createElement("canvas");
         let ctx_ = canvas.getContext("2d");
         ctx_.imageSmoothingEnabled = false;
-        if (rotate) {
+        if (options.rotate) {
             canvas.width = h;
             canvas.height = w;
             ctx_.translate(4, 4);
@@ -53,85 +92,177 @@ class SkinManager {
         texture.minFilter = THREE.NearestFilter;
         texture.magFilter = THREE.NearestFilter;
 
-        return new THREE.MeshLambertMaterial({ map: texture, side: THREE.DoubleSide })
+        let notTransparent = (type.leggings || type.boots) && skin.name != 'chainmail';
+        return new THREE.MeshLambertMaterial({ map: texture, side: THREE.DoubleSide, transparent: (skin.isArmor && !notTransparent) ? true : false });
     }
 
-    loadHead(name) {
-        this.skins[name].head = [];
-        this.skins[name].head.push(
-            this.createMat(name, 0, 8, 8, 8), // Right
-            this.createMat(name, 16, 8, 8, 8), // Left
-            this.createMat(name, 8, 0, 8, 8), // Top
-            this.createMat(name, 16, 0, 8, 8), // Bottom
-            this.createMat(name, 24, 8, 8, 8), // Back
-            this.createMat(name, 8, 8, 8, 8), // Front
+    // HEAD
+    static loadHead(skin) {
+        skin.head = [];
+        skin.head.push(
+            SkinManager.createMat(skin, 0, 8, 8, 8), // Right
+            SkinManager.createMat(skin, 16, 8, 8, 8), // Left
+            SkinManager.createMat(skin, 8, 0, 8, 8), // Top
+            SkinManager.createMat(skin, 16, 0, 8, 8), // Bottom
+            SkinManager.createMat(skin, 24, 8, 8, 8), // Back
+            SkinManager.createMat(skin, 8, 8, 8, 8), // Front
         )
     }
 
-    loadBody(name) {
+    // BODY
+    static loadBody(skin) {
         let x = 16;
         let y = 16;
-        this.skins[name].body = [];
-        this.skins[name].body.push(
-            this.createMat(name, x, y + 4, 4, 12), // Right
-            this.createMat(name, x + 12, y + 4, 4, 12), // Left
-            this.createMat(name, x + 4, y, 8, 4), // Top
-            this.createMat(name, x + 12, y, 8, 4), // Bottom
-            this.createMat(name, x + 16, y + 4, 8, 12), // Back
-            this.createMat(name, x + 4, y + 4, 8, 12), // Front
+        skin.body = [];
+        skin.body.push(
+            SkinManager.createMat(skin, x, y + 4, 4, 12), // Right
+            SkinManager.createMat(skin, x + 12, y + 4, 4, 12), // Left
+            SkinManager.createMat(skin, x + 4, y, 8, 4), // Top
+            SkinManager.createMat(skin, x + 12, y, 8, 4), // Bottom
+            SkinManager.createMat(skin, x + 16, y + 4, 8, 12), // Back
+            SkinManager.createMat(skin, x + 4, y + 4, 8, 12), // Front
         )
     }
 
-    loadArm(name) {
+    // ARM
+    static loadArm(skin) {
         let x = 40;
         let y = 16;
-        this.skins[name].arm = [];
-        if (name == 'alex') { // Skinny arms
-            this.skins[name].arm.push(
-                this.createMat(name, x, y + 4, 4, 12), // Right
-                this.createMat(name, x + 7, y + 4, 4, 12), // Left
-                this.createMat(name, x + 4, y, 3, 4), // Top
-                this.createMat(name, x + 7, y, 3, 4), // Bottom
-                this.createMat(name, x + 10, y + 4, 3, 12), // Back
-                this.createMat(name, x + 4, y + 4, 3, 12), // Front
+        skin.arm = [];
+        if (skin.name == 'alex') { // Skinny arms
+            skin.arm.push(
+                SkinManager.createMat(skin, x, y + 4, 4, 12), // Right
+                SkinManager.createMat(skin, x + 7, y + 4, 4, 12), // Left
+                SkinManager.createMat(skin, x + 4, y, 3, 4), // Top
+                SkinManager.createMat(skin, x + 7, y, 3, 4), // Bottom
+                SkinManager.createMat(skin, x + 10, y + 4, 3, 12), // Back
+                SkinManager.createMat(skin, x + 4, y + 4, 3, 12), // Front
             )
         } else {
-            this.skins[name].arm.push(
-                this.createMat(name, x, y + 4, 4, 12), // Right
-                this.createMat(name, x + 8, y + 4, 4, 12), // Left
-                this.createMat(name, x + 4, y, 4, 4), // Top
-                this.createMat(name, x + 8, y, 4, 4), // Bottom
-                this.createMat(name, x + 12, y + 4, 4, 12), // Back
-                this.createMat(name, x + 4, y + 4, 4, 12), // Front
+            skin.arm.push(
+                SkinManager.createMat(skin, x, y + 4, 4, 12), // Right
+                SkinManager.createMat(skin, x + 8, y + 4, 4, 12), // Left
+                SkinManager.createMat(skin, x + 4, y, 4, 4), // Top
+                SkinManager.createMat(skin, x + 8, y, 4, 4), // Bottom
+                SkinManager.createMat(skin, x + 12, y + 4, 4, 12), // Back
+                SkinManager.createMat(skin, x + 4, y + 4, 4, 12), // Front
             )
         }
     }
 
-    loadArmC(name) {
+    // CLIENT ARM
+    static loadArmClient(skin) {
         let x = 40;
         let y = 16;
-        this.skins[name].armC = [];
-        this.skins[name].armC.push(
-            this.createMat(name, x, y + 4, 4, 12, true), // Right
-            this.createMat(name, x + 4, y, 4, 4), // Top
-            this.createMat(name, x + 4, y, 4, 4), // Top
-            this.createMat(name, x + 4, y + 4, 4, 12), // Front
-            this.createMat(name, x + 4, y, 4, 4), // Top
-            this.createMat(name, x + 4, y, 4, 4), // Top
+        skin.armC = [];
+        skin.armC.push(
+            SkinManager.createMat(skin, x, y + 4, 4, 12, { rotate: true }), // Right
+            SkinManager.createMat(skin, x + 4, y, 4, 4), // Top
+            SkinManager.createMat(skin, x + 4, y, 4, 4), // Top
+            SkinManager.createMat(skin, x + 4, y + 4, 4, 12), // Front
+            SkinManager.createMat(skin, x + 4, y, 4, 4), // Top
+            SkinManager.createMat(skin, x + 4, y, 4, 4), // Top
         )
     }
 
-    loadLeg(name) {
+    // ARM PLATES
+    static loadArmPlates(skin) {
+        let x = 40;
+        let y = 16;
+        skin.armPlates = [];
+        if (skin.name == 'alex') { // Skinny arms
+            skin.armPlates.push(
+                SkinManager.createMat(skin, x, y + 4, 4, 5), // Right
+                SkinManager.createMat(skin, x + 7, y + 4, 4, 5), // Left
+                SkinManager.createMat(skin, x + 4, y, 3, 4), // Top
+                SkinManager.createMat(skin, x + 7, y, 3, 4), // Bottom
+                SkinManager.createMat(skin, x + 10, y + 4, 3, 5), // Back
+                SkinManager.createMat(skin, x + 4, y + 4, 3, 5), // Front
+            )
+        } else {
+            skin.armPlates.push(
+                SkinManager.createMat(skin, x, y + 4, 4, 5), // Right
+                SkinManager.createMat(skin, x + 8, y + 4, 4, 5), // Left
+                SkinManager.createMat(skin, x + 4, y, 4, 4), // Top
+                SkinManager.createMat(skin, x + 8, y, 4, 4), // Bottom
+                SkinManager.createMat(skin, x + 12, y + 4, 4, 5), // Back
+                SkinManager.createMat(skin, x + 4, y + 4, 4, 5), // Front
+            )
+        }
+    }
+
+    // LEGS
+    static loadLeg(skin, isBoots) {
         let x = 0;
         let y = 16;
-        this.skins[name].leg = [];
-        this.skins[name].leg.push(
-            this.createMat(name, x, y + 4, 4, 12), // Right
-            this.createMat(name, x + 8, y + 4, 4, 12), // Left
-            this.createMat(name, x + 4, y, 4, 4), // Top
-            this.createMat(name, x + 8, y, 4, 4), // Bottom
-            this.createMat(name, x + 12, y + 4, 4, 12), // Back
-            this.createMat(name, x + 4, y + 4, 4, 12), // Front
+        skin.leg = [];
+        skin.leg.push(
+            SkinManager.createMat(skin, x, y + 4, 4, 12), // Right
+            SkinManager.createMat(skin, x + 8, y + 4, 4, 12), // Left
+            SkinManager.createMat(skin, x + 4, y, 4, 4), // Top
+            SkinManager.createMat(skin, x + 8, y, 4, 4), // Bottom
+            SkinManager.createMat(skin, x + 12, y + 4, 4, 12), // Back
+            SkinManager.createMat(skin, x + 4, y + 4, 4, 12), // Front
+        )
+    }
+
+    // LEGGINGS TOP
+    static loadLeggingsTop(skin) {
+        let x = 16;
+        let y = 27;
+
+        let type = {
+            leggings: true,
+        }
+
+        skin.leggingsTop = [];
+        skin.leggingsTop.push(
+            SkinManager.createMat(skin, x, y, 4, 5, false, type), // Right
+            SkinManager.createMat(skin, x + 12, y, 4, 5, false, type), // Left
+            { side: THREE.FrontSide }, // Top
+            { side: THREE.FrontSide }, // Bottom
+            SkinManager.createMat(skin, x + 16, y, 8, 5, false, type), // Back
+            SkinManager.createMat(skin, x + 4, y, 8, 5, false, type), // Front
+        )
+    }
+
+    // LEGGINGS BOTTOM
+    static loadLeggings(skin) {
+        let x = 0;
+        let y = 16;
+
+        let type = {
+            leggings: true
+        }
+
+        skin.leggings = [];
+        skin.leggings.push(
+            SkinManager.createMat(skin, x, y + 4, 4, 9, false, type), // Right
+            SkinManager.createMat(skin, x + 8, y + 4, 4, 9, false, type), // Left
+            SkinManager.createMat(skin, x + 4, y, 4, 4, false, type), // Top
+            SkinManager.createMat(skin, x + 8, y, 4, 4, false, type), // Bottom
+            SkinManager.createMat(skin, x + 12, y + 4, 4, 9, false, type), // Back
+            SkinManager.createMat(skin, x + 4, y + 4, 4, 9, false, type), // Front
+        )
+    }
+
+    // BOOTS
+    static loadBoots(skin) {
+        let x = 0;
+        let y = 16;
+
+        let type = {
+            boots: true
+        }
+
+        skin.boots = [];
+        skin.boots.push(
+            SkinManager.createMat(skin, x, y + 10, 4, 6, false, type), // Right
+            SkinManager.createMat(skin, x + 8, y + 10, 4, 6, false, type), // Left
+            { side: THREE.FrontSide }, // Top
+            SkinManager.createMat(skin, x + 8, y, 4, 4, false, type), // Bottom
+            SkinManager.createMat(skin, x + 12, y + 10, 4, 6, false, type), // Back
+            SkinManager.createMat(skin, x + 4, y + 10, 4, 6, false, type), // Front
         )
     }
 

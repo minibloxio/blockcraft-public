@@ -45,8 +45,9 @@ module.exports = class World {
         // ITEM SPRITES
         let tools = ["pickaxe", "axe", "shovel", "sword"];
         let toolMat = ["wood", "stone", "iron", "gold", "diamond"];
+        let armorTypes = ["helmet", "chestplate", "leggings", "boots"];
         let foods = ["beef", "chicken", "porkchop", "mutton", "rabbit"];
-        this.itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "diamond", "emerald", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball", "flint", "flint_and_steel", "brick", "glowstone_dust", "snowball", "ender_pearl", "fireball", "sign"];
+        this.itemOrder = ["bucket_empty", "stick", "string", "bow", "arrow", "coal", "iron_ingot", "gold_ingot", "gold_nugget", "diamond", "emerald", "leather", "apple", "apple_golden", "bread", "carrot", "cookie", "egg", "potato", "potato_baked", "wheat", "clay_ball", "flint", "flint_and_steel", "brick", "glowstone_dust", "snowball", "ender_pearl", "fireball", "sign"];
         for (let mat of toolMat) {
             for (let tool of tools) {
                 this.itemOrder.push(mat + "_" + tool);
@@ -55,6 +56,13 @@ module.exports = class World {
         for (let food of foods) {
             this.itemOrder.push(food + "_raw");
             this.itemOrder.push(food + "_cooked");
+        }
+        for (let armorType of armorTypes) {
+            this.itemOrder.push("leather_" + armorType);
+            this.itemOrder.push("chainmail_" + armorType);
+            this.itemOrder.push("gold_" + armorType);
+            this.itemOrder.push("iron_" + armorType);
+            this.itemOrder.push("diamond_" + armorType);
         }
 
         // ENTITY SPRITES
@@ -143,6 +151,12 @@ module.exports = class World {
             biome: "",
             operator: this.operators.includes(data.token),
             skin: data.skin,
+            armor: {
+                head: null,
+                chest: null,
+                legs: null,
+                boots: null
+            }
         }
 
         return player;

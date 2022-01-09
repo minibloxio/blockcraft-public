@@ -6,6 +6,12 @@ module.exports = class Bot {
         this.world = world;
 
         this.type = "bot";
+        this.bot.armor = {
+            head: 0,
+            chest: 0,
+            legs: 0,
+            feet: 0
+        }
     }
 
     update() {
@@ -34,12 +40,12 @@ module.exports = class Bot {
         bot.pos = pos;
 
         bot.punching = true;
+        //bot.walking = true;
     }
 
     collideVoxel(x, y, z) {
         let { world } = this;
         let voxel = world.getVoxel(x, y, z)
-        if (voxel > 1 && voxel != 255)
-            return voxel;
+        if (voxel > 1 && voxel != 255) return voxel;
     }
 }

@@ -470,7 +470,7 @@ function checkCommand(msg) {
     } else if (msg[0] == "save") {
         saveWorld();
     } else if (msg[0] == "spawn") {
-        spawnBot();
+        spawnBot(msg);
     } else {
         chat.addChat({
             text: 'Error: Unable to recognize command "' + msg[0] + '" (type /help for a list of commands)',
@@ -1098,7 +1098,8 @@ function saveWorld() {
 }
 
 // Spawn an entity
-function spawnBot() {
+function spawnBot(msg) {
+    msg.shift();
     if (!player.operator) {
         chat.addChat({
             text: 'Error: This command can only be used by operators',
@@ -1106,5 +1107,5 @@ function spawnBot() {
         });
         return;
     }
-    socket.emit('spawnBot');
+    socket.emit('spawnBot', msg[0]);
 }

@@ -868,7 +868,7 @@ io.on('connection', function(socket_) {
     });
 
     // Spawn bot
-    socket.on('spawnBot', function() {
+    socket.on('spawnBot', function(data) {
         if (!players[socket.id]) return;
 
         if (players[socket.id].operator) {
@@ -876,6 +876,7 @@ io.on('connection', function(socket_) {
             players[id] = server.addPlayer(id, {
                 name: "Bot",
                 pos: players[socket.id].pos,
+                skin: data || "steve",
             });
             bots[id] = new Bot(players[id], world);
             io.emit('addPlayer', players[id]);

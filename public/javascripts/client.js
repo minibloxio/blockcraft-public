@@ -99,7 +99,7 @@ socket.on('joinResponse', function(data) {
         if (id != socket.id) {
             players[id] = serverPlayers[id];
             if (!players[id]) continue;
-            addPlayer(players, id);
+            PlayerManager.addPlayer(players, id);
         }
     }
 
@@ -157,7 +157,7 @@ socket.on('addPlayer', function(data) {
     if (data.id != socket.id) { // Check if not own player
         players[data.id] = data;
 
-        addPlayer(players, data.id);
+        PlayerManager.addPlayer(players, data.id);
     }
 })
 
@@ -188,10 +188,11 @@ socket.on('knockback', function(data) {
 // Receive punch
 socket.on('punch', function(id) {
     if (id != socket.id && players && players[id]) {
-        updatePlayerColor(id, new THREE.Color(1, 0.5, 0.5))
-        setTimeout(function() {
-            updatePlayerColor(id, new THREE.Color(1, 1, 1))
-        }, 500)
+        PlayerManager.updatePlayerColor(players[id], new THREE.Color(1, 0.5, 0.5))
+        clearTimeout(players[id].punchId);
+        players[id].punchId = setTimeout(function() {
+            PlayerManager.updatePlayerColor(players[id], new THREE.Color(1, 1, 1))
+        }, 350)
     }
 })
 
