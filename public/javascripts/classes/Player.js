@@ -417,6 +417,9 @@ class Player {
             // Drawing a bow
             this.drawBow();
 
+        } else {
+            this.key.rightClick = false;
+            this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * delta);
         }
 
         // Move hand
@@ -737,14 +740,29 @@ class Player {
             this.place = true;
         }
 
+        // Adding armor to armor slots
+        let item = this.getCurrItem();
+        let index = inventory.isArmor(item);
+        if (this.place && typeof index == "number") {
+            console.log("Adding armor to armor slot");
+
+            let armor = JSON.stringify(item);
+            this.toolbar[this.currentSlot] = undefined;
+            this.toolbar[inventory.limit + index] = JSON.parse(armor);
+            socket.emit('updateInventory', this.toolbar);
+
+            this.place = false;
+            return;
+        }
+
         // Place a block
         if (this.closest.point && this.place) {
 
-            let x = Math.floor((this.closest.point.x - this.closest.face.normal.x) / blockSize);
-            let y = Math.floor((this.closest.point.y - this.closest.face.normal.y) / blockSize);
-            let z = Math.floor((this.closest.point.z - this.closest.face.normal.z) / blockSize);
+            let innerPos = this.closest.point.clone();
+            innerPos.sub(this.closest.face.normal);
+            innerPos.divideScalar(blockSize);
 
-            let voxel = world.getVoxel(x, y, z);
+            let voxel = world.getVoxel(innerPos.x, innerPos.y, innerPos.z);
 
             if (world.blockOrder[voxel - 1] == "crafting_table") {
                 inventory.showCraftingTable = true;
@@ -757,36 +775,27 @@ class Player {
                 return;
             }
 
-            x = Math.floor((this.closest.point.x + this.closest.face.normal.x) / blockSize);
-            y = Math.floor((this.closest.point.y + this.closest.face.normal.y) / blockSize);
-            z = Math.floor((this.closest.point.z + this.closest.face.normal.z) / blockSize);
+            let outerPos = this.closest.point.clone();
+            outerPos.add(this.closest.face.normal);
+            outerPos.divideScalar(blockSize);
 
-            if (y > world.buildHeight) // Exceeds build limit
+            if (outerPos.y > world.buildHeight) // Exceeds build limit
                 return;
 
-            let item = this.getCurrItem();
-            voxel = world.getVoxel(x, y, z);
+            voxel = world.getVoxel(outerPos.x, outerPos.y, outerPos.z);
             if (item && item.v > 0 && item.c > 0 && item.class == "block" && voxel <= 1) { // Place a block, not air or water
-                world.setVoxel(x, y, z, item.v);
-
-                /*if (world.blockId["glowstone"] == item.v) {
-                	let pointLight = new THREE.PointLight("orange", 1, 100);
-                	pointLight.position.set(x+0.5, y+0.5, z+0.5);
-                	pointLight.position.multiplyScalar(blockSize);
-                	stage.torches.push(pointLight);
-                	scene.add(pointLight)
-                }*/
+                world.setVoxel(outerPos.x, outerPos.y, outerPos.z, item.v);
 
                 if (this.collides()) {
-                    world.setVoxel(x, y, z, 0);
-                    updateVoxelGeometry(x, y, z, true);
+                    world.setVoxel(outerPos.x, outerPos.y, outerPos.z, 0);
+                    updateVoxelGeometry(outerPos.x, outerPos.y, outerPos.z, true);
                 } else {
-                    updateVoxelGeometry(x, y, z, true);
+                    updateVoxelGeometry(outerPos.x, outerPos.y, outerPos.z, true);
                     // Send data to server
                     socket.emit('setBlock', {
-                        x: x,
-                        y: y,
-                        z: z,
+                        x: outerPos.x,
+                        y: outerPos.y,
+                        z: outerPos.z,
                         t: item.v,
                         class: item.class
                     })

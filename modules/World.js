@@ -473,7 +473,9 @@ module.exports = class World {
         }
 
         // Add item if item does not exist in inventory
-        p.toolbar.push(newItem);
+        if (p.toolbar.length < 36) {
+            p.toolbar.push(newItem);
+        }
     }
 
     removeItem(entity) {

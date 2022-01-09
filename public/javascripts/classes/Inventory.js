@@ -1,6 +1,7 @@
 class Inventory {
     constructor() {
         // Inventory
+        this.limit = 36;
         this.showInventory = false;
         this.canShowInventory = true;
 
@@ -187,6 +188,8 @@ class Inventory {
 
         this.pickup = false;
         this.drop = false;
+        this.split = false;
+
         if (selectedBoxes.length && selectedBoxes.left) {
             let quotient = Math.floor(selectedItem.c / selectedBoxes.length);
             // Loop through selected boxes and add divided items 
@@ -224,6 +227,28 @@ class Inventory {
     // Copy item
     copyItem(item) {
         return JSON.parse(JSON.stringify(item));
+    }
+
+    // Valid armor type
+    isArmor(item, index) {
+        if (!item) return;
+
+        let armorType = ["helmet", "chestplate", "leggings", "boots"];
+        let armorMat = ["leather", "gold", "chainmail", "iron", "diamond"];
+        let correctType = false;
+        for (let i = 0; i < armorType.length; i++) {
+            if (typeof(index) == 'number' && i != index - this.limit) continue;
+            let type = armorType[i];
+            for (let mat of armorMat) {
+                if (item.v == world.itemId[`${mat}_${type}`]) {
+                    correctType = true;
+                    if (!index) return i;
+                    break;
+                }
+            }
+            if (correctType) break;
+        }
+        return correctType;
     }
 
     // Update item in inventory
@@ -287,7 +312,7 @@ class Inventory {
                     }
                 }
             }
-        } else if (block == "creative" && type == "hover") {
+        } else if (block == "creative" && type == "hover") { // HOVERING OVER BOX
             i = i + currentRow * 9;
             let name = "";
             let entity = {};
@@ -308,7 +333,12 @@ class Inventory {
             let blockEqualsSelected = blockExists && selectedExists && block[i].v == this.selectedItem.v;
             let enoughSpace = selectedExists && this.selectedItem.c > this.selectedBoxes.length;
 
+            if (i >= 36 && i < 40 && this.selectedItem) { // Armor slot
+                if (!this.isArmor(this.selectedItem, i)) return;
+            }
+
             if (type == "left") { // Left click item
+
                 if (!selectedExists && blockExists && firstClick) { // Pick up item
                     this.selectedItem = this.copyItem(block[i]);
                     block[i] = undefined;
@@ -330,9 +360,9 @@ class Inventory {
                         class: block[i].class
                     };
                     block[i].c -= Math.ceil(block[i].c / 2);
-                } else if (selectedExists && (!blockExists || blockEqualsSelected)) { // Drop 1 item
+                    this.split = true;
+                } else if (selectedExists && (!blockExists || blockEqualsSelected) && !this.split) { // Drop 1 item
                     let total = 1;
-
                     let exists = false;
                     for (let box of this.selectedBoxes) {
                         if (box.x == xPos && box.y == yPos && box.i == i) {
@@ -435,6 +465,9 @@ class Inventory {
             xPos = startX + (i % 9) * hotboxWidth * this.boxRatio;
             yPos = startY - boxSize;
             if (i > 8) yPos = startY - boxSize - hotboxWidth * 3 * this.boxRatio + hotboxWidth * Math.floor((i - 9) / 9) * this.boxRatio - 8;
+        } else if (type == "armor") {
+            xPos = startX;
+            yPos = startY_ - hotboxWidth * this.boxRatio + (i + j * 2 - 1) * hotboxWidth * this.boxRatio;
         } else if (type == "crafting") {
             xPos = startX + i * hotboxWidth * this.boxRatio + hotboxWidth * 2;
             yPos = startY_ - hotboxWidth * this.boxRatio + j * hotboxWidth * this.boxRatio;
@@ -495,7 +528,7 @@ class Inventory {
         }
 
         // Select from inventory
-        for (let i = 0; i < 36; i++) {
+        for (let i = 0; i < this.limit; i++) {
             let { xPos, yPos } = this.getPos("inventory", i);
             if (!this.withinItemFrame(xPos, yPos)) continue;
 
@@ -516,8 +549,18 @@ class Inventory {
                     self.addHighlightBox(xPos, yPos);
                 })
             } else {
-                // Add crafting grid items
                 let gridSize = 2;
+
+                // Add armor items
+                this.loop(gridSize, function(i, j, self) {
+                    let { xPos, yPos } = self.getPos("armor", i, j);
+                    if (!self.withinItemFrame(xPos, yPos)) return;
+
+                    self.updateItem(self.inventory, self.limit + i + j * gridSize, type, xPos, yPos, firstClick);
+                    self.addHighlightBox(xPos, yPos);
+                })
+
+                // Add crafting grid items
                 this.loop(gridSize, function(i, j, self) {
                     let { xPos, yPos } = self.getPos("crafting", i, j);
                     if (!self.withinItemFrame(xPos, yPos)) return;
@@ -692,6 +735,7 @@ class Inventory {
             self.drawBackgroundBox(xPos, yPos);
         })
 
+        // CRAFTING TABLE
         if (showCraftingTable) {
             // Add crafting grid background boxes
             this.loop(3, function(i, j, self) {
@@ -709,13 +753,20 @@ class Inventory {
         }
 
         if (player.mode == "survival") { // SURVIVAL MODE
-            // Add crafting grid background boxes
-            this.loop(2, function(i, j, self) {
+            let gridSize = 2;
+            // Draw armor slots
+            this.loop(gridSize, function(i, j, self) {
+                let { xPos, yPos } = self.getPos("armor", i, j, true);
+                self.drawBackgroundBox(xPos, yPos);
+            })
+
+            // Draw crafting grid background boxes
+            this.loop(gridSize, function(i, j, self) {
                 let { xPos, yPos } = self.getPos("crafting", i, j, true);
                 self.drawBackgroundBox(xPos, yPos);
             })
 
-            // Add crafting output background box
+            // Draw crafting output background box
             let { xPos, yPos } = this.getPos("craftingOutput", 0, 0, true);
             this.drawBackgroundBox(xPos, yPos);
             this.drawItem(xPos + this.margin, yPos + this.margin, craftingOutput); // Draw crafting output
@@ -761,7 +812,7 @@ class Inventory {
             }
 
             // Draw items in inventory
-            for (let i = 0; i < inventory.length; i++) {
+            for (let i = 0; i < Math.min(inventory.length, this.limit); i++) {
                 let block = inventory[i];
                 if (!block || block.c == 0) continue;
                 let exists = this.selectedBoxExists(block, i);
@@ -783,9 +834,29 @@ class Inventory {
                 })
             }
 
-            // Draw items in crafting grid
             if (player.mode == "survival" && !showCraftingTable) {
                 let gridSize = 2;
+                // Draw armor slot items
+                let armorSlotNames = ["helmet", "chestplate", "leggings", "boots"];
+                this.loop(gridSize, function(i, j, self) {
+                    let { xPos, yPos } = self.getPos("armor", i, j, true);
+                    let slot = self.inventory[self.limit + (i + j * gridSize)];
+                    if (slot && slot.c > 0) {
+                        self.drawItem(xPos + self.margin, yPos + self.margin, {
+                            v: slot.v,
+                            c: 1,
+                            class: "item",
+                        })
+                    } else {
+                        self.drawItem(xPos + self.margin, yPos + self.margin, {
+                            v: world.itemId["empty_armor_slot_" + armorSlotNames[i + gridSize * j]],
+                            c: 1,
+                            class: "item",
+                        })
+                    }
+                })
+
+                // Draw items in crafting grid
                 this.loop(gridSize, function(i, j, self) {
                     let block = craftingGrid[i + j * gridSize];
                     if (!block || block.c == 0) return;
@@ -848,7 +919,7 @@ class Inventory {
     // Draw items in creative mode
     drawItems(entity, offset, type, index) {
         for (let k = offset; k < entity.length; k++) {
-            if (index >= 36) break;
+            if (index >= this.limit) break;
 
             let name = entity[k];
             let voxel;
@@ -910,13 +981,13 @@ class Inventory {
     }
 
     // Draw hover box
-    drawHintBox(name, entity) {
+    drawHintBox(name) {
         if (this.selectedItem || !name || !this.showInventory) return;
-        //if (!map[16]) return;
+        if (map[17]) name += " X: " + Math.floor(mouse.x) + " Y: " + Math.floor(mouse.y); // Show mouse position
 
         let hoverBoxPadding = 10;
         let hoverBoxWidth = Math.max(ctx.measureText(name).width + hoverBoxPadding * 2, 60);
-        let hoverBoxHeight = 30;
+        let hoverBoxHeight = 35;
         let hoverBoxMargin = 20;
         let direction = 1;
         drawRectangle(mouse.x + hoverBoxMargin, mouse.y - hoverBoxHeight * direction - hoverBoxMargin, hoverBoxWidth, hoverBoxHeight, "rgba(0, 0, 0, 0.5");

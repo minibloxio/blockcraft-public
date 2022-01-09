@@ -33,23 +33,22 @@ function updatePlayers(serverPlayers) {
                 PlayerManager.setPlayerGamemode(p, p_.mode);
             }
 
+            // Update player hand if necessary
+            let prevSlot = JSON.stringify(p.toolbar[p_.currSlot]);
+            let newSlot = JSON.stringify(p_.toolbar[p_.currSlot]);
+            if (p.currSlot != p_.currSlot || prevSlot != newSlot) {
+                p.currSlot = p_.currSlot;
+
+                let hand = p_.toolbar[p.currSlot];
+
+                if (p.hand && p.hand.mesh) p.rightArm.remove(p.hand.mesh);
+
+                if (hand && hand.c > 0) PlayerManager.updatePlayerHand(hand, p);
+            }
+
             // Transfer data
             let transferredValues = (({ ping, toolbar, walking, sneaking, punching, blocking, fps }) => ({ ping, toolbar, walking, sneaking, punching, blocking, fps }))(p_);
             Object.assign(p, transferredValues)
-
-            // Update player hand if necessary
-            if (p.currSlot != p_.currSlot) {
-                p.currSlot = p_.currSlot;
-
-                let hand = p.toolbar[p.currSlot];
-
-                if (p.hand && p.hand.mesh)
-                    p.rightArm.remove(p.hand.mesh);
-
-                if (hand && hand.c > 0) {
-                    PlayerManager.updatePlayerHand(hand, p);
-                }
-            }
 
             // Update player name if necessary (performance intensive)
             if (p.name != p_.name) {

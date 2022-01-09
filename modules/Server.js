@@ -63,6 +63,7 @@ module.exports = class World {
             this.itemOrder.push("gold_" + armorType);
             this.itemOrder.push("iron_" + armorType);
             this.itemOrder.push("diamond_" + armorType);
+            this.itemOrder.push("empty_armor_slot_" + armorType);
         }
 
         // ENTITY SPRITES
@@ -134,9 +135,11 @@ module.exports = class World {
                 this.getEntity("wood_pickaxe"),
                 this.getEntity("wood_axe"),
                 this.getEntity("bow"),
-                this.getEntity("log_oak", 64),
                 this.getEntity("arrow", 64),
                 this.getEntity("ender_pearl", 16),
+                this.getEntity("leather_helmet"),
+                this.getEntity("leather_chestplate"),
+                this.getEntity("leather_leggings"),
             ],
             walking: false,
             sneaking: false,
@@ -152,10 +155,10 @@ module.exports = class World {
             operator: this.operators.includes(data.token),
             skin: data.skin,
             armor: {
-                helmet: 1,
-                chestplate: 1,
-                leggings: 1,
-                boots: 1
+                helmet: 0,
+                chestplate: 0,
+                leggings: 0,
+                boots: 0
             }
         }
 
@@ -304,6 +307,18 @@ module.exports = class World {
 
                 addLog(id, "d"); // Deaths
             } else if (!player.dead && player.hp > 0) {
+                // Update player armor type
+                let armorSlots = player.toolbar.slice(36);
+                let armorType = ["helmet", "chestplate", "leggings", "boots"];
+                for (let i = 0; i < armorSlots.length; i++) {
+                    let armor = this.getArmor(armorSlots[i], world);
+                    if (armor && typeof armor.index == "number" && armorSlots[i].c > 0) {
+                        player.armor[armor.type] = armor.index + 1;
+                    } else {
+                        player.armor[armorType[i]] = 0;
+                    }
+                }
+
                 // Update player position in biome
                 player.biome = world.generator.getColumnInfo(player.pos.x / world.blockSize, player.pos.z / world.blockSize)[2];
 
@@ -315,6 +330,27 @@ module.exports = class World {
                     player.hp -= 2;
                     player.dmgType = "void";
                     io.to(`${player.id}`).emit('damage');
+                }
+            }
+        }
+    }
+
+    getArmor(item, world) {
+        if (!item) return;
+
+        let armorType = ["helmet", "chestplate", "leggings", "boots"];
+        let armorMat = ["leather", "gold", "chainmail", "iron", "diamond"];
+        let correctType = false;
+        for (let i = 0; i < armorType.length; i++) {
+            let type = armorType[i];
+            for (let j = 0; j < armorMat.length; j++) {
+                let mat = armorMat[j];
+                if (item.v == world.itemId[`${mat}_${type}`]) {
+                    correctType = true;
+                    return {
+                        type: type,
+                        index: j,
+                    };
                 }
             }
         }
