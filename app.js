@@ -527,36 +527,12 @@ io.on('connection', function(socket_) {
             // Check if player is immune
             if (Date.now() - players[data.id].immune < 500) return;
 
+            let dmg = 1;
 
             let entity = data.curr;
-
-            let damageChart = {
-                "wood_sword": 4,
-                "gold_sword": 4,
-                "stone_sword": 5,
-                "iron_sword": 6,
-                "diamond_sword": 7,
-                "wood_pickaxe": 2,
-                "gold_pickaxe": 2,
-                "stone_pickaxe": 3,
-                "iron_pickaxe": 4,
-                "diamond_pickaxe": 5,
-                "wood_axe": 3,
-                "gold_axe": 3,
-                "stone_axe": 4,
-                "iron_axe": 5,
-                "diamond_axe": 6,
-                "wood_shovel": 1,
-                "gold_shovel": 1,
-                "stone_shovel": 2,
-                "iron_shovel": 3,
-                "diamond_shovel": 4,
-            }
-
-            let dmg = 1;
             if (entity && entity.class == "item") {
                 let weapon = world.itemOrder[entity.v - 1];
-                dmg = damageChart[weapon] || 1;
+                dmg = server.damageChart[weapon] || 1;
             }
 
             // Apply critical hit
@@ -571,6 +547,16 @@ io.on('connection', function(socket_) {
             // Add residual damage
             dmg += players[data.id].residualDamage || 0;
             players[data.id].residualDamage = 0;
+
+            // Apply damage reduction from armor
+            let defensePoints = 0;
+            let toughness = 0;
+            for (let type in players[data.id].armor) {
+                let armor = players[data.id].armor[type];
+                defensePoints += server.armorChart[type][armor] || 0;
+                toughness += server.toughnessChart[type][armor] || 0;
+            }
+            dmg = dmg * (1 - Math.min(20, Math.max(defensePoints / 5, defensePoints - 4 * dmg / (toughness + 8))) / 25);
 
             // Update player health
             players[data.id].hp -= Math.floor(dmg);

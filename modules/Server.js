@@ -15,6 +15,42 @@ module.exports = class World {
         this.blacklist = [];
 
         this.initTextures();
+
+        this.damageChart = {
+            "wood_sword": 4,
+            "gold_sword": 4,
+            "stone_sword": 5,
+            "iron_sword": 6,
+            "diamond_sword": 7,
+            "wood_pickaxe": 2,
+            "gold_pickaxe": 2,
+            "stone_pickaxe": 3,
+            "iron_pickaxe": 4,
+            "diamond_pickaxe": 5,
+            "wood_axe": 3,
+            "gold_axe": 3,
+            "stone_axe": 4,
+            "iron_axe": 5,
+            "diamond_axe": 6,
+            "wood_shovel": 1,
+            "gold_shovel": 1,
+            "stone_shovel": 2,
+            "iron_shovel": 3,
+            "diamond_shovel": 4,
+        }
+
+        this.armorChart = {
+            "helmet": [0, 1, 2, 2, 2, 3],
+            "chestplate": [0, 3, 5, 5, 6, 8],
+            "leggings": [0, 2, 3, 4, 5, 6],
+            "boots": [0, 1, 1, 1, 2, 3],
+        }
+        this.toughnessChart = {
+            "helmet": [0, 0, 0, 0, 0, 2],
+            "chestplate": [0, 0, 0, 0, 0, 2],
+            "leggings": [0, 0, 0, 0, 0, 2],
+            "boots": [0, 0, 0, 0, 0, 2],
+        }
     }
 
     initTextures() {
