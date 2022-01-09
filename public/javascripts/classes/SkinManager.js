@@ -17,10 +17,19 @@ class SkinManager {
         this.loadArmor('diamond'); // 5
 
         this.armorOrder = [null, 'leather', 'gold', 'chainmail', 'iron', 'diamond'];
+        this.parts = ["head", "body", "arm", "leg", "armC"];
     }
 
     getSkin(name) {
-        return this.skins[name];
+        let skin = {};
+        for (let part of this.parts) {
+            for (let mat of this.skins[name][part]) {
+                skin[part] = skin[part] || [];
+                skin[part].push(mat.clone());
+            }
+        }
+
+        return skin;
     }
 
     getArmor(name) {

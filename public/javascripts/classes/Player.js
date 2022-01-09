@@ -585,24 +585,18 @@ class Player {
         if (closest.id) {
 
             let playerId = closest.id;
-            if (!players[playerId].invulnerable) {
-                players[playerId].invulnerable = true;
 
-                // Calculate the knockback force
-                let crit = false;
-                if (this.velocity.y < 0) crit = true;
+            // Calculate the knockback force
+            let crit = false;
+            if (this.velocity.y < 0) crit = true;
 
-                socket.emit("punchPlayer", { // Send to server (IBRAHIM I'M LOOKING AT YOU)
-                    id: playerId,
-                    dir: camera.getWorldDirection(new THREE.Vector3()),
-                    force: crit ? 800 : 400,
-                    crit: crit,
-                    curr: this.getCurrItem()
-                });
-                setTimeout(function() {
-                    if (players[playerId]) players[playerId].invulnerable = false;
-                }, 400)
-            }
+            socket.emit("punchPlayer", { // Send to server (IBRAHIM I'M LOOKING AT YOU)
+                id: playerId,
+                dir: camera.getWorldDirection(new THREE.Vector3()),
+                force: crit ? 800 : 400,
+                crit: crit,
+                curr: this.getCurrItem()
+            });
         }
     }
 

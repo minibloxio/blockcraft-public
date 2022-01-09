@@ -192,7 +192,7 @@ socket.on('punch', function(id) {
         clearTimeout(players[id].punchId);
         players[id].punchId = setTimeout(function() {
             PlayerManager.updatePlayerColor(players[id], new THREE.Color(1, 1, 1))
-        }, 350)
+        }, 400);
     }
 })
 

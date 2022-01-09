@@ -520,21 +520,62 @@ io.on('connection', function(socket_) {
         if (!player) return;
 
         if (players[data.id] && player && !player.dead && players[data.id].mode == "survival") {
-            let dmg = 0.5;
+            // Basic anti-cheat
+            let dist = Math.sqrt(Math.pow(player.pos.x - players[data.id].pos.x, 2) + Math.pow(player.pos.y - players[data.id].pos.y, 2) + Math.pow(player.pos.z - players[data.id].pos.z, 2)) / world.blockSize;
+            if (dist > 5) return; // Player is too far away
+
+            // Check if player is immune
+            if (Date.now() - players[data.id].immune < 500) return;
+
 
             let entity = data.curr;
 
-            if (entity && entity.class == "item" && world.itemId["wood_sword"]) {
-                dmg = 1.5;
+            let damageChart = {
+                "wood_sword": 4,
+                "gold_sword": 4,
+                "stone_sword": 5,
+                "iron_sword": 6,
+                "diamond_sword": 7,
+                "wood_pickaxe": 2,
+                "gold_pickaxe": 2,
+                "stone_pickaxe": 3,
+                "iron_pickaxe": 4,
+                "diamond_pickaxe": 5,
+                "wood_axe": 3,
+                "gold_axe": 3,
+                "stone_axe": 4,
+                "iron_axe": 5,
+                "diamond_axe": 6,
+                "wood_shovel": 1,
+                "gold_shovel": 1,
+                "stone_shovel": 2,
+                "iron_shovel": 3,
+                "diamond_shovel": 4,
             }
+
+            let dmg = 1;
+            if (entity && entity.class == "item") {
+                let weapon = world.itemOrder[entity.v - 1];
+                dmg = damageChart[weapon] || 1;
+            }
+
+            // Apply critical hit
+            if (data.crit) dmg = 1.5 * dmg;
 
             // Check if blocking
             if (players[data.id].blocking) {
-                dmg /= 2;
-                data.force /= 2;
+                dmg = Math.floor(dmg * 0.5);
+                data.force = Math.floor(data.force * 0.5);
             }
 
-            players[data.id].hp -= data.crit ? dmg * 3 : dmg;
+            // Add residual damage
+            dmg += players[data.id].residualDamage || 0;
+            players[data.id].residualDamage = 0;
+
+            // Update player health
+            players[data.id].hp -= Math.floor(dmg);
+            players[data.id].residualDamage = dmg - Math.floor(dmg);
+            players[data.id].immune = Date.now();
             players[data.id].dmgType = player.name;
             io.to(`${data.id}`).emit('knockback', data)
             io.volatile.emit('punch', data.id);
@@ -952,7 +993,6 @@ setInterval(function() {
         world.saveToFile(fs, io, save_path, logger);
         saveToLog();
     }
-
 
     // Send updated data to client
     let data = {

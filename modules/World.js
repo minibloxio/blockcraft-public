@@ -379,12 +379,17 @@ module.exports = class World {
             if (dist > blockSize) continue;
 
             // Arrow hit
-            player.hp -= entity.force;
-            if (players[entity.playerId]) player.dmgType = "arrow" + players[entity.playerId].name;
-            entity.force *= 300;
-            entity.dir = entity.vel; // Update direction of arrow based on velocity
-            io.to(`${id}`).emit('knockback', entity);
-            io.emit('punch', id); // Update player color
+            let damage = entity.force * 2 - 1;
+            if (Date.now() - player.immune > 500) { // Check if player is immune
+                player.hp -= damage;
+                player.immune = Date.now();
+
+                if (players[entity.playerId]) player.dmgType = "arrow" + players[entity.playerId].name;
+                entity.force *= 300;
+                entity.dir = entity.vel; // Update direction of arrow based on velocity
+                io.to(`${id}`).emit('knockback', entity);
+                io.emit('punch', id); // Update player color
+            }
 
             // Remove the item from world
             this.removeItem(entity);

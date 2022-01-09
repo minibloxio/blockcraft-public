@@ -159,7 +159,8 @@ module.exports = class World {
                 chestplate: 0,
                 leggings: 0,
                 boots: 0
-            }
+            },
+            immune: Date.now(),
         }
 
         return player;

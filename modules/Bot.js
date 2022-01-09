@@ -42,11 +42,17 @@ module.exports = class Bot {
         bot.punching = true;
         //bot.walking = true;
 
+        // this.bot.armor = {
+        //     helmet: Math.floor(Date.now() / 2000 % 5) + 1,
+        //     chestplate: Math.floor(Date.now() / 2000 % 5) + 1,
+        //     leggings: Math.floor(Date.now() / 2000 % 5) + 1,
+        //     boots: Math.floor(Date.now() / 2000 % 5) + 1
+        // }
         this.bot.armor = {
-            helmet: Math.floor(Date.now() / 2000 % 5) + 1,
-            chestplate: Math.floor(Date.now() / 2000 % 5) + 1,
-            leggings: Math.floor(Date.now() / 2000 % 5) + 1,
-            boots: Math.floor(Date.now() / 2000 % 5) + 1
+            helmet: 1,
+            chestplate: 1,
+            leggings: 1,
+            boots: 1
         }
     }
 
