@@ -3,8 +3,6 @@ class WorkerManager {
         this.rle;
         this.voxels = [];
         this.voxelIndex = 0;
-
-        this.initWorkers();
     }
 
     updateRLEWorker(data) {
@@ -23,7 +21,7 @@ class WorkerManager {
     }
 
     // Initialize web workers
-    initWorkers() {
+    init() {
         this.rle = new Worker('javascripts/workers/rle-worker.js'); // Run length encoding worker
 
         this.rle.addEventListener('message', async(e) => {

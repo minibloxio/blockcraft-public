@@ -167,7 +167,7 @@ function addVideoControls() {
     addSwitchControl("Clouds", "cloud", false, stage, "showClouds", "generate")
     addSwitchControl("Stars", "stars", true, stage.stars, "visible")
     addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov")
-    addSwitchControl("Transparent Leaves", "transparentLeaves", true, game, "transparentLeaves", false, updateTransparency);
+    addSwitchControl("Transparent Leaves", "transparentLeaves", false, game, "transparentLeaves", false, updateTransparency);
     addSwitchControl("Depth Write", "depthWrite", false, game, "depthWrite", false, chunkManager.updateTexture);
     addSwitchControl("Debug", "debug", false, game, "debug", false, updateDebug);
 
@@ -235,8 +235,8 @@ $(document).ready(function() {
 })
 
 function updateTransparency() {
-    for (let voxelWorker of voxelWorkers) {
-        voxelWorker.postMessage({
+    for (let worker of workerManager.voxels) {
+        worker.postMessage({
             type: "updateTransparency",
             transparentLeaves: game.transparentLeaves
         });

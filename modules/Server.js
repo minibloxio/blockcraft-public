@@ -155,7 +155,8 @@ module.exports = class World {
 
     // Add player
     addPlayer(id, data = {}) {
-        if (data.skin != 'steve' && data.skin != 'alex') data.skin = 'steve';
+        let skins = ['steve', 'alex', 'zombie', 'skeleton']
+        if (!skins.includes(data.skin)) data.skin = 'steve';
 
         let player = {
             id: id,
@@ -174,7 +175,7 @@ module.exports = class World {
                 this.getEntity("arrow", 64),
                 this.getEntity("ender_pearl", 16),
                 this.getEntity("log_oak", 64),
-                this.getEntity("iron_ingot", 64)
+                this.getEntity("iron_ingot", 64),
             ],
             walking: false,
             sneaking: false,

@@ -54,9 +54,6 @@ function init() {
 
 // Initialize statistics
 function initStatistics() {
-    statistics.push(new Stat("Server", game, "region"));
-    statistics.push(new Stat("Socket ID", socket, "id"));
-    statistics.push(new Stat("Token", game, "token"));
     statistics.push([
         new Stat("FPS", game, "fps", 0),
         new Stat("UPS", game, "ups", 1),
@@ -65,9 +62,59 @@ function initStatistics() {
             return player[key] ? player[key].average() : 0;
         }, "ms", 1, "ping"),
     ]);
-    statistics.push(new Stat("MEM", function() {
-        return Math.round(performance.memory.usedJSHeapSize / 1048576);
-    }, "mb", 0));
+    statistics.push([
+        new Stat("LT", function() {
+            return game.logicTime;
+        }, "ms", 2),
+        new Stat("RT", function() {
+            return game.renderTime;
+        }, "ms", 2),
+        new Stat("CT", function() {
+            return game.canvasTime;
+        }, "ms", 2),
+        new Stat("Total", function() {
+            return game.logicTime + game.canvasTime + game.renderTime;
+        }, "ms", 2),
+    ]);
+    statistics.push([
+        new Stat("RC", function() {
+            return renderer.info.render.calls;
+        }),
+        new Stat("Tri", function() {
+            return renderer.info.render.triangles / 1000;
+        }, "k", 2),
+        new Stat("F", function() {
+            return renderer.info.render.frame;
+        }),
+    ]);
+    statistics.push([
+        new Stat("LIM", function() {
+            return performance.memory.jsHeapSizeLimit / 1048576;
+        }, "mb", 0),
+        new Stat("TOT", function() {
+            return performance.memory.totalJSHeapSize / 1048576;
+        }, "mb", 0),
+        new Stat("USED", function() {
+            return performance.memory.usedJSHeapSize / 1048576;
+        }, "mb", 0),
+        new Stat("INC", function() {
+            return game.memIncrease.average() / 1024;
+        }, "kb", 0),
+        new Stat("DEC", function() {
+            return game.memDecrease.average() / 1048576;
+        }, "mb", 1),
+    ]);
+    statistics.push([
+        new Stat("Geo", function() {
+            return renderer.info.memory.geometries;
+        }),
+        new Stat("Tex", function() {
+            return renderer.info.memory.textures;
+        }),
+    ]);
+    statistics.push(new Stat("Server", game, "region"));
+    statistics.push(new Stat("Socket ID", socket, "id"));
+    statistics.push(new Stat("Token", game, "token"));
     statistics.push(new Stat("Gamemode", player, "mode"));
     statistics.push(new Stat("Pos", player.position, false, 1, function(pos) {
         return pos.clone().divideScalar(world.blockSize);
@@ -133,34 +180,40 @@ function animate() {
     delta = (time - prevTime) / 1000;
     delta = Math.min(delta, 0.1)
 
+    let logicTime = performance.now();
+    game.startMemoryMonitor();
+
     updateMenu(); // Update the menu
     player.update(delta, world); // Update player
     chunkManager.update(player); // Update chunks
     animateServerPlayers(); // Update server players
     animateServerEntities(delta); // Animate server entities
-
-    // Send events to server
-    sendPacket();
-
-    // Scene update
-    stage.update();
-    stats.update();
-
+    sendPacket(); // Send events to server
     axesHelper.lookAt(new THREE.Vector3(0, 0, 100000000));
+    game.logicTime = performance.now() - logicTime;
 
+
+    let renderTime = performance.now();
+    stage.update(); // Update the stage
     composer.render(scene, camera);
+    game.renderTime = performance.now() - renderTime;
 
+    let canvasTime = performance.now();
     updateHUD(); // Update the HUD
+    stats.update();
+    game.canvasTime = performance.now() - canvasTime;
 
     prevTime = time;
 
-    // Update fps
+    // Update fps and memory usage
     player.fps = round(stats.fps, 1);
     game.fpsList.unshift(performance.now() - time);
     if (game.fpsList.length > 50) {
         game.fps = 1000 / game.fpsList.average();
         game.fpsList.length = 25;
     }
+
+    game.endMemoryMonitor();
 }
 
 // Window resize

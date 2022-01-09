@@ -488,6 +488,8 @@ class Player {
         // Calculate blocks intersecting the picking ray
         this.nearbyMeshes.length = 0;
         let cellPos = chunkManager.cellPos;
+        if (!cellPos) return;
+
         for (let offset of player.neighborOffsets) {
             let id = (cellPos.x + offset[0]) + "," + (cellPos.y + offset[1]) + "," + (cellPos.z + offset[2]);
             if (cellIdToMesh[id]) {

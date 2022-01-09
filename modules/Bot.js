@@ -1,16 +1,19 @@
 const THREE = require('three');
 
 module.exports = class Bot {
-    constructor(player, world) {
+    constructor(player, world, data) {
         this.bot = player;
         this.world = world;
 
         this.type = "bot";
+
+        let n = parseInt(data);
+        let level = Number.isInteger(n) ? n : 0;
         this.bot.armor = {
-            helmet: 1,
-            chestplate: 1,
-            leggings: 1,
-            boots: 1
+            helmet: level,
+            chestplate: level,
+            leggings: level,
+            boots: level
         }
     }
 
@@ -41,13 +44,6 @@ module.exports = class Bot {
 
         bot.punching = true;
         //bot.walking = true;
-
-        this.bot.armor = {
-            helmet: 5,
-            chestplate: 5,
-            leggings: 5,
-            boots: 5
-        }
     }
 
     collideVoxel(x, y, z) {

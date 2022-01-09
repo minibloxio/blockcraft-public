@@ -8,6 +8,8 @@ class Game {
         this.lastUpdate = Date.now();
         this.updates = [];
         this.fpsList = [];
+        this.memIncrease = [];
+        this.memDecrease = [];
         this.depthWrite = false;
 
         this.initCookies();
@@ -22,5 +24,24 @@ class Game {
 
     update() {
 
+    }
+
+    startMemoryMonitor() {
+        this.prevTotalMem = performance.memory.totalJSHeapSize;
+        this.prevUsedMem = performance.memory.usedJSHeapSize;
+    }
+
+    endMemoryMonitor() {
+        let currTotalMem = performance.memory.totalJSHeapSize;
+        let currUsedMem = performance.memory.usedJSHeapSize;
+        if (this.prevTotalMem < currTotalMem) {
+            this.memIncrease.push(currTotalMem - this.prevTotalMem);
+            if (this.memIncrease.length > 50) this.memIncrease.shift();
+        }
+        if (this.prevUsedMem > currUsedMem) {
+            let decrease = this.prevUsedMem - currUsedMem;
+            if (Number.isInteger(decrease)) this.memDecrease.push(decrease);
+            if (this.memDecrease.length > 1) this.memDecrease.shift();
+        }
     }
 }

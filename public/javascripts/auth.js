@@ -370,15 +370,20 @@ $(document).ready(function() {
 // Menu progression states
 function nextState(e) {
     if (isState("start")) { // Start Menu -> Server Select
-        let x = e.pageX;
-        let y = e.pageY;
-        let offset = $("#steve-bar").offset();
-        let steve = x > offset.left && x < offset.left + $("#steve-bar").width() && y > offset.top && y < offset.top + $("#steve-bar").height();
-        if (steve) {
-            player.skin = "steve";
-        } else {
-            player.skin = "alex";
+        player.skin = "steve";
+
+        if (e) { // Choose skin
+            let x = e.pageX;
+            let y = e.pageY;
+            let offset = $("#steve-bar").offset();
+            let steve = x > offset.left && x < offset.left + $("#steve-bar").width() && y > offset.top && y < offset.top + $("#steve-bar").height();
+            if (steve) {
+                player.skin = "steve";
+            } else {
+                player.skin = "alex";
+            }
         }
+
         showServerSelect();
 
         state += 1;

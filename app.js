@@ -904,7 +904,7 @@ io.on('connection', function(socket_) {
                 pos: players[socket.id].pos,
                 skin: data || "steve",
             });
-            bots[id] = new Bot(players[id], world);
+            bots[id] = new Bot(players[id], world, data);
             io.emit('addPlayer', players[id]);
             io.emit('messageAll', {
                 name: "Server",

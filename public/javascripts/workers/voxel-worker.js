@@ -47,66 +47,71 @@ self.addEventListener('message', e => {
     }
 });
 
-const faces = [
-    { // left
+const faces = [{ // left
         uvRow: 0,
-        dir: [-1, 0, 0,],
+        dir: [-1, 0, 0, ],
         corners: [
             { pos: [0, 1, 0], uv: [0, 1], },
             { pos: [0, 0, 0], uv: [0, 0], },
             { pos: [0, 1, 1], uv: [1, 1], },
             { pos: [0, 0, 1], uv: [1, 0], },
         ],
+        index: 0,
     },
     { // right
         uvRow: 0,
-        dir: [1, 0, 0,],
+        dir: [1, 0, 0, ],
         corners: [
             { pos: [1, 1, 1], uv: [0, 1], },
             { pos: [1, 0, 1], uv: [0, 0], },
             { pos: [1, 1, 0], uv: [1, 1], },
             { pos: [1, 0, 0], uv: [1, 0], },
         ],
+        index: 1,
     },
     { // bottom
         uvRow: 1,
-        dir: [0, -1, 0,],
+        dir: [0, -1, 0, ],
         corners: [
             { pos: [1, 0, 1], uv: [1, 0], },
             { pos: [0, 0, 1], uv: [0, 0], },
             { pos: [1, 0, 0], uv: [1, 1], },
             { pos: [0, 0, 0], uv: [0, 1], },
         ],
+        index: 2,
     },
     { // top
         uvRow: 2,
-        dir: [0, 1, 0,],
+        dir: [0, 1, 0, ],
         corners: [
             { pos: [0, 1, 1], uv: [1, 1], },
             { pos: [1, 1, 1], uv: [0, 1], },
             { pos: [0, 1, 0], uv: [1, 0], },
             { pos: [1, 1, 0], uv: [0, 0], },
         ],
+        index: 3,
     },
     { // back
         uvRow: 0,
-        dir: [0, 0, -1,],
+        dir: [0, 0, -1, ],
         corners: [
             { pos: [1, 0, 0], uv: [0, 0], },
             { pos: [0, 0, 0], uv: [1, 0], },
             { pos: [1, 1, 0], uv: [0, 1], },
             { pos: [0, 1, 0], uv: [1, 1], },
         ],
+        index: 4,
     },
     { // front
         uvRow: 0,
-        dir: [0, 0, 1,],
+        dir: [0, 0, 1, ],
         corners: [
             { pos: [0, 0, 1], uv: [0, 0], },
             { pos: [1, 0, 1], uv: [1, 0], },
             { pos: [0, 1, 1], uv: [0, 1], },
             { pos: [1, 1, 1], uv: [1, 1], },
         ],
+        index: 5,
     },
 ];
 
@@ -143,11 +148,22 @@ function getVoxel(x, y, z) {
     return cell[voxelOffset];
 }
 
-function addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel) {
+// left, right, bottom, top, back, front
+const customFaceBlocks = {
+    "furnace": [0, 1, 2, 2, 1, 1]
+};
+
+function addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel, index) {
     const { tileSize, tileTextureWidth, tileTextureHeight, blockSize } = world;
 
+    let customFace = customFaceBlocks[world.blockOrder[uvVoxel]];
+    if (customFace)
+        uvRow = customFace[index];
+
     const ndx = positions.length / 3;
-    for (const { pos, uv } of corners) {
+    for (const { pos, uv }
+        of corners) {
+        // Get position relative to the cell
         let xPos = (pos[0] + x);
         let yPos = (pos[1] + y);
         let zPos = (pos[2] + z);
@@ -187,20 +203,15 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
             const voxelZ = startZ + z;
             for (let x = 0; x < cellSize; ++x) {
                 const voxelX = startX + x;
-                const voxel = getVoxel(voxelX, voxelY, voxelZ);
-
-                if (voxel <= 0)
-                    continue;
-
-                // voxel 0 is sky (empty) so for UVs we start at 0
+                const voxel = getVoxel(voxelX, voxelY, voxelZ); // Get voxel value at current position
+                if (voxel <= 0) continue; // Skip empty voxels
                 const uvVoxel = voxel - 1;
-
-                // There is a voxel here but do we need faces for it?
                 let transparentTexture = isTransparent(voxel)
 
                 // OPAQUE TEXTURES
                 if (!transparent && !transparentTexture) {
-                    for (const { dir, corners, uvRow } of faces) {
+                    for (const { dir, corners, uvRow, index }
+                        of faces) {
 
                         const neighbor = getVoxel(
                             voxelX + dir[0],
@@ -208,14 +219,15 @@ function generateGeometryDataForCell(cellX, cellY, cellZ, world, transparent) {
                             voxelZ + dir[2]);
                         if (neighbor <= 0 || neighbor == 255 || (isTransparent(neighbor) && voxel != neighbor)) {
                             // this voxel has no neighbor in this direction so we need a face.
-                            addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel)
+                            addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel, index)
                         }
                     }
                 }
 
                 // TRANSPARENT TEXTURES
                 if (transparent && transparentTexture) { // Water
-                    for (const { dir, corners, uvRow } of faces) {
+                    for (const { dir, corners, uvRow }
+                        of faces) {
 
                         const neighbor = getVoxel(
                             voxelX + dir[0],

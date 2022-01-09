@@ -9,6 +9,8 @@ class SkinManager {
 
         this.loadSkin('steve');
         this.loadSkin('alex');
+        this.loadSkin('zombie');
+        this.loadSkin('skeleton');
 
         this.loadArmor('leather'); // 1
         this.loadArmor('gold'); // 2
@@ -112,7 +114,12 @@ class SkinManager {
         texture.magFilter = THREE.NearestFilter;
 
         let notTransparent = (type.leggings || type.boots) && skin.name != 'chainmail';
-        return new THREE.MeshLambertMaterial({ map: texture, side: THREE.DoubleSide, transparent: (skin.isArmor && !notTransparent) ? true : false });
+        let isTransparent = (skin.isArmor && !notTransparent) || !skin.isArmor
+        return new THREE.MeshLambertMaterial({
+            map: texture,
+            side: THREE.DoubleSide,
+            transparent: isTransparent
+        });
     }
 
     // HEAD

@@ -162,8 +162,8 @@ class PlayerManager {
 
         let dim = player.dim;
 
-        let headMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.headSize, dim.headSize, dim.headSize), playerMat.head);
-        p.helmetMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.headSize + 1, dim.headSize + 1, dim.headSize + 1), helmetMat);
+        let headMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.headSize, dim.headSize, dim.headSize), playerMat.head);
+        p.helmetMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.headSize + 1, dim.headSize + 1, dim.headSize + 1), helmetMat);
 
         p.head = new THREE.Group();
         p.head.add(headMesh, p.helmetMesh);
@@ -183,9 +183,9 @@ class PlayerManager {
 
         let dim = player.dim;
 
-        let torsoMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.torso, dim.torsoHeight, dim.legSize), playerMat.body);
-        p.chestplateMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.torso + 1, dim.torsoHeight + 1, dim.legSize + 1), chestplateMat);
-        p.leggingsTopMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.torso + 0.5, dim.torsoHeight * 5 / 12, dim.legSize + 0.5), leggingsMath);
+        let torsoMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.torso, dim.torsoHeight, dim.legSize), playerMat.body);
+        p.chestplateMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.torso + 1, dim.torsoHeight + 1, dim.legSize + 1), chestplateMat);
+        p.leggingsTopMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.torso + 0.5, dim.torsoHeight * 5 / 12, dim.legSize + 0.5), leggingsMath);
         p.leggingsTopMesh.position.y -= dim.torsoHeight * (1 - 5 / 12) / 2 + 1;
 
         // Add body
@@ -205,8 +205,8 @@ class PlayerManager {
         let dim = player.dim;
 
         if (p.skin == 'alex') { // Skinny skins
-            let armMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.armSizeSlim, dim.armHeight, dim.armSize), playerMat.arm);
-            let armPlatesMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.armSizeSlim + 1, dim.armHeight * 5 / 12, dim.armSize + 1), armMat);
+            let armMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSizeSlim, dim.armHeight, dim.armSize), playerMat.arm);
+            let armPlatesMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSizeSlim + 1, dim.armHeight * 5 / 12, dim.armSize + 1), armMat);
             armPlatesMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
             armPlatesMesh.position.y += dim.armHeight * (1 - 5 / 12) / 2 + 1;
 
@@ -222,8 +222,8 @@ class PlayerManager {
             p.leftArm.position.set(-5.45, -blockSize * 0.45, 0);
             p.rightArm.position.set(-0.55, -blockSize * 0.3, 0);
         } else { // Default skins
-            let armMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.armSize, dim.armHeight, dim.armSize), playerMat.arm);
-            let armPlatesMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.armSize + 1, dim.armHeight * 5 / 12, dim.armSize + 1), armMat);
+            let armMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSize, dim.armHeight, dim.armSize), playerMat.arm);
+            let armPlatesMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSize + 1, dim.armHeight * 5 / 12, dim.armSize + 1), armMat);
             armPlatesMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
             armPlatesMesh.position.y += dim.armHeight * (1 - 5 / 12) / 2 + 1;
 
@@ -256,9 +256,9 @@ class PlayerManager {
 
         let dim = player.dim;
 
-        let legMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.legSize, dim.legHeight, dim.legSize), playerMat.leg);
-        let leggingsMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.legSize + 0.5, dim.legHeight * 0.75, dim.legSize + 0.5), leggingsMat);
-        let bootsMesh = PlayerManager.addMesh(new THREE.BoxGeometry(dim.legSize + 1, dim.legHeight * 0.5, dim.legSize + 1), bootsMat);
+        let legMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.legSize, dim.legHeight, dim.legSize), playerMat.leg);
+        let leggingsMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.legSize + 0.5, dim.legHeight * 0.75, dim.legSize + 0.5), leggingsMat);
+        let bootsMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.legSize + 1, dim.legHeight * 0.5, dim.legSize + 1), bootsMat);
         leggingsMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
         bootsMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
         leggingsMesh.position.y += dim.legHeight * 0.125;
@@ -285,7 +285,6 @@ class PlayerManager {
         p.leftLeg.position.set(-dim.legSize * 1 / 2, -blockSize * 0.45 - blockSize * 0.75, 0);
         p.rightLeg.position.set(dim.armSize * 1 / 2, -blockSize * 0.45 - blockSize * 0.75, 0);
     }
-
 
     static addPlayerMesh(p) {
 
