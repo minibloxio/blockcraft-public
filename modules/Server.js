@@ -152,10 +152,10 @@ module.exports = class World {
             operator: this.operators.includes(data.token),
             skin: data.skin,
             armor: {
-                head: null,
-                chest: null,
-                legs: null,
-                boots: null
+                helmet: 1,
+                chestplate: 1,
+                leggings: 1,
+                boots: 1
             }
         }
 

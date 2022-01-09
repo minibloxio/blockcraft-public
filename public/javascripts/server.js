@@ -2,40 +2,44 @@
 function updatePlayers(serverPlayers) {
     for (let id in players) {
         let p = players[id];
-        if (p.pos && p.rot && serverPlayers[id]) {
+        let p_ = serverPlayers[id];
+        if (p.pos && p.rot && p_) {
             // Set new player location
-            p.pos.set({ x: serverPlayers[id].pos.x, y: serverPlayers[id].pos.y, z: serverPlayers[id].pos.z });
-            p.rot.set({ x: serverPlayers[id].rot.x, y: serverPlayers[id].rot.y, z: serverPlayers[id].rot.z });
-            p.dir.set({ x: serverPlayers[id].dir.x, y: serverPlayers[id].dir.y, z: serverPlayers[id].dir.z });
+            p.pos.set({ x: p_.pos.x, y: p_.pos.y, z: p_.pos.z });
+            p.rot.set({ x: p_.rot.x, y: p_.rot.y, z: p_.rot.z });
+            p.dir.set({ x: p_.dir.x, y: p_.dir.y, z: p_.dir.z });
 
             // Update player data
-            if (serverPlayers[id].hp != p.hp) {
+            if (p_.hp != p.hp) {
                 p.heartBlink = game.tick.value;
-                if (!p.lastHp || serverPlayers[id].hp > p.lastHp) {
+                if (!p.lastHp || p_.hp > p.lastHp) {
                     p.lastHp = p.hp;
                 }
             }
-            p.hp = serverPlayers[id].hp;
+            p.hp = p_.hp;
             if (p.hp <= 0 && p.entity.visible) {
                 p.entity.visible = false;
             } else if (p.hp > 0) {
                 p.entity.visible = true;
             }
 
+            // Update player armor
+            PlayerManager.updatePlayerArmor(p, p_);
+
             // Update gamemode / operator
-            if (p.mode != serverPlayers[id].mode || p.operator != serverPlayers[id].operator) {
-                p.operator = serverPlayers[id].operator;
+            if (p.mode != p_.mode || p.operator != p_.operator) {
+                p.operator = p_.operator;
                 PlayerManager.updateNameTag(p);
-                PlayerManager.setPlayerGamemode(p, serverPlayers[id].mode);
+                PlayerManager.setPlayerGamemode(p, p_.mode);
             }
 
             // Transfer data
-            let transferredValues = (({ ping, toolbar, walking, sneaking, punching, blocking, fps }) => ({ ping, toolbar, walking, sneaking, punching, blocking, fps }))(serverPlayers[id]);
+            let transferredValues = (({ ping, toolbar, walking, sneaking, punching, blocking, fps }) => ({ ping, toolbar, walking, sneaking, punching, blocking, fps }))(p_);
             Object.assign(p, transferredValues)
 
             // Update player hand if necessary
-            if (p.currSlot != serverPlayers[id].currSlot) {
-                p.currSlot = serverPlayers[id].currSlot;
+            if (p.currSlot != p_.currSlot) {
+                p.currSlot = p_.currSlot;
 
                 let hand = p.toolbar[p.currSlot];
 
@@ -48,8 +52,8 @@ function updatePlayers(serverPlayers) {
             }
 
             // Update player name if necessary (performance intensive)
-            if (p.name != serverPlayers[id].name) {
-                p.name = serverPlayers[id].name;
+            if (p.name != p_.name) {
+                p.name = p_.name;
 
                 PlayerManager.updateNameTag(p); // Update name tag
                 PlayerManager.setPlayerGamemode(p, p.mode); // Set gamemode

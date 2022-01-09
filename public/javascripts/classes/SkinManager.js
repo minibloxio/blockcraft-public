@@ -10,11 +10,13 @@ class SkinManager {
         this.loadSkin('steve');
         this.loadSkin('alex');
 
-        this.loadArmor('leather');
-        this.loadArmor('chainmail');
-        this.loadArmor('gold');
-        this.loadArmor('iron');
-        this.loadArmor('diamond');
+        this.loadArmor('leather'); // 1
+        this.loadArmor('gold'); // 2
+        this.loadArmor('chainmail'); // 3
+        this.loadArmor('iron'); // 4
+        this.loadArmor('diamond'); // 5
+
+        this.armorOrder = [null, 'leather', 'gold', 'chainmail', 'iron', 'diamond'];
     }
 
     getSkin(name) {
@@ -56,7 +58,6 @@ class SkinManager {
             armor.atlas = texture.image;
             SkinManager.loadHead(armor);
             SkinManager.loadBody(armor);
-            SkinManager.loadArm(armor);
             SkinManager.loadArmPlates(armor);
             SkinManager.loadBoots(armor);
         });
@@ -82,6 +83,15 @@ class SkinManager {
             ctx_.rotate(-90 * Math.PI / 180);
             ctx_.translate(0, -4);
             ctx_.drawImage(atlas, x, y, canvas.height, canvas.width, 0, 0, canvas.height, canvas.width);
+        } else if (skin.name == 'leather') {
+            canvas.width = w || 8;
+            canvas.height = h || 8;
+
+            ctx_.drawImage(atlas, x, y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+            let imageData = ctx_.getImageData(0, 0, canvas.width, canvas.height);
+
+            textureManager.tintImageData(imageData.data, [89, 56, 36]);
+            ctx_.putImageData(imageData, 0, 0);
         } else {
             canvas.width = w || 8;
             canvas.height = h || 8;

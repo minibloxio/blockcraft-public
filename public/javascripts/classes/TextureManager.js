@@ -91,6 +91,10 @@ class TextureManager {
             "leaves_acacia": [76, 168, 32],
             "leaves_big_oak": [71, 160, 29],
             "grass_top": [134, 200, 95],
+            "leather_helmet": [89, 56, 36],
+            "leather_chestplate": [89, 56, 36],
+            "leather_leggings": [89, 56, 36],
+            "leather_boots": [89, 56, 36],
         }
 
         this.blockFaces = {};
@@ -98,7 +102,11 @@ class TextureManager {
 
         // ITEM TEXTURES
         this.items = {
-            "bow": ["bow_standby", "bow_pulling_0", "bow_pulling_1", "bow_pulling_2"]
+            "bow": ["bow_standby", "bow_pulling_0", "bow_pulling_1", "bow_pulling_2"],
+            "leather_helmet": ["leather_helmet", "leather_helmet_overlay"],
+            "leather_chestplate": ["leather_chestplate", "leather_chestplate_overlay"],
+            "leather_leggings": ["leather_leggings", "leather_leggings_overlay"],
+            "leather_boots": ["leather_boots", "leather_boots_overlay"],
         }
         this.itemFaces = {};
 
@@ -317,11 +325,11 @@ class TextureManager {
         }
     }
 
-    tintImageData(data, color, firstFourRows) {
+    tintImageData(data, color, firstFourRows, force) {
         for (var i = 0; i < data.length; i += 4) {
             if (i > 256 && firstFourRows) return;
             let sameColor = data[i] == data[i + 1] && data[i + 1] == data[i + 2];
-            if (data[i + 3] != 0 && sameColor) {
+            if (data[i + 3] != 0 && sameColor || (force)) {
                 data[i] = data[i] / 255 * color[0];
                 data[i + 1] = data[i + 1] / 255 * color[1];
                 data[i + 2] = data[i + 2] / 255 * color[2];
@@ -370,10 +378,22 @@ class TextureManager {
         let index = 0;
         for (let item of order) {
             let b = this.items[item];
-            //console.log(item);
+
             if (b instanceof Array) {
-                for (let i = 0; i < b.length; i++) {
-                    ctx_.drawImage(this.itemFaces[b[i]].image, index * 16, i * 16)
+                if (item.includes("leather")) {
+                    let color = this.colormap[item];
+
+                    ctx_.drawImage(this.itemFaces[b[0]].image, index * 16, 0);
+                    let imageData = ctx_.getImageData(index * 16, 0, 16, 16);
+
+                    this.tintImageData(imageData.data, color);
+                    ctx_.putImageData(imageData, index * 16, 0);
+
+                    ctx_.drawImage(this.itemFaces[b[1]].image, index * 16, 0);
+                } else {
+                    for (let i = 0; i < b.length; i++) {
+                        ctx_.drawImage(this.itemFaces[b[i]].image, index * 16, i * 16)
+                    }
                 }
             } else {
                 ctx_.drawImage(this.itemFaces[item].image, index * 16, 0)

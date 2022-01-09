@@ -7,10 +7,10 @@ module.exports = class Bot {
 
         this.type = "bot";
         this.bot.armor = {
-            head: 0,
-            chest: 0,
-            legs: 0,
-            feet: 0
+            helmet: 1,
+            chestplate: 1,
+            leggings: 1,
+            boots: 1
         }
     }
 
@@ -41,6 +41,13 @@ module.exports = class Bot {
 
         bot.punching = true;
         //bot.walking = true;
+
+        this.bot.armor = {
+            helmet: Math.floor(Date.now() / 2000 % 5) + 1,
+            chestplate: Math.floor(Date.now() / 2000 % 5) + 1,
+            leggings: Math.floor(Date.now() / 2000 % 5) + 1,
+            boots: Math.floor(Date.now() / 2000 % 5) + 1
+        }
     }
 
     collideVoxel(x, y, z) {
