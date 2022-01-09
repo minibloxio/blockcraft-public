@@ -174,8 +174,7 @@ module.exports = class World {
                 this.getEntity("arrow", 64),
                 this.getEntity("ender_pearl", 16),
                 this.getEntity("log_oak", 64),
-                this.getEntity("iron_ingot", 64),
-                this.getEntity("diamond_helmet")
+                this.getEntity("iron_ingot", 64)
             ],
             walking: false,
             sneaking: false,

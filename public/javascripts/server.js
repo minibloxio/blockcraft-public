@@ -34,15 +34,14 @@ function updatePlayers(serverPlayers) {
             }
 
             // Update player hand if necessary
-            let prevSlot = JSON.stringify(p.toolbar[p_.currSlot]);
-            let newSlot = JSON.stringify(p_.toolbar[p_.currSlot]);
-            if (p.currSlot != p_.currSlot || prevSlot != newSlot) {
+            let same = p.toolbar[p_.currSlot] && p_.toolbar[p_.currSlot] && p.toolbar[p_.currSlot].v == p_.toolbar[p_.currSlot].v && p.toolbar[p_.currSlot].class == p_.toolbar[p_.currSlot].class && p.toolbar[p_.currSlot].c == p_.toolbar[p_.currSlot].c;
+            let bothExists = p.toolbar[p_.currSlot] == null && p_.toolbar[p_.currSlot] == null;
+            if (p.currSlot != p_.currSlot || (!same && !bothExists)) {
                 p.currSlot = p_.currSlot;
 
                 let hand = p_.toolbar[p.currSlot];
 
                 if (p.hand && p.hand.mesh) p.rightArm.remove(p.hand.mesh);
-
                 if (hand && hand.c > 0) PlayerManager.updatePlayerHand(hand, p);
             }
 
