@@ -109,6 +109,8 @@ class Player {
     }
 
     init() {
+        console.log("Player init");
+
         // Player appearance
         let blockSize = 16;
         this.halfWidth = blockSize * 0.3;
@@ -134,7 +136,7 @@ class Player {
         this.hunger = 100;
 
         // Hand
-        if (!initialized) this.addArm();
+        this.addArm();
 
         // Select box wireframe
         let select_box = new THREE.BoxGeometry(blockSize + 0.1, blockSize + 0.1, blockSize + 0.1);
@@ -465,6 +467,7 @@ class Player {
     }
 
     addArm() {
+        if (this.arm) return;
         this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin(this.skin).armC);
         this.arm.castShadow = true;
         this.arm.receiveShadow = true;
@@ -738,8 +741,6 @@ class Player {
         let item = this.getCurrItem();
         let index = inventory.isArmor(item);
         if (this.place && typeof index == "number") {
-            console.log("Adding armor to armor slot");
-
             let armor = JSON.stringify(item);
             this.toolbar[this.currentSlot] = undefined;
             this.toolbar[inventory.limit + index] = JSON.parse(armor);
