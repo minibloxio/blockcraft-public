@@ -1,5 +1,4 @@
-recipes = [
-    {
+recipes = [{
         "output": "planks_oak",
         "count": 4,
         "grid": [
@@ -246,5 +245,216 @@ recipes = [
             ["string", "string"],
             ["string", "string"]
         ]
+    },
+    {
+        "output": "leather_helmet",
+        "count": 1,
+        "grid": [
+            ["leather", "leather", "leather"],
+            ["leather", null, "leather"],
+        ]
+    },
+    {
+        "output": "leather_chestplate",
+        "count": 1,
+        "grid": [
+            ["leather", null, "leather"],
+            ["leather", "leather", "leather"],
+            ["leather", "leather", "leather"]
+        ]
+    },
+    {
+        "output": "leather_leggings",
+        "count": 1,
+        "grid": [
+            ["leather", "leather", "leather"],
+            ["leather", null, "leather"],
+            ["leather", null, "leather"]
+        ]
+    },
+    {
+        "output": "leather_boots",
+        "count": 1,
+        "grid": [
+            ["leather", null, "leather"],
+            ["leather", null, "leather"]
+        ]
+    },
+    {
+        "output": "gold_helmet",
+        "count": 1,
+        "grid": [
+            ["gold_ingot", "gold_ingot", "gold_ingot"],
+            ["gold_ingot", null, "gold_ingot"],
+        ]
+    },
+    {
+        "output": "gold_chestplate",
+        "count": 1,
+        "grid": [
+            ["gold_ingot", null, "gold_ingot"],
+            ["gold_ingot", "gold_ingot", "gold_ingot"],
+            ["gold_ingot", "gold_ingot", "gold_ingot"]
+        ]
+    },
+    {
+        "output": "gold_leggings",
+        "count": 1,
+        "grid": [
+            ["gold_ingot", "gold_ingot", "gold_ingot"],
+            ["gold_ingot", null, "gold_ingot"],
+            ["gold_ingot", null, "gold_ingot"]
+        ]
+    },
+    {
+        "output": "gold_boots",
+        "count": 1,
+        "grid": [
+            ["gold_ingot", null, "gold_ingot"],
+            ["gold_ingot", null, "gold_ingot"]
+        ]
+    },
+    {
+        "output": "iron_helmet",
+        "count": 1,
+        "grid": [
+            ["iron_ingot", "iron_ingot", "iron_ingot"],
+            ["iron_ingot", null, "iron_ingot"],
+        ]
+    },
+    {
+        "output": "iron_chestplate",
+        "count": 1,
+        "grid": [
+            ["iron_ingot", null, "iron_ingot"],
+            ["iron_ingot", "iron_ingot", "iron_ingot"],
+            ["iron_ingot", "iron_ingot", "iron_ingot"]
+        ]
+    },
+    {
+        "output": "iron_leggings",
+        "count": 1,
+        "grid": [
+            ["iron_ingot", "iron_ingot", "iron_ingot"],
+            ["iron_ingot", null, "iron_ingot"],
+            ["iron_ingot", null, "iron_ingot"]
+        ]
+    },
+    {
+        "output": "iron_boots",
+        "count": 1,
+        "grid": [
+            ["iron_ingot", null, "iron_ingot"],
+            ["iron_ingot", null, "iron_ingot"]
+        ]
+    },
+    {
+        "output": "diamond_helmet",
+        "count": 1,
+        "grid": [
+            ["diamond", "diamond", "diamond"],
+            ["diamond", null, "diamond"],
+        ]
+    },
+    {
+        "output": "diamond_chestplate",
+        "count": 1,
+        "grid": [
+            ["diamond", null, "diamond"],
+            ["diamond", "diamond", "diamond"],
+            ["diamond", "diamond", "diamond"]
+        ]
+    },
+    {
+        "output": "diamond_leggings",
+        "count": 1,
+        "grid": [
+            ["diamond", "diamond", "diamond"],
+            ["diamond", null, "diamond"],
+            ["diamond", null, "diamond"]
+        ]
+    },
+    {
+        "output": "diamond_boots",
+        "count": 1,
+        "grid": [
+            ["diamond", null, "diamond"],
+            ["diamond", null, "diamond"]
+        ]
+    },
+    {
+        "output": "gold_nugget",
+        "count": 9,
+        "shapeless": true,
+        "grid": ["gold_ingot"]
+    },
+    {
+        "output": "gold_ingot",
+        "count": 1,
+        "grid": [
+            ["gold_nugget", "gold_nugget", "gold_nugget"],
+            ["gold_nugget", "gold_nugget", "gold_nugget"],
+            ["gold_nugget", "gold_nugget", "gold_nugget"],
+        ]
+    },
+    {
+        "output": "gold_block",
+        "count": 1,
+        "grid": [
+            ["gold_ingot", "gold_ingot", "gold_ingot"],
+            ["gold_ingot", "gold_ingot", "gold_ingot"],
+            ["gold_ingot", "gold_ingot", "gold_ingot"],
+        ]
+    },
+    {
+        "output": "iron_ingot",
+        "count": 9,
+        "shapeless": true,
+        "grid": ["iron_block"]
+    },
+    {
+        "output": "iron_block",
+        "count": 1,
+        "grid": [
+            ["iron_ingot", "iron_ingot", "iron_ingot"],
+            ["iron_ingot", "iron_ingot", "iron_ingot"],
+            ["iron_ingot", "iron_ingot", "iron_ingot"],
+        ]
+    },
+    {
+        "output": "iron_ingot",
+        "count": 9,
+        "shapeless": true,
+        "grid": ["iron_block"]
+    },
+    {
+        "output": "diamond_block",
+        "count": 1,
+        "grid": [
+            ["diamond", "diamond", "diamond"],
+            ["diamond", "diamond", "diamond"],
+            ["diamond", "diamond", "diamond"],
+        ]
+    },
+    {
+        "output": "diamond",
+        "count": 9,
+        "shapeless": true,
+        "grid": ["diamond_block"]
+    },
+    {
+        "output": "coal_block",
+        "count": 1,
+        "grid": [
+            ["coal", "coal", "coal"],
+            ["coal", "coal", "coal"],
+            ["coal", "coal", "coal"],
+        ]
+    },
+    {
+        "output": "coal",
+        "count": 9,
+        "shapeless": true,
+        "grid": ["coal_block"]
     }
 ];

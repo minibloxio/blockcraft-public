@@ -216,7 +216,7 @@ class Inventory {
     compareItems(items, itemToCompare, i) {
         let total = 0;
         for (let j = 0; j < items.length; j++) {
-            if (items[j] && items[j].v == itemToCompare.v && i != j) {
+            if (items[j] && items[j].v == itemToCompare.v && i != j && items[j].class == itemToCompare.class) {
                 total += items[j].c;
                 items[j] = undefined;
             }
@@ -274,7 +274,7 @@ class Inventory {
                 }
                 if (!this.selectedItem) {
                     // Pick up item
-                    this.selectedItem = JSON.parse(JSON.stringify(entity));
+                    this.selectedItem = this.copyItem(entity);
                 } else if (this.selectedItem && this.selectedItem.c > 0) {
                     // Switch or combine
                     if (this.selectedItem.v == entity.v) {
@@ -306,8 +306,8 @@ class Inventory {
                         block[i].c += 1;
                         this.selectedItem.c -= 1;
                     } else {
-                        let prevBlock = JSON.parse(JSON.stringify(block[i]));
-                        block[i] = JSON.parse(JSON.stringify(this.selectedItem));
+                        let prevBlock = this.copyItem(block[i]);
+                        block[i] = this.copyItem(this.selectedItem);
                         this.selectedItem = prevBlock;
                     }
                 }
@@ -330,15 +330,80 @@ class Inventory {
         } else if (block != "creative") { // SURVIVAL MODE
             let selectedExists = this.selectedItem && this.selectedItem.c > 0;
             let blockExists = block[i] && block[i].c > 0;
-            let blockEqualsSelected = blockExists && selectedExists && block[i].v == this.selectedItem.v;
+            let blockEqualsSelected = blockExists && selectedExists && block[i].v == this.selectedItem.v && block[i].class == this.selectedItem.class;
             let enoughSpace = selectedExists && this.selectedItem.c > this.selectedBoxes.length;
 
-            if (i >= 36 && i < 40 && this.selectedItem) { // Armor slot
-                if (!this.isArmor(this.selectedItem, i)) return;
-            }
+            // Invalid armor item
+            if (i >= 36 && i < 40 && this.selectedItem && !this.isArmor(this.selectedItem, i)) return;
 
-            if (type == "left") { // Left click item
+            if (map[16] && (type == "left" || type == "right" || type == "double")) { // Shift click to move to another part of the inventory
+                if (!selectedExists && blockExists && firstClick) {
+                    let index = this.isArmor(block[i]);
+                    let item = this.copyItem(block[i]);
 
+                    if (typeof index == 'number') { // Armor item
+
+                        if (i >= 36 && i < 40) { // Move from armor to inventory
+
+                            for (let j = 0; j < this.limit; j++) {
+                                let k = (j + 9) % this.limit;
+                                if (this.inventory[k] && this.inventory[k].c > 0) continue;
+                                this.inventory[k] = item;
+                                block[i] = undefined;
+                                return;
+                            }
+
+                        } else { // Move from inventory to armor
+                            if (this.inventory[this.limit + index]) {
+                                block[i] = JSON.parse(JSON.stringify(this.inventory[this.limit + index]));
+                            } else {
+                                block[i] = undefined;
+                            }
+                            this.inventory[this.limit + index] = item;
+                        }
+                    } else { // Normal item
+
+                        if (i < 9) { // Move from hotbar to inventory
+
+                            // Check if there's existing item in inventory
+                            for (let j = 9; j < this.limit; j++) {
+                                if (!this.inventory[j]) continue;
+                                if (this.inventory[j].v != item.v || this.inventory[j].class != item.class) continue;
+                                this.inventory[j].c += item.c;
+                                block[i] = undefined;
+                                return;
+                            }
+
+                            // Add to inventory
+                            for (let j = 9; j < this.limit; j++) {
+                                if (this.inventory[j] && this.inventory[j].c > 0) continue;
+                                this.inventory[j] = item;
+                                block[i] = undefined;
+                                return;
+                            }
+
+                        } else { // Move from inventory to hotbar
+
+                            for (let j = 0; j < 9; j++) {
+                                if (!this.inventory[j]) continue;
+                                if (this.inventory[j].v != item.v || this.inventory[j].class != item.class) continue;
+                                this.inventory[j].c += item.c;
+                                block[i] = undefined;
+                                return;
+                            }
+
+                            // Add to inventory
+                            for (let j = 0; j < 9; j++) {
+                                if (this.inventory[j] && this.inventory[j].c > 0) continue;
+                                this.inventory[j] = item;
+                                block[i] = undefined;
+                                return;
+                            }
+                        }
+                    }
+                }
+
+            } else if (type == "left") { // Left click item
                 if (!selectedExists && blockExists && firstClick) { // Pick up item
                     this.selectedItem = this.copyItem(block[i]);
                     block[i] = undefined;
@@ -347,8 +412,8 @@ class Inventory {
                     this.addSelectedBox(xPos, yPos, block, i, this.selectedItem, true); // Add box to selected boxes to spread evenly
                     this.drop = true;
                 } else if (selectedExists && blockExists && !blockEqualsSelected && firstClick) { // Switch items
-                    let prevBlock = JSON.parse(JSON.stringify(block[i]));
-                    block[i] = JSON.parse(JSON.stringify(this.selectedItem));
+                    let prevBlock = this.copyItem(block[i]);
+                    block[i] = this.copyItem(this.selectedItem);
                     this.selectedItem = prevBlock;
                     this.pickup = true;
                 }
@@ -389,13 +454,13 @@ class Inventory {
                         block[i].c += 1;
                         this.selectedItem.c -= 1;
                     } else {
-                        let prevBlock = JSON.parse(JSON.stringify(block[i]));
-                        block[i] = JSON.parse(JSON.stringify(this.selectedItem));
+                        let prevBlock = this.copyItem(block[i]);
+                        block[i] = this.copyItem(this.selectedItem);
                         this.selectedItem = prevBlock;
                     }
                 }
             } else if (type == "double") { // Double click item
-                if (this.selectedItem && block[i] && this.selectedItem.v != block[i].v) {
+                if (this.selectedItem && block[i] && this.selectedItem.v != block[i].v && this.selectedItem.class != block[i].class) {
                     return;
                 }
 
@@ -571,22 +636,67 @@ class Inventory {
             }
 
             // Select from survival crafting output
-            if (type == "left" && firstClick) {
-                let block = craftingOutput;
-                let { xPos, yPos } = showCraftingTable ? this.getPos("craftingTableOutput") : this.getPos("craftingOutput");
+            let block = craftingOutput;
+            let { xPos, yPos } = showCraftingTable ? this.getPos("craftingTableOutput") : this.getPos("craftingOutput");
 
-                if (this.withinItemFrame(xPos, yPos)) {
-                    if (!this.selectedItem && block && block.c > 0) {
-                        this.selectedItem = JSON.parse(JSON.stringify(block));
+            if (this.withinItemFrame(xPos, yPos)) {
+
+                this.addHighlightBox(xPos, yPos);
+
+                if (type == "left" && firstClick && this.craftingOutput) {
+                    let selectedExists = this.selectedItem && this.selectedItem.c > 0;
+                    let blockExists = block && block.c > 0;
+                    let item = this.copyItem(this.craftingOutput);
+
+                    if (!selectedExists && blockExists && map[16]) {
+
+                        // Add to preexisting item (if possible)
+                        let moved = false;
+                        for (let j = 0; j < this.limit; j++) {
+                            let k = (j + 9) % this.limit;
+                            if (!this.inventory[k]) continue;
+                            if (this.inventory[k].v != this.craftingOutput.v || this.inventory[k].class != this.craftingOutput.class) continue;
+                            this.inventory[k].c += this.craftingOutput.c;
+                            moved = true;
+                            break;
+                        }
+
+                        // Add to new item in inventory (if possible)
+                        if (!moved) {
+                            for (let j = 0; j < this.limit; j++) {
+                                let k = (j + 9) % this.limit;
+                                if (this.inventory[k] && this.inventory[k].c > 0) continue;
+                                this.inventory[k] = item;
+                                moved = true;
+                                break;
+                            }
+                        }
+
+                        // Add to hand 
+                        if (!moved) {
+                            this.selectedItem = this.copyItem(block);
+                        }
+
                         this.craftingOutput = undefined;
                         this.updateCraftingOutput(true);
-                    } else if (this.selectedItem && this.selectedItem.c > 0 && block && block.c > 0) {
-                        // Switch or combine
-                        if (block.v == this.selectedItem.v) {
-                            this.selectedItem.c += block.c;
-                            this.updateCraftingOutput(true);
-                        }
+                    } else if (!selectedExists && blockExists) { // Pickup crafting output
+                        this.selectedItem = this.copyItem(block);
+                        this.craftingOutput = undefined;
+                        this.updateCraftingOutput(true);
+                    } else if (selectedExists && blockExists && block.v == this.selectedItem.v) { // Combine the same crafting output
+                        this.selectedItem.c += block.c;
+                        this.updateCraftingOutput(true);
                     }
+                }
+
+                if (this.craftingOutput && type == "hover") {
+                    let name = "";
+                    if (this.craftingOutput.class == "block") {
+                        name = world.blockOrder[this.craftingOutput.v - 1];
+                    } else {
+                        name = world.itemOrder[this.craftingOutput.v - 1];
+                    }
+                    this.drawHintBox(name, this.craftingOutput);
                 }
             }
 
@@ -769,8 +879,8 @@ class Inventory {
             // Draw crafting output background box
             let { xPos, yPos } = this.getPos("craftingOutput", 0, 0, true);
             this.drawBackgroundBox(xPos, yPos);
-            this.drawItem(xPos + this.margin, yPos + this.margin, craftingOutput); // Draw crafting output
             this.drawHighlightBoxes();
+            this.drawItem(xPos + this.margin, yPos + this.margin, craftingOutput); // Draw crafting output
         } else if (player.mode == "creative") { // CREATIVE MODE
             this.animateScrollbar();
 

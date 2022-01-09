@@ -742,7 +742,11 @@ class Player {
         let index = inventory.isArmor(item);
         if (this.place && typeof index == "number") {
             let armor = JSON.stringify(item);
-            this.toolbar[this.currentSlot] = undefined;
+            if (this.toolbar[inventory.limit + index]) {
+                this.toolbar[this.currentSlot] = JSON.parse(JSON.stringify(this.toolbar[inventory.limit + index]));
+            } else {
+                this.toolbar[this.currentSlot] = undefined;
+            }
             this.toolbar[inventory.limit + index] = JSON.parse(armor);
             socket.emit('updateInventory', this.toolbar);
 
