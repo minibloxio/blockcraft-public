@@ -1,7 +1,7 @@
 changelog = [{
         "date": "Jan 8, 2022",
         "version": "0.35.0",
-        "changes": "Added middle click to select blocks while in creative mode| Added the Alex skin which can be selected in the start menu| Added dynamic FOV while drawing bow| Added /save command| Updated the stats GUI| Added spawnable bots| Added debug GUI to view chunk boundaries and entity bounding boxes| Explosions now delete entities and damage players within range| Cleaned up a lot of code"
+        "changes": "Added armor| Added middle click to select blocks while in creative mode| Added the Alex skin which can be selected in the start menu| Added dynamic FOV while drawing bow| Added /save command| Updated the stats GUI| Added spawnable bots| Added debug GUI to view chunk boundaries and entity bounding boxes| Explosions now delete entities and damage players within range| Cleaned up a lot of code"
     },
     {
         "date": "Jan 6, 2022",
