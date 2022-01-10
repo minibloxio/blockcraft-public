@@ -368,25 +368,36 @@ $(document).bind('wheel', function(e) {
 
     if (!player.controls.enabled || player.mode == "spectator" || player.mode == "camera") return;
 
+    if (map[16]) e.preventDefault();
+
+    let scrollDirection = game.invertMouse ? -1 : 1;
+    if (navigator.userAgent.includes("Safari") && map[16]) scrollDirection *= -1; 
+
     if (camera.enableZoom) {
-        if (scrollDelta > 0) {
+        if (scrollDelta*scrollDirection*-1 > 0) {
             zoomLevel = clamp(zoomLevel + 0.2, -10, 10);
         } else {
             zoomLevel = clamp(zoomLevel - 0.2, -10, 10);
         }
         camera.zoom = zoomLevel;
     } else {
-        if (scrollDelta > 0) {
-            player.currentSlot -= 1;
-            if (player.currentSlot < 0)
-                player.currentSlot = 8;
+        if (scrollDelta * scrollDirection > 0) {
+            nextSlot();
         } else {
-            player.currentSlot += 1;
-            if (player.currentSlot > 8)
-                player.currentSlot = 0;
+            prevSlot();
         }
     }
 });
+
+function nextSlot() {
+    player.currentSlot += 1;
+    if (player.currentSlot > 8) player.currentSlot = 0;
+}
+
+function prevSlot() {
+    player.currentSlot -= 1;
+    if (player.currentSlot < 0) player.currentSlot = 8;
+}
 
 // Blur & Focus
 $(window).blur(function() {

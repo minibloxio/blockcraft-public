@@ -11,6 +11,7 @@ class Game {
         this.memIncrease = [];
         this.memDecrease = [];
         this.depthWrite = false;
+        this.invertMouse = false;
 
         this.initCookies();
     }

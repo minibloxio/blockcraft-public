@@ -162,11 +162,12 @@ function addVideoControls() {
     addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
     //addSliderControl("Web Workers", "workers", 2, game, "numOfVoxelWorkers");
 
-    addSwitchControl("Statistics", "stats", false, hud, "showStats")
-    addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow")
-    addSwitchControl("Clouds", "cloud", false, stage, "showClouds", "generate")
-    addSwitchControl("Stars", "stars", true, stage.stars, "visible")
-    addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov")
+    addSwitchControl("Statistics", "stats", false, hud, "showStats");
+    addSwitchControl("Invert Mouse", "invertMouse", false, game, "invertMouse");
+    addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow");
+    addSwitchControl("Clouds", "cloud", false, stage, "showClouds", "generate");
+    addSwitchControl("Stars", "stars", true, stage.stars, "visible");
+    addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov");
     addSwitchControl("Transparent Leaves", "transparentLeaves", false, game, "transparentLeaves", false, updateTransparency);
     addSwitchControl("Depth Write", "depthWrite", false, game, "depthWrite", false, chunkManager.updateTexture);
     addSwitchControl("Debug", "debug", false, game, "debug", false, updateDebug);
