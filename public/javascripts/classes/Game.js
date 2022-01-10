@@ -27,11 +27,13 @@ class Game {
     }
 
     startMemoryMonitor() {
+        if (!performance.memory) return;
         this.prevTotalMem = performance.memory.totalJSHeapSize;
         this.prevUsedMem = performance.memory.usedJSHeapSize;
     }
 
     endMemoryMonitor() {
+        if (!performance.memory) return;
         let currTotalMem = performance.memory.totalJSHeapSize;
         let currUsedMem = performance.memory.usedJSHeapSize;
         if (this.prevTotalMem < currTotalMem) {

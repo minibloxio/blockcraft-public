@@ -89,18 +89,23 @@ function initStatistics() {
     ]);
     statistics.push([
         new Stat("LIM", function() {
+            if (!performance.memory) return 0;
             return performance.memory.jsHeapSizeLimit / 1048576;
         }, "mb", 0),
         new Stat("TOT", function() {
+            if (!performance.memory) return 0;
             return performance.memory.totalJSHeapSize / 1048576;
         }, "mb", 0),
         new Stat("USED", function() {
+            if (!performance.memory) return 0;
             return performance.memory.usedJSHeapSize / 1048576;
         }, "mb", 0),
         new Stat("INC", function() {
+            if (!performance.memory) return 0;
             return game.memIncrease.average() / 1024;
         }, "kb", 0),
         new Stat("DEC", function() {
+            if (!performance.memory) return 0;
             return game.memDecrease.average() / 1048576;
         }, "mb", 1),
     ]);
