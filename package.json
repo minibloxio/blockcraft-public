@@ -24,7 +24,10 @@
     "winston": "^3.3.3"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon",
+    "docker:build": "docker build . -t blockcraft",
+    "docker:run": "docker run --rm --name blockcraft -p 3000:3000 blockcraft"
   },
   "repository": {
     "type": "git",
