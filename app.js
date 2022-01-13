@@ -5,20 +5,15 @@ const serverPort = process.env.PORT || config.port || 3001;
 // Initialize server variables
 const express = require('express');
 const app = express();
-const https = require('https');
+const http = require('http');
 const fs = require('fs');
-const options = {
-    key: fs.readFileSync('./cert/ia.key'),
-    cert: fs.readFileSync('./cert/server.crt'),
-    ca: fs.readFileSync('./cert/ca.crt')
-}
 
-// Create HTTPS server
-const httpsServer = https.createServer(options, app);
+// Create HTTP server
+const httpServer = http.createServer(app);
 const path = require('path');
 const readline = require('readline'); // Command line input
 const { Server } = require("socket.io");
-const io = new Server(httpsServer, {
+const io = new Server(httpServer, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
@@ -42,12 +37,12 @@ const THREE = require('three');
 var filter = require('leo-profanity');
 
 // Listen to server port
-httpsServer.listen(serverPort, function() {
-    logger.info('Started an https server on port ' + serverPort);
+httpServer.listen(serverPort, function () {
+    logger.info('Started an http server on port ' + serverPort);
 })
 
 // Send CORS header
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Cross-Origin-Embedder-Policy", "require-corp");
     res.header("Cross-Origin-Opener-Policy", "same-origin");
     next();
@@ -55,7 +50,7 @@ app.use(function(req, res, next) {
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/*', function(req, res, next) {
+app.use('/*', function (req, res, next) {
     res.redirect('/')
     next()
 })
@@ -135,11 +130,11 @@ let bots = {};
 
 // Operators
 let operator_path = __dirname + '/operators.json';
-fs.readFile(operator_path, function(err, data) {
+fs.readFile(operator_path, function (err, data) {
     if (err || data.length == 0) {
         logger.warn("Unable to load operators file from", save_path)
         logger.warn("Creating new operators file...")
-        fs.writeFile(operator_path, JSON.stringify(server.operators), function(err) {
+        fs.writeFile(operator_path, JSON.stringify(server.operators), function (err) {
             if (err) {
                 logger.error("Unable to create operators file at", save_path)
             }
@@ -151,11 +146,11 @@ fs.readFile(operator_path, function(err, data) {
 
 // Black list
 let blacklist_path = __dirname + '/blacklist.json';
-fs.readFile(blacklist_path, function(err, data) {
+fs.readFile(blacklist_path, function (err, data) {
     if (err || data.length == 0) {
         logger.warn("Unable to load blacklist file from", save_path)
         logger.warn("Creating new blacklist file...")
-        fs.writeFile(blacklist_path, JSON.stringify(server.blacklist), function(err) {
+        fs.writeFile(blacklist_path, JSON.stringify(server.blacklist), function (err) {
             if (err) {
                 logger.error("Unable to create blacklist file at", save_path)
             }
@@ -177,7 +172,7 @@ worker.postMessage({ cmd: 'seed', seed: world.seed });
 worker.postMessage({ cmd: "setup", blockOrder: server.blockOrder, itemOrder: server.itemOrder });
 
 // Load save file
-fs.readFile(save_path, function(err, data) {
+fs.readFile(save_path, function (err, data) {
     if (err || data.length == 0) {
         logger.warn("Unable to load save file from", save_path)
         logger.warn("Creating new world...")
@@ -214,7 +209,7 @@ function getDate() {
 // Server logging
 let log_path = __dirname + '/logs/server.json';
 let sessions = {};
-fs.readFile(log_path, function(err, data) {
+fs.readFile(log_path, function (err, data) {
     if (err || data.length == 0) {
         logger.warn("Unable to load log file from " + log_path)
         logger.warn("Creating new log...")
@@ -225,7 +220,7 @@ fs.readFile(log_path, function(err, data) {
 
 function saveToLog() {
     let data = JSON.stringify(sessions);
-    fs.writeFile(log_path, data, function(err) {
+    fs.writeFile(log_path, data, function (err) {
         if (err) throw err;
     });
 }
@@ -245,17 +240,17 @@ function addLog(id, stat, value) {
 }
 
 // Server-client connection architecture
-io.on('connection', function(socket_) {
+io.on('connection', function (socket_) {
     let socket = socket_;
     var address = socket.client.request.headers['cf-connecting-ip'] || socket.client.request.headers['x-real-ip'] || socket.client.request.headers['host'];
 
     // Session info request (server)
-    socket.on('sessionInfoRequest', function(data) {
+    socket.on('sessionInfoRequest', function (data) {
         socket.emit('sessionInfo', JSON.stringify(sessions));
     });
 
     // Server info request
-    socket.on('serverInfoRequest', function(data) {
+    socket.on('serverInfoRequest', function (data) {
         let playerInfo = {};
         for (let id in players) {
             playerInfo[id] = players[id].name;
@@ -278,7 +273,7 @@ io.on('connection', function(socket_) {
     socket.emit('textureData', server.textures);
 
     // Join request from the client
-    socket.on('join', function(data) {
+    socket.on('join', function (data) {
         // Check if the player is token banned
         server.checkBlacklist(io, socket, data.token);
 
@@ -347,7 +342,7 @@ io.on('connection', function(socket_) {
     })
 
     // Update player info
-    socket.on('playerInfo', function(data) {
+    socket.on('playerInfo', function (data) {
         let player = players[socket.id];
         if (!player || data.name == player.name || !data.name) return; // Player not found or name is the same
 
@@ -365,7 +360,7 @@ io.on('connection', function(socket_) {
     })
 
     // Receive packet from the client
-    socket.on('packet', function(data) {
+    socket.on('packet', function (data) {
         if (!players[socket.id])
             return;
 
@@ -374,7 +369,7 @@ io.on('connection', function(socket_) {
     })
 
     // Receive latency check
-    socket.on('latency', function(tick) {
+    socket.on('latency', function (tick) {
         if (!players[socket.id])
             return;
 
@@ -385,7 +380,7 @@ io.on('connection', function(socket_) {
     })
 
     // World functionality
-    socket.on('setBlock', function(data) {
+    socket.on('setBlock', function (data) {
         let player = players[socket.id];
         if (!player) return;
 
@@ -414,7 +409,7 @@ io.on('connection', function(socket_) {
     })
 
     let counter = 0;
-    socket.on('dropItems', function(data) {
+    socket.on('dropItems', function (data) {
         counter += 1;
         let player = players[socket.id];
         if (!player) return;
@@ -451,7 +446,7 @@ io.on('connection', function(socket_) {
     })
 
     // Request chunk
-    socket.on('requestChunk', function(data) {
+    socket.on('requestChunk', function (data) {
         let chunksToGenerate = [];
         let chunksToSend = [];
 
@@ -495,14 +490,14 @@ io.on('connection', function(socket_) {
     })
 
     // Update player inventory
-    socket.on('updateInventory', function(data) {
+    socket.on('updateInventory', function (data) {
         let player = players[socket.id];
         if (!player) return;
         player.toolbar = data;
     })
 
     // Player interactivity
-    socket.on('respawn', function() {
+    socket.on('respawn', function () {
         let player = players[socket.id];
         if (!player) return;
 
@@ -515,7 +510,7 @@ io.on('connection', function(socket_) {
     })
 
     // Receive player punch event
-    socket.on('punchPlayer', function(data) {
+    socket.on('punchPlayer', function (data) {
         let player = players[socket.id];
         if (!player) return;
 
@@ -569,7 +564,7 @@ io.on('connection', function(socket_) {
     })
 
     // Take player damage if in survival mode
-    socket.on('takeDamage', function(data) {
+    socket.on('takeDamage', function (data) {
         let player = players[socket.id];
         if (!player) return;
 
@@ -581,7 +576,7 @@ io.on('connection', function(socket_) {
     })
 
     // Throw item
-    socket.on('throwItem', function(data) {
+    socket.on('throwItem', function (data) {
         let player = players[socket.id];
         if (!player) return;
 
@@ -605,7 +600,7 @@ io.on('connection', function(socket_) {
     })
 
     // Fire server-side arrow
-    socket.on('fireArrow', function(data) {
+    socket.on('fireArrow', function (data) {
         let player = players[socket.id];
         if (!player) return;
 
@@ -634,7 +629,7 @@ io.on('connection', function(socket_) {
     })
 
     // Chat
-    socket.on('message', function(data) {
+    socket.on('message', function (data) {
         let player = players[socket.id];
         if (!player) return;
 
@@ -648,7 +643,7 @@ io.on('connection', function(socket_) {
         addLog(socket.id, "ms"); // Messages sent
     })
 
-    socket.on('messagePlayer', function(data) {
+    socket.on('messagePlayer', function (data) {
         let player = players[socket.id];
         if (!player) return;
 
@@ -664,7 +659,7 @@ io.on('connection', function(socket_) {
         addLog(socket.id, "ms");
     })
 
-    socket.on('replyPlayer', function(data) {
+    socket.on('replyPlayer', function (data) {
         let player = players[socket.id];
         if (!player) return;
 
@@ -683,32 +678,32 @@ io.on('connection', function(socket_) {
     // COMMANDS
 
     // Set the time of day
-    socket.on('settime', function(data) {
+    socket.on('settime', function (data) {
         let text = "<" + players[socket.id].name + "> set the time to " + data;
         logger.info(text)
         world.tick = data;
     })
 
     // Clear inventory
-    socket.on('clearInventory', function(data) {
+    socket.on('clearInventory', function (data) {
         if (!players[socket.id]) return;
         players[socket.id].toolbar = [];
     })
 
     // Clear hand
-    socket.on('clearHand', function(data) {
+    socket.on('clearHand', function (data) {
         if (!players[socket.id]) return;
         players[socket.id].toolbar[data] = null;
     })
 
     // Give player item
-    socket.on('giveItem', function(data) {
+    socket.on('giveItem', function (data) {
         if (!players[socket.id]) return;
         World.addItem(players[socket.id], data);
     })
 
     // Set player's operater status
-    socket.on('setOperator', function(data) {
+    socket.on('setOperator', function (data) {
         if (!players[socket.id] || !players[data.id]) return;
 
         let password = config.operatorPassword;
@@ -736,7 +731,7 @@ io.on('connection', function(socket_) {
     })
 
     // Ban/unban player from server
-    socket.on('banPlayer', function(data) {
+    socket.on('banPlayer', function (data) {
         if (!players[socket.id]) return;
 
         if (players[socket.id].operator && data.isBanned) {
@@ -789,7 +784,7 @@ io.on('connection', function(socket_) {
     })
 
     // Kick player from server
-    socket.on('kickPlayer', function(data) {
+    socket.on('kickPlayer', function (data) {
         if (!players[socket.id]) return;
 
         if (players[socket.id].operator) {
@@ -810,7 +805,7 @@ io.on('connection', function(socket_) {
     })
 
     // Kill player
-    socket.on('killPlayer', function(data) {
+    socket.on('killPlayer', function (data) {
         if (!players[socket.id]) return;
 
         if (players[socket.id].operator) {
@@ -832,7 +827,7 @@ io.on('connection', function(socket_) {
     })
 
     // Kill all players
-    socket.on('killPlayers', function(data) {
+    socket.on('killPlayers', function (data) {
         if (!players[socket.id]) return;
 
         if (players[socket.id].operator) {
@@ -856,7 +851,7 @@ io.on('connection', function(socket_) {
     })
 
     // Kill entities
-    socket.on('killEntities', function() {
+    socket.on('killEntities', function () {
         if (!players[socket.id]) return;
 
         if (players[socket.id].operator) {
@@ -878,7 +873,7 @@ io.on('connection', function(socket_) {
     })
 
     // Save world
-    socket.on('saveWorld', function() {
+    socket.on('saveWorld', function () {
         if (!players[socket.id]) return;
 
         if (players[socket.id].operator) {
@@ -894,7 +889,7 @@ io.on('connection', function(socket_) {
     });
 
     // Spawn bot
-    socket.on('spawnBot', function(data) {
+    socket.on('spawnBot', function (data) {
         if (!players[socket.id]) return;
 
         if (players[socket.id].operator) {
@@ -921,7 +916,7 @@ io.on('connection', function(socket_) {
     })
 
     // DISCONNECT
-    socket.on('disconnect', function() {
+    socket.on('disconnect', function () {
         if (players[socket.id] && players[socket.id].connected) {
             let text = players[socket.id].name + " has left the server";
             logger.info(text)
@@ -938,7 +933,7 @@ let ticks = [];
 let lastTick = Date.now();
 let autosaveTimer = Date.now();
 let autosaveWarningFlag = true;
-setInterval(function() {
+setInterval(function () {
     // Update server tick rate info
     ticks.push(Date.now() - lastTick);
     if (ticks.length > 10) ticks.shift();
