@@ -1,7 +1,6 @@
-// Server config
-var config = require('./config.json');
-const serverPort = process.env.PORT || config.port || 3001;
+require('dotenv').config() // load server config from .env
 
+const serverPort = process.env.PORT || 3001;
 // Initialize server variables
 const express = require('express');
 const app = express();
@@ -259,9 +258,9 @@ io.on('connection', function (socket_) {
         let info = {
             ping: data,
             players: playerInfo,
-            region: config.region,
+            region: process.env.REGION,
             uptime: Date.now() - server.startTime,
-            link: config.link,
+            link: process.env.LINK,
         }
         socket.emit('serverInfoResponse', info);
     })
@@ -336,7 +335,11 @@ io.on('connection', function (socket_) {
                 y: groundHeight,
                 z: randomZ * world.blockSize
             },
-            info: config,
+            info: {
+                port: process.env.PORT,
+                region: process.env.REGION,
+                link: process.env.LINK
+            },
             operator: player.operator
         });
     })
@@ -706,7 +709,7 @@ io.on('connection', function (socket_) {
     socket.on('setOperator', function (data) {
         if (!players[socket.id] || !players[data.id]) return;
 
-        let password = config.operatorPassword;
+        let password = process.env.OP_PASS;
         if (data.password == password && players[data.id].operator != data.isOp) { // Set operator status
             players[data.id].operator = data.isOp;
             io.emit('messageAll', {
