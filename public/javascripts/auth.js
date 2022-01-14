@@ -33,14 +33,15 @@ let loadedAnimate = new Ola(0);
 let maxLoaded = 6;
 let maxChunks = 0; // Chunks need to be loaded before pointerlock can be enabled
 
-let serverList = ["https://na-east.victorwei.com", "https://na-west.victorwei.com", "https://eu-west.victorwei.com", "https://ap-south.victorwei.com", "https://ap-southeast.victorwei.com"] // Request this from the auth server
-let serverNames = {
-    "na-east": "North America East",
-    "na-west": "North America West",
-    "eu-west": "Europe West",
-    "ap-south": "Asia Pacific South",
-    "ap-southeast": "Asia Pacific Southeast",
+const serverNames = {
+    "gold": "Gold Server (formerly North America East)",
+    "coal": "Coal Server (formerly North America West)",
+    "iron": "Iron Server (formerly Europe West)",
+    "wood": "Wood Server (New map!)",
 }
+
+const serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.online`)
+
 let servers = {};
 let currentServer = undefined;
 let joined = false;
@@ -76,19 +77,19 @@ function refreshServers() {
         let server = servers[serverLink];
 
         // Connected to server
-        server.socket.on('connect', function() {
-            setTimeout(function() {
+        server.socket.on('connect', function () {
+            setTimeout(function () {
                 server.socket.emit('serverInfoRequest', Date.now())
             }, 500);
         });
 
         // Error connecting to server
-        server.socket.on('connect_error', function(error) {
+        server.socket.on('connect_error', function (error) {
             //console.error(error);
         });
 
         // Disconnected from server
-        server.socket.on('disconnect', function(reason) {
+        server.socket.on('disconnect', function (reason) {
             if (reason == "transport close") {
                 console.log("Server down!");
                 server.socket.disconnect();
@@ -96,8 +97,9 @@ function refreshServers() {
         })
 
         // Received server info
-        server.socket.on('serverInfoResponse', function(data) {
+        server.socket.on('serverInfoResponse', function (data) {
             // Update server info
+            console.log(data.link)
             servers[data.link].info = data;
 
             // Player names
@@ -118,7 +120,7 @@ function refreshServers() {
                         <p class="serverInfo">${latency}ms</p>
                         <canvas id="${data.region}" class="serverBar" width="30" height="24"></canvas>
                     </div>
-                    
+
                     <div>
                         <p class="serverInfo" style="margin-bottom: 0; top: 54px;">${msToTime(data.uptime)} </p>
                         <canvas id="${data.region}-2" class="serverBar" style="top: 54px;" width="30" height="24"></canvas>
@@ -246,7 +248,7 @@ function connectError(type, reason) {
         bar.css({ "background-color": "red" });
     }
 
-    setTimeout(function() {
+    setTimeout(function () {
         if ($("#direct-connect-input").val()) {
             bar.text(`Direct Connect`);
         } else if (currentServer) {
@@ -328,27 +330,27 @@ function disconnectServer() {
 
 
 // Menu progression logic
-$(document).ready(function() {
+$(document).ready(function () {
     // Initialize game
     init();
 
     // Refresh servers
-    $("#refresh-servers").click(function() {
+    $("#refresh-servers").click(function () {
         refreshServers()
     })
 
     // Menu progression (0: Start Menu, 1: Server Select, 2: Loading Game, 3: In Game)
-    $("#start-button").click(function(event) {
+    $("#start-button").click(function (event) {
         nextState(event);
     })
 
     // Enter username input
-    $("#name-input").keyup(function(event) {
+    $("#name-input").keyup(function (event) {
         if (event.keyCode == 13) nextState();
     })
 
     // Enter direct connect input
-    $("#direct-connect-input").keyup(function(event) {
+    $("#direct-connect-input").keyup(function (event) {
         if (event.keyCode == 13) {
             nextState();
             return;
