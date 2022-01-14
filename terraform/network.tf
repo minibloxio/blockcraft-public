@@ -32,6 +32,22 @@ resource "aws_security_group" "ubuntu" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "nginx proxy manager"
+    from_port   = 81
+    to_port     = 81
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "portainer"
+    from_port   = 9000
+    to_port     = 9000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0

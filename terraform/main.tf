@@ -7,14 +7,18 @@ resource "aws_instance" "main" {
     volume_size = 30
   }
 
-  key_name  = aws_key_pair.qhyun.key_name
-  user_data = file("setup.sh")
+  key_name = aws_key_pair.qhyun.key_name
 
   tags = merge(local.tags, { Name = "blockcraft_main_server" })
 
   vpc_security_group_ids = [
     aws_security_group.ubuntu.id
   ]
+
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes  = [user_data]
+  }
 }
 
 

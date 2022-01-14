@@ -1,6 +1,7 @@
 version: "3"
 services:
   npm-app:
+    container_name: npm-app
     image: "jc21/nginx-proxy-manager:latest"
     restart: always
     ports:
@@ -8,7 +9,7 @@ services:
       - "81:81"
       - "443:443"
     environment:
-      DB_MYSQL_HOST: "db"
+      DB_MYSQL_HOST: "npm-db"
       DB_MYSQL_PORT: 3306
       DB_MYSQL_USER: "mysql"
       DB_MYSQL_PASSWORD: "mysql"
@@ -17,6 +18,7 @@ services:
       - /home/howard/NginxProxyManager/data:/data
       - /home/howard/NginxProxyManager/letsencrypt:/etc/letsencrypt
   npm-db:
+    container_name: npm-db
     image: "jc21/mariadb-aria:latest"
     restart: always
     environment:
@@ -37,6 +39,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /home/howard/Portainer/data:/data
+
+  gold:
+    container_name: gold
+    image: ghcr.io/victoryqwei/blockcraft:staging
+    restart: always
+    volumes:
+      - /mnt/save_data/gold:/usr/src/app/saves
 
 networks:
   default:
