@@ -1,0 +1,52 @@
+version: "3"
+services:
+  npm-app:
+    container_name: npm-app
+    image: "jc21/nginx-proxy-manager:latest"
+    restart: always
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    environment:
+      DB_MYSQL_HOST: "npm-db"
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "mysql"
+      DB_MYSQL_PASSWORD: "mysql"
+      DB_MYSQL_NAME: "nginx-proxy-manager"
+    volumes:
+      - /home/howard/NginxProxyManager/data:/data
+      - /home/howard/NginxProxyManager/letsencrypt:/etc/letsencrypt
+  npm-db:
+    container_name: npm-db
+    image: "jc21/mariadb-aria:latest"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "2dyahJyYYdTwpiBihptuIGINC0Lu7nFr"
+      MYSQL_DATABASE: "nginx-proxy-manager"
+      MYSQL_USER: "mysql"
+      MYSQL_PASSWORD: "mysql"
+    volumes:
+      - /home/howard/NginxProxyManager/data/mysql:/var/lib/mysql
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    ports:
+      - 9000:9000
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/howard/Portainer/data:/data
+
+  gold:
+    container_name: gold
+    image: ghcr.io/victoryqwei/blockcraft:staging
+    restart: always
+    volumes:
+      - /mnt/save_data/gold:/usr/src/app/saves
+
+networks:
+  default:
+    driver: bridge

@@ -1,3 +1,5 @@
+const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
+
 // Classes
 
 class Player {
@@ -372,7 +374,7 @@ class Player {
         }
     }
 
-    throw () {
+    throw() {
         let item = this.getCurrItem();
         if (!item || !this.key.rightClick) return;
 
@@ -401,14 +403,8 @@ class Player {
             this.throw();
 
             // Blocking
-            let swords = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
-            let isSword = false;
-            for (let sword of swords) {
-                if (world.itemId[sword] == hand.v) {
-                    isSword = true;
-                    break;
-                }
-            }
+            const isSword = SWORDS.map((x) => world.itemId[x]).includes(hand.v);
+
             if (isSword) {
                 this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * delta);
             } else {
@@ -1276,7 +1272,7 @@ class Player {
         z = posZ;
 
         let voxel = world.getVoxel(x, y, z)
-            // Head in water
+        // Head in water
         colorPass.enabled = voxel == world.blockId["water"];
         this.headInWater = colorPass.enabled;
 
