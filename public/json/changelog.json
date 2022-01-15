@@ -1,4 +1,9 @@
 changelog = [{
+        "date": "Jan 15, 2022",
+        "version": "0.37.0",
+        "changes": "Updated the infrastructure to leverage AWS Global Accelerator reducing latency| Dockerized the servers to streamline the development process"
+    },
+    {
         "date": "Jan 9, 2022",
         "version": "0.36.0",
         "changes": "Updated stats info| Added ability to shift click for inventory management"

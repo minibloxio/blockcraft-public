@@ -77,19 +77,19 @@ function refreshServers() {
         let server = servers[serverLink];
 
         // Connected to server
-        server.socket.on('connect', function () {
-            setTimeout(function () {
+        server.socket.on('connect', function() {
+            setTimeout(function() {
                 server.socket.emit('serverInfoRequest', Date.now())
             }, 500);
         });
 
         // Error connecting to server
-        server.socket.on('connect_error', function (error) {
+        server.socket.on('connect_error', function(error) {
             //console.error(error);
         });
 
         // Disconnected from server
-        server.socket.on('disconnect', function (reason) {
+        server.socket.on('disconnect', function(reason) {
             if (reason == "transport close") {
                 console.log("Server down!");
                 server.socket.disconnect();
@@ -97,7 +97,7 @@ function refreshServers() {
         })
 
         // Received server info
-        server.socket.on('serverInfoResponse', function (data) {
+        server.socket.on('serverInfoResponse', function(data) {
             // Update server info
             console.log(data.link)
             servers[data.link].info = data;
@@ -248,7 +248,7 @@ function connectError(type, reason) {
         bar.css({ "background-color": "red" });
     }
 
-    setTimeout(function () {
+    setTimeout(function() {
         if ($("#direct-connect-input").val()) {
             bar.text(`Direct Connect`);
         } else if (currentServer) {
@@ -265,14 +265,17 @@ function connectError(type, reason) {
 // Join server
 function joinServer() {
     if (!initialized) {
-        let name = $("#name-input").val() || "";
+        let name = $("#name-input").val().trim() || "";
+        if (!name) {
+            $("#name-input").val('');
+        }
 
         let joinInfo = {
             name: name,
             token: getCookie('token'),
             skin: player.skin,
         }
-        socket.emit('join', joinInfo)
+        socket.emit('join', joinInfo);
         loaded += 1;
         console.log("Joining server...")
     }
@@ -330,27 +333,27 @@ function disconnectServer() {
 
 
 // Menu progression logic
-$(document).ready(function () {
+$(document).ready(function() {
     // Initialize game
     init();
 
     // Refresh servers
-    $("#refresh-servers").click(function () {
+    $("#refresh-servers").click(function() {
         refreshServers()
     })
 
     // Menu progression (0: Start Menu, 1: Server Select, 2: Loading Game, 3: In Game)
-    $("#start-button").click(function (event) {
+    $("#start-button").click(function(event) {
         nextState(event);
     })
 
     // Enter username input
-    $("#name-input").keyup(function (event) {
+    $("#name-input").keyup(function(event) {
         if (event.keyCode == 13) nextState();
     })
 
     // Enter direct connect input
-    $("#direct-connect-input").keyup(function (event) {
+    $("#direct-connect-input").keyup(function(event) {
         if (event.keyCode == 13) {
             nextState();
             return;

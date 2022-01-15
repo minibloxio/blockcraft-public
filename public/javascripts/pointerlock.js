@@ -76,9 +76,10 @@ function enterPointerLock() {
         inventory.craftingOutput = undefined;
         inventory.showCraftingTable = false;
     } else { // Return to game from chat
-        let name = $("#name-input").val();
+        let name = $("#name-input").val().trim();
+        if (!name) $("#name-input").val('');
 
-        if (name && getCookie("Name") != name)
+        if (name && getCookie("Name") != name) // Update cookie
             setCookie("Name", name, 7);
 
         socket.emit('playerInfo', {
