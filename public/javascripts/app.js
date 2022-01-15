@@ -273,7 +273,12 @@ function connect(url) {
         currentServer = servers[url];
     }
 
+    console.log(socket)
+
     socket.io.uri = url;
+
+    console.log(socket)
+
     socket.connect();
 }
 
