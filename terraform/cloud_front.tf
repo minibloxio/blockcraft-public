@@ -18,7 +18,7 @@ resource "aws_cloudfront_distribution" "main" {
     origin_request_policy_id   = data.aws_cloudfront_origin_request_policy.main.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.main.id
     target_origin_id           = "gold.blockcraft.online"
-    viewer_protocol_policy     = "allow-all"
+    viewer_protocol_policy     = "redirect-to-https"
   }
 
   origin {
