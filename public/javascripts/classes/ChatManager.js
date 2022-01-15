@@ -1,6 +1,6 @@
 import game from './Game';
 import inventory from './items/Inventory';
-import hud from './HUD';
+import hud from '../gui/HUDClass';
 
 let canvas = document.getElementById('canvas-hud');
 let ctx = canvas.getContext('2d');

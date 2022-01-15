@@ -15,13 +15,13 @@ import game from './classes/Game';
 import chunkManager from './classes/ChunkManager';
 import chat from './classes/ChatManager';
 import textureManager from './classes/TextureManager';
-import hud from './classes/HUD';
+import hud from './gui/HUDClass';
 import inventory from "./classes/items/Inventory";
 import world from './classes/World';
 import player from './classes/Player';
 import stage from './classes/Stage';
 import { initRenderer, renderer, composer } from './graphics/renderer';
-import { camera, scene, joined, g, connectionDelay, isState } from './globals';
+import { camera, scene, g, connectionDelay, isState } from './globals';
 import initPointerLock from "./pointerlock";
 
 // Import functions
@@ -46,8 +46,6 @@ Handles menu progression logic.
 let prevTime = performance.now();
 let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
 let lastUpdate = Date.now();
-let loadedAnimate = new Ola(0);
-let maxLoaded = 6;
 let maxChunks = 0; // Chunks need to be loaded before pointerlock can be enabled
 
 
@@ -80,21 +78,6 @@ function connect(url) {
 }
 
 
-// Join server
-function joinServer() {
-    if (!g.initialized) {
-        let name = $("#name-input").val() || "";
-
-        let joinInfo = {
-            name: name,
-            token: getCookie('token'),
-            skin: player.skin,
-        }
-        g.socket.emit('join', joinInfo)
-        g.loaded += 1;
-        console.log("Joining server...")
-    }
-}
 
 // Disconnect server
 function disconnectServer() {
@@ -221,9 +204,9 @@ function nextState(e) {
 
         // Wait for connection to server
         g.state += 1;
-    } else if (isState("loading") && g.loaded > maxLoaded) { // Loading Game -> Loading Chunks
+    } else if (isState("loading") && g.loaded > g.maxLoaded) { // Loading Game -> Loading Chunks
         console.log("Loading chunks...")
-        loadedAnimate = new Ola(Object.keys(chunkManager.currChunks).length);
+        g.loadedAnimate = new Ola(Object.keys(chunkManager.currChunks).length);
         g.state += 1;
     } else if (isState("loadingChunks") && Object.keys(chunkManager.currChunks).length >= maxChunks) { // Loading Chunks -> In Game
         console.log("Requesting pointer lock");
@@ -555,7 +538,7 @@ g.socket.on('joinResponse', function (data) {
     // Check if blacklisted
     if (data.blacklisted) {
         g.initialized = false;
-        joined = false;
+        g.joined = false;
         g.currentServer = undefined;
         disconnectServer();
         prevState();
@@ -616,7 +599,7 @@ g.socket.on('joinResponse', function (data) {
 
 // Load textures
 g.socket.on('textureData', function (data) {
-    if (g.loaded < maxLoaded) {
+    if (g.loaded < g.maxLoaded) {
         world.tileSize = data.tileSize;
         world.tileTextureWidth = data.tileTextureWidth;
         world.tileTextureHeight = data.tileTextureHeight;
@@ -631,7 +614,7 @@ g.socket.on('receiveChunk', async function (data) {
 
 // Add newcoming players
 g.socket.on('addPlayer', function (data) {
-    if (!joined) return;
+    if (!g.joined) return;
     // Add to players
     if (data.id != g.socket.id) { // Check if not own player
         players[data.id] = data;
@@ -706,7 +689,7 @@ g.socket.on('refresh', function () {
 })
 
 function updateClient(data) {
-    if (!joined || !g.initialized) return;
+    if (!g.joined || !g.initialized) return;
 
     // Update player
     let serverPlayers = data.serverPlayers;

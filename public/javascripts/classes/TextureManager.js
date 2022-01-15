@@ -1,7 +1,11 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import world from './World';
+import game from './Game';
+import { getCookie } from "../resources/cookie";
 
 import { g } from "../globals"
+
 
 
 // Texture class
@@ -380,7 +384,7 @@ export class TextureManager {
                 loading_index += 1;
 
                 if (loading_index == item_names.length) {
-                    loaded += 1;
+                    g.loaded += 1;
                     self.mergeItemTextures(item_order);
                 }
             })

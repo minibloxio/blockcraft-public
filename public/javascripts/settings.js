@@ -6,7 +6,7 @@ import chunkManager from "./classes/ChunkManager.js";
 
 import stage from "./classes/Stage.js";
 
-import hud from "./classes/HUD.js";
+import hud from "./gui/HUDClass.js";
 
 import { camera } from "./globals";
 

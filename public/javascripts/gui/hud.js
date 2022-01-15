@@ -1,4 +1,4 @@
-import hud from "../classes/HUD.js";
+import hud from "./HUDClass.js";
 import inventory from "../classes/items/Inventory.js";
 import chat from "../classes/ChatManager.js";
 

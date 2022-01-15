@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import world from './World';
-import { joined, isState } from '../globals';
+import { isState, g } from '../globals';
+
 
 class ChunkManager {
     constructor() {
@@ -77,7 +78,7 @@ class ChunkManager {
     }
 
     requestChunks() { // OPTIMIZE
-        if (!joined || isState("disconnecting")) return;
+        if (!g.joined || isState("disconnecting")) return;
 
         // Chunks to request
         let { cellSize } = world;
@@ -185,7 +186,7 @@ class ChunkManager {
     }
 
     processChunks(data, type) {
-        if (!joined || isState("disconnecting")) return;
+        if (!g.joined || isState("disconnecting")) return;
 
         if (type == "rle") {
             let newCells = {};

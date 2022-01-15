@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { PointerLockControls } from '../pointerlock';
-import { camera, initialized, joined, isState } from "../globals";
+import { camera, isState, g } from "../globals";
+
+
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 
@@ -1208,7 +1210,7 @@ class Player {
     }
 
     update(delta) {
-        if (this.hp <= 0 || !initialized || !joined || !isState("inGame")) return;
+        if (this.hp <= 0 || !g.initialized || !g.joined|| !isState("inGame")) return;
 
         this.select(true);
 

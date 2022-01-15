@@ -1,6 +1,6 @@
 import recipes from "../../../json/recipes.json";
 import game from "../Game";
-import { initialized } from '../../globals';
+import { g } from '../../globals';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
@@ -117,7 +117,7 @@ class Inventory {
             size = 3;
         }
 
-        let craftingSize = grid.filter(n => n == 0 || n).length;
+    let craftingSize = grid.filter(n => n == 0 || n).length;
 
         let outputs = [];
         // Loop through recipes
@@ -1114,7 +1114,7 @@ class Inventory {
 
     // Display toolbar
     displayToolbar() {
-        if (!initialized || !player.toolbar) return;
+        if (!g.initialized || !player.toolbar) return;
         if (player.mode == "spectator" || player.mode == "camera") return;
 
         let { toolbarX, toolbarSelectorX, hotboxWidth, selectorWidth, showInventory } = this;

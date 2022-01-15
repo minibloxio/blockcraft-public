@@ -1,6 +1,6 @@
-import game from './Game';
-import inventory from './items/Inventory';
-import { initialized } from '../globals';
+import game from '../classes/Game';
+import inventory from '../classes/items/Inventory';
+import { g } from '../globals';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
@@ -38,7 +38,7 @@ class HUD {
 
     // Display player health
     displayHealth() {
-        if (!initialized) return;
+        if (!g.initialized) return;
 
         if (player && player.hp <= 0) { // Player is dead
             drawRectangle(0, 0, canvas.width, canvas.height, "red", { alpha: 0.5 });
@@ -268,7 +268,7 @@ class HUD {
 
     // Display crosshair
     displayCrosshair() {
-        if (!initialized || player.mode == "camera") return;
+        if (!g.initialized || player.mode == "camera") return;
         let { crosshairSize, crosshairWidth } = this;
 
         // Draw crosshair

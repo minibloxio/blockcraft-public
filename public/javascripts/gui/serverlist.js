@@ -2,6 +2,9 @@ import { io } from "socket.io-client";
 import { serverList, g, serverNames, connectionDelay, isState } from "../globals"
 import { msToTime, drawRectangle, drawCircle } from '../helper';
 import { getCookie, deleteCookie } from "../resources/cookie";
+import player from '../classes/Player';
+import { round } from '../helper';
+
 
 export function refreshServers() {
     // Disconnect servers
@@ -247,27 +250,27 @@ export function updateMenu() {
     } else if (isState("loading")) { // Loading game
 
         // Update loading progress
-        if (loadedAnimate.value >= maxLoaded) {
+        if (g.loadedAnimate.value >= g.maxLoaded) {
             $("#loading-bar").text("Spawn")
 
-            if (!joined) {
-                joined = true;
+            if (!g.joined) {
+                g.joined = true;
                 joinServer();
             }
-        } else if (loadedAnimate.value < maxLoaded && !$("#loading-bar").text().includes("Spawn")) {
-            let text = Math.min(100, round(loadedAnimate.value / maxLoaded * 100, 0));
+        } else if (g.loadedAnimate.value < g.maxLoaded && !$("#loading-bar").text().includes("Spawn")) {
+            let text = Math.min(100, round(g.loadedAnimate.value / g.maxLoaded * 100, 0));
             $("#loading-bar").text("Loading " + text + "%")
         }
 
         // Set loading progress
-        loadedAnimate.value = g.loaded;
-        $("#loading-bar").width(100 * (Math.min(loadedAnimate.value, maxLoaded) / maxLoaded) + "%")
+        g.loadedAnimate.value = g.loaded;
+        $("#loading-bar").width(100 * (Math.min(g.loadedAnimate.value, g.maxLoaded) / g.maxLoaded) + "%")
 
     } else if (isState("loadingChunks")) { // Loading chunks
 
         let chunksLoaded = Object.keys(chunkManager.currChunks).length;
-        loadedAnimate.value = chunksLoaded;
-        $("#loading-bar").width(100 * (Math.min(loadedAnimate.value, maxChunks) / maxChunks) + "%");
+        g.loadedAnimate.value = chunksLoaded;
+        $("#loading-bar").width(100 * (Math.min(g.loadedAnimate.value, maxChunks) / maxChunks) + "%");
         $("#loading-bar").text("Chunks Loaded (" + chunksLoaded + "/" + maxChunks + ")");
 
         if (chunksLoaded >= maxChunks) {
@@ -292,5 +295,22 @@ export function updateMenu() {
             chunkManager.removeAllDebugLines();
             prevState();
         }
+    }
+}
+
+
+// Join server
+function joinServer() {
+    if (!g.initialized) {
+        let name = $("#name-input").val() || "";
+
+        let joinInfo = {
+            name: name,
+            token: getCookie('token'),
+            skin: player.skin,
+        }
+        g.socket.emit('join', joinInfo)
+        g.loaded += 1;
+        console.log("Joining server...")
     }
 }

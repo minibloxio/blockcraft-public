@@ -1,5 +1,6 @@
 
 import * as THREE from 'three';
+import Ola from "ola";
 import { io } from "socket.io-client";
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000000); // Camera
@@ -11,8 +12,8 @@ const serverNames = {
     "wood": "Wood Server (New map!)",
 }
 const serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.online`)
-
 const connectionDelay = 2000;
+let players = {};
 
 
 // use an obj to hold global vars since imported vars are constants
@@ -26,12 +27,11 @@ g.socket = io({
     reconnectionAttempts: 2,
 });
 g.initialized = false;
+g.joined = false;
+g.state = 0;
+g.loadedAnimate = new Ola(0);
+g.maxLoaded = 6;
 
-let joined = false;
-
-let players = {};
-
-let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Server Select, 2: Connecting to Server, 3: Loading Game, 4: Loading Chunks, 5: In Game, 6: Disconnecting)
 let states = {
     "start": 0,
     "serverSelect": 1,
@@ -42,7 +42,7 @@ let states = {
     "disconnecting": 6,
 };
 
-export function isState(check) { return state == states[check]; }
+export function isState(check) { return g.state == states[check]; }
 
-export { camera, scene, joined, players, g, serverNames, serverList, connectionDelay };
+export { camera, scene, players, g, serverNames, serverList, connectionDelay };
 
