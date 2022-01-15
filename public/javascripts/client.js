@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { initialized, joined } from './globals';
 
 // Connection to server successful
 socket.on('connect', function () {

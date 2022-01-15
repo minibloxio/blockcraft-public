@@ -21,7 +21,7 @@ import hud from './classes/HUD';
 import inventory from "./classes/items/Inventory";
 import world from './classes/World';
 import player from './classes/Player';
-import { camera, scene } from './globals';
+import { camera, scene, initialized, joined } from './globals';
 import initPointerLock from "./pointerlock";
 
 // Import functions
@@ -60,7 +60,7 @@ let states = {
     "disconnecting": 6,
 };
 
-function isState(check) { return state == states[check]; }
+export function isState(check) { return state == states[check]; }
 
 let socket = io({
     autoConnect: false,
@@ -84,7 +84,6 @@ const serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.
 
 let servers = {};
 let currentServer = undefined;
-let joined = false;
 let disconnected = 0; // Disconnection progress
 let disconnectedAnimate = new Ola(0); // Disconnection progress
 let maxDisconnected = 5;

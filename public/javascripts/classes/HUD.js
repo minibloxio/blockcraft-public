@@ -1,5 +1,6 @@
 import game from './Game';
 import inventory from './items/Inventory';
+import { initialized } from '../globals';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");

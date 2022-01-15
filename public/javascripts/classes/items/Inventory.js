@@ -1,5 +1,6 @@
 import recipes from "../../../json/recipes.json";
 import game from "../Game";
+import { initialized } from '../../globals';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");

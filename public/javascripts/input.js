@@ -1,4 +1,4 @@
-
+import { initialized } from './globals';
 
 // Key event handling
 $('html').mousedown(function (event) {

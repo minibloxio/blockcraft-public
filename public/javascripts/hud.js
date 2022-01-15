@@ -2,6 +2,8 @@ import hud from "./classes/HUD.js";
 import inventory from "./classes/items/Inventory.js";
 import chat from "./classes/ChatManager.js";
 
+import { initialized } from './globals';
+
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");

@@ -164,7 +164,7 @@ function updatePlayer(p) {
 }
 
 // Animate server players
-function animateServerPlayers() {
+export function animateServerPlayers() {
     for (let id in players) {
         let p = players[id];
         if (p.entity) {

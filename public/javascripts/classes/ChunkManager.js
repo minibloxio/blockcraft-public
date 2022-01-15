@@ -1,4 +1,7 @@
 import * as THREE from "three";
+import world from './World';
+import { isState } from '../app';
+import { joined } from '../globals';
 
 class ChunkManager {
     constructor() {
