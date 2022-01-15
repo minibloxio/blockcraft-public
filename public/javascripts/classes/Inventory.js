@@ -1,3 +1,5 @@
+import recipes from "../../json/recipes.json"
+
 class Inventory {
     constructor() {
         // Inventory
@@ -192,7 +194,7 @@ class Inventory {
 
         if (selectedBoxes.length && selectedBoxes.left) {
             let quotient = Math.floor(selectedItem.c / selectedBoxes.length);
-            // Loop through selected boxes and add divided items 
+            // Loop through selected boxes and add divided items
             for (let box of selectedBoxes) {
                 let total = quotient;
                 if (box.block[box.i] && box.block[box.i].c) total += box.block[box.i].c;
@@ -237,7 +239,7 @@ class Inventory {
         let armorMat = ["leather", "gold", "chainmail", "iron", "diamond"];
         let correctType = false;
         for (let i = 0; i < armorType.length; i++) {
-            if (typeof(index) == 'number' && i != index - this.limit) continue;
+            if (typeof (index) == 'number' && i != index - this.limit) continue;
             let type = armorType[i];
             for (let mat of armorMat) {
                 if (item.v == world.itemId[`${mat}_${type}`]) {
@@ -606,7 +608,7 @@ class Inventory {
             if (showCraftingTable) {
                 // Add crafting table items
                 let gridSize = 3;
-                this.loop(gridSize, function(i, j, self) {
+                this.loop(gridSize, function (i, j, self) {
                     let { xPos, yPos } = self.getPos("craftingTable", i, j);
                     if (!self.withinItemFrame(xPos, yPos)) return;
 
@@ -617,7 +619,7 @@ class Inventory {
                 let gridSize = 2;
 
                 // Add armor items
-                this.loop(gridSize, function(i, j, self) {
+                this.loop(gridSize, function (i, j, self) {
                     let { xPos, yPos } = self.getPos("armor", i, j);
                     if (!self.withinItemFrame(xPos, yPos)) return;
 
@@ -626,7 +628,7 @@ class Inventory {
                 })
 
                 // Add crafting grid items
-                this.loop(gridSize, function(i, j, self) {
+                this.loop(gridSize, function (i, j, self) {
                     let { xPos, yPos } = self.getPos("crafting", i, j);
                     if (!self.withinItemFrame(xPos, yPos)) return;
 
@@ -672,7 +674,7 @@ class Inventory {
                             }
                         }
 
-                        // Add to hand 
+                        // Add to hand
                         if (!moved) {
                             this.selectedItem = this.copyItem(block);
                         }
@@ -806,9 +808,9 @@ class Inventory {
 
         // Draw scroll bar area
         drawRectangle(this.halfW + width / 2, this.halfH - height / 2, 40, height, this.backgroundColor)
-            // Draw scroll bar background
+        // Draw scroll bar background
         drawRectangle(this.halfW + width / 2 + 5, this.halfH - scrollHeight - scrollMargin * 2 - margin, 30, scrollHeight + scrollMargin * 2, "grey")
-            // Draw scroll bar thumb
+        // Draw scroll bar thumb
         drawRectangle(this.halfW + width / 2 + 7, this.halfH - scrollHeight - margin - scrollMargin + currentRow * scrollHeight / maxScroll, 26, scrollHeight / maxScroll, this.backgroundColor)
 
         // Move scroll bar
@@ -840,7 +842,7 @@ class Inventory {
         drawText(title, this.halfW, this.halfH - this.height / 2 + padding, "25px Minecraft-Regular", "grey", "center", "top")
 
         // Add background boxes
-        this.loop(4, 9, function(i, j, self) {
+        this.loop(4, 9, function (i, j, self) {
             let { xPos, yPos } = self.getPos("background", i, j, true);
             self.drawBackgroundBox(xPos, yPos);
         })
@@ -848,7 +850,7 @@ class Inventory {
         // CRAFTING TABLE
         if (showCraftingTable) {
             // Add crafting grid background boxes
-            this.loop(3, function(i, j, self) {
+            this.loop(3, function (i, j, self) {
                 let { xPos, yPos } = self.getPos("craftingTable", i, j, true);
                 self.drawBackgroundBox(xPos, yPos);
             })
@@ -865,13 +867,13 @@ class Inventory {
         if (player.mode == "survival") { // SURVIVAL MODE
             let gridSize = 2;
             // Draw armor slots
-            this.loop(gridSize, function(i, j, self) {
+            this.loop(gridSize, function (i, j, self) {
                 let { xPos, yPos } = self.getPos("armor", i, j, true);
                 self.drawBackgroundBox(xPos, yPos);
             })
 
             // Draw crafting grid background boxes
-            this.loop(gridSize, function(i, j, self) {
+            this.loop(gridSize, function (i, j, self) {
                 let { xPos, yPos } = self.getPos("crafting", i, j, true);
                 self.drawBackgroundBox(xPos, yPos);
             })
@@ -890,7 +892,7 @@ class Inventory {
             $("#search-input").css("width", this.width - 2.5 * padding);
 
             // Add background boxes
-            this.loop(4, 9, function(i, j, self) {
+            this.loop(4, 9, function (i, j, self) {
                 let { xPos, yPos } = self.getPos("creative", i, j, true);
                 self.drawBackgroundBox(xPos, yPos);
             })
@@ -934,7 +936,7 @@ class Inventory {
             // Draw crafting table items
             if (showCraftingTable) {
                 let gridSize = 3;
-                this.loop(gridSize, function(i, j, self) {
+                this.loop(gridSize, function (i, j, self) {
                     let block = craftingTableGrid[i + j * gridSize];
                     if (!block || block.c == 0) return;
                     let exists = self.selectedBoxExists(block, i + j * gridSize);
@@ -948,7 +950,7 @@ class Inventory {
                 let gridSize = 2;
                 // Draw armor slot items
                 let armorSlotNames = ["helmet", "chestplate", "leggings", "boots"];
-                this.loop(gridSize, function(i, j, self) {
+                this.loop(gridSize, function (i, j, self) {
                     let { xPos, yPos } = self.getPos("armor", i, j, true);
                     let slot = self.inventory[self.limit + (i + j * gridSize)];
                     if (slot && slot.c > 0) {
@@ -967,7 +969,7 @@ class Inventory {
                 })
 
                 // Draw items in crafting grid
-                this.loop(gridSize, function(i, j, self) {
+                this.loop(gridSize, function (i, j, self) {
                     let block = craftingGrid[i + j * gridSize];
                     if (!block || block.c == 0) return;
                     let exists = self.selectedBoxExists(block, i + j * gridSize);

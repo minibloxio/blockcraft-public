@@ -1,6 +1,6 @@
 import { getCookie } from '../resources/cookie';
 
-export default class Game {
+class Game {
     constructor() {
         this.packetDelay = 16;
         this.lastPacket = Date.now();
@@ -50,3 +50,5 @@ export default class Game {
         }
     }
 }
+
+export default new Game();

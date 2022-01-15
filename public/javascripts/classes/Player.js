@@ -1,12 +1,13 @@
 import * as THREE from "three";
 import { PointerLockControls } from '../pointerlock';
+import { camera } from "../globals"
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 
 // Classes
 
-export default class Player {
-    constructor(camera) {
+class Player {
+    constructor() {
         // 3d stuff
         this.controls = new PointerLockControls(camera);
         this.camera = camera;
@@ -1334,3 +1335,5 @@ export default class Player {
 
     }
 }
+
+export default new Player();

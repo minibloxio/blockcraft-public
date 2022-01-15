@@ -6,17 +6,19 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
 
-// Import classes
-import Game from "./classes/Game";
+// Import classes (TURN THESE INTO SINGLETONS)
 import { getCookie, setCookie } from "./resources/cookie";
 import World from "./classes/World";
 import ChunkManager from "./classes/ChunkManager";
 import EntityManager from './classes/EntityManager';
 import WorkerManager from './classes/WorkerManager';
 import SkinManager from './classes/SkinManager';
-import Player from "./classes/Player";
 
-// Import functio;ns
+// Import singletons
+import player from './classes/Player';
+import { camera } from './globals';
+
+// Import functions
 import { addVideoControls, addKeyboardControls } from './settings';
 
 
@@ -34,7 +36,7 @@ import Ola from "ola";
 // Setup
 let renderer;
 
-let scene, camera, world, chunkManager, entityManager, skinManager, workerManager, stage, stats, composer, player, players;
+let scene, world, chunkManager, entityManager, skinManager, workerManager, stage, stats, composer, players;
 
 // Stats
 let prevTime = performance.now();
@@ -606,7 +608,6 @@ function init() {
     window.addEventListener('resize', onWindowResize, false); // Add resize event
 
     scene = new THREE.Scene(); // Add scene
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000000); // Camera
 
     camera.add(axesHelper);
 
@@ -616,7 +617,7 @@ function init() {
     entityManager = new EntityManager(); // Add entity manager
     workerManager = new WorkerManager(); // Web worker manager
     skinManager = new SkinManager(); // Skin manager
-    player = new Player(camera); // Add player
+    //player = new Player(camera); // Add player
 
     addVideoControls(); // Add video settings
     addKeyboardControls(); // Add keyboard controls

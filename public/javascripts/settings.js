@@ -1,3 +1,11 @@
+import keyconfig from "../json/keymap.json";
+import player from "./classes/Player.js";
+import { getCookie, setCookie } from "./resources/cookie";
+import game from "./classes/Game.js";
+
+let keymap = keyconfig.keymap;
+let keyorder = keyconfig.keyorder;
+
 // Add keys
 let savedKeymap = JSON.stringify(keymap);
 let savedKeyorder = JSON.stringify(keyorder);

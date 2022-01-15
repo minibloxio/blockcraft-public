@@ -1,5 +1,7 @@
+
+
 // Key event handling
-$('html').mousedown(function(event) {
+$('html').mousedown(function (event) {
     if (!initialized)
         return;
     if (!player.controls.enabled || inventory.showInventory)
@@ -19,10 +21,10 @@ $('html').mousedown(function(event) {
                 player.key.lastRightClick = Date.now();
             break;
         default:
-            //alert('You have a strange Mouse!');
+        //alert('You have a strange Mouse!');
     }
 })
-$('html').mouseup(function(event) {
+$('html').mouseup(function (event) {
     if (!initialized)
         return;
     switch (event.which) {
@@ -39,11 +41,11 @@ $('html').mouseup(function(event) {
             player.key.lastRightClick = false;
             break;
         default:
-            //alert('You have a strange Mouse!');
+        //alert('You have a strange Mouse!');
     }
 })
 
-$(window).keydown(function(event) {
+$(window).keydown(function (event) {
     if (!initialized) return;
     if (!player.controls.enabled) return;
     if (event.keyCode == 18) {
@@ -57,13 +59,13 @@ $(window).keydown(function(event) {
     }
 });
 
-$("body").mousemove(function(e) {
+$("body").mousemove(function (e) {
     mouse.x = e.pageX;
     mouse.y = e.pageY;
 })
 
 let mouseLeft, mouseRight = false;
-$("body").mousedown(function(e) {
+$("body").mousedown(function (e) {
     if (!initialized || !inventory.showInventory) return;
     switch (e.which) {
         case 1:
@@ -78,9 +80,9 @@ $("body").mousedown(function(e) {
             mouseRight = true;
             break;
         default:
-            //alert('You have a strange Mouse!');
+        //alert('You have a strange Mouse!');
     }
-}).mouseup(function(e) {
+}).mouseup(function (e) {
     if (!initialized || !inventory.showInventory) return;
     switch (e.which) {
         case 1:
@@ -95,22 +97,22 @@ $("body").mousedown(function(e) {
             inventory.unselect();
             break;
         default:
-            //alert('You have a strange Mouse!');
+        //alert('You have a strange Mouse!');
     }
 })
 
-$("body").dblclick(function() {
+$("body").dblclick(function () {
     if (!initialized) return;
     inventory.selectInventory("double")
 })
 
 var map = {};
-onkeydown = onkeyup = function(e) {
+onkeydown = onkeyup = function (e) {
     e = e || event;
     map[e.keyCode] = e.type == 'keydown';
 }
 
-var onKeyDown = function(event) {
+var onKeyDown = function (event) {
     if (!initialized) return;
 
     // CHAT INPUT
@@ -240,7 +242,7 @@ var onKeyDown = function(event) {
     }
 };
 
-var onKeyUp = function(event) {
+var onKeyUp = function (event) {
 
     // CHAT INPUT
     if ([13].indexOf(event.keyCode) > -1) {
@@ -346,8 +348,8 @@ document.addEventListener('keydown', onKeyDown, false);
 document.addEventListener('keyup', onKeyUp, false);
 
 // Inventory search
-$(document).ready(function() {
-    $("#search-input").on("input", function() {
+$(document).ready(function () {
+    $("#search-input").on("input", function () {
         let search = $(this).val();
         inventory.updateItemSearch(search);
     });
@@ -356,7 +358,7 @@ $(document).ready(function() {
 // Scrolling
 var lastScrollTop = 0;
 let zoomLevel = 3
-$(document).bind('wheel', function(e) {
+$(document).bind('wheel', function (e) {
     let scrollDelta = e.originalEvent.wheelDelta / 120;
 
     if (!initialized) return;
@@ -371,10 +373,10 @@ $(document).bind('wheel', function(e) {
     if (map[16]) e.preventDefault();
 
     let scrollDirection = game.invertMouse ? -1 : 1;
-    if (navigator.userAgent.includes("Safari") && map[16]) scrollDirection *= -1; 
+    if (navigator.userAgent.includes("Safari") && map[16]) scrollDirection *= -1;
 
     if (camera.enableZoom) {
-        if (scrollDelta*scrollDirection*-1 > 0) {
+        if (scrollDelta * scrollDirection * -1 > 0) {
             zoomLevel = clamp(zoomLevel + 0.2, -10, 10);
         } else {
             zoomLevel = clamp(zoomLevel - 0.2, -10, 10);
@@ -400,10 +402,10 @@ function prevSlot() {
 }
 
 // Blur & Focus
-$(window).blur(function() {
+$(window).blur(function () {
     inScreen = false;
 })
 
-$(window).focus(function() {
+$(window).focus(function () {
     inScreen = true;
 })

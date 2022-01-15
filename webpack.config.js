@@ -16,6 +16,12 @@ module.exports = {
         },
         compress: true,
         port: 3001,
+        proxy: {
+            '/socket.io': {
+                target: 'http://localhost:3002',
+                ws: true
+            }
+        }
     },
     module: {
         rules: [{
