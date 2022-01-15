@@ -9,7 +9,7 @@ resource "aws_security_group" "ubuntu" {
   description = "Allow HTTP, HTTPS and SSH traffic"
 
   ingress {
-    description = "SSH"
+    description = "ssh"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -17,15 +17,7 @@ resource "aws_security_group" "ubuntu" {
   }
 
   ingress {
-    description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "HTTP"
+    description = "http"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -41,9 +33,33 @@ resource "aws_security_group" "ubuntu" {
   }
 
   ingress {
+    description = "https"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "portainer"
     from_port   = 9000
     to_port     = 9000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "spare1"
+    from_port   = 28280
+    to_port     = 28280
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "spare2"
+    from_port   = 28281
+    to_port     = 28281
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
