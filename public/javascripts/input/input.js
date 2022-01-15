@@ -76,20 +76,19 @@ $("body").mousemove(function (e) {
     mouse.y = e.pageY;
 })
 
-let mouseLeft, mouseRight = false;
 $("body").mousedown(function (e) {
     if (!g.initialized || !inventory.showInventory) return;
     switch (e.which) {
         case 1:
             inventory.selectInventory("left", true);
-            mouseLeft = true;
+            g.mouseLeft = true;
             break;
         case 2:
 
             break;
         case 3:
             inventory.selectInventory("right", true);
-            mouseRight = true;
+            g.mouseRight = true;
             break;
         default:
         //alert('You have a strange Mouse!');
@@ -98,14 +97,14 @@ $("body").mousedown(function (e) {
     if (!g.initialized || !inventory.showInventory) return;
     switch (e.which) {
         case 1:
-            mouseLeft = false
+            g.mouseLeft = false
             inventory.unselect();
             break;
         case 2:
 
             break;
         case 3:
-            mouseRight = false;
+            g.mouseRight = false;
             inventory.unselect();
             break;
         default:

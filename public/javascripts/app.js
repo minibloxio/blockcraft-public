@@ -18,6 +18,7 @@ import stage from './classes/Stage';
 import chunkManager from './classes/ChunkManager';
 import textureManager from './classes/TextureManager';
 import workerManager from './classes/WorkerManager';
+import entityManager from './classes/EntityManager';
 import chat from './classes/ChatManager';
 import hud from './gui/HUDClass';
 import inventory from "./items/Inventory";

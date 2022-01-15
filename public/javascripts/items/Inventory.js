@@ -827,12 +827,12 @@ class Inventory {
 
         // Move scroll bar
         if (mouse.x > this.halfW + width / 2 && mouse.x < this.halfW + width / 2 + 40 && mouse.y > this.halfH - height / 2 && mouse.y < this.halfH - height / 2 + height) {
-            if (mouseLeft) {
+            if (g.mouseLeft) {
                 this.scrolling = true;
                 let scrollBarY = clamp(mouse.y - (this.halfH - scrollHeight - scrollMargin * 2), 0, scrollHeight + scrollMargin * 2);
                 this.currentRow = Math.min(maxScroll - 1, Math.round(scrollBarY / (scrollHeight) * (maxScroll)));
             }
-        } else if (mouseLeft && this.scrolling) {
+        } else if (g.mouseLeft && this.scrolling) {
             let scrollBarY = clamp(mouse.y - (this.halfH - scrollHeight - scrollMargin * 2), 0, scrollHeight + scrollMargin * 2);
             this.currentRow = Math.min(maxScroll - 1, Math.round(scrollBarY / (scrollHeight) * (maxScroll)));
         } else {
@@ -928,8 +928,8 @@ class Inventory {
 
         if (showInventory) {
             this.displayInventoryBackground();
-            if (mouseLeft) this.selectInventory("left");
-            if (mouseRight) this.selectInventory("right");
+            if (g.mouseLeft) this.selectInventory("left");
+            if (g.mouseRight) this.selectInventory("right");
             if (!this.drop) {
                 this.selectedBoxes = [];
                 this.highlightBoxes = [];

@@ -35,6 +35,8 @@ g.maxChunks = 0; // Chunks need to be loaded before pointerlock can be enabled
 g.cellIdToMesh = {};
 g.elapse = 0;
 g.delta = 0;
+g.mouseLeft = false;
+g.mouseRight = false;
 
 let states = {
     "start": 0,

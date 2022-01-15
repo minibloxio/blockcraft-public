@@ -13,6 +13,7 @@ import { colorPass } from "../graphics/renderer";
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 
+
 // Classes
 
 class Player {
@@ -373,7 +374,7 @@ class Player {
             }
         } else {
             if (this.bowCharge > 0) { // Release bow
-                socket.emit('fireArrow', {
+                g.socket.emit('fireArrow', {
                     pos: this.position.clone(),
                     dir: this.getItemVel(),
                     force: this.bowCharge
@@ -395,8 +396,8 @@ class Player {
 
         for (let throwable of throwables) {
             if (item.v != world.itemId[throwable]) continue;
-            socket.emit('throwItem', {
-                id: socket.id,
+            g.socket.emit('throwItem', {
+                id: g.socket.id,
                 name: throwable,
                 pos: this.position.clone(),
                 dir: this.getItemVel()
@@ -564,7 +565,7 @@ class Player {
         this.punching = Date.now();
 
         this.playerBoxes.length = 0;
-        for (let id in players) this.playerBoxes.push(players[id].skeleton);
+        for (let id in g.players) this.playerBoxes.push(g.players[id].skeleton);
         let intersects = this.raycaster.intersectObjects(this.playerBoxes, true);
 
         this.picked.length = 0;
@@ -591,7 +592,7 @@ class Player {
             }
             playerId = playerId.name;
 
-            if (closest.distance > this.picked[i].distance && players[playerId].hp > 0) {
+            if (closest.distance > this.picked[i].distance && g.players[playerId].hp > 0) {
                 closest = this.picked[i];
                 closest.id = playerId;
             }
@@ -604,7 +605,7 @@ class Player {
             let crit = false;
             if (this.velocity.y < 0) crit = true;
 
-            socket.emit("punchPlayer", { // Send to server (IBRAHIM I'M LOOKING AT YOU)
+            g.socket.emit("punchPlayer", { // Send to server (IBRAHIM I'M LOOKING AT YOU)
                 id: playerId,
                 dir: camera.getWorldDirection(new THREE.Vector3()),
                 force: crit ? 800 : 400,
@@ -646,13 +647,13 @@ class Player {
                     if ((t && t.c == 0) || !t) {
                         this.currentSlot = i;
                         this.toolbar[i] = { v: voxel, c: 1, class: "block" };
-                        socket.emit('updateInventory', this.toolbar);
+                        g.socket.emit('updateInventory', this.toolbar);
                         break;
                     }
                 }
             } else if (!exists && total == 9) { // Replace current slot with selected block
                 this.toolbar[this.currentSlot] = { v: voxel, c: 1, class: "block" };
-                socket.emit('updateInventory', this.toolbar);
+                g.socket.emit('updateInventory', this.toolbar);
             }
         }
     }
@@ -703,7 +704,7 @@ class Player {
                 updateVoxelGeometry(x, y, z, true, true);
 
                 // Send data to server
-                socket.emit('setBlock', {
+                g.socket.emit('setBlock', {
                     x: x,
                     y: y,
                     z: z,
@@ -759,7 +760,7 @@ class Player {
                 this.toolbar[this.currentSlot] = undefined;
             }
             this.toolbar[inventory.limit + index] = JSON.parse(armor);
-            socket.emit('updateInventory', this.toolbar);
+            g.socket.emit('updateInventory', this.toolbar);
 
             this.place = false;
             return;
@@ -802,7 +803,7 @@ class Player {
                 } else {
                     updateVoxelGeometry(outerPos.x, outerPos.y, outerPos.z, true);
                     // Send data to server
-                    socket.emit('setBlock', {
+                    g.socket.emit('setBlock', {
                         x: outerPos.x,
                         y: outerPos.y,
                         z: outerPos.z,
@@ -847,7 +848,7 @@ class Player {
                 dir: { x: dropDir.x, z: dropDir.y }
             }
 
-            socket.emit('dropItems', [droppedItem]);
+            g.socket.emit('dropItems', [droppedItem]);
         }
     }
 
@@ -1036,7 +1037,7 @@ class Player {
                         let jumpDiff = Math.floor((this.prevHeight - this.position.y) / blockSize) - 3;
 
                         if (jumpDiff > 0 && jumpDiff < 500 && this.mode == "survival" && !this.god) { // Fall damage
-                            socket.emit('takeDamage', {
+                            g.socket.emit('takeDamage', {
                                 dmg: jumpDiff,
                                 type: 'fall'
                             })
@@ -1205,7 +1206,7 @@ class Player {
         }
 
         if (this.oxygen < -20) {
-            socket.emit('takeDamage', {
+            g.socket.emit('takeDamage', {
                 dmg: 1,
                 type: 'drowning'
             })
