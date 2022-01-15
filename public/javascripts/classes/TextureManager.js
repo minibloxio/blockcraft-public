@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 
+import { g } from "../globals"
+
 
 // Texture class
 class Texture {
@@ -141,7 +143,7 @@ export class TextureManager {
 
         this.fontLoader.load('./textures/font/Minecraft_Regular.json', function (font) {
             self.minecraft_font = font;
-            loaded += 1;
+            g.loaded += 1;
             console.log("Done loading font in " + (Date.now() - t) + "ms");
         });
     }
@@ -157,7 +159,7 @@ export class TextureManager {
                 loading_index += 1;
 
                 if (loading_index == entity_names.length) {
-                    loaded += 1;
+                    g.loaded += 1;
                     self.mergeEntityTextures(entity_order); // Merge block textures
                 }
             })
@@ -195,7 +197,7 @@ export class TextureManager {
 
         this.entity_atlas = texture.image;
 
-        loaded += 1;
+        g.loaded += 1;
         console.log("Done stitching entity textures in " + (Date.now() - this.t) + "ms");
     }
 
@@ -210,7 +212,7 @@ export class TextureManager {
                 loading_index += 1;
 
                 if (loading_index == block_names.length) {
-                    loaded += 1;
+                    g.loaded += 1;
                     self.setTexture(block_order); // Merge block textures
                 }
             })
@@ -429,7 +431,7 @@ export class TextureManager {
 
         this.item_atlas = texture.image;
 
-        loaded += 1;
+        g.loaded += 1;
         console.log("Done stitching item textures in " + (Date.now() - this.t) + "ms");
     }
 
