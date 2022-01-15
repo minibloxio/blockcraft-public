@@ -104,7 +104,7 @@ module.exports = class World {
 
         let data = JSON.stringify(saveObject);
 
-        fs.writeFile(filepath, data, function(err) {
+        fs.writeFile(filepath, data, function (err) {
             if (err) throw err;
             let txt = "Server successfully saved in " + (Date.now() - t) + " ms";
             io.emit('messageAll', {

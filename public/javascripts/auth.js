@@ -5,10 +5,25 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
+
+// Import classes
 import Game from "./classes/Game";
 import { getCookie, setCookie } from "./resources/cookie";
 import World from "./classes/World";
 import ChunkManager from "./classes/ChunkManager";
+import EntityManager from './classes/EntityManager';
+import WorkerManager from './classes/WorkerManager';
+import SkinManager from './classes/SkinManager';
+import Player from "./classes/Player";
+
+// Import functio;ns
+import { addVideoControls, addKeyboardControls } from './settings';
+
+
+import changelog from "../json/changelog.json"
+
+import Ola from "ola";
+
 /*
 
     Authenticates the player and provides server details from each running server.
@@ -16,11 +31,10 @@ import ChunkManager from "./classes/ChunkManager";
 
 */
 
-
 // Setup
+let renderer;
 
-// Three.js
-let scene, camera, renderer, world, chunkManager, entityManager, textureManager, skinManager, workerManager, stage, stats, composer, player, players;
+let scene, camera, world, chunkManager, entityManager, skinManager, workerManager, stage, stats, composer, player, players;
 
 // Stats
 let prevTime = performance.now();
@@ -596,14 +610,13 @@ function init() {
 
     camera.add(axesHelper);
 
+    // THERE ARE ALL SINGLETONS (NOT DOUBLETONS)
     world = new World(); // Init world
     chunkManager = new ChunkManager(); // Add chunk manager
     entityManager = new EntityManager(); // Add entity manager
-    textureManager = new TextureManager(); // Add texture manager
     workerManager = new WorkerManager(); // Web worker manager
     skinManager = new SkinManager(); // Skin manager
     player = new Player(camera); // Add player
-    stage = new Stage(); // Initialize the stage (light, sun, moon, stars, etc.)
 
     addVideoControls(); // Add video settings
     addKeyboardControls(); // Add keyboard controls
@@ -857,6 +870,23 @@ function changeTab(evt, cityName) {
     document.getElementById(cityName).style.display = "block";
     evt.currentTarget.className += " active";
 }
+
+// Tab links
+$("#welcome-button").click(function (event) {
+    changeTab(event, "welcome");
+})
+$("#changelog-button").click(function (event) {
+    changeTab(event, "changelog");
+})
+$("#server-button").click(function (event) {
+    changeTab(event, "server");
+})
+$("#video-button").click(function (event) {
+    changeTab(event, "video-settings");
+})
+$("#keyboard-button").click(function (event) {
+    changeTab(event, "keyboard-settings");
+})
 
 // Load the changelog
 for (let change of changelog) {

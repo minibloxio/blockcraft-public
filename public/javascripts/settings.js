@@ -2,7 +2,7 @@
 let savedKeymap = JSON.stringify(keymap);
 let savedKeyorder = JSON.stringify(keyorder);
 
-function addKeyboardControls() {
+export function addKeyboardControls() {
     $("#keyboard-settings").empty();
 
     keymap = JSON.parse(savedKeymap);
@@ -38,12 +38,12 @@ function addKeyboardControls() {
 
     $("#keyboard-settings").append('<div id="reset-keyboard">Reset to Default</div>')
 
-    $(".change-key").on('keydown', function(e) {
+    $(".change-key").on('keydown', function (e) {
         if (e.keyCode == 32 || e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 18)
             e.preventDefault();
     })
 
-    $(".change-key").on('keyup', function(e) {
+    $(".change-key").on('keyup', function (e) {
         let old_key = e.target.getAttribute("data-keycode");
         e.target.style.color = "white";
         let action = e.key;
@@ -114,14 +114,14 @@ function addKeyboardControls() {
         }
     })
 
-    $(".change-key").on('blur', function(e) {
+    $(".change-key").on('blur', function (e) {
         if (e.target.value) {
             e.target.placeholder = e.target.value;
             e.target.value = "";
         }
     })
 
-    $("#reset-keyboard").click(function() {
+    $("#reset-keyboard").click(function () {
         for (let key of keyorder) {
             deleteCookie(keymap[key][0])
         }
@@ -143,7 +143,7 @@ function addSliderControl(name, id, defaultValue, object, key, callback) {
     $("#" + id + "Value").text(name + ": " + object[key]);
     $("#" + id + "Slider")[0].value = object[key]
     $("#" + id + "Slider").off();
-    $("#" + id + "Slider").on("change mousemove", function(e) {
+    $("#" + id + "Slider").on("change mousemove", function (e) {
         object[key] = $("#" + id + "Slider")[0].value;
         $("#" + id + "Value").text(name + ": " + object[key]);
         setCookie(name, object[key], cookieExpiryTime);
@@ -153,7 +153,7 @@ function addSliderControl(name, id, defaultValue, object, key, callback) {
     })
 }
 
-function addVideoControls() {
+export function addVideoControls() {
     $("#switch-container").empty();
     //addSliderControl("FPS", "fps", 60, game, "fps")
     addSliderControl("Sensitivity", "sensitivity", 50, player, "sens")
@@ -198,7 +198,7 @@ function addSwitchControl(name, id, defaultValue, object, key, key2, callback) {
     $("#" + id + "Value").text(name + ": " + (object[key] ? "ON" : "OFF"));
     $("#" + id + "Switch")[0].checked = object[key] ? true : false;
     $("#" + id + "Switch").off();
-    $("#" + id + "Switch").on("change", function() {
+    $("#" + id + "Switch").on("change", function () {
         object[key] = $("#" + id + "Switch")[0].checked == "1" ? true : false;
         if (key2)
             object[key2] = object[key];
@@ -216,16 +216,16 @@ function addSelectControl(name, id, defaultValue, object, key, callback) {
         object[key] = defaultValue;
     }
     $("#" + id + "Select")[0].value = object[key];
-    $(document).on('change', "#" + id + "Select", function() {
+    $(document).on('change', "#" + id + "Select", function () {
         object[key] = $("#" + id + "Select")[0].value;
         setCookie(name, object[key], cookieExpiryTime);
         if (callback) callback();
     });
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
 
-    $("#reset-video").click(function() {
+    $("#reset-video").click(function () {
         let videoCookies = ["Sensitivity", "Render Distance", "Chunk Loading Rate", "FOV", "Statistics", "Shadow Effect", "Clouds", "Stars", "Material Texture"];
         for (let cookie of videoCookies) {
             deleteCookie(cookie)

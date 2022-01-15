@@ -13,27 +13,17 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://blockcraft.victorwei.com" />
     <meta property="og:image" content="https://blockcraft.victorwei.com/images/content.png" />
-    <meta property="og:description" content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!"
-    />
-    <meta name="keywords" content="HTML, CSS, JavaScript, Three.js">
-    <meta name="author" content="Victor Wei">
-
-    <link rel="shortcut icon" type="image/png" href="./favicon.png" />
-
+    <meta property="og:description" content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!" />
+    <meta name="keywords" content="Three.js, Minecraft, Free, Blockcraft, Block, Craft">
+    <meta name="author" content="Victor Wei, Howard Yun">
 </head>
 
 <body>
 
     <canvas id="canvas-hud"></canvas>
 
-    <!-- Load CDNs -->
-    <script src="https://cdn.jsdelivr.net/npm/ola"></script>
-
     <!-- Load Resources -->
-    <script src="javascripts/resources/three.js"></script>
-    <script src="javascripts/resources/SVGLoader.js"></script>
-    <script src="javascripts/resources/socket.io.js"></script>
-    <script src="javascripts/resources/stats.js"></script>
+    <!-- <script src="javascripts/resources/stats.js"></script>
     <script src="javascripts/resources/perlin.js"></script>
     <script src="javascripts/resources/simplex.js"></script>
     <script src="javascripts/resources/matrix.js"></script>
@@ -41,11 +31,9 @@
     <script src="javascripts/resources/cookie.js"></script>
     <script src="javascripts/resources/rle-encoding.js"></script>
     <script src="javascripts/resources/TextureMerger.js"></script>
-    <script src="javascripts/resources/TextGeometry.js"></script>
-    <script src="javascripts/resources/FontLoader.js"></script>
+    <script src="javascripts/resources/TextGeometry.js"></script> -->
 
     <!-- Load JSON files -->
-    <script type="text/javascript" src="json/changelog.json"></script>
     <script type="text/javascript" src="json/keymap.json"></script>
     <script type="text/javascript" src="json/recipes.json"></script>
 
@@ -56,7 +44,7 @@
     <script src="javascripts/postprocessing/CopyShader.js"></script>
 
     <!-- Load Classes -->
-    <script src="javascripts/classes/Game.js"></script>
+    <!-- <script src="javascripts/classes/Game.js"></script>
     <script src="javascripts/classes/World.js"></script>
     <script src="javascripts/classes/Stage.js"></script>
     <script src="javascripts/classes/ChunkManager.js"></script>
@@ -70,10 +58,10 @@
     <script src="javascripts/classes/Player.js"></script>
     <script src="javascripts/classes/Inventory.js"></script>
     <script src="javascripts/classes/HUD.js"></script>
-    <script src="javascripts/classes/Stats.js"></script>
+    <script src="javascripts/classes/Stats.js"></script> -->
 
     <!-- Load Game Files -->
-    <script src="javascripts/auth.js"></script>
+    <!-- <script src="javascripts/auth.js"></script>
     <script src="javascripts/pointerlock.js"></script>
     <script src="javascripts/server.js"></script>
     <script src="javascripts/core.js"></script>
@@ -83,8 +71,7 @@
     <script src="javascripts/helper.js"></script>
     <script src="javascripts/hud.js"></script>
     <script src="javascripts/settings.js"></script>
-    <script src="javascripts/commands.js"></script>
-
+    <script src="javascripts/commands.js"></script> -->
 
     <div id="blocker">
         <div id="background-image"></div>
@@ -94,8 +81,8 @@
                 <!-- Menu -->
                 <div id="menu" class="tab-container">
                     <div id="nav">
-                        <button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
-                        <button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
+                        <button class="tablinks" id="welcome-button">Welcome</button>
+                        <button class="tablinks" id="changelog-button">Changelog</button>
                     </div>
 
                     <div id="welcome" class="tabcontent">
@@ -120,7 +107,7 @@
                 <!-- Server select -->
                 <div id="server-select" class="tab-container" style="display:none">
                     <div id="nav">
-                        <button class="tablinks" style="width: 100%;" onclick="changeTab(event, 'server-list')" id="server-button">Server Select</button>
+                        <button class="tablinks" style="width: 100%;" id="server-button">Server Select</button>
                     </div>
 
                     <div id="server-list" class="tabcontent">
@@ -138,8 +125,8 @@
                 <!-- Settings -->
                 <div id="settings" class="tab-container" style="display:none">
                     <div id="nav">
-                        <button class="tablinks" onclick="changeTab(event, 'video-settings')" id="video-button">Video</button>
-                        <button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
+                        <button class="tablinks" id="video-button">Video</button>
+                        <button class="tablinks" id="keyboard-button">Keyboard</button>
                     </div>
 
                     <div id="video-settings" class="tabcontent" style="display: none;">

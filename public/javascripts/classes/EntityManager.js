@@ -1,4 +1,6 @@
-class EntityManager {
+import * as THREE from "three";
+
+export default class EntityManager {
     constructor() {
 
     }

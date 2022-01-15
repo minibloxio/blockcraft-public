@@ -1,11 +1,14 @@
+import * as THREE from "three";
+import { PointerLockControls } from '../pointerlock';
+
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 
 // Classes
 
-class Player {
+export default class Player {
     constructor(camera) {
         // 3d stuff
-        this.controls = new THREE.PointerLockControls(camera);
+        this.controls = new PointerLockControls(camera);
         this.camera = camera;
 
         // Sensitivity

@@ -1,3 +1,7 @@
+import * as THREE from 'three';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+
+
 // Texture class
 class Texture {
     constructor(loader, textureUrl, material) {
@@ -24,14 +28,14 @@ class Texture {
     }
 }
 
-class TextureManager {
+export class TextureManager {
     constructor() {
         // Texture Loader
         this.loader = new THREE.TextureLoader();
         this.loader.setPath("textures/");
 
         // Font Loader
-        this.fontLoader = new THREE.FontLoader();
+        this.fontLoader = new FontLoader();
         this.minecraft_font = undefined;
 
         // Mining progress
@@ -135,7 +139,7 @@ class TextureManager {
         this.loadItemImages(data.items, data.itemOrder);
         this.loadEntityImages(data.entity, data.entityOrder);
 
-        this.fontLoader.load('./textures/font/Minecraft_Regular.json', function(font) {
+        this.fontLoader.load('./textures/font/Minecraft_Regular.json', function (font) {
             self.minecraft_font = font;
             loaded += 1;
             console.log("Done loading font in " + (Date.now() - t) + "ms");
@@ -149,7 +153,7 @@ class TextureManager {
         let loading_index = 0;
 
         for (let name of entity_names) {
-            this.entityFaces[name.slice(0, -4)] = this.loader.load(name, function() {
+            this.entityFaces[name.slice(0, -4)] = this.loader.load(name, function () {
                 loading_index += 1;
 
                 if (loading_index == entity_names.length) {
@@ -202,7 +206,7 @@ class TextureManager {
         let loading_index = 0;
 
         for (let name of block_names) {
-            this.blockFaces[name.slice(0, -4)] = this.loader.load(name, function() {
+            this.blockFaces[name.slice(0, -4)] = this.loader.load(name, function () {
                 loading_index += 1;
 
                 if (loading_index == block_names.length) {
@@ -337,6 +341,19 @@ class TextureManager {
         }
     }
 
+    static tintImageData(data, color, firstFourRows, force) {
+        for (var i = 0; i < data.length; i += 4) {
+            if (i > 256 && firstFourRows) return;
+            let sameColor = data[i] == data[i + 1] && data[i + 1] == data[i + 2];
+            if (data[i + 3] != 0 && sameColor || (force)) {
+                data[i] = data[i] / 255 * color[0];
+                data[i + 1] = data[i + 1] / 255 * color[1];
+                data[i + 2] = data[i + 2] / 255 * color[2];
+            }
+        }
+        return data;
+    }
+
     drawImage(ctx_, image, index, put) {
         if (put) {
             ctx_.putImageData(image, index * 16, 0);
@@ -357,7 +374,7 @@ class TextureManager {
         this.t = Date.now();
 
         for (let name of item_names) {
-            this.itemFaces[name.slice(0, -4)] = this.loader.load(name, function() {
+            this.itemFaces[name.slice(0, -4)] = this.loader.load(name, function () {
                 loading_index += 1;
 
                 if (loading_index == item_names.length) {
@@ -438,3 +455,5 @@ class TextureManager {
         return sprite;
     }
 }
+
+export default new TextureManager();

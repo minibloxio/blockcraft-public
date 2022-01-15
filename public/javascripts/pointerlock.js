@@ -1,10 +1,10 @@
+import * as THREE from 'three';
 /*
 
 Provides pointer lock functionality and the ability to connect to the game server
 
 */
 
-import * as THREE from 'three';
 
 // Request pointer lock
 function requestPointerLock() {
@@ -167,7 +167,7 @@ function initPointerLock() {
     }
 }
 
-THREE.PointerLockControls = function (camera) {
+export function PointerLockControls(camera) {
     var self = this;
 
     camera.rotation.set(0, 0, 0);

@@ -1,4 +1,4 @@
-export class WorkerManager {
+export default class WorkerManager {
     constructor() {
         this.rle;
         this.voxels = [];

@@ -1,3 +1,6 @@
+import * as THREE from "three";
+import Ola from "ola";
+
 class PlayerManager {
     constructor() {
 
