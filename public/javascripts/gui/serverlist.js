@@ -3,7 +3,10 @@ import { serverList, g, serverNames, connectionDelay, isState } from "../globals
 import { msToTime, drawRectangle, drawCircle } from '../helper';
 import { getCookie, deleteCookie } from "../resources/cookie";
 import player from '../classes/Player';
+import world from '../classes/World';
+import chunkManager from '../classes/ChunkManager';
 import { round } from '../helper';
+
 
 
 export function refreshServers() {

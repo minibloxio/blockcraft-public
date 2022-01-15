@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import world from './World';
-import { isState, g } from '../globals';
+import game from './Game';
+import { isState, g, scene } from '../globals';
 
 
 class ChunkManager {
@@ -181,7 +182,7 @@ class ChunkManager {
         }
 
         if (this.requestedChunks.length > 0) {
-            socket.emit('requestChunk', this.requestedChunks) // Call server to load this chunk
+            g.socket.emit('requestChunk', this.requestedChunks) // Call server to load this chunk
         }
     }
 
@@ -349,4 +350,5 @@ class ChunkManager {
     }
 }
 
-export default new ChunkManager();
+const chunkManager = new ChunkManager();
+export default chunkManager;

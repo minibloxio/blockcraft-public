@@ -461,5 +461,5 @@ export class TextureManager {
         return sprite;
     }
 }
-
-export default new TextureManager();
+const textureManager = new TextureManager();
+export default textureManager;

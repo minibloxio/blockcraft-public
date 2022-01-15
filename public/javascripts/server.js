@@ -3,7 +3,7 @@ import world from './classes/World';
 import { players } from './globals';
 
 // Update server players
-function updatePlayers(serverPlayers) {
+export function updatePlayers(serverPlayers) {
     for (let id in players) {
         let p = players[id];
         let p_ = serverPlayers[id];

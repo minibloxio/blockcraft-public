@@ -42,6 +42,17 @@ let states = {
     "disconnecting": 6,
 };
 
+// Toolbar
+export const toolbar = new Image();
+toolbar.src = "./textures/hotbar.png";
+
+export const toolbar_selector = new Image();
+toolbar_selector.src = "./textures/hotbar-selector.png";
+
+// Icons
+export const icons = new Image()
+icons.src = "./textures/gui/icons.png";
+
 export function isState(check) { return g.state == states[check]; }
 
 export { camera, scene, players, g, serverNames, serverList, connectionDelay };

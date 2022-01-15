@@ -12,14 +12,15 @@ import stats from "./stats/stats.js";
 
 // Import singletons
 import game from './classes/Game';
-import chunkManager from './classes/ChunkManager';
-import chat from './classes/ChatManager';
-import textureManager from './classes/TextureManager';
-import hud from './gui/HUDClass';
-import inventory from "./classes/items/Inventory";
 import world from './classes/World';
 import player from './classes/Player';
 import stage from './classes/Stage';
+import chunkManager from './classes/ChunkManager';
+import textureManager from './classes/TextureManager';
+import workerManager from './classes/WorkerManager';
+import chat from './classes/ChatManager';
+import hud from './gui/HUDClass';
+import inventory from "./items/Inventory";
 import { initRenderer, renderer, composer } from './graphics/renderer';
 import { camera, scene, g, connectionDelay, isState } from './globals';
 import initPointerLock from "./pointerlock";
@@ -31,6 +32,7 @@ import { updateHUD } from './gui/hud';
 import { round } from './helper';
 import { refreshServers, showServerSelect, connectError, updateMenu } from './gui/serverlist';
 import { initStatistics } from './stats/statslist';
+import { updatePlayers } from './server';
 
 
 import changelog from "../json/changelog.json"
@@ -55,15 +57,6 @@ let disconnectedAnimate = new Ola(0); // Disconnection progress
 let maxDisconnected = 5;
 let lastConnection = Date.now() - connectionDelay;
 
-// Toolbar
-let toolbar = new Image();
-toolbar.src = "./textures/hotbar.png";
-let toolbar_selector = new Image();
-toolbar_selector.src = "./textures/hotbar-selector.png";
-
-// Icons
-let icons = new Image()
-icons.src = "./textures/gui/icons.png";
 
 
 

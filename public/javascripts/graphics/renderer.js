@@ -7,6 +7,7 @@ import stats from "../stats/stats"
 
 let renderer;
 let composer;
+let colorPass;
 // Initalize the renderer
 export function initRenderer() {
   renderer = new THREE.WebGLRenderer({ antialias: false, logarithmicDepthBuffer: false });
@@ -24,7 +25,7 @@ export function initRenderer() {
   document.body.appendChild(renderer.domElement);
 
   // Add a color shader
-  let colorPass = new ShaderPass({
+  colorPass = new ShaderPass({
     uniforms: {
       tDiffuse: { value: null },
       color: { value: new THREE.Color(0x2e41f4) },
@@ -53,4 +54,4 @@ export function initRenderer() {
   composer.addPass(colorPass);
 }
 
-export { renderer, composer }
+export { renderer, composer, colorPass }

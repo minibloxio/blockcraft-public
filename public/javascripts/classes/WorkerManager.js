@@ -1,3 +1,5 @@
+import game from './Game';
+
 class WorkerManager {
     constructor() {
         this.rle;
@@ -41,5 +43,5 @@ class WorkerManager {
         }
     }
 }
-
-export default new WorkerManager();
+const workerManager = new WorkerManager();
+export default workerManager;

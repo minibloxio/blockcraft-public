@@ -1,5 +1,5 @@
 import hud from "./HUDClass.js";
-import inventory from "../classes/items/Inventory.js";
+import inventory from "../items/Inventory.js";
 import chat from "../classes/ChatManager.js";
 
 import { g } from '../globals';

@@ -1,6 +1,10 @@
 import game from '../classes/Game';
-import inventory from '../classes/items/Inventory';
-import { g } from '../globals';
+import inventory from '../items/Inventory';
+import world from '../classes/World';
+import player from '../classes/Player';
+import { colorPass } from "../graphics/renderer";
+
+import { g, icons } from '../globals';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
@@ -288,5 +292,5 @@ class HUD {
         this.displayOxygen();
     }
 }
-
-export default new HUD();
+const hud = new HUD();
+export default hud;

@@ -297,4 +297,5 @@ class SkinManager {
 
 }
 
-export default new SkinManager();
+const skinManager = new SkinManager();
+export default skinManager;

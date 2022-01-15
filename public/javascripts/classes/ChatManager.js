@@ -1,5 +1,5 @@
 import game from './Game';
-import inventory from './items/Inventory';
+import inventory from '../items/Inventory';
 import hud from '../gui/HUDClass';
 
 let canvas = document.getElementById('canvas-hud');
@@ -50,6 +50,7 @@ class ChatManager {
 
     // Add chat message
     addChat(options) {
+        console.log(this.chat)
         if (!options)
             return;
 
@@ -241,4 +242,6 @@ class ChatManager {
 
 }
 
-export default new ChatManager();
+const chatManager = new ChatManager()
+
+export default chatManager;

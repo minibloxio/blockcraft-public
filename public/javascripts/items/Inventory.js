@@ -1,6 +1,10 @@
-import recipes from "../../../json/recipes.json";
-import game from "../Game";
-import { g } from '../../globals';
+import recipes from "../../json/recipes.json";
+import game from '../classes/Game';
+import world from '../classes/World';
+import player from '../classes/Player';
+import textureManager from '../classes/TextureManager';
+import { drawImageTopLeft } from "../helper"
+import { g } from '../globals';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
@@ -117,7 +121,7 @@ class Inventory {
             size = 3;
         }
 
-    let craftingSize = grid.filter(n => n == 0 || n).length;
+        let craftingSize = grid.filter(n => n == 0 || n).length;
 
         let outputs = [];
         // Loop through recipes
@@ -1161,5 +1165,5 @@ class Inventory {
     }
 
 }
-
-export default new Inventory();
+const inventory = new Inventory();
+export default inventory;

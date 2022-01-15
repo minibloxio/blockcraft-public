@@ -226,7 +226,6 @@ World.faces = [{ // left
     ],
 },
 ];
-export default new World();
 
 let cells = [];
 const cellIdToMesh = {};
@@ -340,3 +339,5 @@ function setChunkMesh(cellX, cellY, cellZ, cellId, mesh) {
     mesh.updateMatrix();
     scene.add(mesh);
 }
+const world = new World();
+export default world;

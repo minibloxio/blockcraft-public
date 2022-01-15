@@ -138,5 +138,5 @@ class EntityManager {
         }
     }
 }
-
-export default new EntityManager();
+const entityManager = new EntityManager();
+export default entityManager;

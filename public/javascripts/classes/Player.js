@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { PointerLockControls } from '../pointerlock';
-import { camera, isState, g } from "../globals";
+import { camera, isState, g, scene } from "../globals";
+import skinManager from './SkinManager';
+import textureManager from './TextureManager';
+import world from './World';
 
 
 
@@ -1210,7 +1213,7 @@ class Player {
     }
 
     update(delta) {
-        if (this.hp <= 0 || !g.initialized || !g.joined|| !isState("inGame")) return;
+        if (this.hp <= 0 || !g.initialized || !g.joined || !isState("inGame")) return;
 
         this.select(true);
 
@@ -1337,5 +1340,5 @@ class Player {
 
     }
 }
-
-export default new Player();
+const player = new Player();
+export default player;
