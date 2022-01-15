@@ -22,3 +22,11 @@ provider "aws" {
   access_key = var.aws_access_key
   secret_key = var.aws_secret_key
 }
+
+# provider used for CloudFront keys which supports US East (N. Virginia) Region only.
+provider "aws" {
+  alias      = "us_east_1"
+  region     = "us-east-1"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+}
