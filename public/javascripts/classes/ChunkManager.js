@@ -1,4 +1,4 @@
-class ChunkManager {
+export default class ChunkManager {
     constructor() {
         // Chunk loading
         this.reqChunks = {};

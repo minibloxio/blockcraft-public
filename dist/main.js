@@ -1,0 +1,1 @@
+(()=>{performance.now(),new Ola({x:0,y:0},10),new Game;new THREE.AxesHelper(.5).position.z-=3,new THREE.Vector3(0,0,-3),performance.now()})();

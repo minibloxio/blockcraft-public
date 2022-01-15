@@ -1,6 +1,8 @@
 /*
-    MINECRAFT COMMANDS	
+    MINECRAFT COMMANDS
 */
+
+import * as THREE from 'three';
 
 let commandsInit = JSON.stringify({
     "gamemode": {
@@ -574,7 +576,7 @@ function updateGamemode(mode) {
 // Set the time of day
 function setTime(time) {
     let timeInt = parseInt(time);
-    if (typeof(timeInt) == "number" && (timeInt || timeInt == 0)) {
+    if (typeof (timeInt) == "number" && (timeInt || timeInt == 0)) {
         socket.emit('settime', timeInt)
         chat.addChat({
             text: "Time set to " + timeInt

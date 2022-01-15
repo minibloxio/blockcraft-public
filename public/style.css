@@ -24,8 +24,8 @@ a {
 /* Fonts */
 
 @font-face {
-    font-family: 'Minecraft-Regular';
-    src: url('Minecraft-Regular.otf');
+    font-family: "Minecraft-Regular";
+    src: url("Minecraft-Regular.otf");
     font-display: fallback;
 }
 
@@ -48,7 +48,7 @@ a {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image: url("/textures/dirt.png");
+    background-image: url("~/public/textures/dirt.png");
     background-repeat: repeat;
     z-index: -1;
 }
@@ -208,7 +208,7 @@ a {
 
 #alex-bar {
     width: 50%;
-    background-color: #FF007F;
+    background-color: #ff007f;
     float: right;
 }
 
@@ -389,8 +389,8 @@ a {
     right: 0;
     bottom: 0;
     background-color: #ccc;
-    -webkit-transition: .4s;
-    transition: .4s;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
 }
 
 .slider-span:before {
@@ -401,8 +401,8 @@ a {
     left: var(--switch-margin);
     bottom: var(--switch-margin);
     background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
 }
 
 input:checked+.slider-span {
@@ -449,13 +449,13 @@ input:checked+.slider-span:before {
     background: #ccc;
     outline: none;
     opacity: 1;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
+    -webkit-transition: 0.2s;
+    transition: opacity 0.2s;
 }
 
 .slider:hover {
     background: #9bbba2;
-    transition: .4s;
+    transition: 0.4s;
     cursor: pointer;
 }
 

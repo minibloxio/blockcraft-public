@@ -4,6 +4,8 @@ Provides pointer lock functionality and the ability to connect to the game serve
 
 */
 
+import * as THREE from 'three';
+
 // Request pointer lock
 function requestPointerLock() {
     if (loaded >= maxLoaded) {
@@ -106,7 +108,7 @@ function initPointerLock() {
 
         function enabled() { return document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element };
 
-        var pointerlockchange = function(event) {
+        var pointerlockchange = function (event) {
             if (enabled()) {
                 enterPointerLock();
             } else { // Exit pointer lock
@@ -114,7 +116,7 @@ function initPointerLock() {
             }
         };
 
-        var pointerlockerror = function(event) {};
+        var pointerlockerror = function (event) { };
 
         // Hook pointer lock change events
         document.addEventListener('pointerlockchange', pointerlockchange, false);
@@ -125,7 +127,7 @@ function initPointerLock() {
         document.addEventListener('mozpointerlockerror', pointerlockerror, false);
         document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
 
-        $("body").keydown(function(event) {
+        $("body").keydown(function (event) {
             if (event.keyCode == 27 && player.controls.enabled)
                 document.exitPointerLock();
 
@@ -151,7 +153,7 @@ function initPointerLock() {
             if (event.keyCode == 9)
                 event.preventDefault();
 
-        }).keyup(function(event) {
+        }).keyup(function (event) {
             if (event.keyCode == 27 && inventory.showInventory) { // Escape key
                 // Ask the browser to lock the pointer
                 requestPointerLock()
@@ -165,7 +167,7 @@ function initPointerLock() {
     }
 }
 
-THREE.PointerLockControls = function(camera) {
+THREE.PointerLockControls = function (camera) {
     var self = this;
 
     camera.rotation.set(0, 0, 0);
@@ -179,7 +181,7 @@ THREE.PointerLockControls = function(camera) {
 
     var PI_2 = Math.PI / 2;
 
-    var onMouseMove = function(event) {
+    var onMouseMove = function (event) {
         if (self.enabled === false) return;
 
         var movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
@@ -195,7 +197,7 @@ THREE.PointerLockControls = function(camera) {
 
     };
 
-    this.dispose = function() {
+    this.dispose = function () {
         document.removeEventListener('mousemove', onMouseMove, false);
     };
 
@@ -203,16 +205,16 @@ THREE.PointerLockControls = function(camera) {
 
     this.enabled = false;
 
-    this.getObject = function() {
+    this.getObject = function () {
         return yawObject;
     };
 
-    this.getDirection = function() {
+    this.getDirection = function () {
         // assumes the camera itself is not rotated
         var direction = new THREE.Vector3(0, 0, 1);
         var rotation = new THREE.Euler(0, 0, 0, 'YXZ');
 
-        return function(v) {
+        return function (v) {
             rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
             v.copy(direction).applyEuler(rotation);
             return v;

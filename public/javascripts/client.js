@@ -1,5 +1,7 @@
+import * as THREE from 'three';
+
 // Connection to server successful
-socket.on('connect', function() {
+socket.on('connect', function () {
     console.log("Connected successfully with id: " + socket.id);
     lastConnection = Date.now();
 
@@ -12,12 +14,12 @@ socket.on('connect', function() {
 })
 
 // Reconnection attempt
-socket.io.on('reconnect_attempt', function() {
+socket.io.on('reconnect_attempt', function () {
     console.log("Attempting to reconnect...");
 })
 
 // Reconnection to server unsuccessful
-socket.io.on('reconnect_failed', function() {
+socket.io.on('reconnect_failed', function () {
     console.log("Reconnection failed!");
     socket.disconnect();
     connectError();
@@ -26,7 +28,7 @@ socket.io.on('reconnect_failed', function() {
 // Disconnected from server
 let disconnectId = undefined;
 let disconnectCounter = 5;
-socket.on('disconnect', function(reason) {
+socket.on('disconnect', function (reason) {
     console.log("Disconnected from server due to:", reason);
 
     if (reason == "io server disconnect") { // Served closed the connection
@@ -39,7 +41,7 @@ socket.on('disconnect', function(reason) {
             text: "The server has restarted for a new update.",
             color: "red",
         })
-        disconnectId = setInterval(function() {
+        disconnectId = setInterval(function () {
             chat.addChat({
                 text: `Your browser will refresh in ${disconnectCounter} seconds.`,
                 color: "red",
@@ -54,7 +56,7 @@ socket.on('disconnect', function(reason) {
 })
 
 // Kicked from server
-socket.on('kick', function(reason) {
+socket.on('kick', function (reason) {
     let msg = reason ? "Kicked from server due to: " + reason : "Kicked from server";
     console.log(msg);
     disconnectServer();
@@ -62,13 +64,13 @@ socket.on('kick', function(reason) {
 })
 
 // Update session token
-socket.on('uniqueToken', function(token) {
+socket.on('uniqueToken', function (token) {
     setCookie('token', token, 365);
     game.token = token;
 })
 
 // Initialize client
-socket.on('joinResponse', function(data) {
+socket.on('joinResponse', function (data) {
     // Check if already initialized
     if (initialized) console.log("Already initialized game!"); //location.reload(true);
 
@@ -138,7 +140,7 @@ socket.on('joinResponse', function(data) {
 })
 
 // Load textures
-socket.on('textureData', function(data) {
+socket.on('textureData', function (data) {
     if (loaded < maxLoaded) {
         world.tileSize = data.tileSize;
         world.tileTextureWidth = data.tileTextureWidth;
@@ -148,12 +150,12 @@ socket.on('textureData', function(data) {
 })
 
 // Update chunk
-socket.on('receiveChunk', async function(data) {
+socket.on('receiveChunk', async function (data) {
     await workerManager.updateRLEWorker(data); // Send decoding to the rleWorker
 })
 
 // Add newcoming players
-socket.on('addPlayer', function(data) {
+socket.on('addPlayer', function (data) {
     if (!joined) return;
     // Add to players
     if (data.id != socket.id) { // Check if not own player
@@ -164,7 +166,7 @@ socket.on('addPlayer', function(data) {
 })
 
 // Remove player
-socket.on('removePlayer', function(id) {
+socket.on('removePlayer', function (id) {
     if (!initialized || !players[id])
         return;
 
@@ -178,7 +180,7 @@ socket.on('removePlayer', function(id) {
 })
 
 // Receive knockback
-socket.on('knockback', function(data) {
+socket.on('knockback', function (data) {
     let lateralForce = new THREE.Vector3(data.dir.x, data.dir.y, data.dir.z);
     lateralForce.normalize();
     lateralForce.multiplyScalar(data.force);
@@ -188,43 +190,43 @@ socket.on('knockback', function(data) {
 })
 
 // Receive punch
-socket.on('punch', function(id) {
+socket.on('punch', function (id) {
     if (id != socket.id && players && players[id]) {
         PlayerManager.updatePlayerColor(players[id], new THREE.Color(1, 0.5, 0.5))
         clearTimeout(players[id].punchId);
-        players[id].punchId = setTimeout(function() {
+        players[id].punchId = setTimeout(function () {
             PlayerManager.updatePlayerColor(players[id], new THREE.Color(1, 1, 1))
         }, 400);
     }
 })
 
 // Receive damage
-socket.on('damage', function(data) {
+socket.on('damage', function (data) {
     camera.rotation.z = Math.PI / 12;
 })
 
 // Teleport player
-socket.on('teleport', function(data) {
+socket.on('teleport', function (data) {
     player.setCoords(data.pos);
     camera.rotation.z = Math.PI / 12;
 })
 
-socket.on('update', async function(data) {
+socket.on('update', async function (data) {
     await updateClient(JSON.parse(data));
 })
 
-socket.on('messageAll', function(data) {
+socket.on('messageAll', function (data) {
     chat.addChat(data);
 })
 
-socket.on('message', function(data) {
+socket.on('message', function (data) {
     chat.addChat(data);
     if (data.type == "whisper") {
         player.lastWhisper = data.id;
     }
 })
 
-socket.on('refresh', function() {
+socket.on('refresh', function () {
     location.reload(true);
 })
 

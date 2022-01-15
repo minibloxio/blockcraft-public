@@ -1,16 +1,18 @@
+import * as THREE from 'three';
+
 let colorShader = {
-    uniforms: {
-        tDiffuse: { value: null },
-        color: { value: new THREE.Color(0x2e41f4) },
-    },
-    vertexShader: `
+  uniforms: {
+    tDiffuse: { value: null },
+    color: { value: new THREE.Color(0x2e41f4) },
+  },
+  vertexShader: `
       varying vec2 vUv;
       void main() {
         vUv = uv;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1);
       }
     `,
-    fragmentShader: `
+  fragmentShader: `
       uniform vec3 color;
       uniform sampler2D tDiffuse;
       varying vec2 vUv;

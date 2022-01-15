@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 // Update server players
 function updatePlayers(serverPlayers) {
     for (let id in players) {

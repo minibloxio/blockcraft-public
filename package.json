@@ -11,6 +11,7 @@
     "dotenv": "^11.0.0",
     "expose-gc": "^1.0.0",
     "express": "^4.17.1",
+    "jquery": "^3.6.0",
     "leo-profanity": "^1.5.0",
     "minecraft-skin": "^0.1.2",
     "morgan": "^1.10.0",
@@ -18,14 +19,15 @@
     "os": "^0.1.2",
     "serve-favicon": "^2.5.0",
     "simplex-noise": "^3.0.0",
-    "socket.io": "^4.4.0",
+    "socket.io": "^4.4.1",
     "socket.io-client": "^4.4.0",
     "three": "^0.136.0",
     "winston": "^3.3.3"
   },
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon",
+    "dev": "webpack-dev-server --mode=development",
+    "build": "webpack",
     "docker:build": "docker build . -t blockcraft",
     "docker:run": "docker run --rm --name blockcraft -p 3000:3000 blockcraft"
   },
@@ -38,5 +40,14 @@
   "bugs": {
     "url": "https://github.com/victoryqwei/Interplanetarium/issues"
   },
-  "homepage": "https://github.com/victoryqwei/Interplanetarium#readme"
+  "homepage": "https://github.com/victoryqwei/Interplanetarium#readme",
+  "devDependencies": {
+    "css-loader": "^6.5.1",
+    "html-webpack-plugin": "^5.5.0",
+    "style-loader": "^3.3.1",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.66.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.7.3"
+  }
 }

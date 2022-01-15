@@ -1,4 +1,4 @@
-class WorkerManager {
+export class WorkerManager {
     constructor() {
         this.rle;
         this.voxels = [];
@@ -24,14 +24,14 @@ class WorkerManager {
     init() {
         this.rle = new Worker('javascripts/workers/rle-worker.js'); // Run length encoding worker
 
-        this.rle.addEventListener('message', async(e) => {
+        this.rle.addEventListener('message', async (e) => {
             await chunkManager.processChunks(e.data, "rle");
         })
 
         // Voxel geometry workers
         for (let i = 0; i < game.numOfVoxelWorkers; i++) {
             this.voxels.push(new Worker('javascripts/workers/voxel-worker.js'));
-            this.voxels[i].addEventListener('message', async(e) => {
+            this.voxels[i].addEventListener('message', async (e) => {
                 await chunkManager.processChunks(e.data, "voxel");
             })
             this.voxels[i].postMessage({

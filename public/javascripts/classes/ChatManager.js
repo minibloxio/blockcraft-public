@@ -123,7 +123,7 @@ class ChatManager {
     hideChatTimer(time) {
         clearTimeout(this.hideChatId)
         let self = this;
-        this.hideChatId = setTimeout(function() {
+        this.hideChatId = setTimeout(() => {
             self.chatTimer = 0;
             if (!self.showChatBar) {
                 self.showChat = false;
