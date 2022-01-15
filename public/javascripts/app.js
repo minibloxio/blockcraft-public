@@ -1,14 +1,14 @@
 import "../style.css";
-import { io } from "socket.io-client";
+
+// libraries
+import Ola from "ola";
+
+// THREE.js
 import * as THREE from "three";
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
 // Import classes (TURN THESE INTO SINGLETONS)
-import { getCookie, setCookie, deleteCookie } from "./resources/cookie";
-import Stat from "./classes/Stats.js";
-import stats from "./resources/stats.js";
+import { getCookie, setCookie } from "./resources/cookie";
+import stats from "./stats/stats.js";
 
 // Import singletons
 import game from './classes/Game';
@@ -20,19 +20,20 @@ import inventory from "./classes/items/Inventory";
 import world from './classes/World';
 import player from './classes/Player';
 import stage from './classes/Stage';
-import { camera, scene, initialized, joined, g } from './globals';
+import { initRenderer, renderer, composer } from './graphics/renderer';
+import { camera, scene, joined, g, connectionDelay, isState } from './globals';
 import initPointerLock from "./pointerlock";
 
 // Import functions
 import { addVideoControls, addKeyboardControls } from './settings';
 import { animateServerPlayers, animateServerEntities } from './server';
-import { updateHUD } from './hud';
-import { round, msToTime, drawRectangle, drawCircle } from './helper';
+import { updateHUD } from './gui/hud';
+import { round } from './helper';
+import { refreshServers, showServerSelect, connectError, updateMenu } from './gui/serverlist';
+import { initStatistics } from './stats/statslist';
 
 
 import changelog from "../json/changelog.json"
-
-import Ola from "ola";
 
 /*
 Authenticates the player and provides server details from each running server.
@@ -41,55 +42,19 @@ Handles menu progression logic.
 
 
 // Setup
-let renderer;
 
-let composer;
-
-// Stats
 let prevTime = performance.now();
-let statistics = [];
-
 let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
-
 let lastUpdate = Date.now();
-let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Server Select, 2: Connecting to Server, 3: Loading Game, 4: Loading Chunks, 5: In Game, 6: Disconnecting)
-let states = {
-    "start": 0,
-    "serverSelect": 1,
-    "connecting": 2,
-    "loading": 3,
-    "loadingChunks": 4,
-    "inGame": 5,
-    "disconnecting": 6,
-};
-
-export function isState(check) { return state == states[check]; }
-
-let socket = io({
-    autoConnect: false,
-    forceNew: true,
-    reconnectionAttempts: 2,
-});
-
 let loadedAnimate = new Ola(0);
 let maxLoaded = 6;
 let maxChunks = 0; // Chunks need to be loaded before pointerlock can be enabled
 
-const serverNames = {
-    "gold": "Gold Server (formerly North America East)",
-    "coal": "Coal Server (formerly North America West)",
-    "iron": "Iron Server (formerly Europe West)",
-    "wood": "Wood Server (New map!)",
-}
 
-const serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.online`)
-
-let servers = {};
-let currentServer = undefined;
+g.currentServer = undefined;
 let disconnected = 0; // Disconnection progress
 let disconnectedAnimate = new Ola(0); // Disconnection progress
 let maxDisconnected = 5;
-let connectionDelay = 2000;
 let lastConnection = Date.now() - connectionDelay;
 
 // Toolbar
@@ -102,227 +67,22 @@ toolbar_selector.src = "./textures/hotbar-selector.png";
 let icons = new Image()
 icons.src = "./textures/gui/icons.png";
 
-function refreshServers() {
-    // Disconnect servers
-    for (let link in servers) {
-        let server = servers[link];
-        server.socket.disconnect();
-    }
 
-    // Connect to servers
-    servers = {};
-    currentServer = undefined;
-
-    $("#server-container").empty();
-    for (let i = 0; i < serverList.length; i++) {
-        let serverLink = serverList[i];
-        servers[serverLink] = {
-            socket: io(serverLink, {
-                forceNew: true,
-                reconnection: false,
-            }),
-            link: serverLink,
-            info: {},
-        };
-
-        let server = servers[serverLink];
-
-        // Connected to server
-        server.socket.on('connect', function () {
-            setTimeout(function () {
-                server.socket.emit('serverInfoRequest', Date.now())
-            }, 500);
-        });
-
-        // Error connecting to server
-        server.socket.on('connect_error', function (error) {
-            //console.error(error);
-        });
-
-        // Disconnected from server
-        server.socket.on('disconnect', function (reason) {
-            if (reason == "transport close") {
-                console.log("Server down!");
-                server.socket.disconnect();
-            }
-        })
-
-        // Received server info
-        server.socket.on('serverInfoResponse', function (data) {
-            // Update server info
-            console.log(data.link)
-            servers[data.link].info = data;
-
-            // Player names
-            let playerNames = [];
-            for (let id in data.players) playerNames.push(data.players[id]);
-            if (playerNames.length > 0) {
-                playerNames = "Usernames: " + playerNames.join(", ");
-            }
-
-            // Update server list
-            let latency = Date.now() - data.ping;
-            let serverHTML = $(`
-                <div class='server' data-link='${data.link}' id='server-${data.region}'>
-                    <p>Region: ${serverNames[data.region]}</p>
-                    <p>Players: ${Object.keys(data.players).length}/20</p>
-                    <div class="animated"><p id="player-names">${playerNames}</p></div>
-                    <div>
-                        <p class="serverInfo">${latency}ms</p>
-                        <canvas id="${data.region}" class="serverBar" width="30" height="24"></canvas>
-                    </div>
-
-                    <div>
-                        <p class="serverInfo" style="margin-bottom: 0; top: 54px;">${msToTime(data.uptime)} </p>
-                        <canvas id="${data.region}-2" class="serverBar" style="top: 54px;" width="30" height="24"></canvas>
-                    </div>
-                </div>
-            `)
-
-            // Check if it's the first server
-            if (!currentServer && !$("#direct-connect-input").val().length) {
-                currentServer = data;
-
-                setJoinButton(data);
-
-                serverHTML.css({
-                    "background-color": "rgba(0,0,0,0.7)",
-                    "outline": "2px solid white",
-                });
-            }
-
-            $("#server-container").append(serverHTML);
-
-            $(`#server-${data.region}`).on('click', function (event) {
-                clickServer(event);
-            })
-
-            $(`#server-${data.region}`).on('dblclick', function (event) {
-                clickServer(event, true);
-            })
-
-            let ctx_ = $("#" + data.region)[0].getContext("2d");
-            let numOfBars = Math.max(5 - Math.floor(latency / 60), 1);
-            let color;
-            switch (numOfBars) {
-                case 1:
-                    color = "red";
-                    break;
-                case 2:
-                    color = "orange";
-                    break;
-                case 3:
-                    color = "yellow";
-                    break;
-                case 4:
-                    color = "green";
-                    break;
-                case 5:
-                    color = "lime";
-                    break;
-            }
-            for (let i = 0; i < numOfBars; i++) {
-                drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, color, { ctx: ctx_ });
-            }
-            for (let i = numOfBars; i < 5; i++) {
-                drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, "grey", { ctx: ctx_ });
-            }
-
-            ctx_ = $("#" + data.region + "-2")[0].getContext("2d");
-            drawCircle(15, 12, 11, "white", { ctx: ctx_, fill: false, outline: true, outlineColor: "white", outlineWidth: 2 });
-            drawCircle(15, 12, 2, "white", { ctx: ctx_ });
-            drawRectangle(14, 3, 2, 7, "white", { ctx: ctx_ });
-
-            server.socket.disconnect();
-        })
-    }
-}
-
-// Set join button
-function setJoinButton(server) {
-    if (isState("serverSelect") && !$("#direct-connect-input").val().length) {
-        $("#server-bar").text(`Join server (${server.region})`);
-        $("#server-bar").css({ "background-color": "green" });
-    }
-}
-
-// Clicked on a server
-function clickServer(event, doubleClick) {
-    let server = $(event.target).closest(".server");
-    let url = server.data("link");
-    if (url in servers) {
-        currentServer = servers[url];
-    }
-
-    // Outline selected server
-    $("#server-container").children().css({
-        "background-color": "rgba(0,0,0,0.5)",
-        "outline": "none",
-    });
-    server.css({
-        "background-color": "rgba(0,0,0,0.7)",
-        "outline": "2px solid white",
-    });
-
-    // Remove direct connect cookie
-    $("#direct-connect-input").val('');
-    deleteCookie('directConnect');
-
-    // Set join button
-    setJoinButton(currentServer.info);
-
-    // Auto join server
-    if (doubleClick) {
-        $("#start-button").click();
-    }
-}
 
 // Initialize server connection
 function connect(url) {
     console.log("Connecting to server with url: " + url);
-    if (url in servers) {
-        currentServer = servers[url];
+    if (url in g.servers) {
+        g.currentServer = g.servers[url];
     }
-    socket.io.uri = url;
-    socket.connect();
+    g.socket.io.uri = url;
+    g.socket.connect();
 }
 
-// Error connecting to server
-function connectError(type, reason) {
-    reason = reason ? " (" + reason + ")" : "";
-    let bar = $("#server-bar");
-    if (type == "banned") {
-        bar.text("Banned from server" + reason);
-        bar.css({ "background-color": "red" });
-    } else if (type == "kicked") {
-        bar.text("Kicked from server" + reason);
-        bar.css({ "background-color": "red" });
-    } else {
-        console.error("Error connecting to server!");
-        $("#direct-connect-input").val('');
-        deleteCookie('directConnect');
-
-        bar.text("Connection failed");
-        bar.css({ "background-color": "red" });
-    }
-
-    setTimeout(function () {
-        if ($("#direct-connect-input").val()) {
-            bar.text(`Direct Connect`);
-        } else if (currentServer) {
-            bar.text(`Join server (${currentServer.region})`);
-        } else {
-            bar.text(`Join server`);
-        }
-        bar.css({ "background-color": "green" });
-
-        if (!type) state -= 1;
-    }, connectionDelay);
-}
 
 // Join server
 function joinServer() {
-    if (!initialized) {
+    if (!g.initialized) {
         let name = $("#name-input").val() || "";
 
         let joinInfo = {
@@ -330,7 +90,7 @@ function joinServer() {
             token: getCookie('token'),
             skin: player.skin,
         }
-        socket.emit('join', joinInfo)
+        g.socket.emit('join', joinInfo)
         g.loaded += 1;
         console.log("Joining server...")
     }
@@ -344,12 +104,12 @@ function disconnectServer() {
     $("#disconnecting-bar").show();
     document.exitPointerLock();
 
-    initialized = false;
+    g.initialized = false;
     joined = false;
-    currentServer = undefined;
+    g.currentServer = undefined;
     maxDisconnected = Object.keys(chunkManager.currChunks).length;
     disconnectedAnimate = new Ola(0);
-    socket.disconnect();
+    g.socket.disconnect();
 
     console.log("Disconnecting from server... (Cells to unload: " + maxDisconnected + ")");
 
@@ -383,7 +143,7 @@ function disconnectServer() {
         delete world.entities[id];
     }
 
-    state += 1;
+    g.state += 1;
 }
 
 
@@ -419,8 +179,8 @@ $(document).ready(function () {
         if (val) {
             $("#server-bar").text(`Direct Connect`);
             $("#server-bar").css({ "background-color": "green" });
-        } else if (currentServer) {
-            $("#server-bar").text(`Join server (${currentServer.region})`);
+        } else if (g.currentServer) {
+            $("#server-bar").text(`Join server (${g.currentServer.region})`);
             $("#server-bar").css({ "background-color": "green" });
         }
 
@@ -446,25 +206,25 @@ function nextState(e) {
 
         showServerSelect();
 
-        state += 1;
-    } else if (isState("serverSelect") && (currentServer || $("#direct-connect-input").val()) && Date.now() - lastConnection > connectionDelay) { // Server Select -> Connecting to Server
+        g.state += 1;
+    } else if (isState("serverSelect") && (g.currentServer || $("#direct-connect-input").val()) && Date.now() - lastConnection > connectionDelay) { // Server Select -> Connecting to Server
         // Direct connection
         let directConnect = $("#direct-connect-input").val();
         if (directConnect) {
             connect(directConnect);
         } else {
-            connect(currentServer.link);
+            connect(g.currentServer.link);
         }
 
         $("#server-bar").text(`Connecting to server...`);
         $("#server-bar").css({ "background-color": "orange" });
 
         // Wait for connection to server
-        state += 1;
+        g.state += 1;
     } else if (isState("loading") && g.loaded > maxLoaded) { // Loading Game -> Loading Chunks
         console.log("Loading chunks...")
         loadedAnimate = new Ola(Object.keys(chunkManager.currChunks).length);
-        state += 1;
+        g.state += 1;
     } else if (isState("loadingChunks") && Object.keys(chunkManager.currChunks).length >= maxChunks) { // Loading Chunks -> In Game
         console.log("Requesting pointer lock");
         requestPointerLock();
@@ -473,7 +233,7 @@ function nextState(e) {
 
         $(".menu-button").hide();
         $("#ingame-bar").show();
-        state += 1;
+        g.state += 1;
     } else if (isState("inGame")) { // In Game
 
         if (e) {
@@ -498,45 +258,19 @@ function prevState() {
     if (isState("loading")) { // Go back to server select menu
         showServerSelect();
 
-        state = 1;
+        g.state = 1;
     } else if (isState("loadingChunks")) {
         showServerSelect();
 
-        state = 1;
+        g.state = 1;
     } else if (isState("disconnecting")) { // Go back to server select menu
         showServerSelect();
 
         g.loaded -= 1;
-        state -= 5;
+        g.state -= 5;
     }
 }
 
-// Show server select page
-function showServerSelect() {
-    refreshServers();
-
-    $(".input").hide(); // Hide input fields
-    $(".menu-button").hide(); // Hide menu buttons
-    $(".tab-container").hide(); // Hide tab containers
-
-    let directConnect = getCookie("directConnect");
-    if (directConnect) {
-        $("#direct-connect-input").val(directConnect).focus();
-        $("#server-bar").text(`Direct Connect`);
-        $("#server-bar").css({ "background-color": "green" });
-    } else {
-        $("#server-bar").text("Finding Servers...");
-        $("#server-bar").css({ "background-color": "orange" });
-    }
-
-    $("#direct-connect-input").show();
-    $("#server-bar").show();
-
-    $("#server-select").show();
-    $("#server-button")[0].click();
-
-    $("#background-image").show();
-}
 
 // Show settings page
 function showSettings() {
@@ -552,62 +286,6 @@ function showSettings() {
 }
 
 
-// Update menu state
-function updateMenu() {
-
-    // Animate menu
-    if (isState("serverSelect")) { // Server select
-
-    } else if (isState("loading")) { // Loading game
-
-        // Update loading progress
-        if (loadedAnimate.value >= maxLoaded) {
-            $("#loading-bar").text("Spawn")
-
-            if (!joined) {
-                joined = true;
-                joinServer();
-            }
-        } else if (loadedAnimate.value < maxLoaded && !$("#loading-bar").text().includes("Spawn")) {
-            let text = Math.min(100, round(loadedAnimate.value / maxLoaded * 100, 0));
-            $("#loading-bar").text("Loading " + text + "%")
-        }
-
-        // Set loading progress
-        loadedAnimate.value = g.loaded;
-        $("#loading-bar").width(100 * (Math.min(loadedAnimate.value, maxLoaded) / maxLoaded) + "%")
-
-    } else if (isState("loadingChunks")) { // Loading chunks
-
-        let chunksLoaded = Object.keys(chunkManager.currChunks).length;
-        loadedAnimate.value = chunksLoaded;
-        $("#loading-bar").width(100 * (Math.min(loadedAnimate.value, maxChunks) / maxChunks) + "%");
-        $("#loading-bar").text("Chunks Loaded (" + chunksLoaded + "/" + maxChunks + ")");
-
-        if (chunksLoaded >= maxChunks) {
-            nextState();
-        }
-    } else if (initialized && isState("inGame") && !player.controls.enabled) { // In game
-
-        $("#loading-bar").text("Return to game");
-        $("#loading-bar").width(100 + "%");
-
-    } else if (isState("disconnecting")) { // Disconnecting
-
-        disconnectedAnimate.value = maxDisconnected - chunkManager.chunksToUnload.length;
-        let text = Math.min(100, round(disconnectedAnimate.value / maxDisconnected * 100, 0));
-        $("#disconnecting-bar").text("Disconnecting " + text + "%");
-        $("#disconnecting-bar").width(100 * (Math.min(disconnectedAnimate.value, maxDisconnected) / maxDisconnected) + "%");
-
-        if (disconnectedAnimate.value >= maxDisconnected) {
-            for (let id in cellIdToMesh) { // Dispose of all remaining meshes
-                world.deleteCell(id, true);
-            }
-            chunkManager.removeAllDebugLines();
-            prevState();
-        }
-    }
-}
 
 // Update GUI size
 export function updateGUISize() {
@@ -640,147 +318,6 @@ function init() {
     animate(); // Start the animation loop
 }
 
-
-// Initialize statistics
-function initStatistics() {
-    statistics.push([
-        new Stat("FPS", game, "fps", 0),
-        new Stat("UPS", game, "ups", 1),
-        new Stat("TPS", game, "tps", 1),
-        new Stat("Ping", function (key) {
-            return player[key] ? player[key].average() : 0;
-        }, "ms", 1, "ping"),
-    ]);
-    statistics.push([
-        new Stat("LT", function () {
-            return game.logicTime;
-        }, "ms", 2),
-        new Stat("RT", function () {
-            return game.renderTime;
-        }, "ms", 2),
-        new Stat("CT", function () {
-            return game.canvasTime;
-        }, "ms", 2),
-        new Stat("Total", function () {
-            return game.logicTime + game.canvasTime + game.renderTime;
-        }, "ms", 2),
-    ]);
-    statistics.push([
-        new Stat("RC", function () {
-            return renderer.info.render.calls;
-        }),
-        new Stat("Tri", function () {
-            return renderer.info.render.triangles / 1000;
-        }, "k", 2),
-        new Stat("F", function () {
-            return renderer.info.render.frame;
-        }),
-    ]);
-    statistics.push([
-        new Stat("LIM", function () {
-            if (!performance.memory) return 0;
-            return performance.memory.jsHeapSizeLimit / 1048576;
-        }, "mb", 0),
-        new Stat("TOT", function () {
-            if (!performance.memory) return 0;
-            return performance.memory.totalJSHeapSize / 1048576;
-        }, "mb", 0),
-        new Stat("USED", function () {
-            if (!performance.memory) return 0;
-            return performance.memory.usedJSHeapSize / 1048576;
-        }, "mb", 0),
-        new Stat("INC", function () {
-            if (!performance.memory) return 0;
-            return game.memIncrease.average() / 1024;
-        }, "kb", 0),
-        new Stat("DEC", function () {
-            if (!performance.memory) return 0;
-            return game.memDecrease.average() / 1048576;
-        }, "mb", 1),
-    ]);
-    statistics.push([
-        new Stat("Geo", function () {
-            return renderer.info.memory.geometries;
-        }),
-        new Stat("Tex", function () {
-            return renderer.info.memory.textures;
-        }),
-    ]);
-    statistics.push(new Stat("Server", game, "region"));
-    statistics.push(new Stat("Socket ID", socket, "id"));
-    statistics.push(new Stat("Token", game, "token"));
-    statistics.push(new Stat("Gamemode", player, "mode"));
-    statistics.push(new Stat("Pos", player.position, false, 1, function (pos) {
-        return pos.clone().divideScalar(world.blockSize);
-    }));
-    statistics.push(new Stat("Chunk Pos", player.position, false, 0, function (pos) {
-        return world.computeCellFromPlayer(pos.x, pos.y, pos.z);
-    }));
-    statistics.push(new Stat("Biome", player, "biome"));
-    statistics.push(new Stat("Vel", player.velocity, false, 1));
-    statistics.push(new Stat("Speed", player, "speed", 2));
-    statistics.push(new Stat("Fly", player, "fly"));
-    statistics.push([
-        new Stat("FOV", camera, "fov"),
-        new Stat("Base", game, "fov"),
-        new Stat("Delta", player, "deltaFov", 2)
-    ]);
-    statistics.push(new Stat("Facing", function () {
-        let compass = new THREE.Vector3(0, 0, 0);
-        camera.getWorldDirection(compass);
-        if (Math.abs(compass.x) > Math.abs(compass.z)) {
-            return compass.x > 0 ? "East  (→)" : "West  (←)";
-        } else {
-            return compass.z > 0 ? "South (↓)" : "North (↑)";
-        }
-    }));
-}
-
-// Initalize the renderer
-function initRenderer() {
-    renderer = new THREE.WebGLRenderer({ antialias: false, logarithmicDepthBuffer: false });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-
-    // Add statistics
-    document.body.appendChild(stats.dom);
-
-    // Add shader passes
-    composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-
-    document.body.appendChild(renderer.domElement);
-
-    // Add a color shader
-    let colorPass = new ShaderPass({
-        uniforms: {
-            tDiffuse: { value: null },
-            color: { value: new THREE.Color(0x2e41f4) },
-        },
-        vertexShader: `
-            varying vec2 vUv;
-            void main() {
-              vUv = uv;
-              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1);
-            }
-          `,
-        fragmentShader: `
-            uniform vec3 color;
-            uniform sampler2D tDiffuse;
-            varying vec2 vUv;
-            void main() {
-              vec4 previousPassColor = texture2D(tDiffuse, vUv);
-              gl_FragColor = vec4(
-                  previousPassColor.rgb * color,
-                  previousPassColor.a);
-            }
-          `,
-    });
-    colorPass.renderToScreen = true;
-    colorPass.enabled = false;
-    composer.addPass(colorPass);
-}
 
 // Game loop
 let elasped, delta;
@@ -834,7 +371,7 @@ function animate() {
 
 // Window resize
 function onWindowResize() {
-    if (!initialized) return;
+    if (!g.initialized) return;
 
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -855,7 +392,7 @@ function onWindowResize() {
 function sendPacket() {
     if (Date.now() - game.lastPacket > game.packetDelay) {
         game.lastPacket = Date.now();
-        socket.emit('packet', {
+        g.socket.emit('packet', {
             pos: player.position,
             vel: player.velocity,
             onObject: player.onObject,
@@ -946,30 +483,30 @@ if (name)
 
 
 // Connection to server successful
-socket.on('connect', function () {
-    console.log("Connected successfully with id: " + socket.id);
+g.socket.on('connect', function () {
+    console.log("Connected successfully with id: " + g.socket.id);
     lastConnection = Date.now();
 
     showSettings();
-    state += 1;
+    g.state += 1;
 });
 
 // Reconnection attempt
-socket.io.on('reconnect_attempt', function () {
+g.socket.io.on('reconnect_attempt', function () {
     console.log("Attempting to reconnect...");
 })
 
 // Reconnection to server unsuccessful
-socket.io.on('reconnect_failed', function () {
+g.socket.io.on('reconnect_failed', function () {
     console.log("Reconnection failed!");
-    socket.disconnect();
+    g.socket.disconnect();
     connectError();
 })
 
 // Disconnected from server
 let disconnectId = undefined;
 let disconnectCounter = 5;
-socket.on('disconnect', function (reason) {
+g.socket.on('disconnect', function (reason) {
     console.log("Disconnected from server due to:", reason);
 
     if (reason == "io server disconnect") { // Served closed the connection
@@ -977,7 +514,7 @@ socket.on('disconnect', function (reason) {
     }
 
     if (reason == "transport close") {
-        socket.disconnect();
+        g.socket.disconnect();
         chat.addChat({
             text: "The server has restarted for a new update.",
             color: "red",
@@ -997,7 +534,7 @@ socket.on('disconnect', function (reason) {
 })
 
 // Kicked from server
-socket.on('kick', function (reason) {
+g.socket.on('kick', function (reason) {
     let msg = reason ? "Kicked from server due to: " + reason : "Kicked from server";
     console.log(msg);
     disconnectServer();
@@ -1005,21 +542,21 @@ socket.on('kick', function (reason) {
 })
 
 // Update session token
-socket.on('uniqueToken', function (token) {
+g.socket.on('uniqueToken', function (token) {
     setCookie('token', token, 365);
     game.token = token;
 })
 
 // Initialize client
-socket.on('joinResponse', function (data) {
+g.socket.on('joinResponse', function (data) {
     // Check if already initialized
-    if (initialized) console.log("Already initialized game!"); //location.reload(true);
+    if (g.initialized) console.log("Already initialized game!"); //location.reload(true);
 
     // Check if blacklisted
     if (data.blacklisted) {
-        initialized = false;
+        g.initialized = false;
         joined = false;
-        currentServer = undefined;
+        g.currentServer = undefined;
         disconnectServer();
         prevState();
         connectError("banned", data.reason);
@@ -1038,7 +575,7 @@ socket.on('joinResponse', function (data) {
     // Receive current server players
     let serverPlayers = data.serverPlayers;
     for (let id in serverPlayers) {
-        if (id != socket.id) {
+        if (id != g.socket.id) {
             players[id] = serverPlayers[id];
             if (!players[id]) continue;
             PlayerManager.addPlayer(players, id);
@@ -1072,13 +609,13 @@ socket.on('joinResponse', function (data) {
     // Update item search
     inventory.updateItemSearch('');
 
-    initialized = true;
+    g.initialized = true;
     console.log("Successfully joined the server (" + data.info.region + ")");
     game.region = data.info.region;
 })
 
 // Load textures
-socket.on('textureData', function (data) {
+g.socket.on('textureData', function (data) {
     if (g.loaded < maxLoaded) {
         world.tileSize = data.tileSize;
         world.tileTextureWidth = data.tileTextureWidth;
@@ -1088,15 +625,15 @@ socket.on('textureData', function (data) {
 })
 
 // Update chunk
-socket.on('receiveChunk', async function (data) {
+g.socket.on('receiveChunk', async function (data) {
     await workerManager.updateRLEWorker(data); // Send decoding to the rleWorker
 })
 
 // Add newcoming players
-socket.on('addPlayer', function (data) {
+g.socket.on('addPlayer', function (data) {
     if (!joined) return;
     // Add to players
-    if (data.id != socket.id) { // Check if not own player
+    if (data.id != g.socket.id) { // Check if not own player
         players[data.id] = data;
 
         PlayerManager.addPlayer(players, data.id);
@@ -1104,8 +641,8 @@ socket.on('addPlayer', function (data) {
 })
 
 // Remove player
-socket.on('removePlayer', function (id) {
-    if (!initialized || !players[id])
+g.socket.on('removePlayer', function (id) {
+    if (!g.initialized || !players[id])
         return;
 
     chat.addChat({
@@ -1118,7 +655,7 @@ socket.on('removePlayer', function (id) {
 })
 
 // Receive knockback
-socket.on('knockback', function (data) {
+g.socket.on('knockback', function (data) {
     let lateralForce = new THREE.Vector3(data.dir.x, data.dir.y, data.dir.z);
     lateralForce.normalize();
     lateralForce.multiplyScalar(data.force);
@@ -1128,8 +665,8 @@ socket.on('knockback', function (data) {
 })
 
 // Receive punch
-socket.on('punch', function (id) {
-    if (id != socket.id && players && players[id]) {
+g.socket.on('punch', function (id) {
+    if (id != g.socket.id && players && players[id]) {
         PlayerManager.updatePlayerColor(players[id], new THREE.Color(1, 0.5, 0.5))
         clearTimeout(players[id].punchId);
         players[id].punchId = setTimeout(function () {
@@ -1139,37 +676,37 @@ socket.on('punch', function (id) {
 })
 
 // Receive damage
-socket.on('damage', function (data) {
+g.socket.on('damage', function (data) {
     camera.rotation.z = Math.PI / 12;
 })
 
 // Teleport player
-socket.on('teleport', function (data) {
+g.socket.on('teleport', function (data) {
     player.setCoords(data.pos);
     camera.rotation.z = Math.PI / 12;
 })
 
-socket.on('update', async function (data) {
+g.socket.on('update', async function (data) {
     await updateClient(JSON.parse(data));
 })
 
-socket.on('messageAll', function (data) {
+g.socket.on('messageAll', function (data) {
     chat.addChat(data);
 })
 
-socket.on('message', function (data) {
+g.socket.on('message', function (data) {
     chat.addChat(data);
     if (data.type == "whisper") {
         player.lastWhisper = data.id;
     }
 })
 
-socket.on('refresh', function () {
+g.socket.on('refresh', function () {
     location.reload(true);
 })
 
 function updateClient(data) {
-    if (!joined || !initialized) return;
+    if (!joined || !g.initialized) return;
 
     // Update player
     let serverPlayers = data.serverPlayers;
@@ -1219,7 +756,7 @@ function updateClient(data) {
     }
 
     // Update client player
-    if (player) player.updateClient(serverPlayers[socket.id]);
+    if (player) player.updateClient(serverPlayers[g.socket.id]);
 
     // Update tick
     game.updates.push(Date.now() - game.lastUpdate);
@@ -1237,6 +774,6 @@ function updateClient(data) {
     // Latency check
     if (Date.now() - lastUpdate > 500) {
         lastUpdate = Date.now();
-        socket.emit('latency', data.t);
+        g.socket.emit('latency', data.t);
     }
 }

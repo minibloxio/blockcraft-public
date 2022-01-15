@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { PointerLockControls } from '../pointerlock';
-import { camera, initialized, joined } from "../globals";
-import { isState } from '../app';
+import { camera, initialized, joined, isState } from "../globals";
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 

@@ -1,8 +1,8 @@
-import hud from "./classes/HUD.js";
-import inventory from "./classes/items/Inventory.js";
-import chat from "./classes/ChatManager.js";
+import hud from "../classes/HUD.js";
+import inventory from "../classes/items/Inventory.js";
+import chat from "../classes/ChatManager.js";
 
-import { initialized } from './globals';
+import { g } from '../globals';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
@@ -48,7 +48,7 @@ function getPlayerColor(player) {
 
 export function updateHUD() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (!initialized) return;
+    if (!g.initialized) return;
     ctx.imageSmoothingEnabled = false;
     hud.display();
     inventory.displayToolbar();
