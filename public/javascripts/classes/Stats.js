@@ -1,4 +1,4 @@
-class Stat {
+export default class Stat {
     constructor(name, value, key, round, func) {
         this.name = name;
         this.value = value;
@@ -33,7 +33,7 @@ class Stat {
             }
 
             if (this.key) {
-                let type = typeof(val[this.key])
+                let type = typeof (val[this.key])
                 val = val[this.key];
                 if (type == "boolean")
                     text += val

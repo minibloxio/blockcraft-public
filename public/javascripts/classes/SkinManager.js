@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import textureManager from './TextureManager';
 
-export default class SkinManager {
+class SkinManager {
     constructor() {
         // Skin Loader
         this.loader = new THREE.TextureLoader();
@@ -296,3 +296,5 @@ export default class SkinManager {
     }
 
 }
+
+export default new SkinManager();

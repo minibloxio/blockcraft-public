@@ -1,3 +1,10 @@
+import game from './Game';
+import inventory from './items/Inventory';
+import hud from './HUD';
+
+let canvas = document.getElementById('canvas-hud');
+let ctx = canvas.getContext('2d');
+
 class ChatManager {
     constructor() {
         // Chat
@@ -233,3 +240,5 @@ class ChatManager {
     }
 
 }
+
+export default new ChatManager();

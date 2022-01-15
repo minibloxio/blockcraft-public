@@ -2,295 +2,282 @@
 
 html,
 body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    user-select: none;
-    -webkit-user-select: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 body {
-    background-color: black;
-    margin: 0;
-    overflow: hidden;
+  background-color: black;
+  margin: 0;
+  overflow: hidden;
 }
 
 a {
-    color: white;
+  color: white;
 }
-
 
 /* Fonts */
 
 @font-face {
-    font-family: "Minecraft-Regular";
-    src: url("Minecraft-Regular.otf");
-    font-display: fallback;
+  font-family: "Minecraft-Regular";
+  src: url("assets/Minecraft-Regular.otf");
+  font-display: fallback;
 }
-
 
 /* BlockCraft title */
 
 #title {
-    font-family: "Minecraft-Regular";
-    font-size: 100px;
-    color: white;
-    margin: 0;
-    margin-bottom: 20px;
+  font-family: "Minecraft-Regular";
+  font-size: 100px;
+  color: white;
+  margin: 0;
+  margin-bottom: 20px;
 }
-
 
 /* Main menu background image */
 
 #background-image {
-    filter: brightness(40%);
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-image: url("~/public/textures/dirt.png");
-    background-repeat: repeat;
-    z-index: -1;
+  filter: brightness(40%);
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url("./textures/dirt.png") center center repeat;
+  background-repeat: repeat;
+  z-index: -1;
 }
-
 
 /* Blocker (exited pointer lock) */
 
 #blocker {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    vertical-align: middle;
-    z-index: 3;
-    font-family: "Minecraft-Regular";
-    font-size: 20px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  vertical-align: middle;
+  z-index: 3;
+  font-family: "Minecraft-Regular";
+  font-size: 20px;
 }
-
 
 /* TAB CONTAINER */
 
 .outer-container {
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-    margin: 0 auto;
-    width: 80%;
-    min-width: 600px;
-    max-width: 1000px;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0 auto;
+  width: 80%;
+  min-width: 600px;
+  max-width: 1000px;
 }
 
 .container {
-    height: 100%;
+  height: 100%;
 }
 
 .tab-container {
-    height: 60vh;
-    overflow-y: hidden;
+  height: 60vh;
+  overflow-y: hidden;
 }
-
 
 /* NAV BAR */
 
 #nav {
-    height: 60px;
-    text-align: left;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    font-family: "Minecraft-Regular";
+  height: 60px;
+  text-align: left;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-family: "Minecraft-Regular";
 }
 
 #blocker button:hover {
-    background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 #blocker button.active {
-    background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.7);
 }
-
 
 /* NAVBAR CONTENT */
 
 .tabcontent {
-    height: calc(100% - 140px);
-    border-top: none;
-    text-align: left;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 40px;
+  height: calc(100% - 140px);
+  border-top: none;
+  text-align: left;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 40px;
 }
 
 .tablinks {
-    color: white;
-    font-size: 25px;
-    font-family: inherit;
-    background-color: rgba(0, 0, 0, 0);
-    float: left;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    height: 100%;
-    width: 49.9%;
-    transition: 0.3s;
+  color: white;
+  font-size: 25px;
+  font-family: inherit;
+  background-color: rgba(0, 0, 0, 0);
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  height: 100%;
+  width: 49.9%;
+  transition: 0.3s;
 }
-
 
 /* INPUT */
 
 #input-container {
-    text-align: center;
-    top: calc(62vh + 60px);
-    z-index: 3;
-    background-color: rgba(30, 30, 30, 0.8);
+  text-align: center;
+  top: calc(62vh + 60px);
+  z-index: 3;
+  background-color: rgba(30, 30, 30, 0.8);
 }
 
 .input {
-    color: white;
-    background-color: rgba(0, 0, 0, 0);
-    font-family: inherit;
-    border: none;
-    text-decoration: none;
-    outline: none;
-    left: 10px;
-    width: 100%;
-    height: 70px;
-    font-size: 30px;
-    box-sizing: border-box;
-    text-align: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0);
+  font-family: inherit;
+  border: none;
+  text-decoration: none;
+  outline: none;
+  left: 10px;
+  width: 100%;
+  height: 70px;
+  font-size: 30px;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .input::placeholder {
-    color: white;
-    filter: brightness(60%);
-    text-align: center;
+  color: white;
+  filter: brightness(60%);
+  text-align: center;
 }
 
 .input:focus::placeholder {
-    color: transparent;
+  color: transparent;
 }
-
 
 /* START BUTTON */
 
 #start-button {
-    color: white;
-    font-family: inherit;
-    width: 100%;
-    height: 70px;
-    text-decoration: none;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    font-size: 30px;
-    background-color: rgba(0, 0, 0, 0);
-    overflow: visible;
+  color: white;
+  font-family: inherit;
+  width: 100%;
+  height: 70px;
+  text-decoration: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 30px;
+  background-color: rgba(0, 0, 0, 0);
+  overflow: visible;
 }
 
 .bar {
-    width: 100%;
-    height: 100%;
-    background-color: green;
-    text-align: center;
-    line-height: 70px;
-    overflow: visible;
-    white-space: nowrap;
+  width: 100%;
+  height: 100%;
+  background-color: green;
+  text-align: center;
+  line-height: 70px;
+  overflow: visible;
+  white-space: nowrap;
 }
 
 #continue-bar {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 #steve-bar {
-    width: 50%;
-    background-color: #6ca0dc;
-    float: left;
+  width: 50%;
+  background-color: #6ca0dc;
+  float: left;
 }
 
 #alex-bar {
-    width: 50%;
-    background-color: #ff007f;
-    float: right;
+  width: 50%;
+  background-color: #ff007f;
+  float: right;
 }
 
 #ingame-bar {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 #disconnect-bar {
-    width: 30%;
-    background-color: red;
-    float: left;
+  width: 30%;
+  background-color: red;
+  float: left;
 }
 
 #return-bar {
-    width: 70%;
-    overflow: hidden;
+  width: 70%;
+  overflow: hidden;
 }
 
 #disconnecting-bar {
-    background-color: orange;
+  background-color: orange;
 }
-
 
 /* WELCOME PAGE */
 
 #welcome {
-    overflow-y: scroll;
+  overflow-y: scroll;
 }
 
 #welcome p {
-    padding: 0;
-    margin-bottom: 10px;
-    margin-top: 5px;
+  padding: 0;
+  margin-bottom: 10px;
+  margin-top: 5px;
 }
-
 
 /* CHANGELOG */
 
 #changelog {
-    overflow-y: scroll;
-    height: 100%;
+  overflow-y: scroll;
+  height: 100%;
 }
-
 
 /* SERVER LIST */
 
 #server-list {
-    overflow-y: scroll;
+  overflow-y: scroll;
 }
 
 .server {
-    position: relative;
-    margin-bottom: 20px;
-    padding: 20px;
-    padding-bottom: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
-    overflow-y: none;
+  position: relative;
+  margin-bottom: 20px;
+  padding: 20px;
+  padding-bottom: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow-y: none;
 }
 
 .server:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-    cursor: pointer;
-    outline: 2px solid white;
+  background-color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  outline: 2px solid white;
 }
 
 .serverInfo {
-    position: absolute;
-    top: 20px;
-    right: 50px;
+  position: absolute;
+  top: 20px;
+  right: 50px;
 }
 
 .serverBar {
-    position: absolute;
-    top: 20px;
-    right: 10px;
+  position: absolute;
+  top: 20px;
+  right: 10px;
 }
 
 .server p {
-    margin-top: 0;
-    margin-bottom: 10px;
+  margin-top: 0;
+  margin-bottom: 10px;
 }
-
 
 /* .animated {
     display: inline-block;
@@ -323,293 +310,285 @@ a {
     }
 } */
 
-
 /* Refresh button */
 
 .top-button {
-    margin-bottom: 20px;
-    text-align: center;
-    line-height: 50px;
-    width: 100%;
-    height: 50px;
-    background-color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 20px;
+  text-align: center;
+  line-height: 50px;
+  width: 100%;
+  height: 50px;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .top-button:hover {
-    cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.7);
 }
-
 
 /* VIDEO SETTINGS */
 
 :root {
-    --switch-height: 20px;
-    --switch-margin: 3px;
-    --switch-width: 45px;
-    --switch-translate: calc(var(--switch-width) - var(--switch-height) - var(--switch-margin) * 2);
+  --switch-height: 20px;
+  --switch-margin: 3px;
+  --switch-width: 45px;
+  --switch-translate: calc(var(--switch-width) - var(--switch-height) - var(--switch-margin) * 2);
 }
 
 #video-settings {
-    overflow-y: scroll;
+  overflow-y: scroll;
 }
 
 .flex-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    column-gap: 20px;
-    flex-grow: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  column-gap: 20px;
+  flex-grow: 1;
 }
 
 .switch {
-    flex-grow: 1;
-    flex-basis: 0;
-    min-width: 300px;
+  flex-grow: 1;
+  flex-basis: 0;
+  min-width: 300px;
 }
 
 .switch-label {
-    position: relative;
-    float: right;
-    width: var(--switch-width);
-    height: calc(var(--switch-height) + var(--switch-margin) * 2);
+  position: relative;
+  float: right;
+  width: var(--switch-width);
+  height: calc(var(--switch-height) + var(--switch-margin) * 2);
 }
 
 .switch-label input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 .slider-span {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    -webkit-transition: 0.4s;
-    transition: 0.4s;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
 .slider-span:before {
-    position: absolute;
-    content: "";
-    height: var(--switch-height);
-    width: var(--switch-height);
-    left: var(--switch-margin);
-    bottom: var(--switch-margin);
-    background-color: white;
-    -webkit-transition: 0.4s;
-    transition: 0.4s;
+  position: absolute;
+  content: "";
+  height: var(--switch-height);
+  width: var(--switch-height);
+  left: var(--switch-margin);
+  bottom: var(--switch-margin);
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
 }
 
-input:checked+.slider-span {
-    background-color: #1cc942;
+input:checked + .slider-span {
+  background-color: #1cc942;
 }
 
-input:focus+.slider-span {
-    box-shadow: 0 0 1px #1cc942;
+input:focus + .slider-span {
+  box-shadow: 0 0 1px #1cc942;
 }
 
-input:checked+.slider-span:before {
-    -webkit-transform: translateX(var(--switch-translate));
-    -ms-transform: translateX(var(--switch-translate));
-    transform: translateX(var(--switch-translate));
+input:checked + .slider-span:before {
+  -webkit-transform: translateX(var(--switch-translate));
+  -ms-transform: translateX(var(--switch-translate));
+  transform: translateX(var(--switch-translate));
 }
 
 .settings-button {
-    margin-top: 20px;
-    text-align: center;
-    line-height: 50px;
-    width: 100%;
-    height: 50px;
-    background-color: rgba(0, 0, 0, 0.5);
+  margin-top: 20px;
+  text-align: center;
+  line-height: 50px;
+  width: 100%;
+  height: 50px;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .settings-button:hover {
-    cursor: pointer;
-    background-color: rgba(156, 126, 126, 0.7);
+  cursor: pointer;
+  background-color: rgba(156, 126, 126, 0.7);
 }
 
 .control-container {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .slider-text {
-    color: white;
+  color: white;
 }
 
 .slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 15px;
-    background: #ccc;
-    outline: none;
-    opacity: 1;
-    -webkit-transition: 0.2s;
-    transition: opacity 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 15px;
+  background: #ccc;
+  outline: none;
+  opacity: 1;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
 }
 
 .slider:hover {
-    background: #9bbba2;
-    transition: 0.4s;
-    cursor: pointer;
+  background: #9bbba2;
+  transition: 0.4s;
+  cursor: pointer;
 }
 
 .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: green;
-    cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: green;
+  cursor: pointer;
 }
 
 .slider::-moz-range-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: green;
-    cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: green;
+  cursor: pointer;
 }
 
 .select {
-    width: 100%;
-    height: 50px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    font-size: 20px;
-    font-family: inherit;
-    outline: none;
-    border: none;
+  width: 100%;
+  height: 50px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 20px;
+  font-family: inherit;
+  outline: none;
+  border: none;
 }
-
 
 /* KEYBOARD SETTINGS */
 
 #keyboard-settings {
-    overflow-y: scroll;
+  overflow-y: scroll;
 }
 
 #reset-keyboard {
-    text-align: center;
-    line-height: 40px;
-    width: 100%;
-    height: 40px;
-    background-color: rgba(0, 0, 0, 0.5);
+  text-align: center;
+  line-height: 40px;
+  width: 100%;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 #reset-keyboard:hover {
-    cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.7);
 }
-
 
 /* SCROLLBAR */
 
 ::-webkit-scrollbar {
-    width: 20px;
+  width: 20px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(200, 200, 200, 0.5);
+  background: rgba(200, 200, 200, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(200, 200, 200, 0.7);
+  background: rgba(200, 200, 200, 0.7);
 }
-
 
 /* CHANGE KEY */
 
 .key {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .change-key {
-    outline: none;
-    border: none;
-    text-decoration: none;
-    height: 30px;
-    float: right;
-    width: 150px;
-    background-color: rgba(0, 0, 0, 0.5);
-    font-size: 20px;
-    font-family: inherit;
-    color: white;
-    text-align: center;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  height: 30px;
+  float: right;
+  width: 150px;
+  background-color: rgba(0, 0, 0, 0.5);
+  font-size: 20px;
+  font-family: inherit;
+  color: white;
+  text-align: center;
 }
 
 .change-key::placeholder {
-    color: white;
+  color: white;
 }
 
 .change-key:focus::placeholder {
-    color: transparent;
+  color: transparent;
 }
-
 
 /* CHAT INPUT */
 
 #chat-input {
-    position: absolute;
-    left: 5px;
-    bottom: 5px;
-    height: 35px;
-    width: calc(100% - 10px);
-    z-index: 2;
-    border: none;
-    font-family: "Minecraft-Regular";
-    font-size: 25px;
-    padding-left: 5px;
-    text-decoration: none;
-    outline: none;
-    background-color: rgba(0, 0, 0, 0);
-    color: white;
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  height: 35px;
+  width: calc(100% - 10px);
+  z-index: 2;
+  border: none;
+  font-family: "Minecraft-Regular";
+  font-size: 25px;
+  padding-left: 5px;
+  text-decoration: none;
+  outline: none;
+  background-color: rgba(0, 0, 0, 0);
+  color: white;
 }
 
 #chat-input::placeholder {
-    color: white;
+  color: white;
 }
-
 
 /* SEARCH INPUT */
 
 #search-input {
-    position: absolute;
-    left: 5px;
-    bottom: 5px;
-    height: 35px;
-    width: calc(100% - 10px);
-    z-index: 2;
-    border: none;
-    font-family: "Minecraft-Regular";
-    font-size: 25px;
-    padding-left: 5px;
-    text-decoration: none;
-    outline: none;
-    background-color: rgba(0, 0, 0, 0.2);
-    color: white;
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  height: 35px;
+  width: calc(100% - 10px);
+  z-index: 2;
+  border: none;
+  font-family: "Minecraft-Regular";
+  font-size: 25px;
+  padding-left: 5px;
+  text-decoration: none;
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: white;
 }
 
 #search-input::placeholder {
-    color: grey;
+  color: grey;
 }
-
 
 /* Canvas HUD */
 
 #canvas-hud {
-    position: absolute;
-    z-index: 0;
-    padding: 0;
-    margin: 0;
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-crisp-edges;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+  position: absolute;
+  z-index: 0;
+  padding: 0;
+  margin: 0;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }

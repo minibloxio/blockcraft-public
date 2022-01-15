@@ -100,7 +100,7 @@ function exitPointerLock() {
     chat.showChatBar = false;
 }
 
-function initPointerLock() {
+export default function initPointerLock() {
 
     var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
     if (havePointerLock) {

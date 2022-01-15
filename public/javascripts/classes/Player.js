@@ -490,7 +490,7 @@ class Player {
         let cellPos = chunkManager.cellPos;
         if (!cellPos) return;
 
-        for (let offset of player.neighborOffsets) {
+        for (let offset of this.neighborOffsets) {
             let id = (cellPos.x + offset[0]) + "," + (cellPos.y + offset[1]) + "," + (cellPos.z + offset[2]);
             if (cellIdToMesh[id]) {
                 if (cellIdToMesh[id][0]) this.nearbyMeshes.push(cellIdToMesh[id][0]);
@@ -768,7 +768,7 @@ class Player {
             if (world.blockOrder[voxel - 1] == "crafting_table") {
                 inventory.showCraftingTable = true;
                 inventory.showInventory = true;
-                inventory.inventory = JSON.parse(JSON.stringify(player.toolbar));
+                inventory.inventory = JSON.parse(JSON.stringify(this.toolbar));
                 document.exitPointerLock();
                 this.punching = Date.now();
                 this.place = false;
@@ -816,7 +816,7 @@ class Player {
     }
 
     dropItem() {
-        if (!this.allowDrop || !player.controls.enabled || chat.showChatBar) {
+        if (!this.allowDrop || !this.controls.enabled || chat.showChatBar) {
             this.allowDrop = false;
             return;
         }
@@ -1208,7 +1208,7 @@ class Player {
     }
 
     update(delta) {
-        if (player.hp <= 0 || !initialized || !joined || !isState("inGame")) return;
+        if (this.hp <= 0 || !initialized || !joined || !isState("inGame")) return;
 
         this.select(true);
 

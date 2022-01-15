@@ -1,4 +1,4 @@
-function drawCircle(x, y, r, c, options = {}) {
+export function drawCircle(x, y, r, c, options = {}) {
     let _ctx = options.ctx || ctx;
     _ctx.save();
     _ctx.beginPath();
@@ -20,7 +20,7 @@ function drawCircle(x, y, r, c, options = {}) {
     _ctx.restore();
 }
 
-function drawRectangle(x, y, w, h, c, options = {}) {
+export function drawRectangle(x, y, w, h, c, options = {}) {
     let _ctx = options.ctx || ctx;
     _ctx.save();
     _ctx.translate(x, y);
@@ -39,7 +39,7 @@ function drawRectangle(x, y, w, h, c, options = {}) {
 }
 
 // Draw rectangle but centered
-function drawRect(x, y, w, h, d, c, options = {}) {
+export function drawRect(x, y, w, h, d, c, options = {}) {
     let _ctx = options.ctx || ctx;
     _ctx.translate(x, y)
     _ctx.rotate(d);
@@ -55,7 +55,7 @@ function drawRect(x, y, w, h, d, c, options = {}) {
     _ctx.resetTransform();
 }
 
-function drawRoundedRect(x, y, w, h, r, c, options = {}) {
+export function drawRoundedRect(x, y, w, h, r, c, options = {}) {
     // Draw rounded rectangle
     let _ctx = options.ctx || ctx;
     _ctx.beginPath();
@@ -74,7 +74,8 @@ function drawRoundedRect(x, y, w, h, r, c, options = {}) {
     _ctx.globalAlpha = 1;
 }
 
-function drawRotatedRoundedRect(x, y, w, h, r, c, d, options = {}) {    let _ctx = options.ctx || ctx;
+export function drawRotatedRoundedRect(x, y, w, h, r, c, d, options = {}) {
+    let _ctx = options.ctx || ctx;
     _ctx.translate(x, y);
     _ctx.rotate(d);
 
@@ -98,7 +99,7 @@ function drawRotatedRoundedRect(x, y, w, h, r, c, d, options = {}) {    let _ctx
     _ctx.resetTransform();
 }
 
-function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+export function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
     var rot = Math.PI / 2 * 3;
     var x = cx;
     var y = cy;
@@ -124,7 +125,7 @@ function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
 
 }
 
-function drawCheckmark(x, y, size, width) {
+export function drawCheckmark(x, y, size, width) {
     ctx.beginPath();
     ctx.moveTo(x - size, y);
     ctx.lineTo(x, y + size);
@@ -135,7 +136,7 @@ function drawCheckmark(x, y, size, width) {
     ctx.closePath();
 }
 
-function drawImage(img, x, y, w, h, angle) {
+export function drawImage(img, x, y, w, h, angle) {
     ctx.beginPath();
     ctx.translate(x, y);
     ctx.rotate(angle);
@@ -144,7 +145,7 @@ function drawImage(img, x, y, w, h, angle) {
     ctx.closePath();
 }
 
-function drawImageTopLeft(img, x, y, w, h) {
+export function drawImageTopLeft(img, x, y, w, h) {
     ctx.beginPath();
     ctx.translate(x, y);
     ctx.drawImage(img, 0, 0, w, h);
@@ -152,14 +153,14 @@ function drawImageTopLeft(img, x, y, w, h) {
     ctx.closePath();
 }
 
-function drawCircleImage(img, x, y, r, angle) {
+export function drawCircleImage(img, x, y, r, angle) {
     ctx.translate(x, y)
     ctx.rotate(angle);
     ctx.drawImage(img, -r, -r, r * 2, r * 2);
     ctx.resetTransform();
 }
 
-function drawLine(x1, y1, x2, y2, color, thickness, cap, alpha) {
+export function drawLine(x1, y1, x2, y2, color, thickness, cap, alpha) {
     ctx.beginPath();
     ctx.lineWidth = thickness;
     ctx.moveTo(x1, y1);
@@ -172,7 +173,7 @@ function drawLine(x1, y1, x2, y2, color, thickness, cap, alpha) {
     ctx.closePath();
 }
 
-function drawText(text, x, y, font, color, align, baseline, alpha, stroke, strokeOffset) {
+export function drawText(text, x, y, font, color, align, baseline, alpha, stroke, strokeOffset) {
     let options = {};
     if (font instanceof Object) {
         options = font;
@@ -195,7 +196,7 @@ function drawText(text, x, y, font, color, align, baseline, alpha, stroke, strok
     ctx.closePath();
 }
 
-function drawArrow(x1, y1, x2, y2, thickness, color, alpha, cap) {
+export function drawArrow(x1, y1, x2, y2, thickness, color, alpha, cap) {
     ctx.beginPath();
     ctx.lineWidth = thickness || 2;
     ctx.strokeStyle = color || "black";
@@ -213,7 +214,7 @@ function drawArrow(x1, y1, x2, y2, thickness, color, alpha, cap) {
     ctx.globalAlpha = 1;
 }
 
-function drawTriangle(x, y, base, height, angle, color) {
+export function drawTriangle(x, y, base, height, angle, color) {
     ctx.translate(x, y)
     ctx.rotate(angle);
     ctx.beginPath();
@@ -231,7 +232,7 @@ function drawTriangle(x, y, base, height, angle, color) {
 
 // Color
 
-function getRandomRgb() {
+export function getRandomRgb() {
     var num = Math.round(0xffffff * Math.random());
     var r = num >> 16;
     var g = num >> 8 & 255;
@@ -239,12 +240,12 @@ function getRandomRgb() {
     return 'rgb(' + r + ', ' + g + ', ' + b + ')';
 }
 
-function getRandomHEX() {
-    var randomColor = "#000000".replace(/0/g, function() { return (~~(Math.random() * 16)).toString(16); });
+export function getRandomHEX() {
+    var randomColor = "#000000".replace(/0/g, function () { return (~~(Math.random() * 16)).toString(16); });
     return randomColor;
 }
 // Create an RGB value from a hex value
-function hexToRgb(hex) {
+export function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
         r: parseInt(result[1], 16),
@@ -254,7 +255,7 @@ function hexToRgb(hex) {
 }
 
 // Create an hex value from a RGB value
-function rgbToHex(rgb) {
+export function rgbToHex(rgb) {
     var hex = Number(rgb).toString(16);
     if (hex.length < 2) {
         hex = "0" + hex;
@@ -264,7 +265,7 @@ function rgbToHex(rgb) {
 
 // Random ID
 
-function randomString(length) {
+export function randomString(length) {
     var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxyz'.split('');
 
     if (!length) {
@@ -280,21 +281,21 @@ function randomString(length) {
 
 // Map number from one range to another
 
-Number.prototype.map = function(in_min, in_max, out_min, out_max) {
+Number.prototype.map = function (in_min, in_max, out_min, out_max) {
     return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-Number.prototype.clamp = function(min, max) {
+Number.prototype.clamp = function (min, max) {
     return Math.min(Math.max(this, min), max);
 };
 
-function clamp(num, min, max) {
+export function clamp(num, min, max) {
     return num <= min ? min : num >= max ? max : num;
 }
 
 // Math functions
 
-function constrain(value, a, b) {
+export function constrain(value, a, b) {
     if (value < a) {
         return a;
     } else if (value > b) {
@@ -304,32 +305,32 @@ function constrain(value, a, b) {
     }
 }
 
-function random(max, min) {
+export function random(max, min) {
     return Math.random() * (max - min) + min;
 }
 
-function randInt(min, max) {
+export function randInt(min, max) {
     return Math.round(Math.random() * (max - min) + min);
 }
 
-function getRandomInt(max) {
+export function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
 // Return a random vector that is uniformly distributed within a circle given a radius
-function randCircle(radius) {
+export function randCircle(radius) {
     var r = radius * Math.sqrt(Math.random());
     var theta = Math.random() * 2 * Math.PI;
 
     return new Vector(r * Math.cos(theta), r * Math.sin(theta));
 }
 
-function randomProperty(obj) {
+export function randomProperty(obj) {
     var keys = Object.keys(obj)
     return obj[keys[keys.length * Math.random() << 0]];
 }
 
-function randn_bm() {
+export function randn_bm() {
     var u = 0,
         v = 0;
     while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
@@ -340,7 +341,7 @@ function randn_bm() {
     return num;
 }
 
-function randomG(v) {
+export function randomG(v) {
     var r = 0;
     for (var i = v; i > 0; i--) {
         r += Math.random();
@@ -348,23 +349,23 @@ function randomG(v) {
     return r / v;
 }
 
-function interpolate(a, b, frac) // points A and B, frac between 0 and 1
+export function interpolate(a, b, frac) // points A and B, frac between 0 and 1
 {
     var nx = a.x + (b.x - a.x) * frac;
     var ny = a.y + (b.y - a.y) * frac;
     return new Vector(nx, ny);
 }
 
-function dist(a, b) {
+export function dist(a, b) {
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 }
 
-function round(value, decimalPlace) {
+export function round(value, decimalPlace) {
     var decimalPlace = (decimalPlace === undefined) ? 0 : decimalPlace;
     return Math.round(value * (10 ** decimalPlace)) / (10 ** decimalPlace)
 }
 
-function getRandomColor() {
+export function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
     for (var i = 0; i < 6; i++) {
@@ -377,8 +378,8 @@ function getRandomColor() {
 const pSBC = (p, c0, c1, l) => {
     let r, g, b, P, f, t, h, i = parseInt,
         m = Math.round,
-        a = typeof(c1) == "string";
-    if (typeof(p) != "number" || p < -1 || p > 1 || typeof(c0) != "string" || (c0[0] != 'r' && c0[0] != '#') || (c1 && !a)) return null;
+        a = typeof (c1) == "string";
+    if (typeof (p) != "number" || p < -1 || p > 1 || typeof (c0) != "string" || (c0[0] != 'r' && c0[0] != '#') || (c1 && !a)) return null;
     if (!this.pSBCr) this.pSBCr = (d) => {
         let n = d.length,
             x = {};
@@ -405,7 +406,7 @@ const pSBC = (p, c0, c1, l) => {
 }
 
 // Collision detection helper
-function circleCollidesRect(circle, rect) {
+export function circleCollidesRect(circle, rect) {
 
     var rectCenterX = rect.pos.x;
     var rectCenterY = rect.pos.y;
@@ -454,14 +455,14 @@ function circleCollidesRect(circle, rect) {
     return collision;
 }
 
-function getDistance(fromX, fromY, toX, toY) {
+export function getDistance(fromX, fromY, toX, toY) {
     var dX = Math.abs(fromX - toX);
     var dY = Math.abs(fromY - toY);
 
     return Math.sqrt((dX * dX) + (dY * dY));
 }
 
-function abbreviateNumber(value) {
+export function abbreviateNumber(value) {
     var newValue = value;
     if (value >= 1000) {
         var suffixes = ["", "k", "m", "b", "t"];
@@ -481,7 +482,7 @@ function abbreviateNumber(value) {
 const mapRange = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 
 
-function msToTime(s) {
+export function msToTime(s) {
     let ms = s % 1000;
     s = (s - ms) / 1000;
     let secs = s % 60;
@@ -499,7 +500,7 @@ function msToTime(s) {
     );
 }
 
-function roughSizeOfObject(object) {
+export function roughSizeOfObject(object) {
 
     var objectList = [];
     var stack = [object];
@@ -528,12 +529,12 @@ function roughSizeOfObject(object) {
     return bytes;
 }
 
-String.prototype.removeExtraSpaces = function() {
+String.prototype.removeExtraSpaces = () => {
     return this.replace(/\s\s+/g, ' ');
 }
 
 // Regex for parsing commands
-function regex(msg) {
+export function regex(msg) {
     var exp = /[^ \s"]+|"([^"]*)"/gi;
     var result = [];
 
@@ -551,35 +552,35 @@ function regex(msg) {
 }
 
 // Array difference
-Array.prototype.diff = function(a) {
-    return this.filter(function(i) { return a.indexOf(i) < 0; });
+Array.prototype.diff = () => {
+    return this.filter((i) => { return this.indexOf(i) < 0; });
 };
 
 // Array max/min
-Array.prototype.max = function() {
+Array.prototype.max = () => {
     return Math.max.apply(null, this);
 };
 
-Array.prototype.min = function() {
+Array.prototype.min = () => {
     return Math.min.apply(null, this);
 };
 
-Array.prototype.average = function() {
+Array.prototype.average = () => {
     return this.reduce((a, b) => a + b, 0) / this.length;
 }
 
-Array.prototype.sum = function() {
+Array.prototype.sum = () => {
     return this.reduce((a, b) => a + b, 0);
 }
 
-Array.prototype.remove = function(value) {
+Array.prototype.remove = (value) => {
     var i = this.indexOf(value);
     if (i != -1) {
         this.splice(i, 1);
     }
 }
 
-Array.prototype.removeAll = function(value) {
+Array.prototype.removeAll = (value) => {
     var i = this.indexOf(value);
     while (i != -1) {
         this.splice(i, 1);
@@ -587,7 +588,7 @@ Array.prototype.removeAll = function(value) {
     }
 }
 
-Array.prototype.removeDuplicates = function() {
+Array.prototype.removeDuplicates = () => {
     var x,
         len = this.length,
         out = [],
@@ -602,20 +603,20 @@ Array.prototype.removeDuplicates = function() {
     return out;
 }
 
-Array.prototype.removeNulls = function() {
-    return this.filter(function(el) {
+Array.prototype.removeNulls = () => {
+    return this.filter((el) => {
         return el != null;
     });
 }
 
-Array.prototype.removeUndefined = function() {
-    return this.filter(function(el) {
+Array.prototype.removeUndefined = () => {
+    return this.filter((el) => {
         return el != undefined;
     });
 }
 
-Array.prototype.removeEmpty = function() {
-    return this.filter(function(el) {
+Array.prototype.removeEmpty = () => {
+    return this.filter((el) => {
         return el != '';
     });
 }

@@ -447,8 +447,8 @@ export class TextureManager {
     }
 
     // Load sprite
-    static loadSprite(path) {
-        let map = textureManager.loader.load(path);
+    loadSprite(path) {
+        let map = this.loader.load(path);
         let material = new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false });
         let sprite = new THREE.Sprite(material);
         sprite.scale.set(4000, 4000);

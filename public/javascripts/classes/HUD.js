@@ -1,3 +1,10 @@
+import game from './Game';
+import inventory from './items/Inventory';
+
+// Initiate canvas
+let canvas = document.getElementById("canvas-hud");
+let ctx = canvas.getContext("2d");
+
 class HUD {
     constructor() {
         this.heartT = 0;
@@ -258,17 +265,6 @@ class HUD {
         }
     }
 
-    display() {
-        this.displayCrosshair();
-        this.displayPlayerTab();
-
-        if (player.mode != "survival") return;
-        this.displayHealth();
-        this.displayHunger();
-        this.displayArmor();
-        this.displayOxygen();
-    }
-
     // Display crosshair
     displayCrosshair() {
         if (!initialized || player.mode == "camera") return;
@@ -278,4 +274,18 @@ class HUD {
         ctx.fillRect(canvas.width / 2 - crosshairWidth / 2, canvas.height / 2 - crosshairSize / 2, crosshairWidth, crosshairSize)
         ctx.fillRect(canvas.width / 2 - crosshairSize / 2, canvas.height / 2 - crosshairWidth / 2, crosshairSize, crosshairWidth)
     }
+
+    // Display all
+    display() {
+        this.displayCrosshair();
+        this.displayPlayerTab();
+
+        if (player.mode != "survival") return;
+        this.displayHealth(); // TODO: Display death screen in creative mode
+        this.displayHunger();
+        this.displayArmor();
+        this.displayOxygen();
+    }
 }
+
+export default new HUD();

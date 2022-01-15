@@ -1,4 +1,10 @@
 import * as THREE from "three";
+import world from "./World";
+import player from "./Player";
+import textureManager from "./TextureManager";
+
+import { scene } from '../globals';
+import { random } from "../helper"
 
 class Stage {
 	constructor() {
@@ -43,8 +49,8 @@ class Stage {
 		//scene.fog = new THREE.Fog("lightblue", 0, blockSize*cellSize*5)
 
 		// Sun
-		this.sun = TextureManager.loadSprite('./sun.png', 16 * 16 * 16);
-		this.moon = TextureManager.loadSprite('./moon.png', 16 * 16 * 16);
+		this.sun = textureManager.loadSprite('./sun.png', 16 * 16 * 16);
+		this.moon = textureManager.loadSprite('./moon.png', 16 * 16 * 16);
 		this.dayNightCycle = true;
 		this.daySpeed = 1 / (12000 / Math.PI); // Default: 0.001
 
@@ -209,7 +215,7 @@ var LinearColorInterpolator = {
 	// convert 6-digit hex to rgb components;
 	// accepts with or without hash ("335577" or "#335577")
 	convertHexToRgb: function (hex) {
-		match = hex.replace(/#/, '').match(/.{1,2}/g);
+		let match = hex.replace(/#/, '').match(/.{1,2}/g);
 		return new Color({
 			r: parseInt(match[0], 16),
 			g: parseInt(match[1], 16),
@@ -230,7 +236,7 @@ var LinearColorInterpolator = {
 		return new Color(newColor);
 	}
 }
-Color = function (hexOrObject) {
+var Color = function (hexOrObject) {
 	var obj;
 	if (hexOrObject instanceof Object) {
 		obj = hexOrObject;

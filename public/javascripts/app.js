@@ -5,18 +5,24 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
-
 // Import classes (TURN THESE INTO SINGLETONS)
 import { getCookie, setCookie } from "./resources/cookie";
-import World from "./classes/World";
-import ChunkManager from "./classes/ChunkManager";
-import EntityManager from './classes/EntityManager';
-import WorkerManager from './classes/WorkerManager';
-import SkinManager from './classes/SkinManager';
+import Stat from "./classes/Stats.js";
+import { Stats } from './resources/stats.js';
 
 // Import singletons
+import game from './classes/Game';
+import chunkManager from './classes/ChunkManager';
+import entityManager from './classes/EntityManager';
+import workerManager from "./classes/WorkerManager";
+import skinManager from './classes/SkinManager';
+import chat from './classes/ChatManager';
+import hud from './classes/HUD';
+import inventory from "./classes/items/Inventory";
+import world from './classes/World';
 import player from './classes/Player';
-import { camera } from './globals';
+import { camera, scene } from './globals';
+import initPointerLock from "./pointerlock";
 
 // Import functions
 import { addVideoControls, addKeyboardControls } from './settings';
@@ -27,25 +33,21 @@ import changelog from "../json/changelog.json"
 import Ola from "ola";
 
 /*
-
     Authenticates the player and provides server details from each running server.
     Handles menu progression logic.
-
 */
 
 // Setup
 let renderer;
 
-let scene, world, chunkManager, entityManager, skinManager, workerManager, stage, stats, composer, players;
+let stats, composer, players;
 
 // Stats
 let prevTime = performance.now();
 let statistics = [];
 
 let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
-let game = new Game(); // Add games
 
-let initialized = false;
 let lastUpdate = Date.now();
 let state = 0; // State of where the player is in the authentication process (0: Start Menu, 1: Server Select, 2: Connecting to Server, 3: Loading Game, 4: Loading Chunks, 5: In Game, 6: Disconnecting)
 let states = {
@@ -64,7 +66,6 @@ let socket = io({
     autoConnect: false,
     forceNew: true,
     reconnectionAttempts: 2,
-
 });
 
 let loaded = 0;
@@ -591,7 +592,7 @@ function updateMenu() {
 }
 
 // Update GUI size
-function updateGUISize() {
+export function updateGUISize() {
     inventory.resize();
     chat.resize();
     hud.resize();
@@ -607,17 +608,7 @@ function init() {
     console.log('Initalizing game...')
     window.addEventListener('resize', onWindowResize, false); // Add resize event
 
-    scene = new THREE.Scene(); // Add scene
-
     camera.add(axesHelper);
-
-    // THERE ARE ALL SINGLETONS (NOT DOUBLETONS)
-    world = new World(); // Init world
-    chunkManager = new ChunkManager(); // Add chunk manager
-    entityManager = new EntityManager(); // Add entity manager
-    workerManager = new WorkerManager(); // Web worker manager
-    skinManager = new SkinManager(); // Skin manager
-    //player = new Player(camera); // Add player
 
     addVideoControls(); // Add video settings
     addKeyboardControls(); // Add keyboard controls
@@ -745,7 +736,30 @@ function initRenderer() {
     document.body.appendChild(renderer.domElement);
 
     // Add a color shader
-    colorPass = new ShaderPass(colorShader);
+    let colorPass = new ShaderPass({
+        uniforms: {
+            tDiffuse: { value: null },
+            color: { value: new THREE.Color(0x2e41f4) },
+        },
+        vertexShader: `
+            varying vec2 vUv;
+            void main() {
+              vUv = uv;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1);
+            }
+          `,
+        fragmentShader: `
+            uniform vec3 color;
+            uniform sampler2D tDiffuse;
+            varying vec2 vUv;
+            void main() {
+              vec4 previousPassColor = texture2D(tDiffuse, vUv);
+              gl_FragColor = vec4(
+                  previousPassColor.rgb * color,
+                  previousPassColor.a);
+            }
+          `,
+    });
     colorPass.renderToScreen = true;
     colorPass.enabled = false;
     composer.addPass(colorPass);

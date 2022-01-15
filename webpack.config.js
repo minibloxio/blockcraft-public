@@ -5,7 +5,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 
 module.exports = {
-    entry: './public/javascripts/auth.js',
+    entry: './public/javascripts/app.js',
     output: {
         filename: 'main.js',
         path: path.resolve(__dirname, 'dist'),
@@ -29,13 +29,14 @@ module.exports = {
             use: ["style-loader", "css-loader"],
         },
         {
-            test: /\.(png|jpg)$/,
-            loader: 'url-loader'
+            test: /\.(png)$/,
+            use: ['file-loader']
         }
+
         ],
     },
     plugins: [
-        new FaviconsWebpackPlugin('./public/favicon.png'),
+        new FaviconsWebpackPlugin('./public/assets/favicon.png'),
         new HtmlWebpackPlugin({
             template: "./public/index.html",
             filename: "index.html",

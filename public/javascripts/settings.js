@@ -2,6 +2,15 @@ import keyconfig from "../json/keymap.json";
 import player from "./classes/Player.js";
 import { getCookie, setCookie } from "./resources/cookie";
 import game from "./classes/Game.js";
+import chunkManager from "./classes/ChunkManager.js";
+
+import stage from "./classes/Stage.js";
+
+import hud from "./classes/HUD.js";
+
+import { camera } from "./globals";
+
+import { updateGUISize } from "./app";
 
 let keymap = keyconfig.keymap;
 let keyorder = keyconfig.keyorder;

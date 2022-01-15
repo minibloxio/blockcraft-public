@@ -1,4 +1,9 @@
-import recipes from "../../json/recipes.json"
+import recipes from "../../../json/recipes.json";
+import game from "../Game";
+
+// Initiate canvas
+let canvas = document.getElementById("canvas-hud");
+let ctx = canvas.getContext("2d");
 
 class Inventory {
     constructor() {
@@ -1155,3 +1160,5 @@ class Inventory {
     }
 
 }
+
+export default new Inventory();

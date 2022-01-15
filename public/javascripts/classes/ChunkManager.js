@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export default class ChunkManager {
+class ChunkManager {
     constructor() {
         // Chunk loading
         this.reqChunks = {};
@@ -345,3 +345,5 @@ export default class ChunkManager {
         //console.log("Updating texture to " + getCookie("Material Texture") + "...");
     }
 }
+
+export default new ChunkManager();

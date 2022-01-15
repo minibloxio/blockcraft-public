@@ -1,4 +1,4 @@
-export default class World {
+class World {
     computeVoxelOffset(x, y, z) {
         const { cellSize, cellSliceSize } = this;
         const voxelX = THREE.MathUtils.euclideanModulo(x, cellSize) | 0;
@@ -226,6 +226,7 @@ World.faces = [{ // left
     ],
 },
 ];
+export default new World();
 
 let cells = [];
 const cellIdToMesh = {};

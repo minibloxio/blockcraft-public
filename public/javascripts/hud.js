@@ -1,15 +1,10 @@
+import hud from "./classes/HUD.js";
+import inventory from "./classes/items/Inventory.js";
+import chat from "./classes/ChatManager.js";
+
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");
-
-// Chat
-let chat = new ChatManager();
-
-// HUD
-let hud = new HUD();
-
-// Inventory
-let inventory = new Inventory();
 
 // Stats
 function displayStats() {
