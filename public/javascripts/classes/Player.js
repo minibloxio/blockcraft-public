@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { PointerLockControls } from '../pointerlock';
+import { PointerLockControls } from '../input/pointerlock';
 import { camera, isState, g, scene } from "../globals";
 import skinManager from './SkinManager';
 import textureManager from './TextureManager';

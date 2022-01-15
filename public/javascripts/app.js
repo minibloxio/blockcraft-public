@@ -23,7 +23,7 @@ import hud from './gui/HUDClass';
 import inventory from "./items/Inventory";
 import { initRenderer, renderer, composer } from './graphics/renderer';
 import { camera, scene, g, connectionDelay, isState } from './globals';
-import initPointerLock, { requestPointerLock, onWindowResize } from "./pointerlock";
+import initPointerLock, { requestPointerLock, onWindowResize } from "./input/pointerlock";
 
 // Import functions
 import { addVideoControls, addKeyboardControls } from './settings';
@@ -58,7 +58,6 @@ Handles menu progression logic.
 
 // Setup
 
-let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
 let lastUpdate = Date.now();
 
 
@@ -740,3 +739,5 @@ function updateClient(data) {
         g.socket.emit('latency', data.t);
     }
 }
+
+import "./input/input"

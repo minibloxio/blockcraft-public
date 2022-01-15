@@ -1,8 +1,20 @@
-import { initialized } from './globals';
+import Ola from "ola";
+
+import game from '../classes/Game';
+import world from '../classes/World';
+import player from '../classes/Player';
+import chat from '../classes/ChatManager';
+import hud from '../gui/HUDClass';
+import inventory from "../items/Inventory";
+import { camera, g } from '../globals';
+import keymap from "../../json/keymap.json"
+
+let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
+let inScreen;
 
 // Key event handling
 $('html').mousedown(function (event) {
-    if (!initialized)
+    if (!g.initialized)
         return;
     if (!player.controls.enabled || inventory.showInventory)
         return;
@@ -25,7 +37,7 @@ $('html').mousedown(function (event) {
     }
 })
 $('html').mouseup(function (event) {
-    if (!initialized)
+    if (!g.initialized)
         return;
     switch (event.which) {
         case 1:
@@ -46,7 +58,7 @@ $('html').mouseup(function (event) {
 })
 
 $(window).keydown(function (event) {
-    if (!initialized) return;
+    if (!g.initialized) return;
     if (!player.controls.enabled) return;
     if (event.keyCode == 18) {
         event.preventDefault();
@@ -66,7 +78,7 @@ $("body").mousemove(function (e) {
 
 let mouseLeft, mouseRight = false;
 $("body").mousedown(function (e) {
-    if (!initialized || !inventory.showInventory) return;
+    if (!g.initialized || !inventory.showInventory) return;
     switch (e.which) {
         case 1:
             inventory.selectInventory("left", true);
@@ -83,7 +95,7 @@ $("body").mousedown(function (e) {
         //alert('You have a strange Mouse!');
     }
 }).mouseup(function (e) {
-    if (!initialized || !inventory.showInventory) return;
+    if (!g.initialized || !inventory.showInventory) return;
     switch (e.which) {
         case 1:
             mouseLeft = false
@@ -102,7 +114,7 @@ $("body").mousedown(function (e) {
 })
 
 $("body").dblclick(function () {
-    if (!initialized) return;
+    if (!g.initialized) return;
     inventory.selectInventory("double")
 })
 
@@ -113,7 +125,7 @@ onkeydown = onkeyup = function (e) {
 }
 
 var onKeyDown = function (event) {
-    if (!initialized) return;
+    if (!g.initialized) return;
 
     // CHAT INPUT
     if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && chat.showChatFlag) {
@@ -147,7 +159,7 @@ var onKeyDown = function (event) {
         }
     }
 
-    if (!initialized || !player.controls.enabled || chat.showChatBar)
+    if (!g.initialized || !player.controls.enabled || chat.showChatBar)
         return;
 
     // GAME CONTROLS
@@ -250,7 +262,7 @@ var onKeyUp = function (event) {
         return;
     }
 
-    if (!initialized) return;
+    if (!g.initialized) return;
 
     // CREATIVE MENU CONTROLS
     if (event.keyCode == 38) {
@@ -361,7 +373,7 @@ let zoomLevel = 3
 $(document).bind('wheel', function (e) {
     let scrollDelta = e.originalEvent.wheelDelta / 120;
 
-    if (!initialized) return;
+    if (!g.initialized) return;
 
     if (inventory.showInventory && player.mode == "creative") {
         inventory.scroll(scrollDelta > 0 ? 1 : -1);

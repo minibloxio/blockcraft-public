@@ -5,13 +5,13 @@ Provides pointer lock functionality and the ability to connect to the game serve
 */
 
 import * as THREE from 'three';
-import inventory from './items/Inventory';
-import keyconfig from '../json/keymap.json';
-import player from './classes/Player';
-import chat from './classes/ChatManager';
-import { renderer } from './graphics/renderer';
-import { camera, g } from './globals';
-import { updateGUISize } from './helper';
+import inventory from '../items/Inventory';
+import keyconfig from '../../json/keymap.json';
+import player from '../classes/Player';
+import chat from '../classes/ChatManager';
+import { renderer } from '../graphics/renderer';
+import { camera, g } from '../globals';
+import { updateGUISize } from '../helper';
 
 
 let keymap = keyconfig.keymap;
