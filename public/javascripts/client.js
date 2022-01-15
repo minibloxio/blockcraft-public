@@ -8,11 +8,7 @@ socket.on('connect', function () {
 
     showSettings();
     state += 1;
-
-    // if (loadedAnimate.value >= maxLoaded) { // If the player has joined and the game is loaded
-    // 	joinServer();
-    // }
-})
+});
 
 // Reconnection attempt
 socket.io.on('reconnect_attempt', function () {
@@ -96,7 +92,6 @@ socket.on('joinResponse', function (data) {
     workerManager.init();
 
     // Receive current server players
-    players = {};
     let serverPlayers = data.serverPlayers;
     for (let id in serverPlayers) {
         if (id != socket.id) {

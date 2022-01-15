@@ -169,4 +169,5 @@ Stats.Panel = function (name, fg, bg) {
 
 };
 
-export { Stats };
+const stats = new Stats();
+export default stats;

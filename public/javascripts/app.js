@@ -6,26 +6,27 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
 // Import classes (TURN THESE INTO SINGLETONS)
-import { getCookie, setCookie } from "./resources/cookie";
+import { getCookie, setCookie, deleteCookie } from "./resources/cookie";
 import Stat from "./classes/Stats.js";
-import { Stats } from './resources/stats.js';
+import stats from "./resources/stats.js";
 
 // Import singletons
 import game from './classes/Game';
 import chunkManager from './classes/ChunkManager';
-import entityManager from './classes/EntityManager';
-import workerManager from "./classes/WorkerManager";
-import skinManager from './classes/SkinManager';
 import chat from './classes/ChatManager';
 import hud from './classes/HUD';
 import inventory from "./classes/items/Inventory";
 import world from './classes/World';
 import player from './classes/Player';
+import stage from './classes/Stage';
 import { camera, scene, initialized, joined } from './globals';
 import initPointerLock from "./pointerlock";
 
 // Import functions
 import { addVideoControls, addKeyboardControls } from './settings';
+import { animateServerPlayers, animateServerEntities } from './server';
+import { updateHUD } from './hud';
+import { round, msToTime, drawRectangle, drawCircle } from './helper';
 
 
 import changelog from "../json/changelog.json"
@@ -40,7 +41,7 @@ import Ola from "ola";
 // Setup
 let renderer;
 
-let stats, composer, players;
+let composer;
 
 // Stats
 let prevTime = performance.now();
@@ -143,7 +144,7 @@ function refreshServers() {
 
             // Player names
             let playerNames = [];
-            for (id in data.players) playerNames.push(data.players[id]);
+            for (let id in data.players) playerNames.push(data.players[id]);
             if (playerNames.length > 0) {
                 playerNames = "Usernames: " + playerNames.join(", ");
             }
@@ -151,7 +152,7 @@ function refreshServers() {
             // Update server list
             let latency = Date.now() - data.ping;
             let serverHTML = $(`
-                <div class='server' data-link='${data.link}' onClick='clickServer(event)'  ondblclick='clickServer(event, true)'>
+                <div class='server' data-link='${data.link}' id='server-${data.region}'>
                     <p>Region: ${serverNames[data.region]}</p>
                     <p>Players: ${Object.keys(data.players).length}/20</p>
                     <div class="animated"><p id="player-names">${playerNames}</p></div>
@@ -180,6 +181,14 @@ function refreshServers() {
             }
 
             $("#server-container").append(serverHTML);
+
+            $(`#server-${data.region}`).on('click', function (event) {
+                clickServer(event);
+            })
+
+            $(`#server-${data.region}`).on('dblclick', function (event) {
+                clickServer(event, true);
+            })
 
             let ctx_ = $("#" + data.region)[0].getContext("2d");
             let numOfBars = Math.max(5 - Math.floor(latency / 60), 1);
@@ -725,7 +734,6 @@ function initRenderer() {
     renderer.shadowMap.enabled = true;
 
     // Add statistics
-    stats = new Stats();
     document.body.appendChild(stats.dom);
 
     // Add shader passes
@@ -843,7 +851,7 @@ function sendPacket() {
             onObject: player.onObject,
             rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
             dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
-            walking: (new Vector(player.velocity.x, player.velocity.z)).getMag() > 2,
+            walking: (new THREE.Vector3(player.velocity.x, 0, player.velocity.z)).length() > 2, // CHANGED
             sneaking: player.key.sneak,
             punching: player.punchT < 2,
             blocking: player.blockT > 0,
@@ -861,10 +869,9 @@ function sendPacket() {
 $("#welcome-button")[0].click();
 // Prevent right-click
 document.addEventListener('contextmenu', event => event.preventDefault());
-let cookieExpiryTime = 30; // 30 days
 
 // Change tab
-function changeTab(evt, cityName) {
+function changeTab(evt, elementId) {
     // Declare all variables
     var i, tabcontent, tablinks;
 
@@ -881,7 +888,7 @@ function changeTab(evt, cityName) {
     }
 
     // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(cityName).style.display = "block";
+    document.getElementById(elementId).style.display = "block";
     evt.currentTarget.className += " active";
 }
 
@@ -893,7 +900,7 @@ $("#changelog-button").click(function (event) {
     changeTab(event, "changelog");
 })
 $("#server-button").click(function (event) {
-    changeTab(event, "server");
+    changeTab(event, "server-list");
 })
 $("#video-button").click(function (event) {
     changeTab(event, "video-settings");

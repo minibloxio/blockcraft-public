@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import world from './classes/World';
+import { players } from './globals';
 
 // Update server players
 function updatePlayers(serverPlayers) {
@@ -176,7 +178,7 @@ export function animateServerPlayers() {
 // Animate server entities
 let throwables = ["ender_pearl", "fireball", "snowball", "egg"];
 
-function animateServerEntities(delta) {
+export function animateServerEntities(delta) {
 
     for (let id in world.entities) {
         let entity = world.entities[id]

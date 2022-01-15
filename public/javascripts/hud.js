@@ -46,7 +46,7 @@ function getPlayerColor(player) {
     }
 }
 
-function updateHUD() {
+export function updateHUD() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!initialized) return;
     ctx.imageSmoothingEnabled = false;

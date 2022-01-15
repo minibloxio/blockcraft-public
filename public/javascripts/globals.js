@@ -7,4 +7,6 @@ const scene = new THREE.Scene(); // Scene
 let initialized = false;
 let joined = false;
 
-export { camera, scene, initialized, joined };
+let players = {};
+
+export { camera, scene, initialized, joined, players };

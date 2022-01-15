@@ -479,7 +479,7 @@ export function abbreviateNumber(value) {
     return newValue;
 }
 
-const mapRange = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
+export const mapRange = (value, x1, y1, x2, y2) => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
 
 
 export function msToTime(s) {
@@ -565,7 +565,7 @@ Array.prototype.min = () => {
     return Math.min.apply(null, this);
 };
 
-Array.prototype.average = () => {
+Array.prototype.average = function () {
     return this.reduce((a, b) => a + b, 0) / this.length;
 }
 

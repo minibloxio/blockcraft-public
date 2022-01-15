@@ -1,16 +1,15 @@
 import * as THREE from "three";
+import game from "./Game";
 import world from "./World";
 import player from "./Player";
 import textureManager from "./TextureManager";
+import chunkManager from "./ChunkManager";
 
 import { scene } from '../globals';
-import { random } from "../helper"
+import { random, mapRange } from "../helper";
 
 class Stage {
 	constructor() {
-
-		let { blockSize, cellSize } = world;
-
 		// Add hemisphere
 		this.hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
 		this.hemi.position.set(0, 5000, 0);
@@ -227,10 +226,10 @@ var LinearColorInterpolator = {
 	// of right to left. Higher percentage means more right,
 	// lower means more left.
 	findColorBetween: function (left, right, percentage) {
-		newColor = {};
-		components = ["r", "g", "b"];
+		let newColor = {};
+		let components = ["r", "g", "b"];
 		for (var i = 0; i < components.length; i++) {
-			c = components[i];
+			let c = components[i];
 			newColor[c] = Math.round(left[c] + (right[c] - left[c]) * percentage / 100);
 		}
 		return new Color(newColor);

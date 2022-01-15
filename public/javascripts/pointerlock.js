@@ -1,9 +1,15 @@
-import * as THREE from 'three';
 /*
 
 Provides pointer lock functionality and the ability to connect to the game server
 
 */
+
+import * as THREE from 'three';
+import inventory from './classes/items/Inventory';
+import keyconfig from '../json/keymap.json';
+import chat from './classes/ChatManager';
+
+let keymap = keyconfig.keymap;
 
 
 // Request pointer lock
