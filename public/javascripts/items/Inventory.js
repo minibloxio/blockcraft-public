@@ -3,12 +3,14 @@ import game from '../classes/Game';
 import world from '../classes/World';
 import player from '../classes/Player';
 import textureManager from '../classes/TextureManager';
-import { drawImageTopLeft } from "../helper"
-import { g } from '../globals';
+import { drawRectangle, drawRect, drawImage, drawImageTopLeft, drawText, clamp } from "../helper"
+import { g, toolbar, toolbar_selector } from '../globals';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");
+
+console.log(ctx)
 
 class Inventory {
     constructor() {

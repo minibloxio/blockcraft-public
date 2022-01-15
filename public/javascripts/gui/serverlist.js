@@ -245,7 +245,7 @@ function clickServer(event, doubleClick) {
 }
 
 // Update menu state
-export function updateMenu() {
+export function updateMenu(nextStateCB) {
 
     // Animate menu
     if (isState("serverSelect")) { // Server select
@@ -273,11 +273,11 @@ export function updateMenu() {
 
         let chunksLoaded = Object.keys(chunkManager.currChunks).length;
         g.loadedAnimate.value = chunksLoaded;
-        $("#loading-bar").width(100 * (Math.min(g.loadedAnimate.value, maxChunks) / maxChunks) + "%");
-        $("#loading-bar").text("Chunks Loaded (" + chunksLoaded + "/" + maxChunks + ")");
+        $("#loading-bar").width(100 * (Math.min(g.loadedAnimate.value, g.maxChunks) / g.maxChunks) + "%");
+        $("#loading-bar").text("Chunks Loaded (" + chunksLoaded + "/" + g.maxChunks + ")");
 
-        if (chunksLoaded >= maxChunks) {
-            nextState();
+        if (chunksLoaded >= g.maxChunks) {
+            nextStateCB();
         }
     } else if (g.initialized && isState("inGame") && !player.controls.enabled) { // In game
 
@@ -292,7 +292,7 @@ export function updateMenu() {
         $("#disconnecting-bar").width(100 * (Math.min(disconnectedAnimate.value, maxDisconnected) / maxDisconnected) + "%");
 
         if (disconnectedAnimate.value >= maxDisconnected) {
-            for (let id in cellIdToMesh) { // Dispose of all remaining meshes
+            for (let id in g.cellIdToMesh) { // Dispose of all remaining meshes
                 world.deleteCell(id, true);
             }
             chunkManager.removeAllDebugLines();

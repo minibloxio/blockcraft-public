@@ -7,14 +7,19 @@ Provides pointer lock functionality and the ability to connect to the game serve
 import * as THREE from 'three';
 import inventory from './items/Inventory';
 import keyconfig from '../json/keymap.json';
+import player from './classes/Player';
 import chat from './classes/ChatManager';
+import { renderer } from './graphics/renderer';
+import { camera, g } from './globals';
+import { updateGUISize } from './helper';
+
 
 let keymap = keyconfig.keymap;
 
 
 // Request pointer lock
-function requestPointerLock() {
-    if (loaded >= maxLoaded) {
+export function requestPointerLock() {
+    if (g.loaded >= g.maxLoaded) {
         // Ask the browser to lock the pointer
         var element = document.body;
         element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
@@ -79,7 +84,7 @@ function enterPointerLock() {
         inventory.selectedItem = null;
         droppedItems.force = true;
 
-        socket.emit('dropItems', droppedItems);
+        g.socket.emit('dropItems', droppedItems);
 
         inventory.craftingOutput = undefined;
         inventory.showCraftingTable = false;
@@ -89,7 +94,7 @@ function enterPointerLock() {
         if (name && getCookie("Name") != name)
             setCookie("Name", name, 7);
 
-        socket.emit('playerInfo', {
+        g.socket.emit('playerInfo', {
             name: name
         })
     }
@@ -151,7 +156,7 @@ export default function initPointerLock() {
 
                     // Ask the browser to lock the pointer
                     requestPointerLock()
-                    socket.emit('updateInventory', inventory.inventory);
+                    g.socket.emit('updateInventory', inventory.inventory);
                 }
 
             }
@@ -163,7 +168,7 @@ export default function initPointerLock() {
             if (event.keyCode == 27 && inventory.showInventory) { // Escape key
                 // Ask the browser to lock the pointer
                 requestPointerLock()
-                socket.emit('updateInventory', inventory.inventory);
+                g.socket.emit('updateInventory', inventory.inventory);
             }
 
             inventory.canShowInventory = true;
@@ -228,3 +233,22 @@ export function PointerLockControls(camera) {
     }();
 
 };
+
+// Window resize
+export function onWindowResize() {
+    if (!g.initialized) return;
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    var crosshairSize = 50;
+
+    var width = $("html").innerWidth();
+    $("#crosshair").css("left", width / 2 - crosshairSize / 2);
+    var height = $("html").innerHeight();
+    $("#crosshair").css("top", height / 2 - crosshairSize / 2);
+
+    updateGUISize();
+}

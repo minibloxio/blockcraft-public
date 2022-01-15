@@ -1,3 +1,10 @@
+import chat from './classes/ChatManager';
+import hud from './gui/HUDClass';
+import inventory from "./items/Inventory";
+
+let canvas = document.getElementById('canvas-hud');
+let ctx = canvas.getContext('2d');
+
 export function drawCircle(x, y, r, c, options = {}) {
     let _ctx = options.ctx || ctx;
     _ctx.save();
@@ -658,4 +665,11 @@ class Counter {
             this.timer = 0;
         }
     }
+}
+
+// Update GUI size
+export function updateGUISize() {
+    inventory.resize();
+    chat.resize();
+    hud.resize();
 }

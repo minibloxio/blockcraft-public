@@ -1,6 +1,10 @@
+import changelog from "../../json/changelog.json"
 import game from './Game';
 import inventory from '../items/Inventory';
 import hud from '../gui/HUDClass';
+import player from './Player';
+import { players, g } from '../globals';
+import { drawRectangle, drawText } from '../helper';
 
 let canvas = document.getElementById('canvas-hud');
 let ctx = canvas.getContext('2d');
@@ -66,8 +70,8 @@ class ChatManager {
         })
         this.chatTimer = options.timer ? options.timer : undefined;
         if (this.chatTimer) this.hideChatTimer(timer);
-        if (chat.length > 100) {
-            chat.pop();
+        if (this.chat.length > 100) {
+            this.chat.pop();
         }
     }
 
@@ -155,7 +159,7 @@ class ChatManager {
         let lines = [];
         for (let i = 0; i < this.chat.length; i++) {
             let msg = this.chat[i];
-            let isOperator = (players[msg.id] && players[msg.id].operator) || (msg.id == socket.id && player.operator);
+            let isOperator = (players[msg.id] && players[msg.id].operator) || (msg.id == g.socket.id && player.operator);
 
             let elaspedTime = Date.now() - msg.t;
             if (this.showChatBar || elaspedTime < msg.timer) {
@@ -243,5 +247,4 @@ class ChatManager {
 }
 
 const chatManager = new ChatManager()
-
 export default chatManager;

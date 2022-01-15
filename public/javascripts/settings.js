@@ -10,7 +10,7 @@ import hud from "./gui/HUDClass.js";
 
 import { camera } from "./globals";
 
-import { updateGUISize } from "./app";
+import { updateGUISize } from "./helper";
 
 let keymap = keyconfig.keymap;
 let keyorder = keyconfig.keyorder;

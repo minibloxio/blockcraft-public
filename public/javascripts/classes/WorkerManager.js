@@ -1,4 +1,5 @@
 import game from './Game';
+import chunkManager from './ChunkManager';
 
 class WorkerManager {
     constructor() {

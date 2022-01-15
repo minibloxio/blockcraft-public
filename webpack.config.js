@@ -21,6 +21,11 @@ module.exports = {
                 target: 'http://localhost:3002',
                 ws: true
             }
+        },
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Cross-Origin-Embedder-Policy": "require-corp",
+            "Cross-Origin-Opener-Policy": "same-origin"
         }
     },
     module: {
@@ -49,6 +54,9 @@ module.exports = {
         }),
         new CopyPlugin({
             patterns: [{ from: "./public/textures", to: "./textures" }],
+        }),
+        new CopyPlugin({
+            patterns: [{ from: "./public/javascripts/workers", to: "./javascripts/workers" }],
         }),
     ],
 

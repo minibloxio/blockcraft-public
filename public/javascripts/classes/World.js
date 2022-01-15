@@ -1,3 +1,10 @@
+import * as THREE from "three";
+
+import textureManager from './TextureManager';
+import workerManager from './WorkerManager';
+import { g, scene } from '../globals';
+
+
 class World {
     computeVoxelOffset(x, y, z) {
         const { cellSize, cellSliceSize } = this;
@@ -94,9 +101,9 @@ class World {
     }
 
     deleteCell(id, permanently) {
-        if (cellIdToMesh[id]) {
-            let opaqueMesh = cellIdToMesh[id][0];
-            let transparentMesh = cellIdToMesh[id][1];
+        if (g.cellIdToMesh[id]) {
+            let opaqueMesh = g.cellIdToMesh[id][0];
+            let transparentMesh = g.cellIdToMesh[id][1];
 
             if (opaqueMesh) {
                 opaqueMesh.visible = false;
@@ -119,7 +126,7 @@ class World {
                     scene.remove(transparentMesh);
                 }
 
-                delete cellIdToMesh[id];
+                delete g.cellIdToMesh[id];
             }
         }
     }
@@ -228,7 +235,6 @@ World.faces = [{ // left
 ];
 
 let cells = [];
-const cellIdToMesh = {};
 
 const neighborOffsets = [
     [0, 0, 0], // self
@@ -240,7 +246,7 @@ const neighborOffsets = [
     [0, 0, 1], // front
 ];
 
-function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
+export function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
     let { cellSize } = world;
 
     cells.length = 0;
@@ -275,19 +281,19 @@ function updateVoxelGeometry(x, y, z, neighbor, forceUpdate) {
 }
 
 // Update the voxel geometry for a single cell
-function updateCellMesh(data) {
+export function updateCellMesh(data) {
     let [opaqueGeometry, cellX, cellY, cellZ, transparentGeometry, forceUpdate] = data;
     let meshO, meshT;
 
     let cellId = cellX + "," + cellY + "," + cellZ;
 
-    if (cellIdToMesh[cellId]) {
-        meshO = cellIdToMesh[cellId][0];
-        meshT = cellIdToMesh[cellId][1];
-    } else if (cellIdToMesh[cellId]) {
-        cellIdToMesh[cellId].length = 0;
+    if (g.cellIdToMesh[cellId]) {
+        meshO = g.cellIdToMesh[cellId][0];
+        meshT = g.cellIdToMesh[cellId][1];
+    } else if (g.cellIdToMesh[cellId]) {
+        g.cellIdToMesh[cellId].length = 0;
     } else {
-        cellIdToMesh[cellId] = [];
+        g.cellIdToMesh[cellId] = [];
     }
 
     // OPAQUE TEXTURES
@@ -297,7 +303,7 @@ function updateCellMesh(data) {
 
         if (!meshO) {
             meshO = new THREE.Mesh(geometry, textureManager.material);
-            cellIdToMesh[cellId][0] = meshO;
+            g.cellIdToMesh[cellId][0] = meshO;
             setChunkMesh(cellX, cellY, cellZ, cellId, meshO);
         }
     }
@@ -309,14 +315,14 @@ function updateCellMesh(data) {
 
         if (!meshT) {
             meshT = new THREE.Mesh(geometry, textureManager.materialTransparent);
-            cellIdToMesh[cellId][1] = meshT;
+            g.cellIdToMesh[cellId][1] = meshT;
             setChunkMesh(cellX, cellY, cellZ, cellId, meshT);
         }
     }
 }
 
 // Set the geometry of the mesh
-function setGeometry(geometry, data) {
+export function setGeometry(geometry, data) {
     const positionNumComponents = 3;
     geometry.setAttribute('position', new THREE.BufferAttribute(data.positions, positionNumComponents));
     const normalNumComponents = 3;
@@ -329,7 +335,7 @@ function setGeometry(geometry, data) {
 }
 
 // Set the mesh in the chunk
-function setChunkMesh(cellX, cellY, cellZ, cellId, mesh) {
+export function setChunkMesh(cellX, cellY, cellZ, cellId, mesh) {
     let { blockSize, cellSize } = world;
     mesh.name = cellId;
     mesh.castShadow = true;

@@ -23,19 +23,32 @@ import hud from './gui/HUDClass';
 import inventory from "./items/Inventory";
 import { initRenderer, renderer, composer } from './graphics/renderer';
 import { camera, scene, g, connectionDelay, isState } from './globals';
-import initPointerLock from "./pointerlock";
+import initPointerLock, { requestPointerLock, onWindowResize } from "./pointerlock";
 
 // Import functions
 import { addVideoControls, addKeyboardControls } from './settings';
 import { animateServerPlayers, animateServerEntities } from './server';
 import { updateHUD } from './gui/hud';
-import { round } from './helper';
+import { round, updateGUISize } from './helper';
 import { refreshServers, showServerSelect, connectError, updateMenu } from './gui/serverlist';
 import { initStatistics } from './stats/statslist';
 import { updatePlayers } from './server';
 
 
 import changelog from "../json/changelog.json"
+
+import * as test from './helper'
+console.log(Object.keys(test).join(", "))
+
+import * as test2 from './globals'
+console.log(Object.keys(test2).join(", "))
+
+
+//temp
+import { updateVoxelGeometry } from './classes/World';
+
+// ['Employment', 'HolidayPopupContainer', 'default', 'DayView', 'Status']
+
 
 /*
 Authenticates the player and provides server details from each running server.
@@ -45,10 +58,8 @@ Handles menu progression logic.
 
 // Setup
 
-let prevTime = performance.now();
 let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
 let lastUpdate = Date.now();
-let maxChunks = 0; // Chunks need to be loaded before pointerlock can be enabled
 
 
 g.currentServer = undefined;
@@ -201,7 +212,7 @@ function nextState(e) {
         console.log("Loading chunks...")
         g.loadedAnimate = new Ola(Object.keys(chunkManager.currChunks).length);
         g.state += 1;
-    } else if (isState("loadingChunks") && Object.keys(chunkManager.currChunks).length >= maxChunks) { // Loading Chunks -> In Game
+    } else if (isState("loadingChunks") && Object.keys(chunkManager.currChunks).length >= g.maxChunks) { // Loading Chunks -> In Game
         console.log("Requesting pointer lock");
         requestPointerLock();
         updateGUISize();
@@ -263,12 +274,6 @@ function showSettings() {
 
 
 
-// Update GUI size
-export function updateGUISize() {
-    inventory.resize();
-    chat.resize();
-    hud.resize();
-}
 
 const axesHelper = new THREE.AxesHelper(0.5);
 axesHelper.position.z -= 3;
@@ -296,27 +301,27 @@ function init() {
 
 
 // Game loop
-let elasped, delta;
 let then = performance.now();
+let prevTime = performance.now();
 
 function animate() {
     requestAnimationFrame(animate);
 
     // Get the frame's delta
     var time = performance.now();
-    elasped = time - then;
+    g.elapse = time - then;
 
-    delta = (time - prevTime) / 1000;
-    delta = Math.min(delta, 0.1)
+    g.delta = (time - prevTime) / 1000;
+    g.delta = Math.min(g.delta, 0.1)
 
     let logicTime = performance.now();
     game.startMemoryMonitor();
 
-    updateMenu(); // Update the menu
-    player.update(delta, world); // Update player
+    updateMenu(nextState); // Update the menu
+    player.update(g.delta, world); // Update player
     chunkManager.update(player); // Update chunks
     animateServerPlayers(); // Update server players
-    animateServerEntities(delta); // Animate server entities
+    animateServerEntities(g.delta); // Animate server entities
     sendPacket(); // Send events to server
     axesHelper.lookAt(new THREE.Vector3(0, 0, 100000000));
     game.logicTime = performance.now() - logicTime;
@@ -345,24 +350,6 @@ function animate() {
     game.endMemoryMonitor();
 }
 
-// Window resize
-function onWindowResize() {
-    if (!g.initialized) return;
-
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    var crosshairSize = 50;
-
-    var width = $("html").innerWidth();
-    $("#crosshair").css("left", width / 2 - crosshairSize / 2);
-    var height = $("html").innerHeight();
-    $("#crosshair").css("top", height / 2 - crosshairSize / 2);
-
-    updateGUISize();
-}
 
 // Send packet to server
 function sendPacket() {

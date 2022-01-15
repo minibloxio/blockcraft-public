@@ -1,6 +1,8 @@
 import * as THREE from "three";
-import world from './World';
+import world, { updateVoxelGeometry, updateCellMesh } from './World';
 import game from './Game';
+import workerManager from './WorkerManager';
+
 import { isState, g, scene } from '../globals';
 
 
@@ -120,9 +122,9 @@ class ChunkManager {
                     let cellY = y;
                     let cellId = cellX + "," + cellY + "," + cellZ;
 
-                    if (!cellIdToMesh[cellId]) continue;
-                    let opaqueMesh = cellIdToMesh[cellId][0];
-                    let transparentMesh = cellIdToMesh[cellId][1];
+                    if (!g.cellIdToMesh[cellId]) continue;
+                    let opaqueMesh = g.cellIdToMesh[cellId][0];
+                    let transparentMesh = g.cellIdToMesh[cellId][1];
 
                     if (opaqueMesh) opaqueMesh.visible = true;
                     if (transparentMesh) transparentMesh.visible = true;
@@ -317,7 +319,7 @@ class ChunkManager {
 
             this.unloadChunks(true);
 
-            if (Object.keys(cellIdToMesh).length == 0 || this.chunksToUnload.length == 0) {
+            if (Object.keys(g.cellIdToMesh).length == 0 || this.chunksToUnload.length == 0) {
                 this.reloading = false;
             }
         }
@@ -333,12 +335,12 @@ class ChunkManager {
     updateTexture() {
         textureManager.setTexture(world.blockOrder);
 
-        for (let cellId in cellIdToMesh) { // Dispose of all remaining meshes
+        for (let cellId in g.cellIdToMesh) { // Dispose of all remaining meshes
             let mesh, meshT;
 
-            if (cellIdToMesh[cellId]) {
-                mesh = cellIdToMesh[cellId][0];
-                meshT = cellIdToMesh[cellId][1];
+            if (g.cellIdToMesh[cellId]) {
+                mesh = g.cellIdToMesh[cellId][0];
+                meshT = g.cellIdToMesh[cellId][1];
             }
 
             if (mesh) mesh.material = textureManager.material;

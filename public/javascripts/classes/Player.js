@@ -3,8 +3,12 @@ import { PointerLockControls } from '../pointerlock';
 import { camera, isState, g, scene } from "../globals";
 import skinManager from './SkinManager';
 import textureManager from './TextureManager';
-import world from './World';
-
+import world, { updateVoxelGeometry } from './World';
+import game from './Game';
+import chunkManager from './ChunkManager';
+import chat from './ChatManager';
+import inventory from "../items/Inventory";
+import { colorPass } from "../graphics/renderer";
 
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
@@ -365,7 +369,7 @@ class Player {
             // Update fov
             game.fov = parseInt(game.fov);
             if (camera.fov > game.fov - 10 && camera.dynFov) {
-                this.deltaFov -= delta * 10;
+                this.deltaFov -= g.delta * 10;
             }
         } else {
             if (this.bowCharge > 0) { // Release bow
@@ -378,7 +382,7 @@ class Player {
             this.bowCharge = 0;
 
             if (camera.fov < game.fov - 1) {
-                this.deltaFov += delta * 50;
+                this.deltaFov += g.delta * 50;
             }
         }
     }
@@ -415,10 +419,10 @@ class Player {
             const isSword = SWORDS.map((x) => world.itemId[x]).includes(hand.v);
 
             if (isSword) {
-                this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * delta);
+                this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta);
             } else {
                 this.key.rightClick = false;
-                this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * delta);
+                this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta);
             }
 
             // Drawing a bow
@@ -426,7 +430,7 @@ class Player {
 
         } else {
             this.key.rightClick = false;
-            this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * delta);
+            this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta);
         }
 
         // Move hand
@@ -497,9 +501,9 @@ class Player {
 
         for (let offset of this.neighborOffsets) {
             let id = (cellPos.x + offset[0]) + "," + (cellPos.y + offset[1]) + "," + (cellPos.z + offset[2]);
-            if (cellIdToMesh[id]) {
-                if (cellIdToMesh[id][0]) this.nearbyMeshes.push(cellIdToMesh[id][0]);
-                if (cellIdToMesh[id][1]) this.nearbyMeshes.push(cellIdToMesh[id][1]);
+            if (g.cellIdToMesh[id]) {
+                if (g.cellIdToMesh[id][0]) this.nearbyMeshes.push(g.cellIdToMesh[id][0]);
+                if (g.cellIdToMesh[id][1]) this.nearbyMeshes.push(g.cellIdToMesh[id][1]);
             }
         }
         intersects = this.raycaster.intersectObjects(this.nearbyMeshes);

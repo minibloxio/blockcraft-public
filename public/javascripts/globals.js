@@ -31,6 +31,10 @@ g.joined = false;
 g.state = 0;
 g.loadedAnimate = new Ola(0);
 g.maxLoaded = 6;
+g.maxChunks = 0; // Chunks need to be loaded before pointerlock can be enabled
+g.cellIdToMesh = {};
+g.elapse = 0;
+g.delta = 0;
 
 let states = {
     "start": 0,
@@ -52,6 +56,8 @@ toolbar_selector.src = "./textures/hotbar-selector.png";
 // Icons
 export const icons = new Image()
 icons.src = "./textures/gui/icons.png";
+
+// console.log(`icons ${icons.}`)
 
 export function isState(check) { return g.state == states[check]; }
 
