@@ -1,4 +1,9 @@
 [
+    {
+        "date": "Jan 16, 2022",
+        "version": "0.37.0",
+        "changes": "Fixed chunks not loading properly after disconnection| Restructured the server list to: gold, iron, coal, wood| Moved the backend to ECS docker containers scalled using AWS Global Accelerator"
+      },
   {
     "date": "Jan 9, 2022",
     "version": "0.36.0",
