@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { PointerLockControls } from '../input/pointerlock';
-import { camera, isState, g, scene } from "../globals";
+import { camera, isState, g, scene, players } from "../globals";
 import skinManager from './SkinManager';
 import textureManager from './TextureManager';
 import world, { updateVoxelGeometry } from './World';
@@ -9,12 +9,9 @@ import chunkManager from './ChunkManager';
 import chat from './ChatManager';
 import inventory from "../items/Inventory";
 import { colorPass } from "../graphics/renderer";
-
+import { random } from '../helper';
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
-
-
-// Classes
 
 class Player {
     constructor() {
@@ -565,7 +562,7 @@ class Player {
         this.punching = Date.now();
 
         this.playerBoxes.length = 0;
-        for (let id in g.players) this.playerBoxes.push(g.players[id].skeleton);
+        for (let id in players) this.playerBoxes.push(players[id].skeleton);
         let intersects = this.raycaster.intersectObjects(this.playerBoxes, true);
 
         this.picked.length = 0;
@@ -592,7 +589,7 @@ class Player {
             }
             playerId = playerId.name;
 
-            if (closest.distance > this.picked[i].distance && g.players[playerId].hp > 0) {
+            if (closest.distance > this.picked[i].distance && players[playerId].hp > 0) {
                 closest = this.picked[i];
                 closest.id = playerId;
             }
@@ -820,7 +817,6 @@ class Player {
 
     getDropDir() {
         let dropDir = this.camera.getWorldDirection(new THREE.Vector3());
-        dropDir = new Vector(dropDir.x, dropDir.z);
         dropDir.normalize();
         return dropDir;
     }
@@ -833,23 +829,21 @@ class Player {
 
         this.allowDrop = false;
         let item = this.getCurrItem();
-        if (item && item.c > 0) {
-            let dropDir = this.getDropDir();
+        if (!item || item.c <= 0) return;
 
-            let position = this.position.clone();
-            position.y -= 8;
+        let position = this.position.clone();
+        position.y -= 8;
 
-            let droppedItem = {
-                type: item.type,
-                v: item.v,
-                c: 1,
-                pos: position,
-                class: item.class,
-                dir: { x: dropDir.x, z: dropDir.y }
-            }
-
-            g.socket.emit('dropItems', [droppedItem]);
+        let droppedItem = {
+            type: item.type,
+            v: item.v,
+            c: 1,
+            pos: position,
+            class: item.class,
+            dir: this.getDropDir()
         }
+
+        g.socket.emit('dropItems', [droppedItem]);
     }
 
     updateVelocities(delta) {

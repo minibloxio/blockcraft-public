@@ -2,7 +2,12 @@ import hud from "./HUDClass.js";
 import inventory from "../items/Inventory.js";
 import chat from "../classes/ChatManager.js";
 
+// Variables
 import { g } from '../globals';
+import statistics from "../stats/statslist";
+
+// Functions
+import { drawText } from '../helper';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
@@ -29,20 +34,6 @@ function displayStats() {
             }
             index += 1;
         }
-    }
-}
-
-// Get player color
-function getPlayerColor(player) {
-    let mode = player.mode;
-    if (mode == "creative") {
-        return "aqua";
-    } else if (mode == "survival") {
-        return "white";
-    } else if (mode == "spectator") {
-        return "grey";
-    } else if (mode == "camera") {
-        return "grey";
     }
 }
 

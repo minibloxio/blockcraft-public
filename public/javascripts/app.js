@@ -6,6 +6,9 @@ import Ola from "ola";
 // THREE.js
 import * as THREE from "three";
 
+// Import classes (THAT DON'T NEED TO BE TURNED INTO SINGLETONS)
+import PlayerManager from "./classes/PlayerManager";
+
 // Import classes (TURN THESE INTO SINGLETONS)
 import { getCookie, setCookie } from "./resources/cookie";
 import stats from "./stats/stats.js";
@@ -41,9 +44,7 @@ import changelog from "../json/changelog.json"
 import * as test from './helper'
 console.log(Object.keys(test).join(", "))
 
-import * as test2 from './globals'
-console.log(Object.keys(test2).join(", "))
-
+import {players} from './globals'
 
 //temp
 import { updateVoxelGeometry } from './classes/World';
@@ -63,13 +64,7 @@ let lastUpdate = Date.now();
 
 
 g.currentServer = undefined;
-let disconnected = 0; // Disconnection progress
-let disconnectedAnimate = new Ola(0); // Disconnection progress
-let maxDisconnected = 5;
 let lastConnection = Date.now() - connectionDelay;
-
-
-
 
 // Initialize server connection
 function connect(url) {
@@ -81,10 +76,8 @@ function connect(url) {
     g.socket.connect();
 }
 
-
-
 // Disconnect server
-function disconnectServer() {
+export function disconnectServer() {
     if (!isState("inGame")) return;
 
     $(".menu-button").hide();
@@ -92,13 +85,12 @@ function disconnectServer() {
     document.exitPointerLock();
 
     g.initialized = false;
-    joined = false;
+    g.joined = false;
     g.currentServer = undefined;
-    maxDisconnected = Object.keys(chunkManager.currChunks).length;
-    disconnectedAnimate = new Ola(0);
+    g.maxDisconnected = Object.keys(chunkManager.currChunks).length;
     g.socket.disconnect();
 
-    console.log("Disconnecting from server... (Cells to unload: " + maxDisconnected + ")");
+    console.log("Disconnecting from server... (Cells to unload: " + g.maxDisconnected + ")");
 
     // Remove all chunks
     world.cells = {};
@@ -241,7 +233,7 @@ function nextState(e) {
     }
 }
 
-function prevState() {
+export function prevState() {
     if (isState("loading")) { // Go back to server select menu
         showServerSelect();
 
@@ -272,12 +264,8 @@ function showSettings() {
     $("#video-button")[0].click();
 }
 
-
-
-
-const axesHelper = new THREE.AxesHelper(0.5);
+export const axesHelper = new THREE.AxesHelper(0.5);
 axesHelper.position.z -= 3;
-const localToCameraAxesPlacement = new THREE.Vector3(0, 0, -3); // make sure to update this on window resize
 
 // Initialize game
 function init() {
@@ -286,6 +274,7 @@ function init() {
     window.addEventListener('resize', onWindowResize, false); // Add resize event
 
     camera.add(axesHelper);
+    axesHelper.visible = game.debug;
 
     addVideoControls(); // Add video settings
     addKeyboardControls(); // Add keyboard controls
@@ -304,7 +293,7 @@ function init() {
 let then = performance.now();
 let prevTime = performance.now();
 
-function animate() {
+function animate() { // TODO: Clean up
     requestAnimationFrame(animate);
 
     // Get the frame's delta
@@ -681,7 +670,7 @@ function updateClient(data) {
     for (let block of updatedBlocks) {
         world.setVoxel(block.x, block.y, block.z, block.t);
 
-        for (let offset of neighborOffsets) {
+        for (let offset of chunkManager.neighborOffsets) {
             let ox = (block.x + offset[0]);
             let oy = (block.y + offset[1]);
             let oz = (block.z + offset[2]);

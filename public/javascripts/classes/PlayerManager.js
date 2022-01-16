@@ -1,11 +1,23 @@
+/*
+
+Manages the players in the game.
+Adds/removes player meshes to the scene.
+
+*/
+
 import * as THREE from "three";
 import Ola from "ola";
 
+import game from './Game';
+import world from "./World";
+import player from "./Player";
+import textureManager from "./TextureManager";
+import skinManager from "./SkinManager";
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+
+import { scene } from '../globals';
+
 class PlayerManager {
-    constructor() {
-
-    }
-
     // Add mesh
     static addMesh(geometry, material) {
         let mesh = new THREE.Mesh(geometry, material);
@@ -368,7 +380,7 @@ class PlayerManager {
         if (options.color) {
             p.nameTag.material.color.set(options.color);
         } else {
-            var name_geometry = new THREE.TextGeometry(p.name, {
+            var name_geometry = new TextGeometry(p.name, {
                 font: textureManager.minecraft_font,
                 size: 3,
                 height: 0.5
@@ -456,3 +468,5 @@ class PlayerManager {
     }
 
 }
+
+export default PlayerManager;

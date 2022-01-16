@@ -31,6 +31,7 @@ g.joined = false;
 g.state = 0;
 g.loadedAnimate = new Ola(0);
 g.maxLoaded = 6;
+g.maxDisconnected = 1;
 g.maxChunks = 0; // Chunks need to be loaded before pointerlock can be enabled
 g.cellIdToMesh = {};
 g.elapse = 0;

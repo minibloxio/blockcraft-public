@@ -54,7 +54,6 @@ class ChatManager {
 
     // Add chat message
     addChat(options) {
-        console.log(this.chat)
         if (!options)
             return;
 

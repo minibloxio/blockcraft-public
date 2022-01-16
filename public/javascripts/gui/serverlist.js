@@ -6,8 +6,8 @@ import player from '../classes/Player';
 import world from '../classes/World';
 import chunkManager from '../classes/ChunkManager';
 import { round } from '../helper';
-
-
+import Ola from "ola";
+import { prevState } from '../app';
 
 export function refreshServers() {
     // Disconnect servers
@@ -19,6 +19,8 @@ export function refreshServers() {
     // Connect to servers
     g.servers = {};
     g.currentServer = undefined;
+
+    let time = performance.now()+500;
 
     $("#server-container").empty();
     for (let i = 0; i < serverList.length; i++) {
@@ -57,7 +59,7 @@ export function refreshServers() {
         // Received server info
         server.socket.on('serverInfoResponse', function (data) {
             // Update server info
-            console.log(data.link)
+            //console.log("Got response from " + data.link + " in " + round(performance.now()-time, 2) + "ms");
             g.servers[data.link].info = data;
 
             // Player names
@@ -244,6 +246,9 @@ function clickServer(event, doubleClick) {
     }
 }
 
+
+let disconnectedAnimate = new Ola(0); // Disconnection progress
+
 // Update menu state
 export function updateMenu(nextStateCB) {
 
@@ -285,13 +290,13 @@ export function updateMenu(nextStateCB) {
         $("#loading-bar").width(100 + "%");
 
     } else if (isState("disconnecting")) { // Disconnecting
-
-        disconnectedAnimate.value = maxDisconnected - chunkManager.chunksToUnload.length;
-        let text = Math.min(100, round(disconnectedAnimate.value / maxDisconnected * 100, 0));
+        let val = g.maxDisconnected - chunkManager.chunksToUnload.length;
+        disconnectedAnimate.value = val;
+        let text = Math.min(100, round(disconnectedAnimate.value / g.maxDisconnected * 100, 0));
         $("#disconnecting-bar").text("Disconnecting " + text + "%");
-        $("#disconnecting-bar").width(100 * (Math.min(disconnectedAnimate.value, maxDisconnected) / maxDisconnected) + "%");
+        $("#disconnecting-bar").width(100 * (Math.min(disconnectedAnimate.value, g.maxDisconnected) / g.maxDisconnected) + "%");
 
-        if (disconnectedAnimate.value >= maxDisconnected) {
+        if (disconnectedAnimate.value >= g.maxDisconnected) {
             for (let id in g.cellIdToMesh) { // Dispose of all remaining meshes
                 world.deleteCell(id, true);
             }

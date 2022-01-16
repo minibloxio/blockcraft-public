@@ -1,4 +1,6 @@
-class Recipe {
+import world from "../classes/World.js";    
+
+export default class Recipe {
 
     static getEntityName(entity) {
         if (entity && entity.class == "item") {

@@ -2,6 +2,7 @@ import * as THREE from "three";
 import world, { updateVoxelGeometry, updateCellMesh } from './World';
 import game from './Game';
 import workerManager from './WorkerManager';
+import textureManager from "./TextureManager";
 
 import { isState, g, scene } from '../globals';
 

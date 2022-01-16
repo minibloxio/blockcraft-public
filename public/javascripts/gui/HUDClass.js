@@ -4,11 +4,26 @@ import world from '../classes/World';
 import player from '../classes/Player';
 import { colorPass } from "../graphics/renderer";
 
-import { g, icons } from '../globals';
+import { g, icons, players } from '../globals';
+import {drawRectangle, drawText, round} from '../helper';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");
+
+// Get player color
+function getPlayerColor(player) {
+    let mode = player.mode;
+    if (mode == "creative") {
+        return "aqua";
+    } else if (mode == "survival") {
+        return "white";
+    } else if (mode == "spectator") {
+        return "grey";
+    } else if (mode == "camera") {
+        return "grey";
+    }
+}
 
 class HUD {
     constructor() {

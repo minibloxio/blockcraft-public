@@ -5,6 +5,8 @@ import player from '../classes/Player';
 import textureManager from '../classes/TextureManager';
 import { drawRectangle, drawRect, drawImage, drawImageTopLeft, drawText, clamp } from "../helper"
 import { g, toolbar, toolbar_selector } from '../globals';
+import { mouse, map } from '../input/input';
+import Recipe from '../items/RecipeChecker'; 
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
@@ -592,11 +594,11 @@ class Inventory {
         // Check if click is outside of inventory
         if (type != "hover" && !this.withinInventory() && !this.drop && !this.pickup && selectedItem && selectedItem.c > 0) {
             if (type == "left") { // Drop all items from hand
-                socket.emit('dropItems', getDroppedItems([this.selectedItem]));
+                g.socket.emit('dropItems', getDroppedItems([this.selectedItem]));
 
                 this.selectedItem = undefined;
             } else if (type == "right") { // Drop one item from hand
-                socket.emit('dropItems', getDroppedItems([this.selectedItem], 1));
+                g.socket.emit('dropItems', getDroppedItems([this.selectedItem], 1));
                 if (this.selectedItem.c > 0 && !this.drop) { // Remove one item
                     this.selectedItem.c -= 1;
                     this.drop = true;
@@ -729,7 +731,7 @@ class Inventory {
             }
         }
 
-        if (type != "hover") socket.emit('updateInventory', inventory.inventory);
+        if (type != "hover") g.socket.emit('updateInventory', inventory.inventory);
     }
 
     // Add highlight box

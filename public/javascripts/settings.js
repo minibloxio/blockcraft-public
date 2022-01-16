@@ -1,16 +1,20 @@
 import keyconfig from "../json/keymap.json";
-import player from "./classes/Player.js";
+import player from "./classes/Player";
 import { getCookie, setCookie } from "./resources/cookie";
-import game from "./classes/Game.js";
-import chunkManager from "./classes/ChunkManager.js";
+import game from "./classes/Game";
+import world from "./classes/World";
+import chunkManager from "./classes/ChunkManager";
+import workerManager from "./classes/WorkerManager";
 
-import stage from "./classes/Stage.js";
+import stage from "./classes/Stage";
 
-import hud from "./gui/HUDClass.js";
+import hud from "./gui/HUDClass";
 
-import { camera } from "./globals";
+import { camera, players } from "./globals";
 
 import { updateGUISize } from "./helper";
+
+import { axesHelper } from "./app";
 
 let keymap = keyconfig.keymap;
 let keyorder = keyconfig.keyorder;
@@ -18,6 +22,8 @@ let keyorder = keyconfig.keyorder;
 // Add keys
 let savedKeymap = JSON.stringify(keymap);
 let savedKeyorder = JSON.stringify(keyorder);
+
+const cookieExpiryTime = 365; // 1 year
 
 export function addKeyboardControls() {
     $("#keyboard-settings").empty();

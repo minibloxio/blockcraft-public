@@ -3,6 +3,14 @@
 */
 
 import * as THREE from 'three';
+import chat from './classes/ChatManager';
+import world from './classes/World';
+import player from './classes/Player';
+import chunkManager from './classes/ChunkManager';
+
+import { players, g } from './globals';
+import { round, clamp } from './helper';
+import { disconnectServer } from './app';
 
 let commandsInit = JSON.stringify({
     "gamemode": {
@@ -115,38 +123,42 @@ let commandsInit = JSON.stringify({
     }
 })
 let commands = JSON.parse(commandsInit);
-let prevCommands = [
+
+let c = {};
+c.commandIndex = -1;
+c.prevCommands = [
     '/help',
     '/tutorial',
 ];
-let commandIndex = -1;
-let canChangeCommand = true;
+c.canChangeCommand = true;
+
+export { c };
 
 // Previous command
-function prevCommand() {
-    canChangeCommand = false;
-    if (prevCommands.length > 0) {
-        if (commandIndex < prevCommands.length - 1) {
-            commandIndex += 1;
+export function prevCommand() {
+    c.canChangeCommand = false;
+    if (c.prevCommands.length > 0) {
+        if (g.commandIndex < c.prevCommands.length - 1) {
+            g.commandIndex += 1;
             let input = $("#chat-input");
 
-            input.val(prevCommands[commandIndex]);
+            input.val(c.prevCommands[g.commandIndex]);
         }
     }
 }
 
 // Next command
-function nextCommand() {
-    canChangeCommand = false;
-    if (prevCommands.length > 0) {
-        commandIndex -= 1;
-        if (commandIndex >= 0) {
+export function nextCommand() {
+    c.canChangeCommand = false;
+    if (c.prevCommands.length > 0) {
+        g.commandIndex -= 1;
+        if (g.commandIndex >= 0) {
             let input = $("#chat-input");
 
-            input.val(prevCommands[commandIndex]);
+            input.val(c.prevCommands[g.commandIndex]);
         } else {
             $("#chat-input").val("");
-            commandIndex = -1;
+            g.commandIndex = -1;
         }
     }
 }
@@ -193,7 +205,7 @@ function updateHints() {
 }
 
 // Give command hints
-function giveCommandHint(msg, autocomplete) {
+export function giveCommandHint(msg, autocomplete) {
     // Initialize variables
     commands = JSON.parse(commandsInit);
     chat.hintText = "/";
@@ -418,7 +430,7 @@ function validCoord(msg, verify) {
 }
 
 // Check command validity
-function checkCommand(msg) {
+export function checkCommand(msg) {
     if (msg[0] == "gamemode") {
         updateGamemode(msg[1]);
     } else if (msg[0] == "tp") {
@@ -577,7 +589,7 @@ function updateGamemode(mode) {
 function setTime(time) {
     let timeInt = parseInt(time);
     if (typeof (timeInt) == "number" && (timeInt || timeInt == 0)) {
-        socket.emit('settime', timeInt)
+        g.socket.emit('settime', timeInt)
         chat.addChat({
             text: "Time set to " + timeInt
         })
@@ -678,7 +690,7 @@ function setBlock(msg) {
         }
 
         let coord = new THREE.Vector3(pos.x, pos.y, pos.z);
-        socket.emit('setBlock', {
+        g.socket.emit('setBlock', {
             x: coord.x,
             y: coord.y,
             z: coord.z,
@@ -706,7 +718,7 @@ function giveItem(msg) {
     let entity = world.blockId[item] || world.itemId[item];
     if (Number.isInteger(parseInt(amount)) && entity) {
         amount = clamp(parseInt(amount), 1, 64);
-        socket.emit('giveItem', {
+        g.socket.emit('giveItem', {
             v: entity,
             amount: amount,
             class: world.blockId[item] ? "block" : "item",
@@ -727,7 +739,7 @@ function clear(type) {
     if (type == "hand") { // Clear the hand
         let item = player.toolbar[player.currentSlot];
         if (item) {
-            socket.emit('clearHand', player.currentSlot);
+            g.socket.emit('clearHand', player.currentSlot);
             let thing = item.class == "block" ? world.blockOrder[item.v] : world.itemOrder[item.v];
             chat.addChat({
                 text: "Cleared " + item.c + " " + thing + " from hand"
@@ -739,12 +751,12 @@ function clear(type) {
             });
         }
     } else if (type == "inventory") { // Clear the inventory
-        socket.emit('clearInventory');
+        g.socket.emit('clearInventory');
         chat.addChat({
             text: "Cleared inventory"
         });
     } else if (type == "chat") { // Clear the chat
-        chat.length = 0;
+        chat.chat.length = 0;
         chat.addChat({
             text: "Cleared chat"
         });
@@ -766,7 +778,7 @@ function setOperator(msg, isOp) {
     let exists = false;
     if (target == player.name) {
         exists = true;
-        playerId = socket.id;
+        playerId = g.socket.id;
     }
     for (let id in players) {
         let p = players[id];
@@ -788,7 +800,7 @@ function setOperator(msg, isOp) {
             color: "red"
         });
     } else {
-        socket.emit('setOperator', {
+        g.socket.emit('setOperator', {
             id: playerId,
             name: target,
             password: password,
@@ -807,7 +819,7 @@ function banPlayer(msg) {
     let exists = false;
     if (target == player.name) {
         exists = true;
-        playerId = socket.id;
+        playerId = g.socket.id;
     }
     for (let id in players) {
         let p = players[id];
@@ -829,7 +841,7 @@ function banPlayer(msg) {
             color: "red"
         });
     } else {
-        socket.emit('banPlayer', {
+        g.socket.emit('banPlayer', {
             id: playerId,
             name: target,
             reason: reason,
@@ -849,7 +861,7 @@ function unbanPlayer(msg) {
             color: "red"
         });
     } else {
-        socket.emit('banPlayer', {
+        g.socket.emit('banPlayer', {
             name: target,
             isBanned: false,
         });
@@ -867,7 +879,7 @@ function kickPlayer(msg) {
     let exists = false;
     if (target == player.name) {
         exists = true;
-        playerId = socket.id;
+        playerId = g.socket.id;
     }
     for (let id in players) {
         let p = players[id];
@@ -889,7 +901,7 @@ function kickPlayer(msg) {
             color: "red"
         });
     } else {
-        socket.emit('kickPlayer', {
+        g.socket.emit('kickPlayer', {
             id: playerId,
             name: target,
             reason: reason,
@@ -911,10 +923,10 @@ function killPlayer(msg) {
     }
 
     if (target == "@e") {
-        socket.emit('killEntities');
+        g.socket.emit('killEntities');
         return;
     } else if (target == "@a") {
-        socket.emit('killPlayers');
+        g.socket.emit('killPlayers');
         return;
     }
 
@@ -923,7 +935,7 @@ function killPlayer(msg) {
     let exists = false;
     if (target == player.name) {
         exists = true;
-        playerId = socket.id;
+        playerId = g.socket.id;
     }
     for (let id in players) {
         let p = players[id];
@@ -940,7 +952,7 @@ function killPlayer(msg) {
             color: "red"
         });
     } else {
-        socket.emit('killPlayer', {
+        g.socket.emit('killPlayer', {
             id: playerId,
             name: target
         });
@@ -987,7 +999,7 @@ function messagePlayer(msg) {
     let exists = false;
     if (target == player.name) {
         exists = true;
-        playerId = socket.id;
+        playerId = g.socket.id;
     }
     for (let id in players) {
         let p = players[id];
@@ -1014,7 +1026,7 @@ function messagePlayer(msg) {
             text: message,
             color: "grey",
         })
-        socket.emit('messagePlayer', {
+        g.socket.emit('messagePlayer', {
             id: playerId,
             text: message
         });
@@ -1044,7 +1056,7 @@ function replyPlayer(msg) {
             text: message,
             color: "grey",
         })
-        socket.emit('replyPlayer', {
+        g.socket.emit('replyPlayer', {
             id: player.lastWhisper,
             text: message
         });
@@ -1081,7 +1093,7 @@ function damagePlayer(msg) {
         });
         return;
     }
-    socket.emit('takeDamage', {
+    g.socket.emit('takeDamage', {
         dmg: damage,
         type: "command",
     });
@@ -1096,7 +1108,7 @@ function saveWorld() {
         });
         return;
     }
-    socket.emit('saveWorld');
+    g.socket.emit('saveWorld');
 }
 
 // Spawn an entity
@@ -1109,5 +1121,5 @@ function spawnBot(msg) {
         });
         return;
     }
-    socket.emit('spawnBot', msg[0]);
+    g.socket.emit('spawnBot', msg[0]);
 }

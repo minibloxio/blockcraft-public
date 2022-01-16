@@ -2,7 +2,9 @@ import * as THREE from "three";
 import Stat from "./StatsClass.js";
 import game from '../classes/Game';
 import player from '../classes/Player';
-import { g, camera } from '../globals'
+import world from "../classes/World.js";
+import { g, camera } from '../globals';
+import { renderer } from '../graphics/renderer';
 
 
 let statistics = [];
@@ -83,7 +85,8 @@ export function initStatistics() {
         return world.computeCellFromPlayer(pos.x, pos.y, pos.z);
     }));
     statistics.push(new Stat("Biome", player, "biome"));
-    statistics.push(new Stat("Vel", player.velocity, false, 1));
+    statistics.push(new Stat("Local Dir", player.direction, false, 1));
+    statistics.push(new Stat("Local Vel", player.velocity, false, 1));
     statistics.push(new Stat("Speed", player, "speed", 2));
     statistics.push(new Stat("Fly", player, "fly"));
     statistics.push([
@@ -101,3 +104,5 @@ export function initStatistics() {
         }
     }));
 }
+
+export default statistics;

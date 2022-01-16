@@ -536,7 +536,7 @@ export function roughSizeOfObject(object) {
     return bytes;
 }
 
-String.prototype.removeExtraSpaces = () => {
+String.prototype.removeExtraSpaces = function () {
     return this.replace(/\s\s+/g, ' ');
 }
 

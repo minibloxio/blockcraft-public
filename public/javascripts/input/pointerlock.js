@@ -12,6 +12,7 @@ import chat from '../classes/ChatManager';
 import { renderer } from '../graphics/renderer';
 import { camera, g } from '../globals';
 import { updateGUISize } from '../helper';
+import { getCookie, setCookie } from '../resources/cookie';
 
 
 let keymap = keyconfig.keymap;
@@ -41,7 +42,7 @@ function getItemEntity(player, item, dropDir) {
         c: 1,
         pos: pos,
         class: item.class,
-        dir: { x: dropDir.x, z: dropDir.y }
+        dir: dropDir
     }
     return entity;
 }
@@ -142,7 +143,7 @@ export default function initPointerLock() {
             if (event.keyCode == 27 && player.controls.enabled)
                 document.exitPointerLock();
 
-            if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !chat.showChatBar && loaded >= maxLoaded + 1 && (player.controls.enabled || inventory.showInventory)) {
+            if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !chat.showChatBar && g.loaded >= g.maxLoaded + 1 && (player.controls.enabled || inventory.showInventory)) {
 
                 if (player.controls.enabled && inventory.canShowInventory) {
                     inventory.showInventory = true;

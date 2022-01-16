@@ -1,3 +1,8 @@
+import {drawRectangle, drawText, round} from '../helper';
+
+let canvas = document.getElementById('canvas-hud');
+let ctx = canvas.getContext('2d');
+
 export default class Stat {
     constructor(name, value, key, round, func) {
         this.name = name;

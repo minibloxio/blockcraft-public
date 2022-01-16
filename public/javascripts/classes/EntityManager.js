@@ -105,6 +105,7 @@ class EntityManager {
                 let mat = this.textureToMat(canvas);
 
                 let itemSize = blockSize / 4;
+                let throwables = ["ender_pearl", "fireball", "snowball", "egg"]; // TODO: Turn this into a singleton
                 if (throwables.includes(entity.name)) itemSize = blockSize / 2;
                 let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(itemSize, itemSize), mat);
                 item_mesh.renderOrder = 1;

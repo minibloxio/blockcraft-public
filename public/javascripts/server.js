@@ -1,6 +1,9 @@
 import * as THREE from 'three';
+import game from './classes/Game';
 import world from './classes/World';
-import { players } from './globals';
+import player from './classes/Player';
+import { players, g, camera } from './globals';
+import PlayerManager from './classes/PlayerManager';
 
 // Update server players
 export function updatePlayers(serverPlayers) {
@@ -147,13 +150,13 @@ function updatePlayer(p) {
 
     // Punching animation
     if (p.punching) {
-        p.punchingT += delta * 5;
+        p.punchingT += g.delta * 5;
 
         if (p.punchingT > 1)
             p.punchingT = 0
     } else {
         if (p.punchingT < 1) {
-            p.punchingT += delta * 5;
+            p.punchingT += g.delta * 5;
         } else {
             p.punchingT = 1;
         }

@@ -6,14 +6,22 @@ import player from '../classes/Player';
 import chat from '../classes/ChatManager';
 import hud from '../gui/HUDClass';
 import inventory from "../items/Inventory";
+import keyconfig from "../../json/keymap.json"
+
+// Variables
+import { c, checkCommand, prevCommand, nextCommand } from "../commands";
 import { camera, g } from '../globals';
-import keymap from "../../json/keymap.json"
+
+// Functions
+import { giveCommandHint } from "../commands";
+import { clamp } from '../helper';
 
 let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
-let inScreen;
+
+let keymap = keyconfig.keymap;
 
 // Key event handling
-$('html').mousedown(function (event) {
+$('html').on('mousedown', function (event) {
     if (!g.initialized)
         return;
     if (!player.controls.enabled || inventory.showInventory)
@@ -36,7 +44,7 @@ $('html').mousedown(function (event) {
         //alert('You have a strange Mouse!');
     }
 })
-$('html').mouseup(function (event) {
+$('html').on('mouseup', function (event) {
     if (!g.initialized)
         return;
     switch (event.which) {
@@ -57,7 +65,7 @@ $('html').mouseup(function (event) {
     }
 })
 
-$(window).keydown(function (event) {
+$(window).on('keydown', function (event) {
     if (!g.initialized) return;
     if (!player.controls.enabled) return;
     if (event.keyCode == 18) {
@@ -71,12 +79,12 @@ $(window).keydown(function (event) {
     }
 });
 
-$("body").mousemove(function (e) {
+$("body").on('mousemove', function (e) {
     mouse.x = e.pageX;
     mouse.y = e.pageY;
 })
 
-$("body").mousedown(function (e) {
+$("body").on('mousedown', function (e) {
     if (!g.initialized || !inventory.showInventory) return;
     switch (e.which) {
         case 1:
@@ -93,7 +101,7 @@ $("body").mousedown(function (e) {
         default:
         //alert('You have a strange Mouse!');
     }
-}).mouseup(function (e) {
+}).on('mouseup', function (e) {
     if (!g.initialized || !inventory.showInventory) return;
     switch (e.which) {
         case 1:
@@ -112,15 +120,14 @@ $("body").mousedown(function (e) {
     }
 })
 
-$("body").dblclick(function () {
+$("body").on('dblclick', function () {
     if (!g.initialized) return;
     inventory.selectInventory("double")
 })
 
 var map = {};
-onkeydown = onkeyup = function (e) {
-    e = e || event;
-    map[e.keyCode] = e.type == 'keydown';
+onkeydown = onkeyup = function (event) {
+    map[event.keyCode] = event.type == 'keydown';
 }
 
 var onKeyDown = function (event) {
@@ -138,23 +145,23 @@ var onKeyDown = function (event) {
         } else {
             $("#chat-input").blur();
             $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0)" });
-            commandIndex = -1;
+            c.commandIndex = -1;
         }
 
         let msg = $("#chat-input").val()
         if (!chat.showChatBar && msg) {
             if (msg[0] != "/") { // Send message to everyone
-                socket.emit("message", $("#chat-input").val());
+                g.socket.emit("message", $("#chat-input").val());
                 $("#chat-input").val("")
             } else { // Check minecraft command
-                if (prevCommands[0] != $("#chat-input").val()) {
-                    prevCommands.unshift($("#chat-input").val());
+                if (c.prevCommands[0] != $("#chat-input").val()) {
+                    c.prevCommands.unshift($("#chat-input").val());
                 }
                 $("#chat-input").val("")
                 msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
                 checkCommand(msg);
             }
-            commandIndex = -1;
+            c.commandIndex = -1;
         }
     }
 
@@ -162,7 +169,7 @@ var onKeyDown = function (event) {
         return;
 
     // GAME CONTROLS
-    if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
+    if (keymap[event.keyCode]) {
         switch (keymap[event.keyCode][0]) {
             case "Attack":
                 player.punch();
@@ -211,7 +218,7 @@ var onKeyDown = function (event) {
             case "Respawn":
                 if (player.controls.enabled && player.allowRespawn) {
                     player.respawn(world.blockSize);
-                    socket.emit('respawn');
+                    g.socket.emit('respawn');
                     player.allowRespawn = false;
                 }
                 break;
@@ -266,10 +273,10 @@ var onKeyUp = function (event) {
     // CREATIVE MENU CONTROLS
     if (event.keyCode == 38) {
         inventory.scroll(1);
-        canChangeCommand = true;
+        c.canChangeCommand = true;
     } else if (event.keyCode == 40) {
         inventory.scroll(-1);
-        canChangeCommand = true;
+        c.canChangeCommand = true;
     }
 
     if (event.keyCode == 39) {
@@ -299,7 +306,7 @@ var onKeyUp = function (event) {
 
 
     // GAME CONTROLS
-    if (keymap[event.keyCode] && keymap[event.keyCode][2]) {
+    if (keymap[event.keyCode]) {
         switch (keymap[event.keyCode][0]) {
             case "Attack":
                 player.click = false;
@@ -359,7 +366,7 @@ document.addEventListener('keydown', onKeyDown, false);
 document.addEventListener('keyup', onKeyUp, false);
 
 // Inventory search
-$(document).ready(function () {
+$(document).on('ready', function () {
     $("#search-input").on("input", function () {
         let search = $(this).val();
         inventory.updateItemSearch(search);
@@ -381,10 +388,8 @@ $(document).bind('wheel', function (e) {
 
     if (!player.controls.enabled || player.mode == "spectator" || player.mode == "camera") return;
 
-    if (map[16]) e.preventDefault();
-
-    let scrollDirection = game.invertMouse ? -1 : 1;
-    if (navigator.userAgent.includes("Safari") && map[16]) scrollDirection *= -1;
+    let scrollDirection = game.invertMouse ? 1 : -1;
+    if (navigator.userAgent.includes("Safari") && !navigator.userAgent.includes("Chrome") && map[16]) scrollDirection *= -1;
 
     if (camera.enableZoom) {
         if (scrollDelta * scrollDirection * -1 > 0) {
@@ -412,11 +417,4 @@ function prevSlot() {
     if (player.currentSlot < 0) player.currentSlot = 8;
 }
 
-// Blur & Focus
-$(window).blur(function () {
-    inScreen = false;
-})
-
-$(window).focus(function () {
-    inScreen = true;
-})
+export { map, mouse };
