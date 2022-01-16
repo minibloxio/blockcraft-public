@@ -4,7 +4,6 @@ import textureManager from './TextureManager';
 import workerManager from './WorkerManager';
 import { g, scene } from '../globals';
 
-
 class World {
     computeVoxelOffset(x, y, z) {
         const { cellSize, cellSliceSize } = this;
@@ -345,5 +344,7 @@ export function setChunkMesh(cellX, cellY, cellZ, cellId, mesh) {
     mesh.updateMatrix();
     scene.add(mesh);
 }
+
 const world = new World();
+globalThis.world = world;
 export default world;

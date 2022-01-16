@@ -4,7 +4,7 @@ class Game {
     constructor() {
         this.packetDelay = 16;
         this.lastPacket = Date.now();
-        this.numOfVoxelWorkers = 2;
+        this.numOfVoxelWorkers = 1;
         this.guiSize = 1;
         this.tick = 0;
         this.lastUpdate = Date.now();

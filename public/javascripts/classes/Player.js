@@ -122,8 +122,6 @@ class Player {
     }
 
     init() {
-        console.log("Player init");
-
         // Player appearance
         let blockSize = 16;
         this.halfWidth = blockSize * 0.3;
@@ -152,6 +150,24 @@ class Player {
         this.addArm();
 
         // Select box wireframe
+        this.addSelectBox();
+
+        // Add to scene
+        scene.add(this.controls.getObject());
+    }
+
+    addArm() {
+        if (this.arm) return;
+        this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin(this.skin).armC);
+        this.arm.castShadow = true;
+        this.arm.receiveShadow = true;
+        camera.add(this.arm);
+    }
+
+    addSelectBox() {
+        if (this.select_wireframe) return;
+
+        const {blockSize} = world;
         let select_box = new THREE.BoxGeometry(blockSize + 0.1, blockSize + 0.1, blockSize + 0.1);
         let { mining_progress } = textureManager;
         this.mine_box = new THREE.Mesh(select_box, mining_progress[0].material)
@@ -163,9 +179,6 @@ class Player {
         this.select_wireframe = new THREE.LineSegments(geometry, material);
         this.select_wireframe.name = "wireframe";
         scene.add(this.select_wireframe)
-
-        // Add to scene
-        scene.add(this.controls.getObject());
     }
 
     join(data) {
@@ -471,14 +484,6 @@ class Player {
                 this.stoppedPunching = true;
             }
         }
-    }
-
-    addArm() {
-        if (this.arm) return;
-        this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin(this.skin).armC);
-        this.arm.castShadow = true;
-        this.arm.receiveShadow = true;
-        camera.add(this.arm);
     }
 
     select(update) {

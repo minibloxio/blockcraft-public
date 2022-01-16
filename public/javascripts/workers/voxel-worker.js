@@ -24,6 +24,13 @@ self.addEventListener('message', e => {
         return;
     }
 
+    if (e.data.type == "reset") {
+        result = [];
+        cells.length = 0;
+        world.cells.length = 0;
+        return;
+    }
+
     if (e.data.cellSize) {
         world = e.data;
     } else if (!e.data.cellSize && e.data.cells) {

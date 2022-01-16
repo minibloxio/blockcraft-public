@@ -354,4 +354,5 @@ class ChunkManager {
 }
 
 const chunkManager = new ChunkManager();
+globalThis.chunkManager = chunkManager;
 export default chunkManager;

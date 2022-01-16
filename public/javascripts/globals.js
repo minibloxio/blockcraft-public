@@ -5,6 +5,7 @@ import { io } from "socket.io-client";
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000000); // Camera
 const scene = new THREE.Scene(); // Scene
+globalThis.scene = scene;
 const serverNames = {
     "gold": "Gold Server (formerly North America East)",
     "coal": "Coal Server (formerly North America West)",
@@ -31,6 +32,7 @@ g.joined = false;
 g.state = 0;
 g.loadedAnimate = new Ola(0);
 g.maxLoaded = 6;
+g.disconnectedAnimate = new Ola(0);
 g.maxDisconnected = 1;
 g.maxChunks = 0; // Chunks need to be loaded before pointerlock can be enabled
 g.cellIdToMesh = {};
@@ -38,6 +40,8 @@ g.elapse = 0;
 g.delta = 0;
 g.mouseLeft = false;
 g.mouseRight = false;
+
+globalThis.g = g;
 
 let states = {
     "start": 0,

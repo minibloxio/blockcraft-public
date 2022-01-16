@@ -88,9 +88,13 @@ export function disconnectServer() {
     g.joined = false;
     g.currentServer = undefined;
     g.maxDisconnected = Object.keys(chunkManager.currChunks).length;
+    g.disconnectedAnimate = new Ola(0);
     g.socket.disconnect();
 
     console.log("Disconnecting from server... (Cells to unload: " + g.maxDisconnected + ")");
+
+    // Reset chunk manager
+    chunkManager.reqChunks = {};
 
     // Remove all chunks
     world.cells = {};
@@ -282,6 +286,8 @@ function init() {
     initRenderer(); // Finalize by adding the renderer
     initPointerLock(); // Initialize pointer lock
     updateGUISize(); // Update the GUI size
+
+    workerManager.init();
 
     console.log('Game initialized in ' + (Date.now() - t) + 'ms') // Log time
 
@@ -522,7 +528,9 @@ g.socket.on('joinResponse', function (data) {
     player.init();
     player.join(data);
 
-    workerManager.init();
+    // Set chunk pos
+    chunkManager.cellPos = world.computeCellFromPlayer(player.position.x, player.position.y, player.position.z);
+    console.log("Starting chunk pos:", chunkManager.cellPos);
 
     // Receive current server players
     let serverPlayers = data.serverPlayers;

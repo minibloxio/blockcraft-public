@@ -290,13 +290,12 @@ export function updateMenu(nextStateCB) {
         $("#loading-bar").width(100 + "%");
 
     } else if (isState("disconnecting")) { // Disconnecting
-        let val = g.maxDisconnected - chunkManager.chunksToUnload.length;
-        disconnectedAnimate.value = val;
-        let text = Math.min(100, round(disconnectedAnimate.value / g.maxDisconnected * 100, 0));
+        g.disconnectedAnimate.value = g.maxDisconnected - chunkManager.chunksToUnload.length;
+        let text = Math.min(100, round(g.disconnectedAnimate.value / g.maxDisconnected * 100, 0));
         $("#disconnecting-bar").text("Disconnecting " + text + "%");
-        $("#disconnecting-bar").width(100 * (Math.min(disconnectedAnimate.value, g.maxDisconnected) / g.maxDisconnected) + "%");
+        $("#disconnecting-bar").width(100 * (Math.min(g.disconnectedAnimate.value, g.maxDisconnected) / g.maxDisconnected) + "%");
 
-        if (disconnectedAnimate.value >= g.maxDisconnected) {
+        if (g.disconnectedAnimate.value >= g.maxDisconnected) {
             for (let id in g.cellIdToMesh) { // Dispose of all remaining meshes
                 world.deleteCell(id, true);
             }

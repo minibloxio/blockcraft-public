@@ -23,6 +23,14 @@ class WorkerManager {
         }
     }
 
+    resetVoxelWorkers() {
+        for (let worker of this.voxels) {
+            worker.postMessage({
+                type: 'reset',
+            });
+        }
+    }
+
     // Initialize web workers
     init() {
         this.rle = new Worker('javascripts/workers/rle-worker.js'); // Run length encoding worker
