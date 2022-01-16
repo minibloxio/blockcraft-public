@@ -11,6 +11,8 @@ import inventory from "../items/Inventory";
 import { colorPass } from "../graphics/renderer";
 import { random } from '../helper';
 
+import armItem from "../gui/ArmItem"
+
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 
 class Player {
@@ -313,16 +315,14 @@ class Player {
             let ctx = canvas.getContext("2d");
             let atlas = textureManager.getTextureAtlas(item.class);
             ctx.drawImage(atlas, (item.v - 1) * itemSize, (this.bowCharge ? this.bowCharge : 0) * itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
-            let texture = new THREE.CanvasTexture(canvas);
-            texture.magFilter = THREE.NearestFilter;
-            texture.minFilter = THREE.NearestFilter;
-            let mat = new THREE.MeshLambertMaterial({ map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide })
-
-            this.arm = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+            armItem.updateItem(canvas);
+            this.arm = armItem.root
             this.arm.renderOrder = 1;
             this.arm.position.set(1.5, -1, -2);
             this.arm.rotation.set(Math.PI / 6, -Math.PI / 2, Math.PI / 4 + Math.PI / 8)
             camera.add(this.arm)
+
+
         } else if (item && item.c > 0) { // Display block
             let uvVoxel = item.v - 1;
             let item_geometry = new THREE.BufferGeometry();
