@@ -11,13 +11,17 @@ const ctx = canvas.getContext("2d");
 canvas.width = itemSize;
 canvas.height = itemSize;
 
-// TOOL START POS
+// tool start pos
 const posStart = new THREE.Vector3(2, -0.5, -3);
 const rotStart = new THREE.Quaternion().setFromEuler(new THREE.Euler(60 * TO_RAD, 0, 0))
 
-// TOOL END POS
+// tool end pos
 const posEnd = new THREE.Vector3(0.7, -2, -4.5);
 const rotEnd = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.41, 0.24, 0.24))
+
+// tool block pos
+const posBlock = new THREE.Vector3(-0.20, -1.93, -2.36)
+const rotBlock = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.49, 1.53, -0.54))
 
 class ActiveItemVoxels {
 
@@ -81,13 +85,18 @@ class ActiveItemVoxels {
         const timeSincePunch = Date.now() - player.punching;
         const punchLerp = timeSincePunch / 130;
 
-
-        if (punchLerp < 1) { // Forward animatipon
+        if (player.blocking) {
+            this.root.position.copy(posBlock)
+            this.root.quaternion.copy(rotBlock)
+        } else if (punchLerp < 1) { // Forward animatipon
             this.root.position.lerpVectors(posStart, posEnd, punchLerp);
             this.root.quaternion.slerpQuaternions(rotStart, rotEnd, punchLerp)
         } else if (punchLerp < 2) { // Reverse animation
             this.root.position.lerpVectors(posEnd, posStart, punchLerp - 1);
             this.root.quaternion.slerpQuaternions(rotEnd, rotStart, punchLerp - 1)
+        } else {
+            this.root.position.copy(posStart)
+            this.root.quaternion.copy(rotStart)
         }
     }
 }
