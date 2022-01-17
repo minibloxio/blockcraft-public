@@ -11,7 +11,10 @@ import inventory from "./items/Inventory";
 import masterRenderer from "./graphics/MasterRenderer";
 import { random } from './lib/helper';
 
+import activeItemVoxels from "./graphics/ActiveItemVoxels"
+
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
+const EMPTY = new THREE.Mesh();
 
 class Player {
     constructor() {
@@ -292,6 +295,7 @@ class Player {
         item = item || this.getCurrItem();
         this.arm.visible = !(this.mode == "spectator" || this.mode == "camera");
 
+        activeItemVoxels.updateItem()
         this.moveHand(item);
 
         let s = JSON.stringify(item);
@@ -305,24 +309,10 @@ class Player {
         this.prevState = this.bowCharge;
         camera.remove(this.arm);
 
-        if (item && item.class == "item" && item.c > 0) { // Display item
-            let canvas = document.createElement("canvas");
-            let itemSize = 16;
-            canvas.width = itemSize;
-            canvas.height = itemSize;
-            let ctx = canvas.getContext("2d");
-            let atlas = textureManager.getTextureAtlas(item.class);
-            ctx.drawImage(atlas, (item.v - 1) * itemSize, (this.bowCharge ? this.bowCharge : 0) * itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
-            let texture = new THREE.CanvasTexture(canvas);
-            texture.magFilter = THREE.NearestFilter;
-            texture.minFilter = THREE.NearestFilter;
-            let mat = new THREE.MeshLambertMaterial({ map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide })
 
-            this.arm = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
-            this.arm.renderOrder = 1;
-            this.arm.position.set(1.5, -1, -2);
-            this.arm.rotation.set(Math.PI / 6, -Math.PI / 2, Math.PI / 4 + Math.PI / 8)
-            camera.add(this.arm)
+        if (item && item.class == "item" && item.c > 0) { // Display item
+            // moved to Active Item Voxel
+            this.arm = EMPTY
         } else if (item && item.c > 0) { // Display block
             let uvVoxel = item.v - 1;
             let item_geometry = new THREE.BufferGeometry();
@@ -1248,6 +1238,7 @@ class Player {
         this.placeBlock();
         this.dropItem();
         this.updateHand();
+        activeItemVoxels.update()
 
         this.move(delta);
 
