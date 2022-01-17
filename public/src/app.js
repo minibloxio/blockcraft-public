@@ -162,6 +162,14 @@ $(document).ready(function () {
         }
 
     })
+
+    if (DEV_MODE_SKIP_MENUS) {
+        nextState()
+        $("#direct-connect-input").val("localhost:3001")
+        nextState()
+        nextState()
+        setTimeout(nextState, 2000)
+    }
 })
 
 // Menu progression states
