@@ -295,6 +295,7 @@ class Player {
         item = item || this.getCurrItem();
         this.arm.visible = !(this.mode == "spectator" || this.mode == "camera");
 
+        activeItemVoxels.updateItem()
         this.moveHand(item);
 
         let s = JSON.stringify(item);
@@ -308,7 +309,6 @@ class Player {
         this.prevState = this.bowCharge;
         camera.remove(this.arm);
 
-        activeItemVoxels.updateItem()
 
         if (item && item.class == "item" && item.c > 0) { // Display item
             // moved to Active Item Voxel

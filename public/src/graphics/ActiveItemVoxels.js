@@ -25,17 +25,19 @@ class ActiveItemVoxels {
         this.pixels = new Array(256);
         this.currentItem = undefined;
         this.root = new THREE.Group()
-        const axesHelper = new THREE.AxesHelper(5);
-        this.root.add(axesHelper);
-        this.root.position.set(2, -0.5, -4)
+        // const axesHelper = new THREE.AxesHelper(5);
+        // this.root.add(axesHelper);
+        this.root.position.copy(posStart)
+        this.root.quaternion.copy(rotStart)
 
         camera.add(this.root)
-        const mat = new THREE.MeshBasicMaterial({ color: 0x696969 })
+        const mat = new THREE.MeshBasicMaterial()
         const geo = new THREE.BoxGeometry(pixelSize, pixelSize, pixelSize);
 
         for (let z = 0; z < 16; z++) {
             for (let y = 0; y < 16; y++) {
                 const pixel = new THREE.Mesh(geo, mat);
+                pixel.receiveShadow = true
                 pixel.position.z = z * pixelSize;
                 pixel.position.y = y * pixelSize;
                 this.root.add(pixel)
@@ -46,8 +48,20 @@ class ActiveItemVoxels {
 
     updateItem() {
         let item = player.getCurrItem();
+        if (!item || item.class != "item" || item.c <= 0) {
+            this.root.visible = false
+            return;
+        }
+
+        if (item == this.currentItem) return
+
+
+        this.root.visible = true
+        this.currentItem = item
+
         let atlas = textureManager.getTextureAtlas(item.class);
-        ctx.drawImage(atlas, (item.v - 1) * itemSize, (this.bowCharge ? this.bowCharge : 0) * itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
+        ctx.clearRect(0, 0, itemSize, itemSize);
+        ctx.drawImage(atlas, (item.v - 1) * itemSize, (player.bowCharge ? player.bowCharge : 0) * itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
 
 
         const pixels = canvas.getContext("2d").getImageData(0, 0, 16, 16).data;
@@ -57,14 +71,13 @@ class ActiveItemVoxels {
             const b = pixels[i + 2];
             const a = pixels[i + 3];
 
-            this.pixels[i / 4].material = new THREE.MeshBasicMaterial({ color: new THREE.Color(`rgb(${r}, ${g}, ${b})`) })
+            this.pixels[i / 4].material = new THREE.MeshLambertMaterial({ color: new THREE.Color(`rgb(${r}, ${g}, ${b})`) })
             this.pixels[i / 4].visible = a !== 0;
         }
     }
 
     update() {
         // Move hand
-        let pos1, pos2, rot1, rot2;
         const timeSincePunch = Date.now() - player.punching;
         const punchLerp = timeSincePunch / 130;
 
