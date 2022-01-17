@@ -8,7 +8,7 @@ import game from './Game';
 import chunkManager from './managers/ChunkManager';
 import chat from './managers/ChatManager';
 import inventory from "./items/Inventory";
-import gameRenderer from "./graphics/GameRenderer";
+import masterRenderer from "./graphics/MasterRenderer";
 import { random } from './lib/helper';
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
@@ -1288,7 +1288,7 @@ class Player {
 
         // Head in water
         this.headInWater = voxel == world.blockId["water"];
-        gameRenderer.renderUnderWater = this.headInWater
+        masterRenderer.renderUnderWater = this.headInWater
 
 
         // Head and feet

@@ -4,7 +4,7 @@ import game from '../Game';
 import player from '../Player';
 import world from "../managers/WorldManager.js";
 import { g, camera } from '../globals';
-import gameRenderer from '../graphics/GameRenderer';
+import masterRenderer from '../graphics/MasterRenderer';
 
 let statistics = [];
 
@@ -34,13 +34,13 @@ export function initStatistics() {
     ]);
     statistics.push([
         new Stat("RC", function () {
-            return gameRenderer.renderer.info.render.calls;
+            return masterRenderer.renderer.info.render.calls;
         }),
         new Stat("Tri", function () {
-            return gameRenderer.renderer.info.render.triangles / 1000;
+            return masterRenderer.renderer.info.render.triangles / 1000;
         }, "k", 2),
         new Stat("F", function () {
-            return gameRenderer.renderer.info.render.frame;
+            return masterRenderer.renderer.info.render.frame;
         }),
     ]);
     statistics.push([
@@ -67,10 +67,10 @@ export function initStatistics() {
     ]);
     statistics.push([
         new Stat("Geo", function () {
-            return gameRenderer.renderer.info.memory.geometries;
+            return masterRenderer.renderer.info.memory.geometries;
         }),
         new Stat("Tex", function () {
-            return gameRenderer.renderer.info.memory.textures;
+            return masterRenderer.renderer.info.memory.textures;
         }),
     ]);
     statistics.push(new Stat("Server", game, "region"));
