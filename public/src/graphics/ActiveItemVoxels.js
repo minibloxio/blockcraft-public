@@ -1,15 +1,36 @@
 import * as THREE from 'three';
+import { camera } from './ActiveItemScene'
+import textureManager from '../managers/TextureManager';
+import player from '../Player'
 
+const TO_RAD = Math.PI / 180;
 const pixelSize = 1 / 16 * 2;
+const itemSize = 16;
+const canvas = document.createElement("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = itemSize;
+canvas.height = itemSize;
+
+// TOOL START POS
+const posStart = new THREE.Vector3(2, -0.5, -3);
+const rotStart = new THREE.Quaternion().setFromEuler(new THREE.Euler(60 * TO_RAD, 0, 0))
+
+// TOOL END POS
+const posEnd = new THREE.Vector3(0.7, -2, -4.5);
+const rotEnd = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.41, 0.24, 0.24))
 
 class ActiveItemVoxels {
 
     constructor() {
-        this.root = new THREE.Group()
         this.pixels = new Array(256);
+        this.currentItem = undefined;
+        this.root = new THREE.Group()
         const axesHelper = new THREE.AxesHelper(5);
         this.root.add(axesHelper);
-        const mat = new THREE.MeshLambertMaterial({ color: 0x696969 })
+        this.root.position.set(2, -0.5, -4)
+
+        camera.add(this.root)
+        const mat = new THREE.MeshBasicMaterial({ color: 0x696969 })
         const geo = new THREE.BoxGeometry(pixelSize, pixelSize, pixelSize);
 
         for (let z = 0; z < 16; z++) {
@@ -23,7 +44,12 @@ class ActiveItemVoxels {
         }
     }
 
-    updateItem(canvas) {
+    updateItem() {
+        let item = player.getCurrItem();
+        let atlas = textureManager.getTextureAtlas(item.class);
+        ctx.drawImage(atlas, (item.v - 1) * itemSize, (this.bowCharge ? this.bowCharge : 0) * itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
+
+
         const pixels = canvas.getContext("2d").getImageData(0, 0, 16, 16).data;
         for (var i = 0, n = pixels.length; i < n; i += 4) {
             const r = pixels[i];
@@ -31,8 +57,24 @@ class ActiveItemVoxels {
             const b = pixels[i + 2];
             const a = pixels[i + 3];
 
-            this.pixels[i / 4].material = new THREE.MeshLambertMaterial({ color: new THREE.Color(`rgb(${r}, ${g}, ${b})`) })
-            this.pixels[i / 4].visible = a != 0;
+            this.pixels[i / 4].material = new THREE.MeshBasicMaterial({ color: new THREE.Color(`rgb(${r}, ${g}, ${b})`) })
+            this.pixels[i / 4].visible = a !== 0;
+        }
+    }
+
+    update() {
+        // Move hand
+        let pos1, pos2, rot1, rot2;
+        const timeSincePunch = Date.now() - player.punching;
+        const punchLerp = timeSincePunch / 130;
+
+
+        if (punchLerp < 1) { // Forward animatipon
+            this.root.position.lerpVectors(posStart, posEnd, punchLerp);
+            this.root.quaternion.slerpQuaternions(rotStart, rotEnd, punchLerp)
+        } else if (punchLerp < 2) { // Reverse animation
+            this.root.position.lerpVectors(posEnd, posStart, punchLerp - 1);
+            this.root.quaternion.slerpQuaternions(rotEnd, rotStart, punchLerp - 1)
         }
     }
 }

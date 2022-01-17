@@ -11,10 +11,10 @@ import inventory from "./items/Inventory";
 import masterRenderer from "./graphics/MasterRenderer";
 import { random } from './lib/helper';
 
-import armItem from "./graphics/ActiveItemVoxels"
+import activeItemVoxels from "./graphics/ActiveItemVoxels"
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
-const TO_RAD = Math.PI / 180;
+const EMPTY = new THREE.Mesh();
 
 class Player {
     constructor() {
@@ -308,30 +308,11 @@ class Player {
         this.prevState = this.bowCharge;
         camera.remove(this.arm);
 
+        activeItemVoxels.updateItem()
+
         if (item && item.class == "item" && item.c > 0) { // Display item
-            let canvas = document.createElement("canvas");
-            let itemSize = 16;
-            canvas.width = itemSize;
-            canvas.height = itemSize;
-            let ctx = canvas.getContext("2d");
-            let atlas = textureManager.getTextureAtlas(item.class);
-            ctx.drawImage(atlas, (item.v - 1) * itemSize, (this.bowCharge ? this.bowCharge : 0) * itemSize, itemSize, itemSize, 0, 0, itemSize, itemSize);
-            armItem.updateItem(canvas);
-            this.arm = armItem.root
-            this.arm.renderOrder = 1;
-
-
-            // TOOL START POS
-            this.arm.position.set(2, -0.5, -3);
-            this.arm.rotation.set(Math.PI / 4 + 0.2, 0, 0)
-
-            // TOOL END POS
-            // this.arm.position.set(1, -2.5, -3);
-            // this.arm.rotation.set(-30 * TO_RAD, -25 * TO_RAD, 36 * TO_RAD)
-
-            camera.add(this.arm)
-
-
+            // moved to Active Item Voxel
+            this.arm = EMPTY
         } else if (item && item.c > 0) { // Display block
             let uvVoxel = item.v - 1;
             let item_geometry = new THREE.BufferGeometry();
@@ -1234,6 +1215,7 @@ class Player {
         this.placeBlock();
         this.dropItem();
         this.updateHand();
+        activeItemVoxels.update()
 
         this.move(delta);
 
