@@ -1,7 +1,7 @@
 let world, cells;
 let result = [];
 
-let colors = ["black", "blue", "brown", "cyan", "gray", "green", "light_blue", "lime", "magenta", "orange", "pink", "purple", "red", "silver", "white", "yellow"];
+let colors = ["black", "blue", "brown", "cyan", "gray", "green", "blue", "light_blue", "lime", "magenta", "orange", "pink", "purple", "red", "silver", "white", "yellow"];
 let woodTypes = ["spruce", "birch", "jungle", "acacia", "big_oak"];
 let transparentBlocks = [];
 

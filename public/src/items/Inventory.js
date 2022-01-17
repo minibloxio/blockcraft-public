@@ -247,7 +247,7 @@ class Inventory {
 
     // Valid armor type
     isArmor(item, index) {
-        if (!item) return;
+        if (!item || item.class == "block") return;
 
         let armorType = ["helmet", "chestplate", "leggings", "boots"];
         let armorMat = ["leather", "gold", "chainmail", "iron", "diamond"];
@@ -1014,11 +1014,8 @@ class Inventory {
     }
 
     // Draw item in inventory
-    drawItem(xPos, yPos, entity) {
+    drawItem(xPos, yPos, entity, width = this.blockWidth) {
         if (!entity) return;
-
-        let { blockWidth } = this;
-
         // Floor xPos and yPos
         xPos = Math.floor(xPos);
         yPos = Math.floor(yPos);
@@ -1026,17 +1023,68 @@ class Inventory {
         let index = entity.v - 1;
         let atlas = textureManager.getTextureAtlas(entity.class);
 
-        ctx.drawImage(atlas,
-            index * 16, 0,
-            16, 16,
-            xPos,
-            yPos,
-            blockWidth, blockWidth
-        );
+        if (entity.class == "block") {
+            yPos += width/4;
+
+            ctx.save();
+
+            let verticalScale = 0.6;
+            let horizontalScale = 0.25;
+            let topScale = 0.5;
+
+            // Left face
+            ctx.transform(0.5, horizontalScale, 0, verticalScale, xPos, yPos);
+            ctx.filter = "brightness(90%)";
+            ctx.drawImage(atlas,
+                index * 16, 0,
+                16, 16,
+                0,
+                0,
+                width, width
+            );
+            ctx.resetTransform();
+
+            // Right face
+            ctx.transform(0.5, -horizontalScale, 0, verticalScale, xPos+width/2, yPos+width*horizontalScale);
+            ctx.filter = "brightness(70%)";
+            ctx.drawImage(atlas,
+                index * 16, 0,
+                16, 16,
+                0,
+                0,
+                width, width
+            );
+            ctx.filter = "brightness(100%)";
+            ctx.resetTransform();
+            
+            // Top face
+            ctx.translate(xPos, yPos);
+            ctx.scale(1, topScale);
+            ctx.transform(0.5, -0.5, 0.5, 0.5, 0, 0);
+            ctx.drawImage(atlas,
+                index * 16, 32,
+                16, 16,
+                0,
+                0,
+                width, width
+            );
+            ctx.restore();
+
+            yPos -= width/4;
+
+        } else if (entity.class == "item") {
+            ctx.drawImage(atlas,
+                index * 16, 0,
+                16, 16,
+                xPos,
+                yPos,
+                width, width
+            );
+        }
         drawText(entity.c == 1 ? "" : entity.c,
-            xPos + blockWidth + 2,
-            yPos + blockWidth + 5,
-            Math.floor(blockWidth / 2) + 5 + "px Minecraft-Regular",
+            xPos + width + 2,
+            yPos + width + 5,
+            Math.floor(width / 2) + 5 + "px Minecraft-Regular",
             entity.c ? "white" : "yellow",
             "right", "bottom", 1, true, parseInt(game.guiSize) * 1.7
         );
@@ -1053,7 +1101,7 @@ class Inventory {
             else voxel = world.blockId[name];
 
             if (!voxel) continue;
-
+            
             let { xPos, yPos } = this.getPos("item", index);
 
             this.drawItem(xPos, yPos, {
@@ -1147,23 +1195,10 @@ class Inventory {
             if (showInventory)
                 entity = this.inventory[i];
             if (entity && entity.c > 0) {
-                let index = entity.v - 1;
-                let atlas = textureManager.getTextureAtlas(entity.class);
-
                 let xPos = toolbarX + (hotboxWidth - this.toolbarBlockWidth) / 2 + i * hotboxWidth * this.toolbarRatio;
                 let yPos = canvas.height - hotboxWidth + (hotboxWidth - this.toolbarBlockWidth) / 8;
 
-                ctx.drawImage(atlas,
-                    index * 16, 0, 16, 16,
-                    xPos,
-                    yPos,
-                    this.toolbarBlockWidth, this.toolbarBlockWidth
-                );
-                drawText(entity.c == 1 ? "" : entity.c,
-                    xPos + this.toolbarBlockWidth + 2,
-                    yPos + this.toolbarBlockWidth + 5,
-                    Math.floor(this.toolbarBlockWidth / 2) + 5 + "px Minecraft-Regular", "white", "right", "bottom", 1, true, parseInt(game.guiSize) * 1.7
-                );
+                this.drawItem(xPos, yPos, entity, this.toolbarBlockWidth);
             }
         }
     }
