@@ -273,6 +273,7 @@ class Inventory {
 
         if (block == "creative" && firstClick) { // CREATIVE MODE
             i = i + currentRow * 9;
+
             if (type == "left") { // Left click item
                 let entity = {}
                 if (i < searchBlocks.length) {
@@ -353,6 +354,12 @@ class Inventory {
             if (i >= 36 && i < 40 && this.selectedItem && !this.isArmor(this.selectedItem, i)) return;
 
             if (map[16] && (type == "left" || type == "right" || type == "double")) { // Shift click to move to another part of the inventory
+                
+                if (player.mode == "creative" && !this.showCraftingTable) {
+                    block[i] = undefined;
+                    return;
+                }
+
                 if (!selectedExists && blockExists && firstClick) {
                     let index = this.isArmor(block[i]);
                     let item = this.copyItem(block[i]);
