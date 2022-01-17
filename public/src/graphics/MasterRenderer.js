@@ -4,7 +4,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
 import gameScene from "./GameScene"
-import activeItemScene from "./ActiveItemScene"
+import activeItem, { scene as activeItemScene, camera as activeItemCamera } from "./ActiveItemScene"
 import { scene, camera } from "../globals"
 
 
@@ -20,7 +20,7 @@ class MasterRenderer {
 
     init() {
         gameScene.init()
-        activeItemScene.init()
+        activeItem.init()
         this.renderer = new THREE.WebGLRenderer({ antialias: false, logarithmicDepthBuffer: false, alpha: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -64,7 +64,7 @@ class MasterRenderer {
         this.renderer.clear();
         this.composer.render(gameScene.scene, gameScene.camera);
         this.renderer.clearDepth();
-        this.renderer.render(activeItemScene.scene, activeItemScene.camera);
+        this.renderer.render(activeItemScene, activeItemCamera);
     }
 
     resize() {
