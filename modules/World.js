@@ -373,7 +373,7 @@ module.exports = class World {
         for (let id in players) {
             let player = players[id];
             let canHitOwnPlayer = (Date.now() - entity.t > 200) ? true : id != entity.playerId;
-            if (player.mode == "spectator" || player.mode == "camera" || player.blocking || player.dead || entity.onObject || !canHitOwnPlayer) continue;
+            if (player.mode != "survival" || player.blocking || player.dead || entity.onObject || !canHitOwnPlayer) continue;
 
             let { dist } = this.getDist(player, entity);
             if (dist > blockSize) continue;
