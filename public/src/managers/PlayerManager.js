@@ -68,24 +68,6 @@ class PlayerManager {
         PlayerManager.setPlayerGamemode(p, p.mode);
     }
 
-    static addSkeleton(p) {
-        // Create skeleton of head, body, arms, and legs
-        p.skeleton = new THREE.Group();
-        p.skeleton.add(p.body);
-        p.skeleton.add(p.leftArm);
-
-        p.skeleton.add(p.rightShoulder);
-        p.skeleton.add(p.leftLeg);
-        p.skeleton.add(p.rightLeg);
-
-        p.skeleton.add(p.neck);
-        p.skeleton.name = p.id;
-
-        p.bbox = new THREE.BoxHelper(p.skeleton, 0xffff00);
-        p.bbox.visible = game.debug || false;
-        p.skeleton.add(p.bbox);
-    }
-
     static clearPlayerArmor(p) {
         // Helmet
         p.helmetMesh.visible = false;
@@ -297,8 +279,31 @@ class PlayerManager {
             p.rightBootsMesh,
         );
 
-        p.leftLeg.position.set(-dim.legSize * 1 / 2, -blockSize * 0.45 - blockSize * 0.75, 0);
-        p.rightLeg.position.set(dim.armSize * 1 / 2, -blockSize * 0.45 - blockSize * 0.75, 0);
+        p.leftLeg.position.set(-dim.legSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
+        p.rightLeg.position.set(dim.armSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
+
+        p.leftHip = new THREE.Object3D();
+        p.leftHip.add(p.leftLeg);
+        p.rightHip = new THREE.Object3D();
+        p.rightHip.add(p.rightLeg);
+    }
+    
+    static addSkeleton(p) {
+        // Create skeleton of head, body, arms, and legs
+        p.skeleton = new THREE.Group();
+        p.skeleton.add(p.body);
+        p.skeleton.add(p.leftArm);
+
+        p.skeleton.add(p.rightShoulder);
+        p.skeleton.add(p.leftHip);
+        p.skeleton.add(p.rightHip);
+
+        p.skeleton.add(p.neck);
+        p.skeleton.name = p.id;
+
+        p.bbox = new THREE.BoxHelper(p.skeleton, 0xffff00);
+        p.bbox.visible = game.debug || false;
+        p.skeleton.add(p.bbox);
     }
 
     static addPlayerMesh(p) {
