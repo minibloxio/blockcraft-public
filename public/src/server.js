@@ -5,21 +5,6 @@ import player from './Player';
 import { players, g, camera } from './globals';
 import PlayerManager from './managers/PlayerManager';
 
-import * as dat from 'dat.gui';
-const gui = new dat.GUI();
-gui.domElement.style.zIndex = '10';
-console.log(gui.domElement);
-
-let blockSize = 16;
-const offset = {
-    armY: -blockSize * 0.15,
-    legY: -blockSize * 0.75,
-}
-
-gui.add(offset, 'armY', -blockSize * 0.5, blockSize * 0.5);
-gui.add(offset, 'legY', -blockSize * 1, blockSize * 1);
-globalThis.offset = offset;
-
 // Update server players
 export function updatePlayers(serverPlayers) {
     for (let id in players) {
@@ -91,8 +76,8 @@ function updatePlayer(p) {
 
     let shift = blockSize / 8;
 
-    let armOffsetY = offset.armY;
-    let legOffsetY = offset.legY;
+    let armOffsetY = -blockSize * 0.15;
+    let legOffsetY = -blockSize * 0.75;
     let legOffsetZ = 0;
     
     let leftHip = p.leftHip;
