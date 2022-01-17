@@ -43,7 +43,10 @@ module.exports = class Bot {
         bot.pos = pos;
 
         bot.punching = true;
-        //bot.walking = true;
+
+        this.bot.sneaking = Date.now() % 1000 < 500;
+
+        this.bot.walking = Date.now() % 10000 < 5000;
     }
 
     collideVoxel(x, y, z) {

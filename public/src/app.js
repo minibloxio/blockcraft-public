@@ -357,7 +357,7 @@ function sendPacket() {
 
 $("#welcome-button")[0].click();
 // Prevent right-click
-document.addEventListener('contextmenu', event => event.preventDefault());
+//document.addEventListener('contextmenu', event => event.preventDefault());
 
 
 // Get cookie username
