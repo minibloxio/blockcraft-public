@@ -23,9 +23,8 @@ import textureManager from './managers/TextureManager';
 import workerManager from './managers/WorkerManager';
 import entityManager from './managers/EntityManager';
 import chat from './managers/ChatManager';
-import hud from './gui/HUDClass';
 import inventory from "./items/Inventory";
-import { initRenderer, renderer, composer } from './graphics/renderer';
+import { initRenderer, composer } from './graphics/renderer';
 import { camera, scene, g, connectionDelay, isState } from './globals';
 import initPointerLock, { requestPointerLock, onWindowResize } from "./input/pointerlock";
 
@@ -34,12 +33,15 @@ import { addVideoControls, addKeyboardControls } from './settings';
 import { animateServerPlayers, animateServerEntities } from './server';
 import { updateHUD } from './gui/hud';
 import { round, updateGUISize } from './lib/helper';
-import { refreshServers, showServerSelect, connectError, updateMenu } from './gui/serverlist';
+import { refreshServers, showServerSelect, connectError, updateMenu } from './gui/mainmenu/serverlist';
 import { initStatistics } from './stats/statslist';
 import { updatePlayers } from './server';
 
+// mainmenu
+import { showSettings } from "./gui/mainmenu/settings"
+import "./gui/mainmenu/tabs"
 
-import changelog from "../json/changelog.json"
+
 
 import * as test from './lib/helper'
 console.log(Object.keys(test).join(", "))
@@ -49,9 +51,6 @@ import { players } from './globals'
 //temp
 import { updateVoxelGeometry } from './managers/WorldManager';
 
-// ['Employment', 'HolidayPopupContainer', 'default', 'DayView', 'Status']
-
-
 /*
 Authenticates the player and provides server details from each running server.
 Handles menu progression logic.
@@ -59,11 +58,6 @@ Handles menu progression logic.
 
 
 // Setup
-
-let lastUpdate = Date.now();
-
-
-g.currentServer = undefined;
 let lastConnection = Date.now() - connectionDelay;
 
 // Initialize server connection
@@ -255,18 +249,6 @@ export function prevState() {
 }
 
 
-// Show settings page
-function showSettings() {
-    $(".menu-button").hide();
-    $("#loading-bar").show();
-
-    $(".input").hide();
-    $("#name-input").show();
-
-    $(".tab-container").hide();
-    $("#settings").show();
-    $("#video-button")[0].click();
-}
 
 export const axesHelper = new THREE.AxesHelper(0.5);
 axesHelper.position.z -= 3;
@@ -295,7 +277,9 @@ function init() {
 }
 
 
-// Game loop
+// #########################################################################
+// GAME LOOP
+// #########################################################################
 let then = performance.now();
 let prevTime = performance.now();
 
@@ -375,62 +359,6 @@ $("#welcome-button")[0].click();
 // Prevent right-click
 document.addEventListener('contextmenu', event => event.preventDefault());
 
-// Change tab
-function changeTab(evt, elementId) {
-    // Declare all variables
-    var i, tabcontent, tablinks;
-
-    // Get all elements with class="tabcontent" and hide them
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-
-    // Get all elements with class="tablinks" and remove the class "active"
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    // Show the current tab, and add an "active" class to the button that opened the tab
-    document.getElementById(elementId).style.display = "block";
-    evt.currentTarget.className += " active";
-}
-
-// Tab links
-$("#welcome-button").click(function (event) {
-    changeTab(event, "welcome");
-})
-$("#changelog-button").click(function (event) {
-    changeTab(event, "changelog");
-})
-$("#server-button").click(function (event) {
-    changeTab(event, "server-list");
-})
-$("#video-button").click(function (event) {
-    changeTab(event, "video-settings");
-})
-$("#keyboard-button").click(function (event) {
-    changeTab(event, "keyboard-settings");
-})
-
-// Load the changelog
-for (let change of changelog) {
-    let date = change.date;
-    let version = change.version;
-    let changes = change.changes.split("|");
-
-    let message = $("<span>v" + version + " | " + date + "</span><br><br>");
-    $("#changelog").append(message);
-
-    for (let comment of changes) {
-
-        let message = $("<span>- " + comment + "</span><br>");
-        $("#changelog").append(message);
-    }
-
-    $("#changelog").append($("<br>"));
-}
 
 // Get cookie username
 
@@ -664,6 +592,8 @@ g.socket.on('message', function (data) {
 g.socket.on('refresh', function () {
     location.reload(true);
 })
+
+let lastUpdate = Date.now();
 
 function updateClient(data) {
     if (!g.joined || !g.initialized) return;
