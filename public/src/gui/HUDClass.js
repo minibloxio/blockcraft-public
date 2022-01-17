@@ -2,7 +2,6 @@ import game from '../Game';
 import inventory from '../items/Inventory';
 import world from '../managers/WorldManager';
 import player from '../Player';
-import { colorPass } from "../graphics/renderer";
 
 import { g, icons, players } from '../globals';
 import { drawRectangle, drawText, round } from '../lib/helper';
@@ -166,7 +165,7 @@ class HUD {
 
     // Display oxygen bar
     displayOxygen() {
-        if (!colorPass.enabled) return;
+        if (!player.headInWater) return;
 
         // Draw air bubbles
         for (let i = 0; i < 10; i++) {

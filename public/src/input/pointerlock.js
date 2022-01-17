@@ -9,7 +9,7 @@ import inventory from '../items/Inventory';
 import keyconfig from '../../json/keymap.json';
 import player from '../Player';
 import chat from '../managers/ChatManager';
-import { renderer } from '../graphics/renderer';
+import masterRenderer from '../graphics/MasterRenderer';
 import { camera, g } from '../globals';
 import { updateGUISize } from '../lib/helper';
 import { getCookie, setCookie } from '../resources/cookie';
@@ -242,7 +242,7 @@ export function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    masterRenderer.resize()
 
     var crosshairSize = 50;
 

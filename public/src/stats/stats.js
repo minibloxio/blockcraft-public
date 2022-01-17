@@ -170,4 +170,8 @@ Stats.Panel = function (name, fg, bg) {
 };
 
 const stats = new Stats();
+
+// Add statistics
+document.body.appendChild(stats.dom);
+
 export default stats;

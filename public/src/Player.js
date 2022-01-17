@@ -8,7 +8,7 @@ import game from './Game';
 import chunkManager from './managers/ChunkManager';
 import chat from './managers/ChatManager';
 import inventory from "./items/Inventory";
-import { colorPass } from "./graphics/renderer";
+import gameRenderer from "./graphics/GameRenderer";
 import { random } from './lib/helper';
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
@@ -932,7 +932,7 @@ class Player {
         } else {
             if (this.key.up && this.inWater) {
                 this.velocity.y = 50;
-            } else if (colorPass.enabled) {
+            } else if (this.headInWater) {
                 this.velocity.y = Math.min(-20, this.velocity.y * delta * 50);
             } else {
                 this.velocity.y -= 9.81 * 50.0 * delta; // Falling in air
@@ -1285,9 +1285,10 @@ class Player {
         z = posZ;
 
         let voxel = world.getVoxel(x, y, z)
+
         // Head in water
-        colorPass.enabled = voxel == world.blockId["water"];
-        this.headInWater = colorPass.enabled;
+        this.headInWater = voxel == world.blockId["water"];
+        gameRenderer.renderUnderWater = this.headInWater
 
 
         // Head and feet

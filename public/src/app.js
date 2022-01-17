@@ -24,7 +24,7 @@ import workerManager from './managers/WorkerManager';
 import entityManager from './managers/EntityManager';
 import chat from './managers/ChatManager';
 import inventory from "./items/Inventory";
-import { initRenderer, composer } from './graphics/renderer';
+import masterRenderer from './graphics/MasterRenderer';
 import { camera, scene, g, connectionDelay, isState } from './globals';
 import initPointerLock, { requestPointerLock, onWindowResize } from "./input/pointerlock";
 
@@ -265,7 +265,7 @@ function init() {
     addVideoControls(); // Add video settings
     addKeyboardControls(); // Add keyboard controls
     initStatistics(); // Add statistics to record
-    initRenderer(); // Finalize by adding the renderer
+    masterRenderer.init()
     initPointerLock(); // Initialize pointer lock
     updateGUISize(); // Update the GUI size
 
@@ -308,7 +308,7 @@ function animate() { // TODO: Clean up
 
     let renderTime = performance.now();
     stage.update(); // Update the stage
-    composer.render(scene, camera);
+    masterRenderer.render(scene, camera);
     game.renderTime = performance.now() - renderTime;
 
     let canvasTime = performance.now();
