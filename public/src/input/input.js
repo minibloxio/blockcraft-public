@@ -24,6 +24,7 @@ let keymap = keyconfig.keymap;
 $('html').on('mousedown', function (event) {
     if (!g.initialized)
         return;
+    event.preventDefault();
     if (!player.controls.enabled || inventory.showInventory)
         return;
     switch (event.which) {
@@ -92,7 +93,8 @@ $("body").on('mousedown', function (e) {
             g.mouseLeft = true;
             break;
         case 2:
-
+            inventory.selectInventory("middle", true);
+            g.mouseMiddle = true;
             break;
         case 3:
             inventory.selectInventory("right", true);
@@ -105,11 +107,11 @@ $("body").on('mousedown', function (e) {
     if (!g.initialized || !inventory.showInventory) return;
     switch (e.which) {
         case 1:
-            g.mouseLeft = false
+            g.mouseLeft = false;
             inventory.unselect();
             break;
         case 2:
-
+            g.mouseMiddle = false;
             break;
         case 3:
             g.mouseRight = false;

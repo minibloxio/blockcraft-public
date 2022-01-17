@@ -1,6 +1,6 @@
 import keyconfig from "../json/keymap.json";
 import player from "./Player";
-import { getCookie, setCookie } from "./resources/cookie";
+import { getCookie, setCookie, deleteCookie } from "./resources/cookie";
 import game from "./Game";
 import world from "./managers/WorldManager";
 import chunkManager from "./managers/ChunkManager";

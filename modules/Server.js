@@ -62,7 +62,6 @@ module.exports = class World {
         let woodTypes = ["spruce", "birch", "jungle", "acacia", "big_oak"];
         for (let type of woodTypes) {
             this.blockOrder.push("log_" + type);
-            this.blockOrder.push("log_" + type + "_top");
             this.blockOrder.push("planks_" + type);
             this.blockOrder.push("leaves_" + type);
         }
