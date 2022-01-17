@@ -11,7 +11,7 @@ import inventory from "./items/Inventory";
 import masterRenderer from "./graphics/MasterRenderer";
 import { random } from './lib/helper';
 
-import armItem from "../gui/ArmItem"
+import armItem from "./graphics/ActiveItemVoxels"
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 const TO_RAD = Math.PI / 180;

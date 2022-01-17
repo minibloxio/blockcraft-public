@@ -3,8 +3,8 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
-import gameRenderer from "./GameScene"
-import armItemRenderer from "./ActiveItemScene"
+import gameScene from "./GameScene"
+import activeItemScene from "./ActiveItemScene"
 import { scene, camera } from "../globals"
 
 
@@ -19,8 +19,8 @@ class MasterRenderer {
     }
 
     init() {
-        gameRenderer.init()
-        armItemRenderer.init()
+        gameScene.init()
+        activeItemScene.init()
         this.renderer = new THREE.WebGLRenderer({ antialias: false, logarithmicDepthBuffer: false, alpha: true });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -62,9 +62,9 @@ class MasterRenderer {
 
     render() {
         this.renderer.clear();
-        this.composer.render(scene, camera);
+        this.composer.render(gameScene.scene, gameScene.camera);
         this.renderer.clearDepth();
-        this.renderer.render(armItemRenderer.scene, armItemRenderer.camera);
+        this.renderer.render(activeItemScene.scene, activeItemScene.camera);
     }
 
     resize() {
