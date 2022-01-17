@@ -1,11 +1,11 @@
 import { io } from "socket.io-client";
 import { serverList, g, serverNames, connectionDelay, isState } from "../globals"
-import { msToTime, drawRectangle, drawCircle } from '../helper';
+import { msToTime, drawRectangle, drawCircle } from '../lib/helper';
 import { getCookie, deleteCookie } from "../resources/cookie";
-import player from '../classes/Player';
-import world from '../classes/World';
-import chunkManager from '../classes/ChunkManager';
-import { round } from '../helper';
+import player from '../Player';
+import world from '../managers/WorldManager';
+import chunkManager from '../managers/ChunkManager';
+import { round } from '../lib/helper';
 import Ola from "ola";
 import { prevState } from '../app';
 
@@ -20,7 +20,7 @@ export function refreshServers() {
     g.servers = {};
     g.currentServer = undefined;
 
-    let time = performance.now()+500;
+    let time = performance.now() + 500;
 
     $("#server-container").empty();
     for (let i = 0; i < serverList.length; i++) {

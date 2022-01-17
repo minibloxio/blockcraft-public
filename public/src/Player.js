@@ -1,15 +1,15 @@
 import * as THREE from "three";
-import { PointerLockControls } from '../input/pointerlock';
-import { camera, isState, g, scene, players } from "../globals";
-import skinManager from './SkinManager';
-import textureManager from './TextureManager';
-import world, { updateVoxelGeometry } from './World';
+import { PointerLockControls } from './input/pointerlock';
+import { camera, isState, g, scene, players } from "./globals";
+import skinManager from './managers/SkinManager';
+import textureManager from './managers/TextureManager';
+import world, { updateVoxelGeometry } from './managers/WorldManager';
 import game from './Game';
-import chunkManager from './ChunkManager';
-import chat from './ChatManager';
-import inventory from "../items/Inventory";
-import { colorPass } from "../graphics/renderer";
-import { random } from '../helper';
+import chunkManager from './managers/ChunkManager';
+import chat from './managers/ChatManager';
+import inventory from "./items/Inventory";
+import { colorPass } from "./graphics/renderer";
+import { random } from './lib/helper';
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 
@@ -167,7 +167,7 @@ class Player {
     addSelectBox() {
         if (this.select_wireframe) return;
 
-        const {blockSize} = world;
+        const { blockSize } = world;
         let select_box = new THREE.BoxGeometry(blockSize + 0.1, blockSize + 0.1, blockSize + 0.1);
         let { mining_progress } = textureManager;
         this.mine_box = new THREE.Mesh(select_box, mining_progress[0].material)

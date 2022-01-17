@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import Stat from "./StatsClass.js";
-import game from '../classes/Game';
-import player from '../classes/Player';
-import world from "../classes/World.js";
+import game from '../Game';
+import player from '../Player';
+import world from "../managers/WorldManager.js";
 import { g, camera } from '../globals';
 import { renderer } from '../graphics/renderer';
 

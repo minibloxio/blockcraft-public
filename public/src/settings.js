@@ -1,18 +1,18 @@
 import keyconfig from "../json/keymap.json";
-import player from "./classes/Player";
+import player from "./Player";
 import { getCookie, setCookie } from "./resources/cookie";
-import game from "./classes/Game";
-import world from "./classes/World";
-import chunkManager from "./classes/ChunkManager";
-import workerManager from "./classes/WorkerManager";
+import game from "./Game";
+import world from "./managers/WorldManager";
+import chunkManager from "./managers/ChunkManager";
+import workerManager from "./managers/WorkerManager";
 
-import stage from "./classes/Stage";
+import stage from "./Stage";
 
 import hud from "./gui/HUDClass";
 
 import { camera, players } from "./globals";
 
-import { updateGUISize } from "./helper";
+import { updateGUISize } from "./lib/helper";
 
 import { axesHelper } from "./app";
 

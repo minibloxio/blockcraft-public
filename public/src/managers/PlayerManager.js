@@ -8,9 +8,9 @@ Adds/removes player meshes to the scene.
 import * as THREE from "three";
 import Ola from "ola";
 
-import game from './Game';
-import world from "./World";
-import player from "./Player";
+import game from '../Game';
+import world from "./WorldManager";
+import player from "../Player";
 import textureManager from "./TextureManager";
 import skinManager from "./SkinManager";
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';

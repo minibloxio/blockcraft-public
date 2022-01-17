@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import world from './World';
-import game from './Game';
+import world from './WorldManager';
+import game from '../Game';
 import { getCookie } from "../resources/cookie";
 
 import { g } from "../globals"

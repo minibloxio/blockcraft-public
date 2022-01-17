@@ -1,4 +1,4 @@
-import {drawRectangle, drawText, round} from '../helper';
+import { drawRectangle, drawText, round } from '../lib/helper';
 
 let canvas = document.getElementById('canvas-hud');
 let ctx = canvas.getContext('2d');

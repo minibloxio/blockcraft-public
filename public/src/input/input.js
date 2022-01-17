@@ -1,9 +1,9 @@
 import Ola from "ola";
 
-import game from '../classes/Game';
-import world from '../classes/World';
-import player from '../classes/Player';
-import chat from '../classes/ChatManager';
+import game from '../Game';
+import world from '../managers/WorldManager';
+import player from '../Player';
+import chat from '../managers/ChatManager';
 import hud from '../gui/HUDClass';
 import inventory from "../items/Inventory";
 import keyconfig from "../../json/keymap.json"
@@ -14,7 +14,7 @@ import { camera, g } from '../globals';
 
 // Functions
 import { giveCommandHint } from "../commands";
-import { clamp } from '../helper';
+import { clamp } from '../lib/helper';
 
 let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
 

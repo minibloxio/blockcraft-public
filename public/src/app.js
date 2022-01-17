@@ -7,22 +7,22 @@ import Ola from "ola";
 import * as THREE from "three";
 
 // Import classes (THAT DON'T NEED TO BE TURNED INTO SINGLETONS)
-import PlayerManager from "./classes/PlayerManager";
+import PlayerManager from "./managers/PlayerManager";
 
 // Import classes (TURN THESE INTO SINGLETONS)
 import { getCookie, setCookie } from "./resources/cookie";
 import stats from "./stats/stats.js";
 
 // Import singletons
-import game from './classes/Game';
-import world from './classes/World';
-import player from './classes/Player';
-import stage from './classes/Stage';
-import chunkManager from './classes/ChunkManager';
-import textureManager from './classes/TextureManager';
-import workerManager from './classes/WorkerManager';
-import entityManager from './classes/EntityManager';
-import chat from './classes/ChatManager';
+import game from './Game';
+import world from './managers/WorldManager';
+import player from './Player';
+import stage from './Stage';
+import chunkManager from './managers/ChunkManager';
+import textureManager from './managers/TextureManager';
+import workerManager from './managers/WorkerManager';
+import entityManager from './managers/EntityManager';
+import chat from './managers/ChatManager';
 import hud from './gui/HUDClass';
 import inventory from "./items/Inventory";
 import { initRenderer, renderer, composer } from './graphics/renderer';
@@ -33,7 +33,7 @@ import initPointerLock, { requestPointerLock, onWindowResize } from "./input/poi
 import { addVideoControls, addKeyboardControls } from './settings';
 import { animateServerPlayers, animateServerEntities } from './server';
 import { updateHUD } from './gui/hud';
-import { round, updateGUISize } from './helper';
+import { round, updateGUISize } from './lib/helper';
 import { refreshServers, showServerSelect, connectError, updateMenu } from './gui/serverlist';
 import { initStatistics } from './stats/statslist';
 import { updatePlayers } from './server';
@@ -41,13 +41,13 @@ import { updatePlayers } from './server';
 
 import changelog from "../json/changelog.json"
 
-import * as test from './helper'
+import * as test from './lib/helper'
 console.log(Object.keys(test).join(", "))
 
-import {players} from './globals'
+import { players } from './globals'
 
 //temp
-import { updateVoxelGeometry } from './classes/World';
+import { updateVoxelGeometry } from './managers/WorldManager';
 
 // ['Employment', 'HolidayPopupContainer', 'default', 'DayView', 'Status']
 

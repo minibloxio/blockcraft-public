@@ -1,12 +1,12 @@
 import * as THREE from "three";
 import game from "./Game";
-import world from "./World";
+import world from "./managers/WorldManager";
 import player from "./Player";
-import textureManager from "./TextureManager";
-import chunkManager from "./ChunkManager";
+import textureManager from "./managers/TextureManager";
+import chunkManager from "./managers/ChunkManager";
 
-import { scene } from '../globals';
-import { random, mapRange } from "../helper";
+import { scene } from './globals';
+import { random, mapRange } from "./lib/helper";
 
 class Stage {
 	constructor() {

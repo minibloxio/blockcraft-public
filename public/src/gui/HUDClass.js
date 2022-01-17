@@ -1,11 +1,11 @@
-import game from '../classes/Game';
+import game from '../Game';
 import inventory from '../items/Inventory';
-import world from '../classes/World';
-import player from '../classes/Player';
+import world from '../managers/WorldManager';
+import player from '../Player';
 import { colorPass } from "../graphics/renderer";
 
 import { g, icons, players } from '../globals';
-import {drawRectangle, drawText, round} from '../helper';
+import { drawRectangle, drawText, round } from '../lib/helper';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");

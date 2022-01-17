@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import game from './classes/Game';
-import world from './classes/World';
-import player from './classes/Player';
+import game from './Game';
+import world from './managers/WorldManager';
+import player from './Player';
 import { players, g, camera } from './globals';
-import PlayerManager from './classes/PlayerManager';
+import PlayerManager from './managers/PlayerManager';
 
 // Update server players
 export function updatePlayers(serverPlayers) {

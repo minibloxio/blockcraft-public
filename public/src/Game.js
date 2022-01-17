@@ -1,10 +1,10 @@
-import { getCookie } from '../resources/cookie';
+import { getCookie } from './resources/cookie';
 
 class Game {
     constructor() {
         this.packetDelay = 16;
         this.lastPacket = Date.now();
-        this.numOfVoxelWorkers = 1;
+        this.numOfVoxelWorkers = 2;
         this.guiSize = 1;
         this.tick = 0;
         this.lastUpdate = Date.now();

@@ -3,13 +3,13 @@
 */
 
 import * as THREE from 'three';
-import chat from './classes/ChatManager';
-import world from './classes/World';
-import player from './classes/Player';
-import chunkManager from './classes/ChunkManager';
+import chat from './managers/ChatManager';
+import world from './managers/WorldManager';
+import player from './Player';
+import chunkManager from './managers/ChunkManager';
 
 import { players, g } from './globals';
-import { round, clamp } from './helper';
+import { round, clamp } from './lib/helper';
 import { disconnectServer } from './app';
 
 let commandsInit = JSON.stringify({

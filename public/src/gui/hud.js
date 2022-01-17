@@ -1,13 +1,13 @@
 import hud from "./HUDClass.js";
 import inventory from "../items/Inventory.js";
-import chat from "../classes/ChatManager.js";
+import chat from "../managers/ChatManager.js";
 
 // Variables
 import { g } from '../globals';
 import statistics from "../stats/statslist";
 
 // Functions
-import { drawText } from '../helper';
+import { drawText } from '../lib/helper';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");

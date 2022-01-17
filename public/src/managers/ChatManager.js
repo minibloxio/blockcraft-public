@@ -1,10 +1,10 @@
 import changelog from "../../json/changelog.json"
-import game from './Game';
+import game from '../Game';
 import inventory from '../items/Inventory';
 import hud from '../gui/HUDClass';
-import player from './Player';
+import player from '../Player';
 import { players, g } from '../globals';
-import { drawRectangle, drawText } from '../helper';
+import { drawRectangle, drawText } from '../lib/helper';
 
 let canvas = document.getElementById('canvas-hud');
 let ctx = canvas.getContext('2d');

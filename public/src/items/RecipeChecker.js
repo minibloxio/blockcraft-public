@@ -1,4 +1,4 @@
-import world from "../classes/World.js";    
+import world from "../managers/WorldManager.js";
 
 export default class Recipe {
 

@@ -1,6 +1,6 @@
-import chat from './classes/ChatManager';
-import hud from './gui/HUDClass';
-import inventory from "./items/Inventory";
+import chat from '../managers/ChatManager';
+import hud from '../gui/HUDClass';
+import inventory from "../items/Inventory";
 
 let canvas = document.getElementById('canvas-hud');
 let ctx = canvas.getContext('2d');

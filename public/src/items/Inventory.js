@@ -1,12 +1,12 @@
 import recipes from "../../json/recipes.json";
-import game from '../classes/Game';
-import world from '../classes/World';
-import player from '../classes/Player';
-import textureManager from '../classes/TextureManager';
-import { drawRectangle, drawRect, drawImage, drawImageTopLeft, drawText, clamp } from "../helper"
+import game from '../Game';
+import world from '../managers/WorldManager';
+import player from '../Player';
+import textureManager from '../managers/TextureManager';
+import { drawRectangle, drawRect, drawImage, drawImageTopLeft, drawText, clamp } from "../lib/helper"
 import { g, toolbar, toolbar_selector } from '../globals';
 import { mouse, map } from '../input/input';
-import Recipe from '../items/RecipeChecker'; 
+import Recipe from './RecipeChecker';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
