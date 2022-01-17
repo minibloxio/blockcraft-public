@@ -617,6 +617,7 @@ class Player {
         }
     }
 
+    // Gets the block that the player is looking at
     getBlock() {
         if (this.mode != "creative") return;
 
@@ -636,7 +637,29 @@ class Player {
             for (let i = 0; i < this.toolbar.length; i++) {
                 let t = this.toolbar[i];
                 if (t && t.v == voxel && t.c > 0 && t.class == "block") {
-                    this.currentSlot = i;
+
+                    if (i >= 9) { // Move to toolbar
+                        let item = JSON.parse(JSON.stringify(this.toolbar[i]));
+                        this.toolbar[i] = undefined;
+
+                        // Find space in toolbar
+                        let foundSpace = false;
+                        for (let  j = 0; j < 9; j++) {
+                            if (!this.toolbar[j] || this.toolbar[j].c == 0) {
+                                this.toolbar[j] = item;
+                                this.currentSlot = j;
+                                foundSpace = true;
+                                break;
+                            }
+                        }
+                        if (!foundSpace) {
+                            this.toolbar[this.currentSlot] = item;
+                        }
+                        g.socket.emit('updateInventory', this.toolbar);
+                    } else {
+                        this.currentSlot = i;
+                    }
+                    
                     exists = true;
                     break;
                 } else if (t && t.c > 0) {
@@ -763,7 +786,7 @@ class Player {
             }
             this.toolbar[inventory.limit + index] = JSON.parse(armor);
             g.socket.emit('updateInventory', this.toolbar);
-
+            
             this.place = false;
             return;
         }

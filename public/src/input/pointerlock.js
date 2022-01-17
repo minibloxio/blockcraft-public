@@ -48,7 +48,7 @@ function getItemEntity(player, item, dropDir) {
 }
 
 // Get dropped items
-function getDroppedItems(items, count) {
+export function getDroppedItems(items, count) {
     if (!items) return [];
 
     let droppedItems = [];

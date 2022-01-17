@@ -7,6 +7,7 @@ import { drawRectangle, drawRect, drawImage, drawImageTopLeft, drawText, clamp }
 import { g, toolbar, toolbar_selector } from '../globals';
 import { mouse, map } from '../input/input';
 import Recipe from './RecipeChecker';
+import { getDroppedItems } from '../input/pointerlock';
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
@@ -328,6 +329,20 @@ class Inventory {
                         this.selectedItem = prevBlock;
                     }
                 }
+            } else if (type == "middle") { // Middle click item
+                let entity = {
+                    c: 64,
+                }
+
+                if (i < searchBlocks.length) {
+                    entity.class = "block";
+                    entity.v = world.blockId[searchBlocks[i]]; // Get block id
+                } else if (i < searchBlocks.length + searchItems.length) {
+                    entity.class = "item";
+                    entity.v = world.itemId[searchItems[i - searchBlocks.length]]; // Get item id
+                }
+                // Copy item
+                this.selectedItem = entity;
             }
         } else if (block == "creative" && type == "hover") { // HOVERING OVER BOX
             i = i + currentRow * 9;
@@ -353,11 +368,19 @@ class Inventory {
             // Invalid armor item
             if (i >= 36 && i < 40 && this.selectedItem && !this.isArmor(this.selectedItem, i)) return;
 
+            if (type == "middle" && firstClick && player.mode == "creative") { // Middle click item
+                // Copy item
+                if (block[i] && block[i].c > 0) {
+                    this.selectedItem = this.copyItem(block[i]);
+                }
+                return;
+            }
+
             if (map[16] && (type == "left" || type == "right" || type == "double")) { // Shift click to move to another part of the inventory
                 
                 if (player.mode == "creative" && !this.showCraftingTable) {
                     block[i] = undefined;
-                    return;
+                    return;e
                 }
 
                 if (!selectedExists && blockExists && firstClick) {
