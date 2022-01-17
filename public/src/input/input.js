@@ -24,7 +24,7 @@ let keymap = keyconfig.keymap;
 $('html').on('mousedown', function (event) {
     if (!g.initialized)
         return;
-    event.preventDefault();
+    //event.preventDefault();
     if (!player.controls.enabled || inventory.showInventory)
         return;
     switch (event.which) {

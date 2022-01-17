@@ -6,6 +6,8 @@ import world from "../managers/WorldManager.js";
 import { g, camera } from '../globals';
 import masterRenderer from '../graphics/MasterRenderer';
 
+globalThis.masterRenderer = masterRenderer;
+
 let statistics = [];
 
 // Initialize statistics

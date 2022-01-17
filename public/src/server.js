@@ -72,12 +72,12 @@ function updatePlayer(p) {
 
     p.entity.position.set(p.pos.x, p.pos.y, p.pos.z);
     p.skeleton.rotation.set(p.rot.x, p.rot.y, p.rot.z);
-    p.neck.rotation.x = p.dir.y;
+    p.headPivot.rotation.x = p.dir.y;
 
     let shift = blockSize / 8;
 
     let armOffsetY = -blockSize * 0.15;
-    let legOffsetY = -blockSize * 0.75;
+    let legOffsetY = blockSize * 0.5;
     let legOffsetZ = 0;
     
     let leftHip = p.leftHip;
@@ -94,28 +94,26 @@ function updatePlayer(p) {
 
     	p.body.rotation.x = -Math.PI/8;
 
-    	p.head.position.set(0, blockSize*0, 0);
+    	p.neck.position.set(0, -blockSize*0.25, 0);
     	p.body.position.set(0, -blockSize*0.55, shift);
 
-    	leftLeg.position.set(-player.dim.legSize/2, -blockSize*0.45-blockSize*0.9+shift, shift*2);
-    	rightLeg.position.set(player.dim.legSize/2, -blockSize*0.45-blockSize*0.9+shift, shift*2);
+    	leftHip.position.set(-player.dim.legSize/2, -blockSize*0.45-blockSize*0.9+shift, shift*2);
+    	rightHip.position.set(player.dim.legSize/2, -blockSize*0.45-blockSize*0.9+shift, shift*2);
 
         p.leftArm.position.set(-5.45, -blockSize*0.45-shift, 0);
         p.rightArm.position.set(-0.55, -blockSize * 0.3-shift, 0);
     } else {
     	p.body.rotation.x = 0;
 
-    	p.head.position.set(0, blockSize*0.175, 0);
+    	p.neck.position.set(0, -blockSize * 0.075, 0);
     	p.body.position.set(0, -blockSize*0.45, 0);
 
-    	leftLeg.position.set(-player.dim.legSize*0.5, -blockSize*0.45-blockSize*0.75, 0);
-    	rightLeg.position.set(player.dim.armSize*0.5, -blockSize*0.45-blockSize*0.75, 0);
+    	leftHip.position.set(-player.dim.legSize*0.5, -blockSize*0.45-blockSize*0.75, 0);
+    	rightHip.position.set(player.dim.armSize*0.5, -blockSize*0.45-blockSize*0.75, 0);
 
         p.leftArm.position.set(-5.45, -blockSize*0.45, 0);
         p.rightArm.position.set(-0.55, -blockSize * 0.3, 0);
     }
-    
-    
 
     // if (p.sneaking) {
     // 	legOffsetY += shift;
@@ -138,21 +136,21 @@ function updatePlayer(p) {
             rotateAboutPoint(p.rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed)
             rotateAboutPoint(p.leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed)
 
-            rotateAboutPoint(rightHip, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, -speed)
-            rotateAboutPoint(leftHip, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, speed)
+            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, -speed)
+            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, speed)
         } else {
             rotateAboutPoint(p.rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed)
             rotateAboutPoint(p.leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed)
 
-            rotateAboutPoint(rightHip, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, speed)
-            rotateAboutPoint(leftHip, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, -speed)
+            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, speed)
+            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, -speed)
         }
     } else {
         rotateAboutPoint(p.rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, Math.abs(p.rightArm.rotation.x) * Math.sign(-p.rightArm.rotation.x))
         rotateAboutPoint(p.leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, Math.abs(p.leftArm.rotation.x) * Math.sign(-p.leftArm.rotation.x))
 
-        rotateAboutPoint(rightHip, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, Math.abs(rightHip.rotation.x) * Math.sign(-rightHip.rotation.x))
-        rotateAboutPoint(leftHip, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, Math.abs(leftHip.rotation.x) * Math.sign(-leftHip.rotation.x))
+        rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, Math.abs(rightLeg.rotation.x) * Math.sign(-rightLeg.rotation.x))
+        rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, Math.abs(leftLeg.rotation.x) * Math.sign(-leftLeg.rotation.x))
     }
 
     if (p.hand) {

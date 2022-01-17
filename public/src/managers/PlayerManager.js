@@ -164,10 +164,16 @@ class PlayerManager {
 
         p.head = new THREE.Group();
         p.head.add(headMesh, p.helmetMesh);
-        p.head.position.set(0, blockSize * 0.175, 0);
+        p.head.position.set(0, blockSize * 0.25, 0);
+
+        p.headPivot = new THREE.Group();
+        p.headPivot.add(p.head);
+
 
         p.neck = new THREE.Object3D();
-        p.neck.add(p.head);
+        p.neck.add(p.headPivot);
+        
+        p.neck.position.set(0, -blockSize * 0.075, 0);
     }
 
     // Add torso
@@ -278,14 +284,15 @@ class PlayerManager {
             p.rightLeggingsMesh,
             p.rightBootsMesh,
         );
-
-        p.leftLeg.position.set(-dim.legSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
-        p.rightLeg.position.set(dim.armSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
+        
 
         p.leftHip = new THREE.Object3D();
         p.leftHip.add(p.leftLeg);
         p.rightHip = new THREE.Object3D();
         p.rightHip.add(p.rightLeg);
+
+        p.leftHip.position.set(-dim.legSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
+        p.rightHip.position.set(dim.legSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
     }
     
     static addSkeleton(p) {
