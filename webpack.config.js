@@ -5,7 +5,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 
 module.exports = {
-    entry: './public/javascripts/app.js',
+    entry: './public/src/app.js',
     output: {
         filename: 'main.js',
         path: path.resolve(__dirname, 'dist'),
@@ -56,7 +56,7 @@ module.exports = {
             patterns: [{ from: "./public/textures", to: "./textures" }],
         }),
         new CopyPlugin({
-            patterns: [{ from: "./public/javascripts/workers", to: "./javascripts/workers" }],
+            patterns: [{ from: "./public/src/workers", to: "./src/workers" }],
         }),
     ],
 
