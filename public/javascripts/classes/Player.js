@@ -14,6 +14,7 @@ import { random } from '../helper';
 import armItem from "../gui/ArmItem"
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
+const TO_RAD = Math.PI / 180;
 
 class Player {
     constructor() {
@@ -169,7 +170,7 @@ class Player {
     addSelectBox() {
         if (this.select_wireframe) return;
 
-        const {blockSize} = world;
+        const { blockSize } = world;
         let select_box = new THREE.BoxGeometry(blockSize + 0.1, blockSize + 0.1, blockSize + 0.1);
         let { mining_progress } = textureManager;
         this.mine_box = new THREE.Mesh(select_box, mining_progress[0].material)
@@ -318,8 +319,16 @@ class Player {
             armItem.updateItem(canvas);
             this.arm = armItem.root
             this.arm.renderOrder = 1;
-            this.arm.position.set(1.5, -1, -2);
-            this.arm.rotation.set(Math.PI / 6, -Math.PI / 2, Math.PI / 4 + Math.PI / 8)
+
+
+            // TOOL START POS
+            this.arm.position.set(2, -0.5, -3);
+            this.arm.rotation.set(Math.PI / 4 + 0.2, 0, 0)
+
+            // TOOL END POS
+            // this.arm.position.set(1, -2.5, -3);
+            // this.arm.rotation.set(-30 * TO_RAD, -25 * TO_RAD, 36 * TO_RAD)
+
             camera.add(this.arm)
 
 
