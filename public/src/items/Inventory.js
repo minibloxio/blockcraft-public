@@ -844,14 +844,15 @@ class Inventory {
     // Animate scrollbar
     animateScrollbar() {
         let { boxSize, hotboxWidth, margin, searchBlocks, searchItems, width, height, currentRow } = this;
-        // SCROLLBAR
+        
         let scrollMargin = 2;
         let scrollHeight = boxSize + 3 * hotboxWidth * this.boxRatio - scrollMargin * 2;
         let maxScroll = Math.floor((searchBlocks.length + searchItems.length) / 9) - 2;
         maxScroll = Math.max(maxScroll, 1);
 
         // Draw scroll bar area
-        drawRectangle(this.halfW + width / 2, this.halfH - height / 2, 40, height, this.backgroundColor)
+        if (!game.transparentInventory)
+            drawRectangle(this.halfW + width / 2, this.halfH - height / 2, 40, height, this.backgroundColor)
         // Draw scroll bar background
         drawRectangle(this.halfW + width / 2 + 5, this.halfH - scrollHeight - scrollMargin * 2 - margin, 30, scrollHeight + scrollMargin * 2, "grey")
         // Draw scroll bar thumb
