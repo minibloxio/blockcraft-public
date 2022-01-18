@@ -104,7 +104,7 @@ module.exports = class World {
 
         let data = JSON.stringify(saveObject);
 
-        fs.writeFile(filepath, data, function(err) {
+        fs.writeFile(filepath, data, function (err) {
             if (err) throw err;
             let txt = "Server successfully saved in " + (Date.now() - t) + " ms";
             io.emit('messageAll', {
@@ -373,7 +373,7 @@ module.exports = class World {
         for (let id in players) {
             let player = players[id];
             let canHitOwnPlayer = (Date.now() - entity.t > 200) ? true : id != entity.playerId;
-            if (player.mode == "spectator" || player.mode == "camera" || player.blocking || player.dead || entity.onObject || !canHitOwnPlayer) continue;
+            if (player.mode != "survival" || player.blocking || player.dead || entity.onObject || !canHitOwnPlayer) continue;
 
             let { dist } = this.getDist(player, entity);
             if (dist > blockSize) continue;

@@ -1,6 +1,6 @@
 require('dotenv').config() // load server config from .env
 
-const serverPort = process.env.PORT || 3001;
+const serverPort = process.env.PORT || 3002;
 // Initialize server variables
 const express = require('express');
 const app = express();

@@ -7,87 +7,17 @@
     <meta name="viewport" content="width=device-width, user-scalable=yes, minimum-scale=1.0, maximum-scale=1.0">
     <meta name=description content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!">
     <meta name="theme-color" content="#317EFB" />
-
-
     <meta property="og:title" content="BlockCraft" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://blockcraft.victorwei.com" />
     <meta property="og:image" content="https://blockcraft.victorwei.com/images/content.png" />
-    <meta property="og:description" content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!"
-    />
-    <meta name="keywords" content="HTML, CSS, JavaScript, Three.js">
-    <meta name="author" content="Victor Wei">
-
-    <link rel="stylesheet" href="style.css">
-    <link rel="shortcut icon" type="image/png" href="./favicon.png" />
-
+    <meta property="og:description" content="BlockCraft is a WebGL implementation of a procedurally-generated voxel world that runs on the web browser. This project started off as a Minecraft Classic clone but has evolved to include multiplayer PvP, crafting, shaders and much more!" />
+    <meta name="keywords" content="Three.js, Minecraft, Free, Blockcraft, Block, Craft">
+    <meta name="author" content="Victor Wei, Howard Yun">
 </head>
 
 <body>
-
     <canvas id="canvas-hud"></canvas>
-
-    <!-- Load CDNs -->
-    <script src="https://cdn.jsdelivr.net/npm/ola"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-    <!-- Load Resources -->
-    <script src="javascripts/resources/three.js"></script>
-    <script src="javascripts/resources/SVGLoader.js"></script>
-    <script src="javascripts/resources/socket.io.js"></script>
-    <script src="javascripts/resources/stats.js"></script>
-    <script src="javascripts/resources/perlin.js"></script>
-    <script src="javascripts/resources/simplex.js"></script>
-    <script src="javascripts/resources/matrix.js"></script>
-    <script src="javascripts/resources/sizeof.js"></script>
-    <script src="javascripts/resources/cookie.js"></script>
-    <script src="javascripts/resources/rle-encoding.js"></script>
-    <script src="javascripts/resources/TextureMerger.js"></script>
-    <script src="javascripts/resources/TextGeometry.js"></script>
-    <script src="javascripts/resources/FontLoader.js"></script>
-
-    <!-- Load JSON files -->
-    <script type="text/javascript" src="json/changelog.json"></script>
-    <script type="text/javascript" src="json/keymap.json"></script>
-    <script type="text/javascript" src="json/recipes.json"></script>
-
-    <!-- Load Postprocessing -->
-    <script src="javascripts/postprocessing/EffectComposer.js"></script>
-    <script src="javascripts/postprocessing/RenderPass.js"></script>
-    <script src="javascripts/postprocessing/ShaderPass.js"></script>
-    <script src="javascripts/postprocessing/CopyShader.js"></script>
-
-    <!-- Load Classes -->
-    <script src="javascripts/classes/Game.js"></script>
-    <script src="javascripts/classes/World.js"></script>
-    <script src="javascripts/classes/Stage.js"></script>
-    <script src="javascripts/classes/ChunkManager.js"></script>
-    <script src="javascripts/classes/TextureManager.js"></script>
-    <script src="javascripts/classes/EntityManager.js"></script>
-    <script src="javascripts/classes/ChatManager.js"></script>
-    <script src="javascripts/classes/WorkerManager.js"></script>
-    <script src="javascripts/classes/SkinManager.js"></script>
-    <script src="javascripts/classes/PlayerManager.js"></script>
-    <script src="javascripts/classes/RecipeChecker.js"></script>
-    <script src="javascripts/classes/Player.js"></script>
-    <script src="javascripts/classes/Inventory.js"></script>
-    <script src="javascripts/classes/HUD.js"></script>
-    <script src="javascripts/classes/Stats.js"></script>
-
-    <!-- Load Game Files -->
-    <script src="javascripts/auth.js"></script>
-    <script src="javascripts/pointerlock.js"></script>
-    <script src="javascripts/server.js"></script>
-    <script src="javascripts/core.js"></script>
-    <script src="javascripts/textures.js"></script>
-    <script src="javascripts/client.js"></script>
-    <script src="javascripts/input.js"></script>
-    <script src="javascripts/helper.js"></script>
-    <script src="javascripts/hud.js"></script>
-    <script src="javascripts/settings.js"></script>
-    <script src="javascripts/commands.js"></script>
-
-
     <div id="blocker">
         <div id="background-image"></div>
 
@@ -96,8 +26,8 @@
                 <!-- Menu -->
                 <div id="menu" class="tab-container">
                     <div id="nav">
-                        <button class="tablinks" onclick="changeTab(event, 'welcome')" id="welcome-button">Welcome</button>
-                        <button class="tablinks" onclick="changeTab(event, 'changelog')">Changelog</button>
+                        <button class="tablinks" id="welcome-button">Welcome</button>
+                        <button class="tablinks" id="changelog-button">Changelog</button>
                     </div>
 
                     <div id="welcome" class="tabcontent">
@@ -122,7 +52,7 @@
                 <!-- Server select -->
                 <div id="server-select" class="tab-container" style="display:none">
                     <div id="nav">
-                        <button class="tablinks" style="width: 100%;" onclick="changeTab(event, 'server-list')" id="server-button">Server Select</button>
+                        <button class="tablinks" style="width: 100%;" id="server-button">Server Select</button>
                     </div>
 
                     <div id="server-list" class="tabcontent">
@@ -140,8 +70,8 @@
                 <!-- Settings -->
                 <div id="settings" class="tab-container" style="display:none">
                     <div id="nav">
-                        <button class="tablinks" onclick="changeTab(event, 'video-settings')" id="video-button">Video</button>
-                        <button class="tablinks" onclick="changeTab(event, 'keyboard-settings')">Keyboard</button>
+                        <button class="tablinks" id="video-button">Video</button>
+                        <button class="tablinks" id="keyboard-button">Keyboard</button>
                     </div>
 
                     <div id="video-settings" class="tabcontent" style="display: none;">
@@ -226,66 +156,9 @@
                 </div>
             </div>
         </div>
-
-
     </div>
 
     <input spellcheck="false" autocomplete="off" id="chat-input" type="text" placeholder="> Press Enter to Chat" maxlength="100">
     <input spellcheck="false" autocomplete="off" id="search-input" type="text" placeholder="Search Items" maxlength="100">
-
-
-    <script>
-        $("#welcome-button")[0].click();
-        // Prevent right-click
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        let cookieExpiryTime = 30; // 30 days
-
-        // Change tab
-        function changeTab(evt, cityName) {
-            // Declare all variables
-            var i, tabcontent, tablinks;
-
-            // Get all elements with class="tabcontent" and hide them
-            tabcontent = document.getElementsByClassName("tabcontent");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-
-            // Get all elements with class="tablinks" and remove the class "active"
-            tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
-            }
-
-            // Show the current tab, and add an "active" class to the button that opened the tab
-            document.getElementById(cityName).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
-
-        // Load the changelog
-        for (let change of changelog) {
-            let date = change.date;
-            let version = change.version;
-            let changes = change.changes.split("|");
-
-            let message = $("<span>v" + version + " | " + date + "</span><br><br>");
-            $("#changelog").append(message);
-
-            for (let comment of changes) {
-
-                let message = $("<span>- " + comment + "</span><br>");
-                $("#changelog").append(message);
-            }
-
-            $("#changelog").append($("<br>"));
-        }
-
-        // Get cookie username
-
-        let name = getCookie("Name");
-        if (name)
-            $("#name-input").val(name);
-    </script>
 </body>
-
 </html>
