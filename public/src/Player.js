@@ -11,7 +11,7 @@ import inventory from "./items/Inventory";
 import masterRenderer from "./graphics/MasterRenderer";
 import { random } from './lib/helper';
 
-import activeItemVoxels from "./graphics/ActiveItemVoxels"
+import activeItemVoxels from "./graphics/ActiveItemVoxels.ts"
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 const EMPTY = new THREE.Mesh();
@@ -636,7 +636,7 @@ class Player {
 
                         // Find space in toolbar
                         let foundSpace = false;
-                        for (let  j = 0; j < 9; j++) {
+                        for (let j = 0; j < 9; j++) {
                             if (!this.toolbar[j] || this.toolbar[j].c == 0) {
                                 this.toolbar[j] = item;
                                 this.currentSlot = j;
@@ -651,7 +651,7 @@ class Player {
                     } else {
                         this.currentSlot = i;
                     }
-                    
+
                     exists = true;
                     break;
                 } else if (t && t.c > 0) {
@@ -778,7 +778,7 @@ class Player {
             }
             this.toolbar[inventory.limit + index] = JSON.parse(armor);
             g.socket.emit('updateInventory', this.toolbar);
-            
+
             this.place = false;
             return;
         }

@@ -4,7 +4,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 
 import gameScene from "./GameScene"
-import activeItem, { scene as activeItemScene, camera as activeItemCamera } from "./ActiveItemScene"
+import activeItem, { scene as activeItemScene, camera as activeItemCamera } from "./ActiveItemScene.ts"
 import { scene, camera } from "../globals"
 
 
