@@ -420,7 +420,9 @@ class Player {
             const isSword = SWORDS.map((x) => world.itemId[x]).includes(hand.v);
 
             if (isSword) {
-                this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta);
+                this.blocking = this.key.rightClick
+                //this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1)
+                //this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta);
             } else {
                 this.key.rightClick = false;
                 this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta);
@@ -1171,11 +1173,12 @@ class Player {
             this.position.y += -this.walkSpeed * 1.5;
             this.halfHeight = blockSize * 0.6;
         }
-        if (this.drawingBow && this.mode == "survival") this.speed = 0.75;
-        if (this.blocking && !this.fly && this.onObject)
-            this.speed = 0.75;
-        if (this.blocking && this.key.sneak && !this.fly && this.onObject)
-            this.speed = 0.3;
+        if (this.drawingBow || this.blocking && this.mode == "survival") this.speed = 0.75;
+        if ((this.drawingBow || this.blocking) && this.key.sneak && this.mode == "survival") this.speed = 0.5;
+        // if (this.blocking && !this.fly && this.onObject)
+        //     this.speed = 0.75;
+        // if (this.blocking && this.key.sneak && !this.fly && this.onObject)
+        //     this.speed = 0.3;
 
         // Change camera fov when sprinting
 

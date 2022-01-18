@@ -169,7 +169,6 @@ class PlayerManager {
         p.headPivot = new THREE.Group();
         p.headPivot.add(p.head);
 
-
         p.neck = new THREE.Object3D();
         p.neck.add(p.headPivot);
         
@@ -222,8 +221,18 @@ class PlayerManager {
             p.rightArm = new THREE.Group();
             p.rightArm.add(armMesh.clone(), p.rightArmPlatesMesh);
 
-            p.leftArm.position.set(-5.45, -blockSize * 0.45, 0);
-            p.rightArm.position.set(-0.55, -blockSize * 0.3, 0);
+            // Shoulder joints
+            p.leftShoulder = new THREE.Object3D();
+            p.leftShoulder.position.set(-5.45, -blockSize * 0.45, 0);
+            p.leftShoulder.add(p.leftArm);
+
+            p.rightShoulderJoint = new THREE.Object3D();
+            p.rightShoulderJoint.add(p.rightArm);
+            p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
+
+            p.rightShoulder = new THREE.Object3D();
+            p.rightShoulder.position.set(-0.55, -blockSize * 0.45, 0);
+            p.rightShoulder.add(p.rightShoulderJoint);
         } else { // Default skins
             let armMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSize, dim.armHeight, dim.armSize), playerMat.arm);
             let armPlatesMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSize + 1, dim.armHeight * 5 / 12, dim.armSize + 1), armMat);
@@ -239,14 +248,19 @@ class PlayerManager {
             p.rightArm = new THREE.Group();
             p.rightArm.add(armMesh.clone(), p.rightArmPlatesMesh);
 
-            p.leftArm.position.set(-dim.armSize * 3 / 2, -blockSize * 0.45, 0);
-            p.rightArm.position.set(0, -blockSize * 0.3, 0);
-        }
+            // Shoulder joints
+            p.leftShoulder = new THREE.Object3D();
+            p.leftShoulder.position.set(-dim.armSize * 3 / 2, -blockSize * 0.45, 0);
+            p.leftShoulder.add(p.leftArm);
 
-        // Shoulder joints
-        p.rightShoulder = new THREE.Object3D();
-        p.rightShoulder.position.set(dim.armSize * 3 / 2, -blockSize * 0.15, 0);
-        p.rightShoulder.add(p.rightArm);
+            p.rightShoulderJoint = new THREE.Object3D();
+            p.rightShoulderJoint.add(p.rightArm);
+            p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
+
+            p.rightShoulder = new THREE.Object3D();
+            p.rightShoulder.position.set(dim.armSize * 3 / 2, -blockSize * 0.15, 0);
+            p.rightShoulder.add(p.rightShoulderJoint);
+        }
     }
 
     // Add legs
@@ -299,8 +313,8 @@ class PlayerManager {
         // Create skeleton of head, body, arms, and legs
         p.skeleton = new THREE.Group();
         p.skeleton.add(p.body);
-        p.skeleton.add(p.leftArm);
 
+        p.skeleton.add(p.leftShoulder);
         p.skeleton.add(p.rightShoulder);
         p.skeleton.add(p.leftHip);
         p.skeleton.add(p.rightHip);
