@@ -23,19 +23,19 @@ function changeTab(evt, elementId) {
 }
 
 // Tab links
-$("#welcome-button").click(function (event) {
+$("#welcome-button").on('click', function (event) {
     changeTab(event, "welcome");
 })
-$("#changelog-button").click(function (event) {
+$("#changelog-button").on('click', function (event) {
     changeTab(event, "changelog");
 })
-$("#server-button").click(function (event) {
+$("#server-button").on('click', function (event) {
     changeTab(event, "server-list");
 })
-$("#video-button").click(function (event) {
+$("#video-button").on('click', function (event) {
     changeTab(event, "video-settings");
 })
-$("#keyboard-button").click(function (event) {
+$("#keyboard-button").on('click', function (event) {
     changeTab(event, "keyboard-settings");
 })
 

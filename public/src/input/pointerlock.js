@@ -6,17 +6,15 @@ Provides pointer lock functionality and the ability to connect to the game serve
 
 import * as THREE from 'three';
 import inventory from '../items/Inventory';
-import keyconfig from '../../json/keymap.json';
+import keyconfig from '../../json/keyconfig.json';
 import player from '../Player';
 import chat from '../managers/ChatManager';
 import masterRenderer from '../graphics/MasterRenderer';
-import { camera, g } from '../globals';
+import { g } from '../globals';
 import { updateGUISize } from '../lib/helper';
 import { getCookie, setCookie } from '../resources/cookie';
 
-
 let keymap = keyconfig.keymap;
-
 
 // Request pointer lock
 export function requestPointerLock() {
@@ -238,9 +236,6 @@ export function PointerLockControls(camera) {
 // Window resize
 export function onWindowResize() {
     if (!g.initialized) return;
-
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
 
     masterRenderer.resize()
 

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Stat from "./StatsClass.js";
+import { statsManager, Stat } from "./StatsManager.js";
 import game from '../Game';
 import player from '../Player';
 import world from "../managers/WorldManager.js";
@@ -8,11 +8,9 @@ import masterRenderer from '../graphics/MasterRenderer';
 
 globalThis.masterRenderer = masterRenderer;
 
-let statistics = [];
-
 // Initialize statistics
 export function initStatistics() {
-    statistics.push([
+statsManager.addStat([
         new Stat("FPS", game, "fps", 0),
         new Stat("UPS", game, "ups", 1),
         new Stat("TPS", game, "tps", 1),
@@ -20,7 +18,7 @@ export function initStatistics() {
             return player[key] ? player[key].average() : 0;
         }, "ms", 1, "ping"),
     ]);
-    statistics.push([
+    statsManager.addStat([
         new Stat("LT", function () {
             return game.logicTime;
         }, "ms", 2),
@@ -34,7 +32,7 @@ export function initStatistics() {
             return game.logicTime + game.canvasTime + game.renderTime;
         }, "ms", 2),
     ]);
-    statistics.push([
+    statsManager.addStat([
         new Stat("RC", function () {
             return masterRenderer.renderer.info.render.calls;
         }),
@@ -45,7 +43,7 @@ export function initStatistics() {
             return masterRenderer.renderer.info.render.frame;
         }),
     ]);
-    statistics.push([
+    statsManager.addStat([
         new Stat("LIM", function () {
             if (!performance.memory) return 0;
             return performance.memory.jsHeapSizeLimit / 1048576;
@@ -67,7 +65,7 @@ export function initStatistics() {
             return game.memDecrease.average() / 1048576;
         }, "mb", 1),
     ]);
-    statistics.push([
+    statsManager.addStat([
         new Stat("Geo", function () {
             return masterRenderer.renderer.info.memory.geometries;
         }),
@@ -75,30 +73,30 @@ export function initStatistics() {
             return masterRenderer.renderer.info.memory.textures;
         }),
     ]);
-    statistics.push(new Stat("Server", game, "region"));
-    statistics.push(new Stat("Socket ID", g.socket, "id"));
-    statistics.push(new Stat("Token", game, "token"));
-    statistics.push(new Stat("Gamemode", player, "mode"));
-    statistics.push(new Stat("Pos", player.position, false, 1, function (pos) {
+    statsManager.addStat(new Stat("Server", game, "region"));
+    statsManager.addStat(new Stat("Socket ID", g.socket, "id"));
+    statsManager.addStat(new Stat("Token", game, "token"));
+    statsManager.addStat(new Stat("Gamemode", player, "mode"));
+    statsManager.addStat(new Stat("Pos", player.position, false, 1, function (pos) {
         return pos.clone().divideScalar(world.blockSize);
     }));
-    statistics.push(new Stat("Chunk Pos", player.position, false, 0, function (pos) {
+    statsManager.addStat(new Stat("Chunk Pos", player.position, false, 0, function (pos) {
         return world.computeCellFromPlayer(pos.x, pos.y, pos.z);
     }));
-    statistics.push(new Stat("Biome", player, "biome"));
-    statistics.push(new Stat("Local Dir", player.direction, false, 1));
-    statistics.push(new Stat("Local Vel", player.velocity, false, 1));
-    statistics.push(new Stat("World Vel", false, false, 2, function () {
+    statsManager.addStat(new Stat("Biome", player, "biome"));
+    statsManager.addStat(new Stat("Local Dir", player.direction, false, 1));
+    statsManager.addStat(new Stat("Local Vel", player.velocity, false, 1));
+    statsManager.addStat(new Stat("World Vel", false, false, 2, function () {
         return player.newMove;
     }));
-    statistics.push(new Stat("Speed", player, "speed", 2));
-    statistics.push(new Stat("Fly", player, "fly"));
-    statistics.push([
+    statsManager.addStat(new Stat("Speed", player, "speed", 2));
+    statsManager.addStat(new Stat("Fly", player, "fly"));
+    statsManager.addStat([
         new Stat("FOV", camera, "fov"),
         new Stat("Base", game, "fov"),
         new Stat("Delta", player, "deltaFov", 2)
     ]);
-    statistics.push(new Stat("Facing", function () {
+    statsManager.addStat(new Stat("Facing", function () {
         let compass = new THREE.Vector3(0, 0, 0);
         camera.getWorldDirection(compass);
         if (Math.abs(compass.x) > Math.abs(compass.z)) {
@@ -108,5 +106,3 @@ export function initStatistics() {
         }
     }));
 }
-
-export default statistics;

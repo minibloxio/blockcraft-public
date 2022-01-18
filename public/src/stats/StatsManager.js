@@ -1,9 +1,10 @@
 import { drawRectangle, drawText, round } from '../lib/helper';
+import hud from "../gui/HUD";
 
 let canvas = document.getElementById('canvas-hud');
 let ctx = canvas.getContext('2d');
 
-export default class Stat {
+export class Stat {
     constructor(name, value, key, round, func) {
         this.name = name;
         this.value = value;
@@ -78,3 +79,39 @@ export default class Stat {
         return width;
     }
 }
+
+class StatsManager {
+    constructor() {
+        this.stats = [];
+    }
+
+    addStat(stat) {
+        this.stats.push(stat);
+    }
+
+    displayStats() {
+        if (!hud.showStats) return;
+
+        let index = 0;
+        drawText(
+            "",
+            10, 55,
+            "20px Minecraft-Regular", "white", "left", "top"
+        );
+        for (let i = 0; i < this.stats.length; i++) {
+            let stat = this.stats[i];
+            if (stat instanceof Array) {
+                let offset = 0;
+                for (let j = 0; j < stat.length; j++) {
+                    offset += stat[j].display(index, offset);
+                }
+            } else {
+                stat.display(index);
+            }
+            index += 1;
+        }
+    }
+}
+
+const statsManager = new StatsManager();
+export { statsManager };

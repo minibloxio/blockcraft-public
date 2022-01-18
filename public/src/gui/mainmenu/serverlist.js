@@ -1,13 +1,12 @@
-import { io } from "socket.io-client";
-import { serverList, g, serverNames, connectionDelay, isState } from "../../globals"
-import { msToTime, drawRectangle, drawCircle } from '../../lib/helper';
-import { getCookie, deleteCookie } from "../../resources/cookie";
-import player from '../../Player';
-import world from '../../managers/WorldManager';
-import chunkManager from '../../managers/ChunkManager';
-import { round } from '../../lib/helper';
 import Ola from "ola";
-import { prevState } from '../../app';
+import { io } from "socket.io-client";
+import { prevState } from '../..';
+import { connectionDelay, g, isState, serverList, serverNames } from "../../globals";
+import { drawCircle, drawRectangle, msToTime, round } from '../../lib/helper';
+import chunkManager from '../../managers/ChunkManager';
+import world from '../../managers/WorldManager';
+import player from '../../Player';
+import { deleteCookie, getCookie } from "../../resources/cookie";
 
 export function refreshServers() {
     // Disconnect servers

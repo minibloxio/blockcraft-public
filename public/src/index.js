@@ -1,55 +1,31 @@
-import "../style.css";
-
-// libraries
 import Ola from "ola";
-
-// THREE.js
 import * as THREE from "three";
-
-// Import classes (THAT DON'T NEED TO BE TURNED INTO SINGLETONS)
-import PlayerManager from "./managers/PlayerManager";
-
-// Import classes (TURN THESE INTO SINGLETONS)
-import { getCookie, setCookie } from "./resources/cookie";
-import stats from "./stats/stats.js";
-
-// Import singletons
+import "../style.css";
 import game from './Game';
-import world from './managers/WorldManager';
-import player from './Player';
-import stage from './Stage';
+import { camera, connectionDelay, g, isState, players, scene } from './globals';
+import masterRenderer from './graphics/MasterRenderer';
+import hud from './gui/HUD';
+import { connectError, refreshServers, showServerSelect, updateMenu } from './gui/mainmenu/serverlist';
+import { showSettings } from "./gui/mainmenu/settings";
+import "./gui/mainmenu/tabs";
+import "./input/input";
+import initPointerLock, { onWindowResize, requestPointerLock } from "./input/pointerlock";
+import inventory from "./items/Inventory";
+import { round, updateGUISize } from './lib/helper';
+import chat from './managers/ChatManager';
 import chunkManager from './managers/ChunkManager';
+import entityManager from './managers/EntityManager';
+import PlayerManager from "./managers/PlayerManager";
 import textureManager from './managers/TextureManager';
 import workerManager from './managers/WorkerManager';
-import entityManager from './managers/EntityManager';
-import chat from './managers/ChatManager';
-import inventory from "./items/Inventory";
-import masterRenderer from './graphics/MasterRenderer';
-import { camera, scene, g, connectionDelay, isState } from './globals';
-import initPointerLock, { requestPointerLock, onWindowResize } from "./input/pointerlock";
-
-// Import functions
-import { addVideoControls, addKeyboardControls } from './settings';
-import { animateServerPlayers, animateServerEntities } from './server';
-import { updateHUD } from './gui/hud';
-import { round, updateGUISize } from './lib/helper';
-import { refreshServers, showServerSelect, connectError, updateMenu } from './gui/mainmenu/serverlist';
+import world, { updateVoxelGeometry } from './managers/WorldManager';
+import player from './Player';
+import { getCookie, setCookie } from "./resources/cookie";
+import { animateServerEntities, animateServerPlayers, updatePlayers } from './server';
+import { addKeyboardControls, addVideoControls } from './settings';
+import stage from './Stage';
+import stats from "./stats/stats.js";
 import { initStatistics } from './stats/statslist';
-import { updatePlayers } from './server';
-
-// mainmenu
-import { showSettings } from "./gui/mainmenu/settings"
-import "./gui/mainmenu/tabs"
-
-
-
-import * as test from './lib/helper'
-console.log(Object.keys(test).join(", "))
-
-import { players } from './globals'
-
-//temp
-import { updateVoxelGeometry } from './managers/WorldManager';
 
 /*
 Authenticates the player and provides server details from each running server.
@@ -319,7 +295,7 @@ function animate() { // TODO: Clean up
     game.renderTime = performance.now() - renderTime;
 
     let canvasTime = performance.now();
-    updateHUD(); // Update the HUD
+    hud.update(); // Update the HUD
     stats.update();
     game.canvasTime = performance.now() - canvasTime;
 
@@ -678,4 +654,4 @@ function updateClient(data) {
     }
 }
 
-import "./input/input"
+

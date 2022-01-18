@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { camera } from './ActiveItemScene'
 import textureManager from '../managers/TextureManager';
-import player from '../Player'
+import player from '../Player';
+import { camera } from './ActiveItemScene';
 
 const TO_RAD = Math.PI / 180;
 const pixelSize = 1 / 16 * 2;

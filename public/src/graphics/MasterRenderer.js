@@ -1,11 +1,10 @@
 import * as THREE from "three";
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-
-import gameScene from "./GameScene"
-import activeItem, { scene as activeItemScene, camera as activeItemCamera } from "./ActiveItemScene"
-import { scene, camera } from "../globals"
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { camera, scene } from "../globals";
+import activeItem, { camera as activeItemCamera, scene as activeItemScene } from "./ActiveItemScene";
+import gameScene from "./GameScene";
 
 
 class MasterRenderer {
@@ -70,6 +69,13 @@ class MasterRenderer {
     resize() {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.composer.setSize(window.innerWidth, window.innerHeight);
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        activeItemCamera.aspect = window.innerWidth / window.innerHeight;
+        activeItemCamera.updateProjectionMatrix();
+
     }
 }
 

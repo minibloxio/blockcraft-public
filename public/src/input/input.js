@@ -1,23 +1,17 @@
 import Ola from "ola";
-
+import keyconfig from "../../json/keyconfig.json";
+import { c, checkCommand, giveCommandHint, nextCommand, prevCommand } from "../commands";
 import game from '../Game';
+import { camera, g } from '../globals';
+import hud from '../gui/HUD';
+import inventory from "../items/Inventory";
+import { clamp } from '../lib/helper';
+import chat from '../managers/ChatManager';
 import world from '../managers/WorldManager';
 import player from '../Player';
-import chat from '../managers/ChatManager';
-import hud from '../gui/HUDClass';
-import inventory from "../items/Inventory";
-import keyconfig from "../../json/keymap.json"
-
-// Variables
-import { c, checkCommand, prevCommand, nextCommand } from "../commands";
-import { camera, g } from '../globals';
-
-// Functions
-import { giveCommandHint } from "../commands";
-import { clamp } from '../lib/helper';
 
 let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
-
+var map = {};
 let keymap = keyconfig.keymap;
 
 // Key event handling
@@ -127,12 +121,9 @@ $("body").on('dblclick', function () {
     inventory.selectInventory("double")
 })
 
-var map = {};
-onkeydown = onkeyup = function (event) {
-    map[event.keyCode] = event.type == 'keydown';
-}
-
 var onKeyDown = function (event) {
+    map[event.keyCode] = event.type == 'keydown';
+
     if (!g.initialized) return;
 
     // CHAT INPUT
@@ -263,6 +254,7 @@ var onKeyDown = function (event) {
 };
 
 var onKeyUp = function (event) {
+    map[event.keyCode] = event.type == 'keydown';
 
     // CHAT INPUT
     if ([13].indexOf(event.keyCode) > -1) {
@@ -376,7 +368,6 @@ $(document).on('ready', function () {
 });
 
 // Scrolling
-var lastScrollTop = 0;
 let zoomLevel = 3
 $(document).bind('wheel', function (e) {
     let scrollDelta = e.originalEvent.wheelDelta / 120;
@@ -420,3 +411,4 @@ function prevSlot() {
 }
 
 export { map, mouse };
+

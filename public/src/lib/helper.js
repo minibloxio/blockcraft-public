@@ -1,5 +1,5 @@
 import chat from '../managers/ChatManager';
-import hud from '../gui/HUDClass';
+import hud from '../gui/HUD';
 import inventory from "../items/Inventory";
 
 let canvas = document.getElementById('canvas-hud');

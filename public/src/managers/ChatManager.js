@@ -1,7 +1,7 @@
 import changelog from "../../json/changelog.json"
 import game from '../Game';
 import inventory from '../items/Inventory';
-import hud from '../gui/HUDClass';
+import hud from '../gui/HUD';
 import player from '../Player';
 import { players, g } from '../globals';
 import { drawRectangle, drawText } from '../lib/helper';

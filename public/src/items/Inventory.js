@@ -880,10 +880,15 @@ class Inventory {
         let padding = 10;
 
         // Draw background
-        drawRectangle(0, 0, canvas.width, canvas.height, "rgba(0, 0, 0, 0.5)")
-        drawRect(this.halfW, this.halfH, this.width, this.height, 0, this.backgroundColor)
-        let title = (player.mode == "survival" || showCraftingTable) ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode"
-        drawText(title, this.halfW, this.halfH - this.height / 2 + padding, "25px Minecraft-Regular", "grey", "center", "top")
+        if (!game.transparentInventory) {
+            drawRectangle(0, 0, canvas.width, canvas.height, "rgba(0, 0, 0, 0.5)")
+            drawRect(this.halfW, this.halfH, this.width, this.height, 0, this.backgroundColor)
+        }
+
+        let title = (player.mode == "survival" || showCraftingTable) ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode";
+        drawText(title, this.halfW, this.halfH - this.height / 2 + padding, "25px Minecraft-Regular", 
+            game.transparentInventory ? "white" : "black", "center", "top"
+        );
 
         // Add background boxes
         this.loop(4, 9, function (i, j, self) {
@@ -1133,7 +1138,7 @@ class Inventory {
             if (!voxel) continue;
             
             let { xPos, yPos } = this.getPos("item", index);
-
+            
             this.drawItem(xPos, yPos, {
                 v: voxel,
                 c: "∞",
@@ -1180,8 +1185,12 @@ class Inventory {
     drawBackgroundBox(xPos, yPos) {
         let { boxSize } = this;
         let outline = 1;
-        drawRectangle(xPos - outline, yPos - outline, boxSize + outline * 2, boxSize + outline * 2, "grey");
-        drawRectangle(xPos, yPos, boxSize, boxSize, this.backgroundBoxColor)
+        drawRectangle(xPos - outline, yPos - outline, boxSize + outline * 2, boxSize + outline * 2, "grey", {
+            alpha: game.transparentInventory ? 0.5 : 1
+        });
+        drawRectangle(xPos, yPos, boxSize, boxSize, this.backgroundBoxColor, {
+            alpha: game.transparentInventory ? 0.5 : 1
+        })
     }
 
     // Draw hover box

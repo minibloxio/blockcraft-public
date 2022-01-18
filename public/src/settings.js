@@ -1,20 +1,15 @@
-import keyconfig from "../json/keymap.json";
-import player from "./Player";
-import { getCookie, setCookie, deleteCookie } from "./resources/cookie";
+import { axesHelper } from ".";
+import keyconfig from "../json/keyconfig.json";
 import game from "./Game";
-import world from "./managers/WorldManager";
+import { camera, players } from "./globals";
+import hud from "./gui/HUD";
+import { updateGUISize } from "./lib/helper";
 import chunkManager from "./managers/ChunkManager";
 import workerManager from "./managers/WorkerManager";
-
+import world from "./managers/WorldManager";
+import player from "./Player";
+import { deleteCookie, getCookie, setCookie } from "./resources/cookie";
 import stage from "./Stage";
-
-import hud from "./gui/HUDClass";
-
-import { camera, players } from "./globals";
-
-import { updateGUISize } from "./lib/helper";
-
-import { axesHelper } from "./app";
 
 let keymap = keyconfig.keymap;
 let keyorder = keyconfig.keyorder;
@@ -192,6 +187,7 @@ export function addVideoControls() {
     addSwitchControl("Stars", "stars", true, stage.stars, "visible");
     addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov");
     addSwitchControl("Transparent Leaves", "transparentLeaves", false, game, "transparentLeaves", false, updateTransparency);
+    addSwitchControl("Transparent Inventory", "transparentInventory", false, game, "transparentInventory");
     addSwitchControl("Depth Write", "depthWrite", false, game, "depthWrite", false, chunkManager.updateTexture);
     addSwitchControl("Debug", "debug", false, game, "debug", false, updateDebug);
 

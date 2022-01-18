@@ -5,17 +5,15 @@ Adds/removes player meshes to the scene.
 
 */
 
-import * as THREE from "three";
 import Ola from "ola";
-
-import game from '../Game';
-import world from "./WorldManager";
-import player from "../Player";
-import textureManager from "./TextureManager";
-import skinManager from "./SkinManager";
+import * as THREE from "three";
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
-
+import game from '../Game';
 import { scene } from '../globals';
+import player from "../Player";
+import skinManager from "./SkinManager";
+import textureManager from "./TextureManager";
+import world from "./WorldManager";
 
 class PlayerManager {
     // Add mesh

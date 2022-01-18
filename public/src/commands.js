@@ -10,7 +10,7 @@ import chunkManager from './managers/ChunkManager';
 
 import { players, g } from './globals';
 import { round, clamp } from './lib/helper';
-import { disconnectServer } from './app';
+import { disconnectServer } from '.';
 
 let commandsInit = JSON.stringify({
     "gamemode": {

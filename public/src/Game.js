@@ -51,4 +51,5 @@ class Game {
     }
 }
 const game = new Game();
+globalThis.game = game;
 export default game;
