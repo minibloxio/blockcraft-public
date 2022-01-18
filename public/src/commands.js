@@ -125,7 +125,6 @@ let commandsInit = JSON.stringify({
 let commands = JSON.parse(commandsInit);
 
 let c = {};
-c.commandIndex = -1;
 c.prevCommands = [
     '/help',
     '/tutorial',

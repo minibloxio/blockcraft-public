@@ -44,6 +44,7 @@ g.elapse = 0;
 g.delta = 0;
 g.mouseLeft = false;
 g.mouseRight = false;
+g.commandIndex = -1;
 
 globalThis.g = g;
 
