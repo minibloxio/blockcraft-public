@@ -19,6 +19,7 @@ class MasterRenderer {
     }
 
     init() {
+        this.lastRenderRenderCalls = 0;
         gameScene.init()
         activeItem.init()
         this.renderer = new THREE.WebGLRenderer({ antialias: false, logarithmicDepthBuffer: false, alpha: true });
@@ -61,10 +62,13 @@ class MasterRenderer {
     }
 
     render() {
+        this.lastRenderRenderCalls = 0;
         this.renderer.clear();
         this.composer.render(gameScene.scene, gameScene.camera);
+        this.lastRenderRenderCalls += this.renderer.info.render.calls;
         this.renderer.clearDepth();
         this.renderer.render(activeItemScene, activeItemCamera);
+        this.lastRenderRenderCalls += this.renderer.info.render.calls;
     }
 
     resize() {

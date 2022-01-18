@@ -28,9 +28,9 @@
   "scripts": {
     "start": "node app.js",
     "dev": "webpack-dev-server --mode=development",
-    "build": "webpack",
+    "webpack:build": "webpack --mode=production",
     "docker:build": "docker build . -t blockcraft",
-    "docker:run": "docker run --rm --name blockcraft -p 3000:3000 blockcraft"
+    "docker:start": "docker run --rm --name blockcraft -p 3000:3000 blockcraft"
   },
   "repository": {
     "type": "git",

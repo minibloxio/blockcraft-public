@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000000);
+export const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000000);
 export const scene = new THREE.Scene();
 
 class ActiveItemScene {

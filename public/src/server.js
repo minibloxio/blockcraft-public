@@ -4,6 +4,7 @@ import world from './managers/WorldManager';
 import player from './Player';
 import { players, g, camera } from './globals';
 import PlayerManager from './managers/PlayerManager';
+import { clamp } from './lib/helper';
 
 // Update server players
 export function updatePlayers(serverPlayers) {
@@ -15,6 +16,8 @@ export function updatePlayers(serverPlayers) {
             p.pos.set({ x: p_.pos.x, y: p_.pos.y, z: p_.pos.z });
             p.rot.set({ x: p_.rot.x, y: p_.rot.y, z: p_.rot.z });
             p.dir.set({ x: p_.dir.x, y: p_.dir.y, z: p_.dir.z });
+
+            p.vel.set({ x: p_.vel.x, y: p_.vel.y, z: p_.vel.z });
 
             // Update player data
             if (p_.hp != p.hp) {
@@ -69,90 +72,89 @@ export function updatePlayers(serverPlayers) {
 
 function updatePlayer(p) {
     let { blockSize } = world;
-
-    p.entity.position.set(p.pos.x, p.pos.y, p.pos.z);
-    p.skeleton.rotation.set(p.rot.x, p.rot.y, p.rot.z);
-    p.headPivot.rotation.x = p.dir.y;
-
-    let shift = blockSize / 8;
-
-    let armOffsetY = -blockSize * 0.15;
-    let legOffsetY = blockSize * 0.5;
-    let legOffsetZ = 0;
     
-    let leftHip = p.leftHip;
-    let rightHip = p.rightHip;
+    let dim = player.dim;
+    let {skin, leftArm, rightArm, leftLeg, rightLeg, leftHip, rightHip, headPivot, entity, skeleton, pos, rot, dir} = p;
 
-    let leftLeg = p.leftLeg;
-    let rightLeg = p.rightLeg;
+    entity.position.set(pos.x, pos.y, pos.z); // Set player position
+    skeleton.rotation.set(rot.x, rot.y, rot.z); // Set player rotation
+    headPivot.rotation.x = dir.y * Math.PI/2; // Set head rotation
+
+    let shift = 2; // blockSize / 8;
+
+    let armOffsetY = 4; // blockSize * 0.25;
+    let legOffsetY = 8; // blockSize * 0.5;
+    
+    let rightShoulderOffset = skin == "steve" ? dim.armSize * 3/2 : dim.armSize * 3/2 - 0.6;
+    let leftShoulderOffset = skin == "steve" ? -6 : -5.45;
 
     // Sneaking animation
     if (p.sneaking) {
-
-        //legOffsetY = -blockSize * 0.5;
-        //legOffsetZ = blockSize * 0.5;
 
     	p.body.rotation.x = -Math.PI/8;
 
     	p.neck.position.set(0, -blockSize*0.25, 0);
     	p.body.position.set(0, -blockSize*0.55, shift);
 
-    	leftHip.position.set(-player.dim.legSize/2, -blockSize*0.45-blockSize*0.9+shift, shift*2);
-    	rightHip.position.set(player.dim.legSize/2, -blockSize*0.45-blockSize*0.9+shift, shift*2);
+    	leftHip.position.set(-dim.legSize/2, -blockSize*0.45-blockSize*0.9+shift, shift*2);
+    	rightHip.position.set(dim.legSize/2, -blockSize*0.45-blockSize*0.9+shift, shift*2);
 
-        p.leftArm.position.set(-5.45, -blockSize*0.45-shift, 0);
-        p.rightArm.position.set(-0.55, -blockSize * 0.3-shift, 0);
+        p.leftShoulder.position.set(leftShoulderOffset, -blockSize*0.42-shift, blockSize*0.05);
+        p.rightShoulder.position.set(rightShoulderOffset, -blockSize * 0.12-shift, 0);
     } else {
     	p.body.rotation.x = 0;
 
     	p.neck.position.set(0, -blockSize * 0.075, 0);
     	p.body.position.set(0, -blockSize*0.45, 0);
 
-    	leftHip.position.set(-player.dim.legSize*0.5, -blockSize*0.45-blockSize*0.75, 0);
-    	rightHip.position.set(player.dim.armSize*0.5, -blockSize*0.45-blockSize*0.75, 0);
+    	leftHip.position.set(-dim.legSize*0.5, -blockSize*0.45-blockSize*0.75, 0);
+    	rightHip.position.set(dim.armSize*0.5, -blockSize*0.45-blockSize*0.75, 0);
 
-        p.leftArm.position.set(-5.45, -blockSize*0.45, 0);
-        p.rightArm.position.set(-0.55, -blockSize * 0.3, 0);
+        p.leftShoulder.position.set(leftShoulderOffset, -blockSize*0.45, 0);
+        p.rightShoulder.position.set(rightShoulderOffset, -blockSize * 0.15, 0);
     }
 
-    // if (p.sneaking) {
-    // 	legOffsetY += shift;
-    // 	legOffsetZ += shift*2;
-    // }
+    // Get magnitude of velocity
+    let v = Math.sqrt(p.vel.x * p.vel.x + p.vel.z * p.vel.z);
+    v = clamp(v, 0, 1);
+    if (p.sneaking) v *= 2;
+
+    // Set speed of animation based on velocity
     let axis = new THREE.Vector3(1, 0, 0);
     let speed = p.sneaking ? g.delta*3 : g.delta*10;
     let maxRotation = p.sneaking ? Math.PI/6 : Math.PI/3;
+    speed *= v;
+    maxRotation *= v;
 
     if (p.walking) { // Walking animation
-        if (p.leftArm.rotation.x < -maxRotation) {
+        if (leftArm.rotation.x < -maxRotation) {
             p.extendBody = false;
-        } else if (p.leftArm.rotation.x > maxRotation) {
+        } else if (leftArm.rotation.x > maxRotation) {
             p.extendBody = true;
         }
 
-
-
         if (p.extendBody) {
-            rotateAboutPoint(p.rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed)
-            rotateAboutPoint(p.leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed)
+            rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed)
+            rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed)
 
-            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, -speed)
-            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, speed)
+            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, -speed)
+            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, speed)
         } else {
-            rotateAboutPoint(p.rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed)
-            rotateAboutPoint(p.leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed)
+            rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed)
+            rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed)
 
-            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, speed)
-            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, -speed)
+            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, speed)
+            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, -speed)
         }
     } else {
-        rotateAboutPoint(p.rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, Math.abs(p.rightArm.rotation.x) * Math.sign(-p.rightArm.rotation.x))
-        rotateAboutPoint(p.leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, Math.abs(p.leftArm.rotation.x) * Math.sign(-p.leftArm.rotation.x))
+        rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, Math.abs(rightArm.rotation.x) * Math.sign(-rightArm.rotation.x))
+        rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, Math.abs(leftArm.rotation.x) * Math.sign(-leftArm.rotation.x))
 
-        rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, Math.abs(rightLeg.rotation.x) * Math.sign(-rightLeg.rotation.x))
-        rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, Math.abs(leftLeg.rotation.x) * Math.sign(-leftLeg.rotation.x))
+        rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, Math.abs(rightLeg.rotation.x) * Math.sign(-rightLeg.rotation.x))
+        rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, Math.abs(leftLeg.rotation.x) * Math.sign(-leftLeg.rotation.x))
     }
 
+    // Active hand item
     if (p.hand) {
         let hand = p.toolbar[p.currSlot];
         let item_mesh = p.hand.mesh;
@@ -164,7 +166,7 @@ function updatePlayer(p) {
                 item_mesh.position.set(0, -4, -8);
                 item_mesh.rotation.set(-Math.PI / 2 - Math.PI / 6, Math.PI / 2, 0);
             } else {
-                item_mesh.position.set(-3, -player.dim.armHeight / 2, -player.dim.armSize);
+                item_mesh.position.set(-3, -dim.armHeight / 2, -dim.armSize);
                 item_mesh.rotation.set(0, Math.PI / 4, 0);
             }
         }
@@ -185,9 +187,18 @@ function updatePlayer(p) {
         }
     }
 
+    // Update nametag rotation
     p.nameTag.quaternion.copy(camera.getWorldQuaternion(new THREE.Quaternion()));
 
-    p.rightShoulder.rotation.x = (-Math.cos(p.punchingT * Math.PI * 2) + 1) / 2;
+    if (p.sneaking) {
+        p.leftShoulder.rotation.x = -Math.PI/16;
+        p.rightShoulder.rotation.x = -Math.PI/16;
+    } else {
+        p.leftShoulder.rotation.x = 0;
+        p.rightShoulder.rotation.x = 0;
+    }
+
+    p.rightShoulder.rotation.x += (-Math.cos(p.punchingT * Math.PI * 2) + 1) / 2;
     p.rightShoulder.rotation.z = Math.sin(p.punchingT * Math.PI * 2) / 2;
 }
 

@@ -12,7 +12,7 @@ canvas.width = itemSize;
 canvas.height = itemSize;
 
 // tool start pos
-const posStart = new THREE.Vector3(2, -0.5, -3);
+const posStart = new THREE.Vector3(1.5, -0.5, -3);
 const rotStart = new THREE.Quaternion().setFromEuler(new THREE.Euler(60 * TO_RAD, 0, 0))
 
 // tool end pos
@@ -20,7 +20,7 @@ const posEnd = new THREE.Vector3(0.7, -2, -4.5);
 const rotEnd = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.41, 0.24, 0.24))
 
 // tool block pos
-const posBlock = new THREE.Vector3(-0.20, -1.93, -2.36)
+const posBlock = new THREE.Vector3(-0.20, -2.2, -2.36)
 const rotBlock = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.49, 1.53, -0.54))
 
 class ActiveItemVoxels {
@@ -52,7 +52,7 @@ class ActiveItemVoxels {
 
     updateItem() {
         let item = player.getCurrItem();
-        if (!item || item.class != "item" || item.c <= 0) {
+        if (!item || item.class != "item" || item.c <= 0 || player.mode == "spectator" || player.mode == "camera") {
             this.root.visible = false
             return;
         }

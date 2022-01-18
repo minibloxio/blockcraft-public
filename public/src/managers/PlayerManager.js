@@ -34,6 +34,8 @@ class PlayerManager {
         p.rot = Ola({ x: 0, y: 0, z: 0 });
         p.dir = Ola({ x: 0, y: 0, z: 0 });
 
+        p.vel = Ola({ x: 0, y: 0, z: 0 });
+
         // Add player body
         PlayerManager.addPlayerMesh(p);
 
@@ -169,7 +171,6 @@ class PlayerManager {
         p.headPivot = new THREE.Group();
         p.headPivot.add(p.head);
 
-
         p.neck = new THREE.Object3D();
         p.neck.add(p.headPivot);
         
@@ -222,8 +223,18 @@ class PlayerManager {
             p.rightArm = new THREE.Group();
             p.rightArm.add(armMesh.clone(), p.rightArmPlatesMesh);
 
-            p.leftArm.position.set(-5.45, -blockSize * 0.45, 0);
-            p.rightArm.position.set(-0.55, -blockSize * 0.3, 0);
+            // Shoulder joints
+            p.leftShoulder = new THREE.Object3D();
+            p.leftShoulder.position.set(-5.45, -blockSize * 0.45, 0);
+            p.leftShoulder.add(p.leftArm);
+
+            p.rightShoulderJoint = new THREE.Object3D();
+            p.rightShoulderJoint.add(p.rightArm);
+            p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
+
+            p.rightShoulder = new THREE.Object3D();
+            p.rightShoulder.position.set(-0.55, -blockSize * 0.45, 0);
+            p.rightShoulder.add(p.rightShoulderJoint);
         } else { // Default skins
             let armMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSize, dim.armHeight, dim.armSize), playerMat.arm);
             let armPlatesMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSize + 1, dim.armHeight * 5 / 12, dim.armSize + 1), armMat);
@@ -239,14 +250,19 @@ class PlayerManager {
             p.rightArm = new THREE.Group();
             p.rightArm.add(armMesh.clone(), p.rightArmPlatesMesh);
 
-            p.leftArm.position.set(-dim.armSize * 3 / 2, -blockSize * 0.45, 0);
-            p.rightArm.position.set(0, -blockSize * 0.3, 0);
-        }
+            // Shoulder joints
+            p.leftShoulder = new THREE.Object3D();
+            p.leftShoulder.position.set(-dim.armSize * 3 / 2, -blockSize * 0.45, 0);
+            p.leftShoulder.add(p.leftArm);
 
-        // Shoulder joints
-        p.rightShoulder = new THREE.Object3D();
-        p.rightShoulder.position.set(dim.armSize * 3 / 2, -blockSize * 0.15, 0);
-        p.rightShoulder.add(p.rightArm);
+            p.rightShoulderJoint = new THREE.Object3D();
+            p.rightShoulderJoint.add(p.rightArm);
+            p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
+
+            p.rightShoulder = new THREE.Object3D();
+            p.rightShoulder.position.set(dim.armSize * 3 / 2, -blockSize * 0.15, 0);
+            p.rightShoulder.add(p.rightShoulderJoint);
+        }
     }
 
     // Add legs
@@ -299,8 +315,8 @@ class PlayerManager {
         // Create skeleton of head, body, arms, and legs
         p.skeleton = new THREE.Group();
         p.skeleton.add(p.body);
-        p.skeleton.add(p.leftArm);
 
+        p.skeleton.add(p.leftShoulder);
         p.skeleton.add(p.rightShoulder);
         p.skeleton.add(p.leftHip);
         p.skeleton.add(p.rightHip);
@@ -451,7 +467,7 @@ class PlayerManager {
     static updatePlayerColor(p, color, opacity) {
         if (!p || !p.skeleton) return;
 
-        for (let a of p.skeleton.children) {
+        for (let a of p.skeleton.children) { // TODO: CLEAN UP THIS PIECE OF LAZY GARBAGE
             if (a.type == "Mesh") {
                 for (let material of a.material) {
                     if (color) material.color = color;
@@ -470,6 +486,16 @@ class PlayerManager {
                             for (let material of child.material) {
                                 if (color) material.color = color;
                                 if (opacity) material.opacity = opacity;
+                            }
+                        } else if (child.type == "Group") {
+                            let group = child;
+                            for (let child of group.children) {
+                                if (child.type == "Mesh") {
+                                    for (let material of child.material) {
+                                        if (color) material.color = color;
+                                        if (opacity) material.opacity = opacity;
+                                    }
+                                }
                             }
                         }
                         break;

@@ -163,7 +163,7 @@ $(document).ready(function () {
 
     })
 
-    if (DEV_MODE_SKIP_MENUS) {
+    if (DEV_MODE_SKIP_MENUS) { // Add callbacks to nextState() so setTimeout isn't needed
         nextState()
         $("#direct-connect-input").val("localhost:3001")
         nextState()
@@ -344,7 +344,7 @@ function sendPacket() {
         game.lastPacket = Date.now();
         g.socket.emit('packet', {
             pos: player.position,
-            vel: player.velocity,
+            vel: player.newMove,
             onObject: player.onObject,
             rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
             dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
@@ -633,7 +633,7 @@ function updateClient(data) {
     // Add new entities
     for (let entity of data.newEntities) entityManager.addEntity(entity);
 
-    // Update existing entities PUT THIS IN THE WORLD CLASS FUNCTION
+    // Update existing entities TODO: cleanup
     let updatedEntities = data.entities;
     for (let id in updatedEntities) {
         let entity = updatedEntities[id];
