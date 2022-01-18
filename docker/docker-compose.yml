@@ -35,7 +35,6 @@ services:
     restart: always
     ports:
       - 9000:9000
-      - 8000:8000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /home/howard/Portainer/data:/data
@@ -43,7 +42,7 @@ services:
   # na-east
   gold:
     container_name: gold
-    image: ghcr.io/victoryqwei/blockcraft:staging
+    image: ghcr.io/blockcraftio/blockcraft:staging
     restart: always
     volumes:
       - /mnt/save_data/gold:/usr/src/app/saves
@@ -55,7 +54,7 @@ services:
   # na-west
   coal:
     container_name: coal
-    image: ghcr.io/victoryqwei/blockcraft:staging
+    image: ghcr.io/blockcraftio/blockcraft:staging
     restart: always
     volumes:
       - /mnt/save_data/coal:/usr/src/app/saves
@@ -67,7 +66,7 @@ services:
   # europe-west
   iron:
     container_name: iron
-    image: ghcr.io/victoryqwei/blockcraft:staging
+    image: ghcr.io/blockcraftio/blockcraft:staging
     restart: always
     volumes:
       - /mnt/save_data/iron:/usr/src/app/saves
@@ -79,13 +78,24 @@ services:
   # new map
   wood:
     container_name: wood
-    image: ghcr.io/victoryqwei/blockcraft:staging
+    image: ghcr.io/blockcraftio/blockcraft:staging
     restart: always
     volumes:
       - /mnt/save_data/wood:/usr/src/app/saves
     environment:
       REGION: wood
       LINK: https://wood.blockcraft.online
+      OP_PASS: poop
+  # new map
+  lava:
+    container_name: lava
+    image: ghcr.io/blockcraftio/blockcraft:staging
+    restart: always
+    volumes:
+      - /mnt/save_data/lava:/usr/src/app/saves
+    environment:
+      REGION: lava
+      LINK: https://lava.blockcraft.online
       OP_PASS: poop
 
 networks:

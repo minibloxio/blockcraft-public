@@ -11,6 +11,7 @@ const serverNames = {
     "coal": "Coal Server (formerly North America West)",
     "iron": "Iron Server (formerly Europe West)",
     "wood": "Wood Server (New map!)",
+    "lava": "Lava Server (New map!)",
 }
 const serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.online`)
 const connectionDelay = 2000;

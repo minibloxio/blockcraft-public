@@ -52,7 +52,7 @@ class ActiveItemVoxels {
 
     updateItem() {
         let item = player.getCurrItem();
-        if (!item || item.class != "item" || item.c <= 0) {
+        if (!item || item.class != "item" || item.c <= 0 || player.mode == "spectator" || player.mode == "camera") {
             this.root.visible = false
             return;
         }
