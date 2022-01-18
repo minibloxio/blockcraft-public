@@ -48,7 +48,7 @@ app.use(function (req, res, next) {
 });
 
 // Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'dist')));
 app.use('/*', function (req, res, next) {
     res.redirect('/')
     next()
