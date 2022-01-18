@@ -36,7 +36,7 @@ export function initStatistics() {
     ]);
     statistics.push([
         new Stat("RC", function () {
-            return masterRenderer.renderer.info.render.calls;
+            return masterRenderer.lastRenderRenderCalls;
         }),
         new Stat("Tri", function () {
             return masterRenderer.renderer.info.render.triangles / 1000;
