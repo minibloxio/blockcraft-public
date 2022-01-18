@@ -210,8 +210,8 @@ class Player {
         if (pos) {
             // Set player position
             this.position.set(pos.x, pos.y, pos.z);
-            this.controls.getObject().position['y'] = pos.y;
-            this.savedPosition['y'] = pos.y;
+            this.controls.getObject().position.y = pos.y;
+            this.savedPosition.y = pos.y;
         } else {
             // Respawn in new location
             let maxSpawnDistance = 32; // Maximum distance from spawn
@@ -230,8 +230,8 @@ class Player {
             }
             // Set player position
             this.position.set(randomX * blockSize, resetHeight, randomZ * blockSize);
-            this.controls.getObject().position['y'] = resetHeight;
-            this.savedPosition['y'] = resetHeight;
+            this.controls.getObject().position.y = resetHeight;
+            this.savedPosition.y = resetHeight;
         }
 
 
@@ -972,7 +972,7 @@ class Player {
             // Reset shift position
 
             if (!this.fly) {
-                this.position.y = this.savedPosition['y'];
+                this.position.y = this.savedPosition.y;
                 this.halfHeight = blockSize * 0.8;
             }
         }
@@ -1042,7 +1042,7 @@ class Player {
 
                 if (axes === 'y' && !this.fly) {
                     // Test for y
-                    this.position.y += this.newMove['y'];
+                    this.position.y += this.newMove.y;
                     let collision = this.collides();
                     if (!collision)
                         continue;
@@ -1063,17 +1063,17 @@ class Player {
 
                         this.velocity.y = 0;
                         this.onObject = true;
-                        this.newMove['y'] = 0;
+                        this.newMove.y = 0;
 
                     } else if (this.inWater || this.onObject) {
-                        this.newMove['y'] = 0;
+                        this.newMove.y = 0;
                     } else { // Head hit
                         this.velocity.y = 0;
-                        this.newMove['y'] = 0;
+                        this.newMove.y = 0;
                         this.maxSprintSpeed = Math.min(this.bhopMaxSpeed, this.maxSprintSpeed + this.bhopRate * 10)
                     }
                     // Put back before testing y
-                    this.position.y = previousPosition['y'];
+                    this.position.y = previousPosition.y;
                 }
 
 
@@ -1096,13 +1096,13 @@ class Player {
                 for (let axis of separate_axes) {
 
                     // Test for y during shift mode
-                    this.position.y += savedMove['y'];
+                    this.position.y += savedMove.y;
                     if (!this.collides() && this.onObject && this.key.sneak) {
                         this.velocity[axis] = 0;
                         this.newMove[axis] = 0;
                     }
                     // Put back before testing y
-                    this.position.y = previousPosition['y']
+                    this.position.y = previousPosition.y
 
                     this.position[axis] = previousPosition[axis];
                 }
@@ -1110,13 +1110,13 @@ class Player {
         }
 
         // Update player position
-        this.position.x += this.newMove['x'];
-        if (!(!this.onObject && this.newMove['y'] === 0) && !this.fly) {
-            this.position.y += this.newMove['y'];
+        this.position.x += this.newMove.x;
+        if (!(!this.onObject && this.newMove.y === 0) && !this.fly) {
+            this.position.y += this.newMove.y;
         } else {
-            this.position.y += this.newMove['y'];
+            this.position.y += this.newMove.y;
         }
-        this.position.z += this.newMove['z'];
+        this.position.z += this.newMove.z;
 
         // Stop sprinting if you hit a block
         this.distanceMoved = this.previousPosition.sub(this.position).length() / delta / blockSize;

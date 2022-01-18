@@ -88,6 +88,9 @@ export function initStatistics() {
     statistics.push(new Stat("Biome", player, "biome"));
     statistics.push(new Stat("Local Dir", player.direction, false, 1));
     statistics.push(new Stat("Local Vel", player.velocity, false, 1));
+    statistics.push(new Stat("World Vel", false, false, 2, function () {
+        return player.newMove;
+    }));
     statistics.push(new Stat("Speed", player, "speed", 2));
     statistics.push(new Stat("Fly", player, "fly"));
     statistics.push([

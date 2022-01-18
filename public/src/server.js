@@ -4,6 +4,7 @@ import world from './managers/WorldManager';
 import player from './Player';
 import { players, g, camera } from './globals';
 import PlayerManager from './managers/PlayerManager';
+import { clamp } from './lib/helper';
 
 // Update server players
 export function updatePlayers(serverPlayers) {
@@ -15,6 +16,8 @@ export function updatePlayers(serverPlayers) {
             p.pos.set({ x: p_.pos.x, y: p_.pos.y, z: p_.pos.z });
             p.rot.set({ x: p_.rot.x, y: p_.rot.y, z: p_.rot.z });
             p.dir.set({ x: p_.dir.x, y: p_.dir.y, z: p_.dir.z });
+
+            p.vel.set({ x: p_.vel.x, y: p_.vel.y, z: p_.vel.z });
 
             // Update player data
             if (p_.hp != p.hp) {
@@ -69,30 +72,21 @@ export function updatePlayers(serverPlayers) {
 
 function updatePlayer(p) {
     let { blockSize } = world;
-
+    
     let dim = player.dim;
+    let {skin, leftArm, rightArm, leftLeg, rightLeg, leftHip, rightHip, headPivot, entity, skeleton, pos, rot, dir} = p;
 
-    p.entity.position.set(p.pos.x, p.pos.y, p.pos.z);
-    p.skeleton.rotation.set(p.rot.x, p.rot.y, p.rot.z);
-    p.headPivot.rotation.x = p.dir.y * Math.PI/2;
+    entity.position.set(pos.x, pos.y, pos.z); // Set player position
+    skeleton.rotation.set(rot.x, rot.y, rot.z); // Set player rotation
+    headPivot.rotation.x = dir.y * Math.PI/2; // Set head rotation
 
-    let shift = blockSize / 8;
+    let shift = 2; // blockSize / 8;
 
-    let armOffsetY = blockSize * 0.25;
-    let legOffsetY = blockSize * 0.5;
-    let legOffsetZ = 0;
-
-    let leftArm = p.leftArm;
-    let rightArm = p.rightArm;
+    let armOffsetY = 4; // blockSize * 0.25;
+    let legOffsetY = 8; // blockSize * 0.5;
     
-    let leftHip = p.leftHip;
-    let rightHip = p.rightHip;
-
-    let leftLeg = p.leftLeg;
-    let rightLeg = p.rightLeg;
-    
-    let rightShoulderOffset = p.skin == "steve" ? dim.armSize * 3/2 : dim.armSize * 3/2 - 0.6;
-    let leftShoulderOffset = p.skin == "steve" ? -6 : -5.45;
+    let rightShoulderOffset = skin == "steve" ? dim.armSize * 3/2 : dim.armSize * 3/2 - 0.6;
+    let leftShoulderOffset = skin == "steve" ? -6 : -5.45;
 
     // Sneaking animation
     if (p.sneaking) {
@@ -120,9 +114,17 @@ function updatePlayer(p) {
         p.rightShoulder.position.set(rightShoulderOffset, -blockSize * 0.15, 0);
     }
 
+    // Get magnitude of velocity
+    let v = Math.sqrt(p.vel.x * p.vel.x + p.vel.z * p.vel.z);
+    v = clamp(v, 0, 1);
+    if (p.sneaking) v *= 2;
+
+    // Set speed of animation based on velocity
     let axis = new THREE.Vector3(1, 0, 0);
     let speed = p.sneaking ? g.delta*3 : g.delta*10;
     let maxRotation = p.sneaking ? Math.PI/6 : Math.PI/3;
+    speed *= v;
+    maxRotation *= v;
 
     if (p.walking) { // Walking animation
         if (leftArm.rotation.x < -maxRotation) {
@@ -135,23 +137,24 @@ function updatePlayer(p) {
             rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed)
             rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed)
 
-            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, -speed)
-            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, speed)
+            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, -speed)
+            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, speed)
         } else {
             rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed)
             rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed)
 
-            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, speed)
-            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, -speed)
+            rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, speed)
+            rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, -speed)
         }
     } else {
         rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, Math.abs(rightArm.rotation.x) * Math.sign(-rightArm.rotation.x))
         rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, Math.abs(leftArm.rotation.x) * Math.sign(-leftArm.rotation.x))
 
-        rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, Math.abs(rightLeg.rotation.x) * Math.sign(-rightLeg.rotation.x))
-        rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, legOffsetZ), axis, Math.abs(leftLeg.rotation.x) * Math.sign(-leftLeg.rotation.x))
+        rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, Math.abs(rightLeg.rotation.x) * Math.sign(-rightLeg.rotation.x))
+        rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, Math.abs(leftLeg.rotation.x) * Math.sign(-leftLeg.rotation.x))
     }
 
+    // Active hand item
     if (p.hand) {
         let hand = p.toolbar[p.currSlot];
         let item_mesh = p.hand.mesh;
@@ -184,6 +187,7 @@ function updatePlayer(p) {
         }
     }
 
+    // Update nametag rotation
     p.nameTag.quaternion.copy(camera.getWorldQuaternion(new THREE.Quaternion()));
 
     if (p.sneaking) {

@@ -34,6 +34,8 @@ class PlayerManager {
         p.rot = Ola({ x: 0, y: 0, z: 0 });
         p.dir = Ola({ x: 0, y: 0, z: 0 });
 
+        p.vel = Ola({ x: 0, y: 0, z: 0 });
+
         // Add player body
         PlayerManager.addPlayerMesh(p);
 
@@ -465,7 +467,7 @@ class PlayerManager {
     static updatePlayerColor(p, color, opacity) {
         if (!p || !p.skeleton) return;
 
-        for (let a of p.skeleton.children) {
+        for (let a of p.skeleton.children) { // TODO: CLEAN UP THIS PIECE OF LAZY GARBAGE
             if (a.type == "Mesh") {
                 for (let material of a.material) {
                     if (color) material.color = color;
@@ -484,6 +486,16 @@ class PlayerManager {
                             for (let material of child.material) {
                                 if (color) material.color = color;
                                 if (opacity) material.opacity = opacity;
+                            }
+                        } else if (child.type == "Group") {
+                            let group = child;
+                            for (let child of group.children) {
+                                if (child.type == "Mesh") {
+                                    for (let material of child.material) {
+                                        if (color) material.color = color;
+                                        if (opacity) material.opacity = opacity;
+                                    }
+                                }
                             }
                         }
                         break;

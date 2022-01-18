@@ -15,6 +15,7 @@ const serverNames = {
 const serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.online`)
 const connectionDelay = 2000;
 let players = {};
+globalThis.players = players;
 
 
 // use an obj to hold global vars since imported vars are constants
