@@ -163,7 +163,7 @@ $(document).ready(function () {
 
     })
 
-    if (DEV_MODE_SKIP_MENUS) { // Add callbacks to nextState() so setTimeout isn't needed
+    if (DEV_MODE) { // TODO: Add callbacks to nextState() so setTimeout isn't needed 
         nextState()
         $("#direct-connect-input").val("localhost:3001")
         nextState()
@@ -268,7 +268,6 @@ function init() {
     window.addEventListener('resize', onWindowResize, false); // Add resize event
 
     camera.add(axesHelper);
-    axesHelper.visible = game.debug;
 
     addVideoControls(); // Add video settings
     addKeyboardControls(); // Add keyboard controls
@@ -456,6 +455,9 @@ g.socket.on('joinResponse', function (data) {
         connectError("banned", data.reason);
         return;
     }
+
+    // Initialize axesHelper
+    axesHelper.visible = game.debug;
 
     // Receive common world attritutes
     Object.assign(world, data.world);

@@ -31,8 +31,8 @@ class PlayerManager {
 
         // Set position, rotation and direction
         p.pos = Ola({ x: 0, y: 0, z: 0 });
-        p.rot = Ola({ x: 0, y: 0, z: 0 });
-        p.dir = Ola({ x: 0, y: 0, z: 0 });
+        p.rot = Ola({ x: 0, y: 0, z: 0 }, 100);
+        p.dir = Ola({ x: 0, y: 0, z: 0 }, 100);
 
         p.vel = Ola({ x: 0, y: 0, z: 0 });
 
@@ -314,12 +314,16 @@ class PlayerManager {
     static addSkeleton(p) {
         // Create skeleton of head, body, arms, and legs
         p.skeleton = new THREE.Group();
-        p.skeleton.add(p.body);
+        p.wholeBody = new THREE.Group(); // TODO: rename
 
-        p.skeleton.add(p.leftShoulder);
-        p.skeleton.add(p.rightShoulder);
-        p.skeleton.add(p.leftHip);
-        p.skeleton.add(p.rightHip);
+        p.wholeBody.add(p.body);
+
+        p.wholeBody.add(p.leftShoulder);
+        p.wholeBody.add(p.rightShoulder);
+        p.wholeBody.add(p.leftHip);
+        p.wholeBody.add(p.rightHip);
+
+        p.skeleton.add(p.wholeBody);
 
         p.skeleton.add(p.neck);
         p.skeleton.name = p.id;
@@ -467,7 +471,7 @@ class PlayerManager {
     static updatePlayerColor(p, color, opacity) {
         if (!p || !p.skeleton) return;
 
-        for (let a of p.skeleton.children) { // TODO: CLEAN UP THIS PIECE OF LAZY GARBAGE
+        for (let a of p.skeleton.children) { // TODO: CLEAN UP THIS PIECE OF LAZY GARBAGE (while loop)
             if (a.type == "Mesh") {
                 for (let material of a.material) {
                     if (color) material.color = color;

@@ -63,7 +63,7 @@ class Player {
         this.onObjectTime = 0;
 
         this.bhopTimeLimit = 0.05; // 50ms to jump before the sprint boost is reset
-        this.bhopMaxSpeed = this.defaultMaxSprintSpeed + 1; // Maximum speed that can be reached through bhopping
+        this.bhopMaxSpeed = this.defaultMaxSprintSpeed + 0.2; // Maximum speed that can be reached through bhopping
         this.bhopRate = 0.05; // How much the speed ramps up after each successful bhop
 
         this.deltaFov = 0;
@@ -190,7 +190,11 @@ class Player {
         this.toolbar = [];
 
         // Spawn
-        this.respawn(world.blockSize, data.startPos);
+        if (DEV_MODE) {
+            this.respawn(world.blockSize, new THREE.Vector3(0, 16*16*8, 0));
+        } else {
+            this.respawn(world.blockSize, data.startPos);
+        }
 
         // Check if operator
         if (data.operator) {

@@ -92,7 +92,7 @@ class HUD {
 
         // Update heart jump animation
         if (this.heartUp) {
-            this.heartT += delta * 20;
+            this.heartT += g.delta * 20;
             if (this.heartT > 9) {
                 this.heartT = 0;
                 this.heartUp = false;

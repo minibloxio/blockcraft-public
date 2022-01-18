@@ -43,7 +43,7 @@ module.exports = (env, argv) => {
             ],
         },
         plugins: [
-            new webpack.DefinePlugin({ 'DEV_MODE_SKIP_MENUS': argv.mode == 'development' }),
+            new webpack.DefinePlugin({ 'DEV_MODE': argv.mode == 'development' }),
             new FaviconsWebpackPlugin('./public/assets/favicon.png'),
             new HtmlWebpackPlugin({
                 template: "./public/index.html",

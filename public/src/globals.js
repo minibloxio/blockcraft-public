@@ -17,6 +17,8 @@ const connectionDelay = 2000;
 let players = {};
 globalThis.players = players;
 
+globalThis.THREE = THREE;
+
 
 // use an obj to hold global vars since imported vars are constants
 let g = {}

@@ -77,14 +77,37 @@ function updatePlayer(p) {
     let {skin, leftArm, rightArm, leftLeg, rightLeg, leftHip, rightHip, headPivot, entity, skeleton, pos, rot, dir} = p;
 
     entity.position.set(pos.x, pos.y, pos.z); // Set player position
-    skeleton.rotation.set(rot.x, rot.y, rot.z); // Set player rotation
-    headPivot.rotation.x = dir.y * Math.PI/2; // Set head rotation
 
+    p.neck.rotation.set(rot.x, rot.y, rot.z); // Set sideways head rotation
+
+    // Rotate body towards the head
+    let angleDiff = Math.abs(p.neck.quaternion.dot(p.wholeBody.quaternion));
+    if (angleDiff < 0.92) {
+        p.wholeBody.quaternion.slerp(p.neck.quaternion, g.delta*4);
+    }
+
+    if (p.walking) {
+        let target = new THREE.Vector3(-p.vel.x, 0, -p.vel.z); // Target direction
+        target.normalize();
+
+        let bodyDir = new THREE.Vector3()
+        p.wholeBody.getWorldDirection(bodyDir);
+
+        bodyDir.normalize();
+        let quaternion = new THREE.Quaternion().setFromUnitVectors(bodyDir, target); // Get rotation quaternion from current and target direction
+
+        let targetQuaternion = p.wholeBody.clone(false); // TODO: OPTIMIZE
+        targetQuaternion.applyQuaternion(quaternion); // Apply rotation quaternion to body
+
+        p.wholeBody.quaternion.slerp(targetQuaternion.quaternion, g.delta*3); // Lerp body towards target quaternion
+    }
+
+    headPivot.rotation.x = dir.y * Math.PI/2; // Set up/down head rotation
+
+    // Offsets
     let shift = 2; // blockSize / 8;
-
     let armOffsetY = 4; // blockSize * 0.25;
     let legOffsetY = 8; // blockSize * 0.5;
-    
     let rightShoulderOffset = skin == "steve" ? dim.armSize * 3/2 : dim.armSize * 3/2 - 0.6;
     let leftShoulderOffset = skin == "steve" ? -6 : -5.45;
 
