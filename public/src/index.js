@@ -1,3 +1,4 @@
+import { initKeys } from 'kontra';
 import Ola from "ola";
 import * as THREE from "three";
 import "../style.css";
@@ -139,7 +140,7 @@ $(document).ready(function () {
 
     })
 
-    if (DEV_MODE) { // TODO: Add callbacks to nextState() so setTimeout isn't needed 
+    if (DEV_MODE) { // TODO: Add callbacks to nextState() so setTimeout isn't needed
         nextState()
         $("#direct-connect-input").val("localhost:3001")
         nextState()
@@ -245,6 +246,7 @@ function init() {
 
     camera.add(axesHelper);
 
+    initKeys()
     addVideoControls(); // Add video settings
     addKeyboardControls(); // Add keyboard controls
     initStatistics(); // Add statistics to record

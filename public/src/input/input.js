@@ -10,6 +10,8 @@ import chat from '../managers/ChatManager';
 import world from '../managers/WorldManager';
 import player from '../Player';
 
+import "./flying.ts"
+
 let mouse = new Ola({ x: 0, y: 0 }, 10); // Mouse
 var map = {};
 let keymap = keyconfig.keymap;
@@ -175,21 +177,12 @@ var onKeyDown = function (event) {
             case "Move Right":
                 player.key.right = -1;
                 break;
-            case "Jump":
-                player.key.up = -1;
-                break;
             case "Sprint":
                 player.key.sprint = true;
                 break;
             case "Sneak":
                 player.key.sneak = true;
                 player.key.down = 1;
-                break;
-            case "Fly":
-                if (player.controls.enabled && player.allowFly) {
-                    player.fly = !player.fly;
-                    player.allowFly = false;
-                }
                 break;
             case "Clip":
                 if (player.controls.enabled && player.allowClip) {
@@ -306,18 +299,12 @@ var onKeyUp = function (event) {
             case "Move Right":
                 player.key.right = 0;
                 break;
-            case "Jump":
-                player.key.up = 0;
-                break;
             case "Sprint":
                 player.key.sprint = false;
                 break;
             case "Sneak":
                 player.key.sneak = false;
                 player.key.down = 0;
-                break;
-            case "Fly":
-                player.allowFly = true;
                 break;
             case "Clip":
                 player.allowClip = true;

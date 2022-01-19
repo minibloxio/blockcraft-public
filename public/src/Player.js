@@ -9,11 +9,10 @@ import chat from './managers/ChatManager';
 import inventory from "./items/Inventory";
 import masterRenderer from "./graphics/MasterRenderer";
 import { random } from './lib/helper';
-
 import activeItemVoxels from "./graphics/ActiveItemVoxels.ts"
+import { keyPressed } from "kontra"
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
-const EMPTY = new THREE.Mesh();
 
 class Player {
     constructor() {
@@ -824,37 +823,6 @@ class Player {
             this.direction.x = this.direction.x / mag;
             this.direction.z = this.direction.z / mag;
         }
-        this.direction.y = this.key.up + this.key.down;
-
-        // // Check if double jump
-        // if (Date.now()-this.firstJump > 400) {
-        // 	this.firstJump = 0;
-        // }
-
-        // if (this.key.up && !this.secondJump) this.firstJump = Date.now(); // First jump
-        // else if (!this.key.up && this.secondJump) {
-        // 	this.secondJump = false;
-        // } else if (!this.key.up && !this.secondJump && this.firstJump && Date.now()-this.firstJump < 100) {
-        // 	this.secondJumpPossible = true; // Second jump possible
-        // }
-
-        // if (Date.now()-this.firstJump >= 100) {
-        // 	this.firstJump = false;
-        // 	this.secondJumpPossible = false;
-        // 	this.secondJump = false;
-        // }
-
-        // if (this.key.up && this.secondJumpPossible) { // Double jump
-        // 	this.secondJumpPossible = false;
-        // 	this.firstJump = undefined;
-        // 	this.secondJump = true;
-
-        // 	// Fly if allowed
-        // 	if (player.controls.enabled) {
-        // 		player.fly = !player.fly;
-        // 		player.allowFly = false;
-        // 	}
-        // }
 
         if (this.onObject && !this.fly) this.velocity.y = Math.max(0, this.velocity.y);
 
@@ -876,7 +844,7 @@ class Player {
             this.halfHeight = blockSize * 0.4;
 
         } else {
-            if (this.key.up && this.inWater) {
+            if (keyPressed('space') && this.inWater) {
                 this.velocity.y = 50;
             } else if (this.headInWater) {
                 this.velocity.y = Math.min(-20, this.velocity.y * delta * 50);
@@ -885,7 +853,7 @@ class Player {
             }
 
             // Jump
-            if (this.key.up && !chat.showChatBar) {
+            if (keyPressed('space') && !chat.showChatBar) {
                 if (this.onObject) {
                     this.velocity.y += this.initialJumpVelocity;
                     if (this.onObjectTime < this.bhopTimeLimit) {
@@ -893,8 +861,6 @@ class Player {
                     } else {
                         this.maxSprintSpeed = this.defaultMaxSprintSpeed;
                     }
-                } else {
-                    this.key.up = -1;
                 }
             } else if (this.onObjectTime > this.bhopTimeLimit) {
                 this.maxSprintSpeed = this.defaultMaxSprintSpeed;
@@ -910,7 +876,11 @@ class Player {
 
         if (this.key.forward || this.key.backward) this.velocity.z -= this.direction.z * 400.0 * delta;
         if (this.key.left || this.key.right) this.velocity.x -= this.direction.x * 400.0 * delta;
-        if ((this.key.down || this.key.up) && this.fly) this.velocity.y -= this.direction.y * 400.0 * delta;
+
+        if (this.fly) {
+            if (keyPressed('space')) this.velocity.y += 400.0 * delta;
+            if (this.key.down) this.velocity.y -= 400.0 * delta;
+        }
 
     }
 
