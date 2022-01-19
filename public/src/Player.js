@@ -773,12 +773,6 @@ class Player {
     }
 
     dropItem() {
-        if (!this.allowDrop || !this.controls.enabled || chat.showChatBar) {
-            this.allowDrop = false;
-            return;
-        }
-
-        this.allowDrop = false;
         let item = this.getCurrItem();
         if (!item || item.c <= 0) return;
 
@@ -1137,7 +1131,6 @@ class Player {
 
         this.mine();
         this.placeBlock();
-        this.dropItem();
         this.updateHand();
         activeItemVoxels.update()
 

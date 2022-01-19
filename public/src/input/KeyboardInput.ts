@@ -34,6 +34,7 @@ bindKeys(
 bindKeys(
   ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
   (e) => {
+    if (!player.controls.enabled || chat.showChatBar) return;
     player.currentSlot = parseInt(e.key);
   },
   { preventDefault: false }
@@ -43,6 +44,7 @@ bindKeys(
 bindKeys(
   "x",
   () => {
+    if (!player.controls.enabled || chat.showChatBar) return;
     camera.zoom = g.zoomLevel;
     g.enableZoom = true;
   },
@@ -58,6 +60,38 @@ bindKeys(
   { preventDefault: false, handler: "keyup" }
 );
 
+// respawn
+bindKeys(
+  "r",
+  (event) => {
+    if (!player.controls.enabled || chat.showChatBar || event.repeat) return;
+    player.respawn(world.blockSize);
+    g.socket.emit("respawn");
+  },
+  { preventDefault: false, handler: "keydown" }
+);
+
+// drop
+bindKeys(
+  "q",
+  (event) => {
+    if (!player.controls.enabled || chat.showChatBar || event.repeat) return;
+    player.dropItem();
+  },
+  { preventDefault: false, handler: "keydown" }
+);
+
 export function update() {
   hud.showPlayerTab = keyPressedPlayer("tab");
 }
+
+// open chat
+bindKeys(
+  ["enter", "slash"],
+  (e) => {
+    if (!player.controls.enabled) return;
+    const slashOpen = e.code === "Slash" && !chat.showChatBar; // slash key to toggle chat when it isn't already open
+    if (e.code == "Enter" || slashOpen) chat.showChatBar = !chat.showChatBar;
+  },
+  { preventDefault: false, handler: "keydown" }
+);

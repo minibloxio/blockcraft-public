@@ -35,34 +35,7 @@ $(window).on("keydown", function (event) {
 var onKeyDown = function (event) {
   if (!g.initialized) return;
 
-  // CHAT INPUT
-
-  // slash key to toggle chat when it isn't already open
-  const slashOpen = event.keyCode === 191 && !chat.showChatBar;
-
-  if (player.controls.enabled && (13 === event.keyCode || slashOpen)) {
-    chat.showChatBar = !chat.showChatBar;
-
-    let msg = $("#chat-input").val();
-    if (!chat.showChatBar && msg) {
-      if (msg[0] != "/") {
-        // Send message to everyone
-        g.socket.emit("message", $("#chat-input").val());
-        $("#chat-input").val("");
-      } else {
-        // Check minecraft command
-        if (c.prevCommands[0] != $("#chat-input").val()) {
-          c.prevCommands.unshift($("#chat-input").val());
-        }
-        $("#chat-input").val("");
-        msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
-        checkCommand(msg);
-      }
-      c.commandIndex = -1;
-    }
-  }
-
-  if (!g.initialized || !player.controls.enabled || chat.showChatBar) return;
+  if (!player.controls.enabled || chat.showChatBar) return;
 
   // GAME CONTROLS
   if (keymap[event.keyCode]) {
@@ -84,18 +57,6 @@ var onKeyDown = function (event) {
           player.allowClip = false;
         }
         break;
-      case "Drop Item":
-        player.allowDrop = true;
-        break;
-      case "Respawn":
-        if (player.controls.enabled && player.allowRespawn) {
-          player.respawn(world.blockSize);
-          g.socket.emit("respawn");
-          player.allowRespawn = false;
-        }
-        break;
-      case "Player Tab":
-        break;
     }
   }
 };
@@ -115,10 +76,8 @@ var onKeyUp = function (event) {
   if (chat.showChatBar) {
     // ARROW KEY CONTROLS
     if (event.keyCode == 38) {
-      inventory.scroll(1);
       prevCommand();
     } else if (event.keyCode == 40) {
-      inventory.scroll(-1);
       nextCommand();
     }
 
@@ -151,12 +110,6 @@ var onKeyUp = function (event) {
       case "Clip":
         player.allowClip = true;
         break;
-      case "Drop Item":
-        player.allowDrop = false;
-        break;
-      case "Respawn":
-        player.allowRespawn = true;
-        break;
     }
   }
 };
@@ -177,3 +130,4 @@ keyMap["ShiftRight"] = "shift";
 keyMap["CtrlLeft"] = "ctrl";
 keyMap["CtrlRight"] = "ctrl";
 keyMap["Tab"] = "tab";
+keyMap["Slash"] = "slash";
