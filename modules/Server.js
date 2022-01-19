@@ -427,7 +427,8 @@ module.exports = class World {
   }
 
   // Update players
-  updatePlayers(players, world, logger, io, addLog) {
+  updatePlayers(data) {
+    let { players, world, logger, io, addLog, bots } = data;
     let regenTick = world.tick % 50 == 0;
     let voidTick = (world.tick + 5) % 10 == 0;
 
@@ -466,7 +467,15 @@ module.exports = class World {
           text: txt,
         });
 
-        addLog(id, "d"); // Deaths
+        if (bots[id]) {
+          // Killed a bot
+          delete bots[id];
+          io.emit("removePlayer", id);
+          delete players[id];
+        } else {
+          // Killed a player
+          addLog(id, "d"); // Deaths
+        }
       } else if (!player.dead && player.hp > 0) {
         // Update player armor type
         let armorSlots = player.toolbar.slice(36);

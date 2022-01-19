@@ -75,7 +75,7 @@ const faces = [
       { pos: [1, 1, 1], uv: [1, 1] },
     ],
   },
-];
+]; // If the other faces are needed, they can be found in the WorldManager file.
 
 class ActiveItemVoxels {
   root = new THREE.Group();

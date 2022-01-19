@@ -970,7 +970,7 @@ setInterval(function () {
   world.tick += 1;
 
   // Update players
-  server.updatePlayers(players, world, logger, io, addLog);
+  server.updatePlayers({ players, world, logger, io, addLog, bots });
 
   // Update bots
   for (let id in bots) {
