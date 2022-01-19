@@ -1,3 +1,5 @@
+import * as $ from "jquery";
+import Cookies from "js-cookie";
 import { axesHelper } from ".";
 import keyconfig from "../json/keyconfig.json";
 import game from "./Game";
@@ -8,7 +10,7 @@ import chunkManager from "./managers/ChunkManager";
 import workerManager from "./managers/WorkerManager";
 import world from "./managers/WorldManager";
 import player from "./Player";
-import { deleteCookie, getCookie, setCookie } from "./resources/cookie";
+import { getCookie, setCookie } from "./resources/cookie";
 import stage from "./Stage";
 
 let keymap = keyconfig.keymap;
@@ -141,7 +143,7 @@ export function addKeyboardControls() {
 
     $("#reset-keyboard").click(function () {
         for (let key of keyorder) {
-            deleteCookie(keymap[key][0])
+            Cookies.remove(keymap[key][0])
         }
 
         keyorder = JSON.parse(savedKeyorder)
@@ -152,9 +154,10 @@ export function addKeyboardControls() {
 
 function addSliderControl(name, id, defaultValue, object, key, callback) {
 
+    const val = getCookie(name)
     // Sensitivity
-    if (getCookie(name)) {
-        object[key] = parseFloat(getCookie(name));
+    if (val) {
+        object[key] = parseFloat(val);
     } else {
         object[key] = defaultValue;
     }
@@ -196,8 +199,9 @@ export function addVideoControls() {
 }
 
 function addSwitchControl(name, id, defaultValue, object, key, key2, callback) {
-    if (getCookie(name)) {
-        object[key] = getCookie(name) == "true" ? true : false;
+    const val = getCookie(name)
+    if (val) {
+        object[key] = val == "true" ? true : false;
         if (key2) object[key2] = object[key];
     } else {
         object[key] = defaultValue;
@@ -229,8 +233,9 @@ function addSwitchControl(name, id, defaultValue, object, key, key2, callback) {
 }
 
 function addSelectControl(name, id, defaultValue, object, key, callback) {
-    if (getCookie(name)) {
-        object[key] = getCookie(name);
+    const val =getCookie(name)
+    if (val) {
+        object[key] = val
     } else {
         object[key] = defaultValue;
     }
@@ -247,7 +252,7 @@ $(document).ready(function () {
     $("#reset-video").click(function () {
         let videoCookies = ["Sensitivity", "Render Distance", "Chunk Loading Rate", "FOV", "Statistics", "Shadow Effect", "Clouds", "Stars", "Material Texture"];
         for (let cookie of videoCookies) {
-            deleteCookie(cookie)
+            Cookies.remove(cookie)
         }
 
         addVideoControls();

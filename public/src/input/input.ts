@@ -11,7 +11,6 @@ import "./MouseInput";
 
 initKeys();
 
-var map = {};
 let keymap = keyconfig.keymap;
 
 $(window).on("keydown", function (event) {
