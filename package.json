@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
+    "bad-words": "^3.0.4",
     "body-parser": "^1.19.1",
     "cluster": "^0.7.7",
     "colors": "^1.4.0",

@@ -124,7 +124,7 @@
             </div>
             <!-- User Input and Start Button -->
             <div id="input-container">
-                <input autocomplete="off" id="name-input" class="input" type="text" placeholder="Enter Username" maxlength="20" onkeypress="return /[a-z ]/i.test(event.key)">
+                <input autocomplete="off" id="name-input" class="input" type="text" placeholder="Enter Username" maxlength="20" onkeypress="return /[a-z 0-9]/i.test(event.key)">
                 <input autocomplete="off" id="direct-connect-input" class="input" type="text" placeholder="Direct Connect (optional)" maxlength="50" style="display: none;">
                 <br />
                 <div id="start-button">
