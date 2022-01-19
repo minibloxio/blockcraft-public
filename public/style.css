@@ -58,7 +58,7 @@ a {
   height: 100%;
   text-align: center;
   vertical-align: middle;
-  z-index: 0; /* change back to 3 if anything is broken  */
+  z-index: 3; /* change back to 3 if anything is broken  */
   font-family: "Minecraft-Regular";
   font-size: 20px;
 }
@@ -332,7 +332,9 @@ a {
   --switch-height: 20px;
   --switch-margin: 3px;
   --switch-width: 45px;
-  --switch-translate: calc(var(--switch-width) - var(--switch-height) - var(--switch-margin) * 2);
+  --switch-translate: calc(
+    var(--switch-width) - var(--switch-height) - var(--switch-margin) * 2
+  );
 }
 
 #video-settings {
