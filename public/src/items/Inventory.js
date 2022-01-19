@@ -1274,4 +1274,5 @@ class Inventory {
   }
 }
 const inventory = new Inventory();
+globalThis.inventory = inventory;
 export default inventory;

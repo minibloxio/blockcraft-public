@@ -1288,4 +1288,5 @@ class Player {
   }
 }
 const player = new Player();
+globalThis.player = player;
 export default player;
