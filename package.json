@@ -43,6 +43,7 @@
   "homepage": "https://github.com/victoryqwei/Interplanetarium#readme",
   "devDependencies": {
     "@types/dat.gui": "^0.7.7",
+    "@types/ola": "^1.2.0",
     "@types/three": "^0.136.1",
     "copy-webpack-plugin": "^10.2.0",
     "css-loader": "^6.5.1",
