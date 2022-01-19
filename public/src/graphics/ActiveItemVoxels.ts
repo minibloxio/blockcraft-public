@@ -8,6 +8,9 @@ import { AnimationLerp, Keyframe } from "../lib/AnimationLerp";
 
 const pixelSize = (1 / 16) * 2;
 const itemSize = 16;
+const tileSize = 16;
+const tileTextureWidth = 4096;
+const tileTextureHeight = 64;
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 const ZERO_VEC = new THREE.Vector3();
@@ -17,7 +20,8 @@ canvas.height = itemSize;
 
 // ITEM
 // ###############################
-const itemOffsetPos = new THREE.Vector3(1.885, -0.493, -3.0);
+//const itemOffsetPos = new THREE.Vector3(1.885, -0.493, -3.0);
+const itemOffsetPos = new THREE.Vector3(1, -0.493, -3.0);
 const itemOffsetRot = new THREE.Quaternion().setFromEuler(new THREE.Euler(1.075, 0.037, -0.102));
 const swordBlockPos = new THREE.Vector3(0.696, 0.894, -0.405);
 const swordBlockRot = new THREE.Quaternion().setFromEuler(new THREE.Euler(-1.67, 0.36, 1.467));
@@ -39,10 +43,44 @@ const arm2 = new Keyframe(new THREE.Vector3(1.246, -0.317, 0.498), new THREE.Eul
 const arm3 = new Keyframe(new THREE.Vector3(3.0, -0.295, -0.361), new THREE.Euler(0.29, 1.467, 0.014), 3);
 const arm4 = new Keyframe(new THREE.Vector3(2.348, -1.264, -0.361), new THREE.Euler(0.083, 1.167, 0.083), 4);
 
+// TODO: Organize this
+const faces = [
+  {
+    // left
+    dir: [-1, 0, 0],
+    corners: [
+      { pos: [0, 1, 0], uv: [0, 1] },
+      { pos: [0, 0, 0], uv: [0, 0] },
+      { pos: [0, 1, 1], uv: [1, 1] },
+      { pos: [0, 0, 1], uv: [1, 0] },
+    ],
+  },
+  {
+    // top
+    dir: [0, 1, 0],
+    corners: [
+      { pos: [0, 1, 1], uv: [1, 1] },
+      { pos: [1, 1, 1], uv: [0, 1] },
+      { pos: [0, 1, 0], uv: [1, 0] },
+      { pos: [1, 1, 0], uv: [0, 0] },
+    ],
+  },
+  {
+    // front
+    dir: [0, 0, 1],
+    corners: [
+      { pos: [0, 0, 1], uv: [0, 0] },
+      { pos: [1, 0, 1], uv: [1, 0] },
+      { pos: [0, 1, 1], uv: [0, 1] },
+      { pos: [1, 1, 1], uv: [1, 1] },
+    ],
+  },
+];
+
 class ActiveItemVoxels {
   root = new THREE.Group();
-  itemPixels = new Array<THREE.Mesh>(256);
   itemPixelsGroup = new THREE.Group();
+  itemMesh = new THREE.Mesh();
   block = new THREE.Mesh(new THREE.BufferGeometry(), textureManager.materialTransparent);
   blockGroup = new THREE.Group();
   arm: THREE.Mesh;
@@ -61,28 +99,104 @@ class ActiveItemVoxels {
     camera.add(this.root);
 
     // init block
+    this.initBlockMesh();
+
+    // init item
+    this.initItemMesh();
+  }
+
+  addFaceData(positions, dir, corners, normals, indices, x, y, z) {
+    const ndx = positions.length / 3;
+    for (const { pos } of corners) {
+      // Get position of the pixel
+      let xPos = pos[0] + x;
+      let yPos = pos[1] + y;
+      let zPos = pos[2] + z;
+
+      positions.push(xPos * pixelSize, yPos * pixelSize, zPos * pixelSize);
+      normals.push(...dir);
+    }
+    indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
+  }
+
+  initItemMesh() {
+    let data = {
+      positions: [],
+      normals: [],
+      indices: [],
+    };
+
+    // Add face data
+    for (let y = 0; y < itemSize; ++y) {
+      for (let z = 0; z < itemSize; ++z) {
+        for (const { dir, corners } of faces) {
+          this.addFaceData(data.positions, dir, corners, data.normals, data.indices, 0, y, z);
+        }
+      }
+    }
+
+    // Convert to ArrayBuffers
+    let positionBuffer = new Float32Array(new ArrayBuffer(data.positions.length * 4));
+    let normalBuffer = new Float32Array(new ArrayBuffer(data.normals.length * 4));
+    let indexBuffer = new Uint16Array(new ArrayBuffer(data.indices.length * 2));
+    positionBuffer.set(data.positions);
+    normalBuffer.set(data.normals);
+    indexBuffer.set(data.indices);
+
+    // Set attributes
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positionBuffer, 3));
+    geometry.setAttribute("normal", new THREE.BufferAttribute(normalBuffer, 3));
+    geometry.setIndex(new THREE.BufferAttribute(indexBuffer, 1));
+
+    const material = new THREE.MeshBasicMaterial();
+
+    // Add item mesh
+    this.itemMesh = new THREE.Mesh(geometry, material);
+    this.itemPixelsGroup.position.copy(itemOffsetPos);
+    this.itemPixelsGroup.quaternion.copy(itemOffsetRot);
+    this.itemPixelsGroup.add(this.itemMesh);
+    this.root.add(this.itemPixelsGroup);
+  }
+
+  initBlockMesh() {
     this.blockGroup.position.copy(blockOffsetPos);
     this.blockGroup.quaternion.copy(blockOffsetRot);
     this.blockGroup.scale.set(0.35, 0.35, 0.35);
     this.root.add(this.blockGroup);
+  }
 
-    // init item
-    this.itemPixelsGroup.position.copy(itemOffsetPos);
-    this.itemPixelsGroup.quaternion.copy(itemOffsetRot);
-    const mat = new THREE.MeshBasicMaterial();
-    const geo = new THREE.BoxGeometry(pixelSize, pixelSize, pixelSize);
+  updateItemGraphics(item: any) {
+    if (item.v == this.currentItem && player.bowCharge == this.bowCharge) return;
 
-    for (let z = 0; z < 16; z++) {
-      for (let y = 0; y < 16; y++) {
-        const pixel = new THREE.Mesh(geo, mat);
-        pixel.receiveShadow = true;
-        pixel.position.z = z * pixelSize;
-        pixel.position.y = y * pixelSize;
-        this.itemPixelsGroup.add(pixel);
-        this.itemPixels[z * 16 + y] = pixel;
+    this.itemMesh.material = textureManager.materialItem; // TODO: set this once
+
+    this.currentItem = item.v;
+    this.bowCharge = player.bowCharge;
+
+    let uvVoxel = item.v - 1;
+    let uvRow = player.bowCharge ? player.bowCharge : 0;
+
+    let uvs = []; // TODO: set this in the constructor (to reduce memory consumption)
+
+    // Update the UV data of each face
+    for (let y = 0; y < itemSize; ++y) {
+      for (let z = 0; z < itemSize; ++z) {
+        for (let i = 0; i < faces.length; i++) {
+          for (let i = 0; i < 4; i++) {
+            let uvX = y + uvVoxel * tileSize;
+            let uvY = z + uvRow * tileSize + 1;
+            uvs.push(uvX / tileTextureWidth, 1 - uvY / tileTextureHeight);
+          }
+        }
       }
     }
-    this.root.add(this.itemPixelsGroup);
+
+    // Update the uv data of the item mesh
+    let uvBuffer = new Float32Array(new ArrayBuffer(uvs.length * 4));
+    uvBuffer.set(uvs);
+    armItem.itemMesh.geometry.setAttribute("uv", new THREE.BufferAttribute(uvBuffer, 2));
+    armItem.itemMesh.geometry.attributes.uv.needsUpdate = true;
   }
 
   updateBlockGraphics(item: any) {
@@ -92,54 +206,15 @@ class ActiveItemVoxels {
     let uvVoxel = item.v - 1;
     let item_geometry = new THREE.BufferGeometry();
     const { positions, normals, uvs, indices } = world.generateGeometryDataForItem(uvVoxel);
-    const positionNumComponents = 3;
-    item_geometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents)
-    );
-    const normalNumComponents = 3;
-    item_geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
-    const uvNumComponents = 2;
-    item_geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
+    item_geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), 3));
+    item_geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
+    item_geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), 2));
     item_geometry.setIndex(indices);
     item_geometry.computeBoundingSphere();
 
     this.blockGroup.remove(this.block);
     this.block = new THREE.Mesh(item_geometry, textureManager.materialTransparent);
     this.blockGroup.add(this.block);
-  }
-
-  updateItemGraphics(item: any) {
-    if (item.v == this.currentItem && player.bowCharge == this.bowCharge) return;
-    this.currentItem = item.v;
-    this.bowCharge = player.bowCharge;
-
-    let atlas = textureManager.getTextureAtlas(item.class);
-    ctx.clearRect(0, 0, itemSize, itemSize);
-    ctx.drawImage(
-      atlas,
-      (item.v - 1) * itemSize,
-      (player.bowCharge ? player.bowCharge : 0) * itemSize,
-      itemSize,
-      itemSize,
-      0,
-      0,
-      itemSize,
-      itemSize
-    );
-
-    const pixels = canvas.getContext("2d").getImageData(0, 0, 16, 16).data;
-    for (var i = 0, n = pixels.length; i < n; i += 4) {
-      const r = pixels[i];
-      const g = pixels[i + 1];
-      const b = pixels[i + 2];
-      const a = pixels[i + 3];
-
-      this.itemPixels[i / 4].material = new THREE.MeshLambertMaterial({
-        color: new THREE.Color(`rgb(${r}, ${g}, ${b})`),
-      });
-      this.itemPixels[i / 4].visible = a !== 0;
-    }
   }
 
   update() {
@@ -157,14 +232,15 @@ class ActiveItemVoxels {
     this.arm.visible = false;
 
     if (player.mode == "spectator" || player.mode == "camera") return;
-    let curItem = player.getCurrItem();
+    let currItem = player.getCurrItem();
 
-    if (curItem) {
-      if (curItem.class == "block") {
-        this.updateBlockGraphics(curItem);
+    // Update arm based on current item in hand
+    if (currItem) {
+      if (currItem.class == "block") {
+        this.updateBlockGraphics(currItem);
         this.blockGroup.visible = true;
-      } else if (curItem.class == "item") {
-        this.updateItemGraphics(curItem);
+      } else if (currItem.class == "item") {
+        this.updateItemGraphics(currItem);
         this.itemPixelsGroup.visible = true;
       } else {
         throw "invalid item class";
@@ -181,7 +257,7 @@ class ActiveItemVoxels {
       this.root.position.copy(swordBlockPos);
       this.root.quaternion.copy(swordBlockRot);
     } else if (punchLerp <= 1) {
-      if (!curItem) {
+      if (!currItem) {
         this.armPunch.update(punchLerp);
       } else {
         this.blockPunch.update(punchLerp);
@@ -194,4 +270,5 @@ class ActiveItemVoxels {
 }
 
 const armItem = new ActiveItemVoxels();
+globalThis.armItem = armItem;
 export default armItem;

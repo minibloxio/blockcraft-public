@@ -322,14 +322,10 @@ export function updateCellMesh(data) {
 
 // Set the geometry of the mesh
 export function setGeometry(geometry, data) {
-  const positionNumComponents = 3;
-  geometry.setAttribute("position", new THREE.BufferAttribute(data.positions, positionNumComponents));
-  const normalNumComponents = 3;
-  geometry.setAttribute("normal", new THREE.BufferAttribute(data.normals, normalNumComponents));
-  const uvNumComponents = 2;
-  geometry.setAttribute("uv", new THREE.BufferAttribute(data.uvs, uvNumComponents));
-  const indexNumComponents = 1;
-  geometry.setIndex(new THREE.BufferAttribute(data.indices, indexNumComponents));
+  geometry.setAttribute("position", new THREE.BufferAttribute(data.positions, 3));
+  geometry.setAttribute("normal", new THREE.BufferAttribute(data.normals, 3));
+  geometry.setAttribute("uv", new THREE.BufferAttribute(data.uvs, 2));
+  geometry.setIndex(new THREE.BufferAttribute(data.indices, 1));
   geometry.computeBoundingSphere();
 }
 
