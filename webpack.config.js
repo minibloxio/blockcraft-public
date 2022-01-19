@@ -11,6 +11,7 @@ module.exports = (env, argv) => {
             filename: 'main.js',
             path: path.resolve(__dirname, 'dist'),
         },
+        devtool: 'eval-cheap-source-map',
         devServer: {
             static: {
                 directory: path.join(__dirname, 'dist'),
@@ -30,16 +31,21 @@ module.exports = (env, argv) => {
             }
         },
         module: {
-            rules: [{
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader']
-            },
-            {
+            rules: [
+                {
+                    test: /\.tsx?$/,
+                    use: 'ts-loader',
+                    exclude: /node_modules/,
+                }, {
+                    test: /\.css$/,
+                    use: ['style-loader', 'css-loader']
+                },
+                {
 
-                test: /\.(png|otf)$/,
-                type: 'asset/resource'
+                    test: /\.(png|otf)$/,
+                    type: 'asset/resource'
 
-            }
+                }
             ],
         },
         plugins: [
@@ -61,6 +67,8 @@ module.exports = (env, argv) => {
                 patterns: [{ from: "./public/src/workers", to: "./src/workers" }],
             }),
         ],
-
+        resolve: {
+            extensions: ['.ts', '.js', '.json']
+        }
     };
 }

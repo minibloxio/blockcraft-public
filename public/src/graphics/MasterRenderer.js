@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { camera, scene } from "../globals";
-import activeItem, { camera as activeItemCamera, scene as activeItemScene } from "./ActiveItemScene";
-import gameScene from "./GameScene";
+
+import gameScene from "./GameScene"
+import activeItem, { scene as activeItemScene, camera as activeItemCamera } from "./ActiveItemScene.ts"
+import { scene, camera } from "../globals"
 
 
 class MasterRenderer {

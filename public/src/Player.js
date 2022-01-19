@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { PointerLockControls } from './input/pointerlock';
 import { camera, isState, g, scene, players } from "./globals";
-import skinManager from './managers/SkinManager';
 import textureManager from './managers/TextureManager';
 import world, { updateVoxelGeometry } from './managers/WorldManager';
 import game from './Game';
@@ -11,7 +10,7 @@ import inventory from "./items/Inventory";
 import masterRenderer from "./graphics/MasterRenderer";
 import { random } from './lib/helper';
 
-import activeItemVoxels from "./graphics/ActiveItemVoxels"
+import activeItemVoxels from "./graphics/ActiveItemVoxels.ts"
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 const EMPTY = new THREE.Mesh();
@@ -121,7 +120,8 @@ class Player {
             legHeight: 0.75 * blockSize,
             headSize: 0.5 * blockSize,
             height: 1.8 * blockSize
-        }
+        };
+        this.skin = undefined;
     }
 
     init() {
@@ -149,22 +149,11 @@ class Player {
         this.oxygen = 300;
         this.hunger = 100;
 
-        // Hand
-        this.addArm();
-
         // Select box wireframe
         this.addSelectBox();
 
         // Add to scene
         scene.add(this.controls.getObject());
-    }
-
-    addArm() {
-        if (this.arm) return;
-        this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin(this.skin).armC);
-        this.arm.castShadow = true;
-        this.arm.receiveShadow = true;
-        camera.add(this.arm);
     }
 
     addSelectBox() {
@@ -297,9 +286,7 @@ class Player {
 
     updateHand(item) { // OPTIMIZE
         item = item || this.getCurrItem();
-        this.arm.visible = !(this.mode == "spectator" || this.mode == "camera");
 
-        activeItemVoxels.updateItem()
         this.moveHand(item);
 
         let s = JSON.stringify(item);
@@ -311,37 +298,6 @@ class Player {
 
         this.prevItem = s;
         this.prevState = this.bowCharge;
-        camera.remove(this.arm);
-
-
-        if (item && item.class == "item" && item.c > 0) { // Display item
-            // moved to Active Item Voxel
-            this.arm = EMPTY
-        } else if (item && item.c > 0) { // Display block
-            let uvVoxel = item.v - 1;
-            let item_geometry = new THREE.BufferGeometry();
-            const { positions, normals, uvs, indices } = world.generateGeometryDataForItem(uvVoxel);
-            const positionNumComponents = 3;
-            item_geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
-            const normalNumComponents = 3;
-            item_geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
-            const uvNumComponents = 2;
-            item_geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
-            item_geometry.setIndex(indices);
-            item_geometry.computeBoundingSphere();
-
-            this.arm = new THREE.Mesh(item_geometry, textureManager.materialTransparent);
-            this.arm.position.set(3, -7, -8);
-        } else {
-            // Display hand if empty
-            this.arm = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 3), skinManager.getSkin(this.skin).armC);
-            this.arm.position.set(2, -2, -2.5);
-            this.arm.rotation.set(Math.PI, Math.PI, 0)
-        }
-
-        this.arm.castShadow = true;
-        this.arm.receiveShadow = true;
-        camera.add(this.arm);
     }
 
     drawBow() {
@@ -440,42 +396,12 @@ class Player {
             this.blocking = (this.key.rightClick && (this.punchT > 1)) ? this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1) : this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta);
         }
 
-        // Move hand
-        let pos1, pos2, rot1, rot2;
-        if (entity && entity.class == "item" && entity.c > 0) {
-            pos1 = new THREE.Vector3(1.5, -1, -2);
-            pos2 = this.blocking ? new THREE.Vector3(1.5, -1, -3) : new THREE.Vector3(1.5, -1, -5);
-            rot1 = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 6, -Math.PI / 2, Math.PI / 4 + Math.PI / 8));
-            let rot2Euler = this.blocking ? new THREE.Euler(-Math.PI / 8, 0, Math.PI / 4 + Math.PI / 3) : new THREE.Euler(Math.PI / 6, -Math.PI / 3, Math.PI / 4 + Math.PI / 2);
-            rot2 = new THREE.Quaternion().setFromEuler(rot2Euler);
-        } else if (entity && entity.c > 0) { // Items
-            pos1 = new THREE.Vector3(3, -7, -8);
-            pos2 = new THREE.Vector3(3, -7, -11);
-            rot1 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, 0));
-            rot2 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI / 8, Math.PI / 8));
-        } else { // Arm
-            pos1 = new THREE.Vector3(2, -2, -2.5);
-            pos2 = new THREE.Vector3(2, -2, -4.5);
-            rot1 = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI, Math.PI, 0));
-            rot2 = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI, Math.PI - Math.PI / 8, Math.PI / 8));
-        }
-
-        if (!this.arm) return;
-
+        // legacy code that works
         if (this.blockT > 0 && this.punchT > 1) {
-            this.arm.position.lerpVectors(pos1, pos2, Math.min(this.blockT, 1));
-            rot1.slerp(rot2, this.blockT);
-            this.arm.rotation.setFromQuaternion(rot1);
         } else {
-            if (this.punchT < 1) { // Forward animatipon
-                this.arm.position.lerpVectors(pos1, pos2, this.punchT);
-                rot1.slerp(rot2, this.punchT);
-                this.arm.rotation.setFromQuaternion(rot1);
-            } else if (this.punchT < 2) { // Reverse animation
+            if (this.punchT < 1) {
+            } else if (this.punchT >= 1 && this.punchT < 2) {
                 this.punchT -= 1;
-                this.arm.position.lerpVectors(pos2, pos1, this.punchT);
-                rot2.slerp(rot1, this.punchT);
-                this.arm.rotation.setFromQuaternion(rot2);
             } else {
                 this.stoppedPunching = true;
             }
@@ -640,7 +566,7 @@ class Player {
 
                         // Find space in toolbar
                         let foundSpace = false;
-                        for (let  j = 0; j < 9; j++) {
+                        for (let j = 0; j < 9; j++) {
                             if (!this.toolbar[j] || this.toolbar[j].c == 0) {
                                 this.toolbar[j] = item;
                                 this.currentSlot = j;
@@ -655,7 +581,7 @@ class Player {
                     } else {
                         this.currentSlot = i;
                     }
-                    
+
                     exists = true;
                     break;
                 } else if (t && t.c > 0) {
@@ -782,7 +708,7 @@ class Player {
             }
             this.toolbar[inventory.limit + index] = JSON.parse(armor);
             g.socket.emit('updateInventory', this.toolbar);
-            
+
             this.place = false;
             return;
         }
@@ -801,8 +727,8 @@ class Player {
                 inventory.showInventory = true;
                 inventory.inventory = JSON.parse(JSON.stringify(this.toolbar));
                 document.exitPointerLock();
-                this.punching = Date.now();
                 this.place = false;
+                this.placing = Date.now();
                 this.key.rightClick = 0;
                 return;
             }
@@ -835,6 +761,7 @@ class Player {
                 }
 
                 this.place = false;
+                this.placing = Date.now();
             }
         }
     }

@@ -5,6 +5,7 @@ import hud from '../gui/HUD';
 import player from '../Player';
 import { players, g } from '../globals';
 import { drawRectangle, drawText } from '../lib/helper';
+import { c } from "../commands";
 
 let canvas = document.getElementById('canvas-hud');
 let ctx = canvas.getContext('2d');
@@ -14,7 +15,7 @@ class ChatManager {
         // Chat
         this.showChat = true
         this.showChatFlag = true;
-        this.showChatBar = false;
+        this._showChatBar = false;
         this.hideChatId = undefined;
         this.hintText = "";
 
@@ -28,6 +29,24 @@ class ChatManager {
         // Init chat
         this.chat = [];
         this.chatTimer = undefined;
+    }
+
+    set showChatBar(x) {
+        this._showChatBar = x
+        if (x) {
+            $("#chat-input").focus();
+            $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0.4)" });
+            this.showChat = true;
+            this.hintText = "";
+        } else {
+            $("#chat-input").blur();
+            $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0)" });
+            c.commandIndex = -1;
+        }
+    }
+
+    get showChatBar() {
+        return this._showChatBar
     }
 
     // Update GUI size

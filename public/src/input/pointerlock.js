@@ -139,7 +139,7 @@ export default function initPointerLock() {
         document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
 
         $("body").keydown(function (event) {
-            if (event.keyCode == 27 && player.controls.enabled)
+            if (event.keyCode == 27 && player.controls.enabled && !chat.showChatBar)
                 document.exitPointerLock();
 
             if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !chat.showChatBar && g.loaded >= g.maxLoaded + 1 && (player.controls.enabled || inventory.showInventory)) {

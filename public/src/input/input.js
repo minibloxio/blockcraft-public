@@ -18,7 +18,6 @@ let keymap = keyconfig.keymap;
 $('html').on('mousedown', function (event) {
     if (!g.initialized)
         return;
-    //event.preventDefault();
     if (!player.controls.enabled || inventory.showInventory)
         return;
     switch (event.which) {
@@ -63,13 +62,13 @@ $('html').on('mouseup', function (event) {
 $(window).on('keydown', function (event) {
     if (!g.initialized) return;
     if (!player.controls.enabled) return;
-    if (event.keyCode == 18) {
+    if (event.keyCode == 18) { // alt
         event.preventDefault();
     }
-    if (event.altKey && event.keyCode == 68) {
+    if (event.altKey && event.keyCode == 68) { // alt + d
         event.preventDefault();
     }
-    if (event.altKey && event.keyCode == 32) {
+    if (event.altKey && event.keyCode == 32) { // alt + space
         event.preventDefault();
     }
 });
@@ -127,19 +126,12 @@ var onKeyDown = function (event) {
     if (!g.initialized) return;
 
     // CHAT INPUT
-    if (player.controls.enabled && ([13].indexOf(event.keyCode) > -1) && chat.showChatFlag) {
-        chat.showChatFlag = false;
+
+    // slash key to toggle chat when it isn't already open
+    const slashOpen = event.keyCode === 191 && !chat.showChatBar
+
+    if (player.controls.enabled && (13 === event.keyCode || slashOpen)) {
         chat.showChatBar = !chat.showChatBar;
-        if (chat.showChatBar) {
-            $("#chat-input").focus();
-            $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0.4)" });
-            chat.showChat = true;
-            chat.hintText = "";
-        } else {
-            $("#chat-input").blur();
-            $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0)" });
-            c.commandIndex = -1;
-        }
 
         let msg = $("#chat-input").val()
         if (!chat.showChatBar && msg) {
@@ -254,14 +246,6 @@ var onKeyDown = function (event) {
 };
 
 var onKeyUp = function (event) {
-    map[event.keyCode] = event.type == 'keydown';
-
-    // CHAT INPUT
-    if ([13].indexOf(event.keyCode) > -1) {
-        chat.showChatFlag = true;
-        return;
-    }
-
     if (!g.initialized) return;
 
     // CREATIVE MENU CONTROLS
@@ -291,7 +275,7 @@ var onKeyUp = function (event) {
         chat.hintText = "";
         let msg = $("#chat-input").val()
 
-        if (player && player.controls.enabled && chat.showChatFlag && msg && msg[0] == "/") {
+        if (player && player.controls.enabled && msg && msg[0] == "/") {
             chat.hintText = "";
             msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
             giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);

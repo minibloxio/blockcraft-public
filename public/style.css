@@ -58,7 +58,7 @@ a {
   height: 100%;
   text-align: center;
   vertical-align: middle;
-  z-index: 3;
+  z-index: 0; /* change back to 3 if anything is broken  */
   font-family: "Minecraft-Regular";
   font-size: 20px;
 }
