@@ -82,7 +82,7 @@ class Player {
   initialJumpVelocity = 150;
 
   fly = false;
-  clip = true;
+  noClip = true;
   fallCooldown = 0;
 
   onObject = false; // Sees if player is on object
@@ -139,7 +139,6 @@ class Player {
     height: 1.8 * blockSize,
   };
   skin = undefined;
-  allowClip = undefined;
   miningDelayConstant = 750;
   placingDelay = 200;
   respawnDelay = 1000;
@@ -844,10 +843,11 @@ class Player {
 
     // Reset fly if in survival mode
     this.fly = this.mode == "survival" ? false : this.fly;
-    this.clip = this.mode == "survival" || this.mode == "creative" ? true : this.clip;
     if (this.mode == "spectator") {
       this.fly = true;
-      this.clip = false;
+      this.noClip = true;
+    } else {
+      this.noClip = false;
     }
 
     // Reduce velocity (friction)
@@ -971,7 +971,7 @@ class Player {
     let test_axes = ["y", "x", "z", "xz"];
 
     // Check for collision
-    if (this.clip) {
+    if (!this.noClip) {
       let savedMove = this.newMove.clone();
 
       // Test each axis in collsion
@@ -1067,7 +1067,7 @@ class Player {
     }
 
     // Check if stuck
-    if (this.collides() && this.clip) {
+    if (this.collides() && !this.noClip) {
       this.position.y += blockSize * delta * 30; // Move up at a rate of 10 blocks per second
     }
 

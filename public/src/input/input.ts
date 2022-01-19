@@ -46,12 +46,6 @@ var onKeyDown = function (event) {
         player.place = true;
         player.key.rightClick = Date.now();
         break;
-      case "Clip":
-        if (player.controls.enabled && player.allowClip) {
-          player.clip = !player.clip;
-          player.allowClip = false;
-        }
-        break;
     }
   }
 };
@@ -97,9 +91,6 @@ var onKeyUp = function (event) {
       case "Place Block":
         player.place = false;
         player.key.rightClick = 0;
-        break;
-      case "Clip":
-        player.allowClip = true;
         break;
     }
   }
