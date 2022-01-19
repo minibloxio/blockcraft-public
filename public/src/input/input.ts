@@ -1,10 +1,9 @@
 import * as $ from "jquery";
-import { bindKeys, keyPressed, initKeys, keyMap } from "kontra";
+import { initKeys, keyMap } from "kontra";
 import keyconfig from "../../json/keyconfig.json";
-import { c, checkCommand, giveCommandHint, nextCommand, prevCommand } from "../commands";
+import { c, giveCommandHint, nextCommand, prevCommand } from "../commands";
 import inventory from "../items/Inventory";
 import chat from "../managers/ChatManager";
-import world from "../managers/WorldManager";
 import player from "../Player";
 
 import "./KeyboardInput";
@@ -46,10 +45,6 @@ var onKeyDown = function (event) {
       case "Place Block":
         player.place = true;
         player.key.rightClick = Date.now();
-        break;
-      case "Sneak":
-        player.key.sneak = true;
-        player.key.down = 1;
         break;
       case "Clip":
         if (player.controls.enabled && player.allowClip) {
@@ -103,10 +98,6 @@ var onKeyUp = function (event) {
         player.place = false;
         player.key.rightClick = 0;
         break;
-      case "Sneak":
-        player.key.sneak = false;
-        player.key.down = 0;
-        break;
       case "Clip":
         player.allowClip = true;
         break;
@@ -129,5 +120,7 @@ keyMap["ShiftLeft"] = "shift";
 keyMap["ShiftRight"] = "shift";
 keyMap["CtrlLeft"] = "ctrl";
 keyMap["CtrlRight"] = "ctrl";
+keyMap["AltLeft"] = "alt";
+keyMap["AltRight"] = "alt";
 keyMap["Tab"] = "tab";
 keyMap["Slash"] = "slash";

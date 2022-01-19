@@ -29,6 +29,7 @@ class Inventory {
         this.craftingGrid = [];
         this.craftingTableGrid = [];
         this.craftingOutput = undefined;
+        this.showCraftingTable = false;
 
         // Toolbar
         this.toolbarX = this.halfW - this.hotboxWidth * 4;

@@ -1,5 +1,5 @@
 import { bindKeys, keyPressed } from "kontra";
-import player from "../Player.js";
+import player from "../Player";
 import chat from "../managers/ChatManager.js";
 import hud from "../gui/HUD";
 import { camera, g } from "../globals";
