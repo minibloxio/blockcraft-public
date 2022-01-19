@@ -1,4 +1,3 @@
-import { initKeys } from 'kontra';
 import Ola from "ola";
 import * as THREE from "three";
 import "../style.css";
@@ -10,6 +9,7 @@ import { connectError, refreshServers, showServerSelect, updateMenu } from './gu
 import { showSettings } from "./gui/mainmenu/settings";
 import "./gui/mainmenu/tabs";
 import "./input/input";
+import { update as updateKeyboardInput } from './input/KeyboardInput';
 import initPointerLock, { onWindowResize, requestPointerLock } from "./input/pointerlock";
 import inventory from "./items/Inventory";
 import { round, updateGUISize } from './lib/helper';
@@ -118,12 +118,12 @@ $(document).ready(function () {
 
     // Enter username input
     $("#name-input").keyup(function (event) {
-        if (event.keyCode == 13) nextState();
+        if (event.code === "Enter") nextState();
     })
 
     // Enter direct connect input
     $("#direct-connect-input").keyup(function (event) {
-        if (event.keyCode == 13) {
+        if (event.code === "Enter") {
             nextState();
             return;
         }
@@ -246,7 +246,6 @@ function init() {
 
     camera.add(axesHelper);
 
-    initKeys()
     addVideoControls(); // Add video settings
     addKeyboardControls(); // Add keyboard controls
     initStatistics(); // Add statistics to record
@@ -312,6 +311,8 @@ function animate() { // TODO: Clean up
     }
 
     game.endMemoryMonitor();
+
+    updateKeyboardInput();
 }
 
 

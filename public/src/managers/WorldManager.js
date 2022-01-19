@@ -5,6 +5,10 @@ import workerManager from './WorkerManager';
 import { g, scene } from '../globals';
 
 class World {
+    constructor () {
+        this.blockSize = 16
+    }
+
     computeVoxelOffset(x, y, z) {
         const { cellSize, cellSliceSize } = this;
         const voxelX = THREE.MathUtils.euclideanModulo(x, cellSize) | 0;

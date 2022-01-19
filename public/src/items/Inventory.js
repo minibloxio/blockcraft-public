@@ -5,9 +5,10 @@ import player from '../Player';
 import textureManager from '../managers/TextureManager';
 import { drawRectangle, drawRect, drawImage, drawImageTopLeft, drawText, clamp } from "../lib/helper"
 import { g, toolbar, toolbar_selector } from '../globals';
-import { mouse, map } from '../input/input';
+import { mouse} from '../input/MouseInput';
 import Recipe from './RecipeChecker';
 import { getDroppedItems } from '../input/pointerlock';
+import { keyPressed } from "kontra"
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
@@ -279,13 +280,13 @@ class Inventory {
                 let entity = {}
                 if (i < searchBlocks.length) {
                     entity.class = "block";
-                    entity.c = map[16] ? 64 : 1;
+                    entity.c = keyPressed('shift') ? 64 : 1;
 
                     let block = world.blockId[searchBlocks[i]]; // Get block id
                     entity.v = block;
                 } else if (i < searchBlocks.length + searchItems.length) {
                     entity.class = "item";
-                    entity.c = map[16] ? 64 : 1;
+                    entity.c = keyPressed('shift') ? 64 : 1;
 
                     let item = world.itemId[searchItems[i - searchBlocks.length]]; // Get item id
                     entity.v = item;
@@ -376,8 +377,8 @@ class Inventory {
                 return;
             }
 
-            if (map[16] && (type == "left" || type == "right" || type == "double")) { // Shift click to move to another part of the inventory
-                
+            if (keyPressed('shift') && (type == "left" || type == "right" || type == "double")) { // Shift click to move to another part of the inventory
+
                 if (player.mode == "creative" && !this.showCraftingTable) {
                     block[i] = undefined;
                     return;e
@@ -694,7 +695,7 @@ class Inventory {
                     let blockExists = block && block.c > 0;
                     let item = this.copyItem(this.craftingOutput);
 
-                    if (!selectedExists && blockExists && map[16]) {
+                    if (!selectedExists && blockExists && keyPressed('shift')) {
 
                         // Add to preexisting item (if possible)
                         let moved = false;
@@ -844,7 +845,7 @@ class Inventory {
     // Animate scrollbar
     animateScrollbar() {
         let { boxSize, hotboxWidth, margin, searchBlocks, searchItems, width, height, currentRow } = this;
-        
+
         let scrollMargin = 2;
         let scrollHeight = boxSize + 3 * hotboxWidth * this.boxRatio - scrollMargin * 2;
         let maxScroll = Math.floor((searchBlocks.length + searchItems.length) / 9) - 2;
@@ -887,7 +888,7 @@ class Inventory {
         }
 
         let title = (player.mode == "survival" || showCraftingTable) ? "Crafting" : player.mode == "creative" ? "" : "Adventure Mode";
-        drawText(title, this.halfW, this.halfH - this.height / 2 + padding, "25px Minecraft-Regular", 
+        drawText(title, this.halfW, this.halfH - this.height / 2 + padding, "25px Minecraft-Regular",
             game.transparentInventory ? "white" : "black", "center", "top"
         );
 
@@ -1091,7 +1092,7 @@ class Inventory {
             );
             drawRectangle(0, 0, width, width, "rgba(0,0,0,0.15)"); // Shade the right face
             ctx.resetTransform();
-            
+
             // Top face
             ctx.translate(xPos, yPos);
             ctx.scale(1, topScale);
@@ -1136,9 +1137,9 @@ class Inventory {
             else voxel = world.blockId[name];
 
             if (!voxel) continue;
-            
+
             let { xPos, yPos } = this.getPos("item", index);
-            
+
             this.drawItem(xPos, yPos, {
                 v: voxel,
                 c: "∞",
@@ -1196,7 +1197,7 @@ class Inventory {
     // Draw hover box
     drawHintBox(name) {
         if (this.selectedItem || !name || !this.showInventory) return;
-        if (map[17]) name += " X: " + Math.floor(mouse.x) + " Y: " + Math.floor(mouse.y); // Show mouse position
+        if (keyPressed('ctrl')) name += " X: " + Math.floor(mouse.x) + " Y: " + Math.floor(mouse.y); // Show mouse position
 
         let hoverBoxPadding = 10;
         let hoverBoxWidth = Math.max(ctx.measureText(name).width + hoverBoxPadding * 2, 60);

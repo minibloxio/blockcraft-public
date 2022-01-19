@@ -139,7 +139,7 @@ export default function initPointerLock() {
         document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
 
         $("body").keydown(function (event) {
-            if (event.keyCode == 27 && player.controls.enabled && !chat.showChatBar)
+            if (event.code == "Escape" && player.controls.enabled && !chat.showChatBar)
                 document.exitPointerLock();
 
             if (keymap[event.keyCode] && keymap[event.keyCode][0] == "Open Inventory" && !chat.showChatBar && g.loaded >= g.maxLoaded + 1 && (player.controls.enabled || inventory.showInventory)) {
@@ -161,11 +161,11 @@ export default function initPointerLock() {
 
             }
 
-            if (event.keyCode == 9)
+            if (event.code == "Tab")
                 event.preventDefault();
 
         }).keyup(function (event) {
-            if (event.keyCode == 27 && inventory.showInventory) { // Escape key
+            if (event.code == "Escape" && inventory.showInventory) { // Escape key
                 // Ask the browser to lock the pointer
                 requestPointerLock()
                 g.socket.emit('updateInventory', inventory.inventory);

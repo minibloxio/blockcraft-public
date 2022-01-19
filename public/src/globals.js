@@ -45,6 +45,8 @@ g.delta = 0;
 g.mouseLeft = false;
 g.mouseRight = false;
 g.commandIndex = -1;
+g.enableZoom = false;
+g.zoomLevel = 3;
 
 globalThis.g = g;
 

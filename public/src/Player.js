@@ -10,7 +10,7 @@ import inventory from "./items/Inventory";
 import masterRenderer from "./graphics/MasterRenderer";
 import { random } from './lib/helper';
 import activeItemVoxels from "./graphics/ActiveItemVoxels.ts"
-import { keyPressed } from "kontra"
+import { keyPressedPlayer} from "./input/KeyboardInput"
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 
@@ -69,18 +69,18 @@ class Player {
         // Events
 
         this.key = {
-            forward: false,
-            backward: false,
-            left: false,
-            right: false,
-            up: false,
-            down: false,
-            jump: false,
-            sprint: false,
-            shift: false,
-            leftClick: false,
-            rightClick: false,
-            lastRightClick: false,
+            forward: 0,
+            backward: 0,
+            left: 0,
+            right: 0,
+            up: 0,
+            down: 0,
+            jump: 0,
+            sprint: 0,
+            shift: 0,
+            leftClick: 0,
+            rightClick: 0,
+            lastRightClick: 0,
         }
 
         // World interaction
@@ -121,6 +121,7 @@ class Player {
             height: 1.8 * blockSize
         };
         this.skin = undefined;
+        this.allowClip = undefined;
     }
 
     init() {
@@ -814,8 +815,8 @@ class Player {
         this.velocity.x -= previousVelocity.x * 10.0 * delta;
         this.velocity.z -= previousVelocity.z * 10.0 * delta;
         // Determine direction vector
-        this.direction.x = this.key.left + this.key.right;
-        this.direction.z = this.key.forward + this.key.backward;
+        this.direction.x = keyPressedPlayer('a') ? 1 : 0 + keyPressedPlayer('d') ? -1 : 0;
+        this.direction.z = keyPressedPlayer('w') ? 1 : 0 + keyPressedPlayer('s') ? -1 : 0;
 
         // Normalize direction vector
         let mag = Math.sqrt((Math.abs(this.direction.x) + Math.abs(this.direction.z)));
@@ -828,7 +829,7 @@ class Player {
 
         if (this.fly) {
             this.velocity.y -= previousVelocity.y * 10.0 * delta;
-        } else if (this.inWater && this.direction.z > 0 && this.key.sprint) {
+        } else if (this.inWater && this.direction.z > 0 && keyPressedPlayer('shift')) {
 
             let dir = this.camera.getWorldDirection(new THREE.Vector3());
             dir.z = dir.z;
@@ -844,7 +845,7 @@ class Player {
             this.halfHeight = blockSize * 0.4;
 
         } else {
-            if (keyPressed('space') && this.inWater) {
+            if (keyPressedPlayer('space') && this.inWater) {
                 this.velocity.y = 50;
             } else if (this.headInWater) {
                 this.velocity.y = Math.min(-20, this.velocity.y * delta * 50);
@@ -853,7 +854,7 @@ class Player {
             }
 
             // Jump
-            if (keyPressed('space') && !chat.showChatBar) {
+            if (keyPressedPlayer('space') && !chat.showChatBar) {
                 if (this.onObject) {
                     this.velocity.y += this.initialJumpVelocity;
                     if (this.onObjectTime < this.bhopTimeLimit) {
@@ -874,11 +875,11 @@ class Player {
             }
         }
 
-        if (this.key.forward || this.key.backward) this.velocity.z -= this.direction.z * 400.0 * delta;
-        if (this.key.left || this.key.right) this.velocity.x -= this.direction.x * 400.0 * delta;
+        if (keyPressedPlayer('w') || keyPressedPlayer('s')) this.velocity.z -= this.direction.z * 400.0 * delta;
+        if (keyPressedPlayer('a') || keyPressedPlayer('d')) this.velocity.x -= this.direction.x * 400.0 * delta;
 
         if (this.fly) {
-            if (keyPressed('space')) this.velocity.y += 400.0 * delta;
+            if (keyPressedPlayer('space')) this.velocity.y += 400.0 * delta;
             if (this.key.down) this.velocity.y -= 400.0 * delta;
         }
 
@@ -1050,10 +1051,10 @@ class Player {
 
         this.sprintSpeed = this.inWater ? this.maxWalkSpeed * 1.5 : this.maxSprintSpeed;
         if (this.fly) this.sprintSpeed = this.maxSprintSpeed * 2;
-        if (this.key.backward && !this.fly) this.sprintSpeed = this.maxWalkSpeed;
+        if (keyPressedPlayer('s') && !this.fly) this.sprintSpeed = this.maxWalkSpeed;
         this.walkSpeed = this.inWater ? this.maxWalkSpeed / 2 : this.maxWalkSpeed;
         let acc = this.inWater ? 1 : 10;
-        if (this.key.sprint) {
+        if (keyPressedPlayer('shift')) {
             if (this.speed < this.sprintSpeed) {
                 this.speed += delta * acc;
             } else {
@@ -1076,10 +1077,6 @@ class Player {
         }
         if (this.drawingBow || this.blocking && this.mode == "survival") this.speed = 0.75;
         if ((this.drawingBow || this.blocking) && this.key.sneak && this.mode == "survival") this.speed = 0.5;
-        // if (this.blocking && !this.fly && this.onObject)
-        //     this.speed = 0.75;
-        // if (this.blocking && this.key.sneak && !this.fly && this.onObject)
-        //     this.speed = 0.3;
 
         // Change camera fov when sprinting
 
@@ -1261,6 +1258,12 @@ class Player {
         }
 
 
+    }
+
+    toggleFly() {
+        if (player.controls.enabled) {
+            player.fly = !player.fly;
+        }
     }
 }
 const player = new Player();
