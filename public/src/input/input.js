@@ -135,7 +135,11 @@ var onKeyDown = function (event) {
     if (!g.initialized) return;
 
     // CHAT INPUT
-    if (player.controls.enabled && ([13, 191].indexOf(event.keyCode) !== -1)) {
+
+    // slash key to toggle chat when it isn't already open
+    const slashOpen = event.keyCode === 191 && !chat.showChatBar
+
+    if (player.controls.enabled && (13 === event.keyCode || slashOpen)) {
         chat.showChatBar = !chat.showChatBar;
 
         let msg = $("#chat-input").val()
