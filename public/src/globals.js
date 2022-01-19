@@ -71,8 +71,6 @@ toolbar_selector.src = "./textures/hotbar-selector.png";
 export const icons = new Image()
 icons.src = "./textures/gui/icons.png";
 
-// console.log(`icons ${icons.}`)
-
 export function isState(check) { return g.state == states[check]; }
 
 export { camera, scene, players, g, serverNames, serverList, connectionDelay };

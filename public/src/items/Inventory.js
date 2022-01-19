@@ -14,8 +14,6 @@ import { keyPressed } from "kontra"
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");
 
-console.log(ctx)
-
 class Inventory {
     constructor() {
         // Inventory
