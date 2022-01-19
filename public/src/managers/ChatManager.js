@@ -246,4 +246,5 @@ class ChatManager {
 }
 
 const chatManager = new ChatManager()
+globalThis.chat = chatManager;
 export default chatManager;

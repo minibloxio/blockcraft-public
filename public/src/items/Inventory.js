@@ -1070,7 +1070,6 @@ class Inventory {
 
             // Left face
             ctx.transform(0.5, horizontalScale, 0, verticalScale, xPos, yPos);
-            ctx.filter = "brightness(90%)";
             ctx.drawImage(atlas,
                 index * 16, 0,
                 16, 16,
@@ -1079,10 +1078,10 @@ class Inventory {
                 width, width
             );
             ctx.resetTransform();
+            drawRectangle(0, 0, width, width, "rgba(0,0,0,0.1)"); // Shade the left face
 
             // Right face
             ctx.transform(0.5, -horizontalScale, 0, verticalScale, xPos+width/2, yPos+width*horizontalScale);
-            ctx.filter = "brightness(70%)";
             ctx.drawImage(atlas,
                 index * 16, 0,
                 16, 16,
@@ -1090,7 +1089,7 @@ class Inventory {
                 0,
                 width, width
             );
-            ctx.filter = "brightness(100%)";
+            drawRectangle(0, 0, width, width, "rgba(0,0,0,0.15)"); // Shade the right face
             ctx.resetTransform();
             
             // Top face
