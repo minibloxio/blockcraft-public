@@ -11,6 +11,7 @@ module.exports = (env, argv) => {
             filename: 'main.js',
             path: path.resolve(__dirname, 'dist'),
         },
+        devtool: 'eval-cheap-source-map',
         devServer: {
             static: {
                 directory: path.join(__dirname, 'dist'),
