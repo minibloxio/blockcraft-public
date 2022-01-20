@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import Ola from "ola";
 import * as THREE from "three";
 import "../style.css";
@@ -9,9 +10,9 @@ import { connectError, refreshServers, showServerSelect, updateMenu } from "./gu
 import { showSettings } from "./gui/mainmenu/settings";
 import "./gui/mainmenu/tabs";
 import "./input/input";
-import { update as updateKeyboardInput } from './input/KeyboardInput';
+import { update as updateKeyboardInput } from "./input/KeyboardInput";
 import initPointerLock, { onWindowResize, requestPointerLock } from "./input/pointerlock";
-import { addKeyboardControls, addVideoControls } from './input/settings';
+import { addKeyboardControls, addVideoControls } from "./input/settings";
 import inventory from "./items/Inventory";
 import { round, updateGUISize } from "./lib/helper";
 import chat from "./managers/ChatManager";
@@ -20,9 +21,8 @@ import entityManager from "./managers/EntityManager";
 import PlayerManager from "./managers/PlayerManager";
 import textureManager from "./managers/TextureManager";
 import workerManager from "./managers/WorkerManager";
-import world, { updateVoxelGeometry } from "./managers/WorldManager";
+import world from "./managers/WorldManager";
 import player from "./Player";
-import Cookies from "js-cookie";
 import { animateServerEntities, animateServerPlayers, updatePlayers } from "./server";
 import stage from "./Stage";
 import stats from "./stats/stats.js";
@@ -115,18 +115,18 @@ $(document).ready(function () {
 
   // Enter username input
   $("#name-input").keyup(function (event) {
-        if (event.code === "Enter") nextState();
+    if (event.code === "Enter") nextState();
   });
 
   // Enter direct connect input
   $("#direct-connect-input").keyup(function (event) {
-        if (event.code === "Enter") {
+    if (event.code === "Enter") {
       nextState();
       return;
     }
 
     let val = $("#direct-connect-input").val();
-    Cookies.set("directConnect", val, { expires: 365});
+    Cookies.set("directConnect", val, { expires: 365 });
     if (val) {
       $("#server-bar").text(`Direct Connect`);
       $("#server-bar").css({ "background-color": "green" });
@@ -359,8 +359,6 @@ document.addEventListener("contextmenu", (event) => event.preventDefault()); // 
 let name = Cookies.get("Name");
 if (name) $("#name-input").val(name);
 
-
-
 // Connection to server successful
 g.socket.on("connect", function () {
   console.log("Connected successfully with id: " + g.socket.id);
@@ -422,10 +420,10 @@ g.socket.on("kick", function (reason) {
 });
 
 // Update session token
-g.socket.on('uniqueToken', function (token) {
-    Cookies.set('token', token, { expires: 10000 });
-    game.token = token;
-})
+g.socket.on("uniqueToken", function (token) {
+  Cookies.set("token", token, { expires: 10000 });
+  game.token = token;
+});
 
 // Initialize client
 g.socket.on("joinResponse", function (data) {
@@ -529,13 +527,18 @@ g.socket.on("addPlayer", function (data) {
 g.socket.on("removePlayer", function (id) {
   if (!g.initialized || !players[id]) return;
 
+  let isBot = players[id].type == "bot";
+
+  scene.remove(players[id].entity);
+  delete players[id];
+
+  if (isBot) return;
+
   chat.addChat({
     text: players[id].name + " has left the server",
     color: "yellow",
     timer: 3000,
   });
-  scene.remove(players[id].entity);
-  delete players[id];
 });
 
 // Receive knockback
@@ -589,77 +592,27 @@ g.socket.on("refresh", function () {
   location.reload(true);
 });
 
-let lastUpdate = Date.now();
-
 function updateClient(data) {
   if (!g.joined || !g.initialized) return;
 
-  // Update player
-  let serverPlayers = data.serverPlayers;
-  updatePlayers(serverPlayers);
+  // Update players
+  updatePlayers(data.serverPlayers);
 
   // Update blocks
-  let updatedBlocks = data.updatedBlocks;
-  let updatedChunks = {};
-  for (let block of updatedBlocks) {
-    world.setVoxel(block.x, block.y, block.z, block.t);
-
-    for (let offset of chunkManager.neighborOffsets) {
-      let ox = block.x + offset[0];
-      let oy = block.y + offset[1];
-      let oz = block.z + offset[2];
-      let cellId = world.computeCellId(ox, oy, oz);
-      updatedChunks[cellId] = true;
-    }
-  }
-
-  for (let id in updatedChunks) {
-    let cell = world.computeCoordsFromId(id);
-    updateVoxelGeometry(cell.x, cell.y, cell.z, true, true);
-  }
+  chunkManager.updateBlocks(data.updatedBlocks);
 
   // Add new entities
-  for (let entity of data.newEntities) entityManager.addEntity(entity);
+  entityManager.addEntities(data.newEntities);
 
   // Update existing entities TODO: cleanup
-  let updatedEntities = data.entities;
-  for (let id in updatedEntities) {
-    let entity = updatedEntities[id];
-    if (entity.type == "item" && world.entities[id]) {
-      world.entities[id].onObject = entity.onGround;
-
-      if (entity.name == "arrow" && !entity.onObject) {
-        world.entities[id].pos = entity.pos;
-        world.entities[id].vel.set(entity.vel);
-      } else {
-        world.entities[id].pos = entity.pos;
-      }
-
-      if (world.entities[id].mesh && world.entities[id].mesh.position.length() == 0) {
-        world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
-      }
-    }
-  }
+  entityManager.updateEntities(data.entities);
 
   // Update client player
-  if (player) player.updateClient(serverPlayers[g.socket.id]);
+  if (player) player.updateClient(data.serverPlayers[g.socket.id]);
 
-  // Update tick
-  game.updates.push(Date.now() - game.lastUpdate);
-  if (game.updates.length > 20) game.updates.shift();
-  game.ups = 1000 / game.updates.average();
-  let tickDiff = Math.abs(data.tick - game.tick.value);
-  if (tickDiff > 1000) {
-    game.tick = new Ola(data.tick);
-  } else {
-    game.tick.value = data.tick;
-  }
-  game.lastUpdate = Date.now();
-  game.tps = 1000 / data.tps;
+  // Update server stats
+  game.updateStatsMonitor(data);
 
   // Latency check
-  if (Date.now() - lastUpdate > 500) {
-    lastUpdate = Date.now();
-    g.socket.emit("latency", data.t);
-  }
+  game.checkLatency(data);
 }

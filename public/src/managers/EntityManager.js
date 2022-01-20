@@ -8,6 +8,7 @@ import { scene } from "../globals";
 class EntityManager {
   constructor() {}
 
+  // Get the canvas for the entity
   getCanvas(type, width = 16, height = 16) {
     let canvas = document.createElement("canvas");
     let ctx = canvas.getContext("2d");
@@ -17,6 +18,7 @@ class EntityManager {
     return { canvas, ctx, atlas };
   }
 
+  // Convert the canvas texture to a material
   textureToMat(canvas, options = {}) {
     let texture = new THREE.CanvasTexture(canvas);
     texture.magFilter = THREE.NearestFilter;
@@ -29,12 +31,14 @@ class EntityManager {
     });
   }
 
+  // Get the material
   getMat(width, height, offX = 0, offY = 0) {
     let { canvas, ctx, atlas } = this.getCanvas("entity", width, height);
     ctx.drawImage(atlas, offX, offY, width, height, 0, 0, width, height);
     return this.textureToMat(canvas);
   }
 
+  // Add item mesh to the scene
   addToScene(entity, mesh, type) {
     let entities = world.entities;
     let id = entity.id;
@@ -60,6 +64,7 @@ class EntityManager {
     scene.add(entities[id].mesh);
   }
 
+  // Add entity to the world
   addEntity(entity) {
     let { blockSize } = world;
     if (entity.type == "item") {
@@ -139,6 +144,34 @@ class EntityManager {
       }
 
       delete world.entities[entity.id];
+    }
+  }
+
+  // Add new entities to the world
+  addEntities(entities) {
+    for (let entity of entities) {
+      this.addEntity(entity);
+    }
+  }
+
+  // Update the entities based on the server's state
+  updateEntities(entities) {
+    for (let id in entities) {
+      let entity = entities[id];
+      if (entity.type == "item" && world.entities[id]) {
+        world.entities[id].onObject = entity.onGround;
+
+        if (entity.name == "arrow" && !entity.onObject) {
+          world.entities[id].pos = entity.pos;
+          world.entities[id].vel.set(entity.vel);
+        } else {
+          world.entities[id].pos = entity.pos;
+        }
+
+        if (world.entities[id].mesh && world.entities[id].mesh.position.length() == 0) {
+          world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
+        }
+      }
     }
   }
 }

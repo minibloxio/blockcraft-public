@@ -917,6 +917,7 @@ io.on("connection", function (socket_) {
         name: "Bot",
         pos: players[socket.id].pos,
         skin: data || "steve",
+        type: "bot",
       });
       bots[id] = new Bot(players[id], world, data);
       io.emit("addPlayer", players[id]);
