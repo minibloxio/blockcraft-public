@@ -54,6 +54,8 @@ module.exports = class Bot {
     //   this.bot.currSlot = (this.bot.currSlot + 1) % 9;
     // }
 
+    this.bot.bowCharge = Math.floor((Date.now() % 2000) / 500);
+
     //this.bot.walking = Date.now() % 6000 < 3000;
   }
 

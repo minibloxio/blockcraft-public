@@ -292,9 +292,6 @@ module.exports = class World {
       dead: false,
       toolbar: [
         // Starting items
-        this.getEntity("wood_sword"),
-        this.getEntity("wood_pickaxe"),
-        this.getEntity("wood_axe"),
         this.getEntity("bow"),
         this.getEntity("arrow", 64),
         this.getEntity("ender_pearl", 16),

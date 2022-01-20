@@ -51,8 +51,9 @@ export function updatePlayers(serverPlayers) {
         p.toolbar[p_.currSlot].class == p_.toolbar[p_.currSlot].class &&
         p.toolbar[p_.currSlot].c == p_.toolbar[p_.currSlot].c;
       let bothExists = p.toolbar[p_.currSlot] == null && p_.toolbar[p_.currSlot] == null;
-      if (p.currSlot != p_.currSlot || (!same && !bothExists)) {
+      if (p.currSlot != p_.currSlot || (!same && !bothExists) || p.bowCharge != p_.bowCharge) {
         p.currSlot = p_.currSlot;
+        p.bowCharge = p_.bowCharge;
 
         let hand = p_.toolbar[p.currSlot];
 
@@ -263,7 +264,7 @@ export function animateServerEntities(delta) {
         // Animate server entities on the ground
         let offset = Math.sin(((Date.now() - entity.t + 500) / 1000) * Math.PI) * 2 - 2;
         if (entity.class == "item") {
-          let target = new THREE.Vector3(0, offset, 0);
+          let target = new THREE.Vector3(0, offset, -2);
           mesh[1].position.lerp(target, delta * 10);
           mesh[0].position.set(0, mesh[1].position.y, 0);
         } else if ((entity.class = "block")) {

@@ -4,10 +4,9 @@ import game from "../Game";
 import world from "./WorldManager";
 import textureManager from "./TextureManager";
 import { scene } from "../globals";
+import Item3D from "../graphics/Item3D";
 
 class EntityManager {
-  constructor() {}
-
   // Get the canvas for the entity
   getCanvas(type, width = 16, height = 16) {
     let canvas = document.createElement("canvas");
@@ -50,7 +49,7 @@ class EntityManager {
     } else {
       entities[id].mesh = new THREE.Group();
       if (type == "block") mesh.position.set(-2, 0, -2);
-      if (type == "item") mesh.position.set(0, 0, 0);
+      if (type == "item") mesh.position.set(0, 0, -2);
 
       entities[id].bbox = new THREE.BoxHelper(mesh, 0xffff00);
       entities[id].bbox.matrixAutoUpdate = true;
@@ -102,15 +101,10 @@ class EntityManager {
         this.addToScene(entity, arrow, "arrow");
       } else if (entity.class == "item") {
         // Add item
-        let { canvas, ctx, atlas } = this.getCanvas("item");
-        ctx.drawImage(atlas, (entity.v - 1) * 16, 0, 16, 16, 0, 0, 16, 16);
-        let mat = this.textureToMat(canvas);
-
-        let itemSize = blockSize / 4;
+        let pixelSize = blockSize / 4;
         let throwables = ["ender_pearl", "fireball", "snowball", "egg"]; // TODO: Turn this into a singleton
-        if (throwables.includes(entity.name)) itemSize = blockSize / 2;
-        let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(itemSize, itemSize), mat);
-        item_mesh.renderOrder = 1;
+        if (throwables.includes(entity.name)) pixelSize = blockSize / 2;
+        let item_mesh = Item3D.getMesh(entity, pixelSize / 16);
         this.addToScene(entity, item_mesh, "item");
       } else {
         // Add block
