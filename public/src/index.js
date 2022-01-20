@@ -520,8 +520,6 @@ g.socket.on("removePlayer", function (id) {
   let isBot = players[id].type == "bot";
 
   scene.remove(players[id].entity);
-  delete players[id];
-
   if (isBot) return;
 
   chat.addChat({
@@ -529,6 +527,7 @@ g.socket.on("removePlayer", function (id) {
     color: "yellow",
     timer: 3000,
   });
+  delete players[id];
 });
 
 // Receive knockback

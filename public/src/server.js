@@ -84,6 +84,10 @@ export function updatePlayers(serverPlayers) {
   }
 }
 
+function euclideanModulo(a, b) {
+  return ((a % b) + b) % b;
+}
+
 // Update the player's visuals
 function updatePlayer(p) {
   let { blockSize } = world;
@@ -96,9 +100,10 @@ function updatePlayer(p) {
   p.neck.rotation.set(rot.x, rot.y, rot.z); // Set sideways head rotation
 
   // Rotate body towards the head when turning around
-  let angleDiff = Math.abs(p.neck.quaternion.dot(p.body.quaternion));
-  if (angleDiff < 0.92) {
-    let diff = Math.abs(0.92 - angleDiff) * 20 + 1;
+  let angleDiff = p.neck.quaternion.angleTo(p.body.quaternion);
+  let maxAngleDiff = Math.PI / 4;
+  if (angleDiff > maxAngleDiff) {
+    let diff = angleDiff * 2 + maxAngleDiff;
     p.body.quaternion.slerp(p.neck.quaternion, g.delta * diff);
   }
 
@@ -116,7 +121,10 @@ function updatePlayer(p) {
     let targetQuaternion = p.body.clone(false); // TODO: OPTIMIZE
     targetQuaternion.applyQuaternion(quaternion); // Apply rotation quaternion to body
 
-    p.body.quaternion.slerp(targetQuaternion.quaternion, g.delta * 3); // Lerp body towards target quaternion
+    p.body.quaternion.slerp(targetQuaternion.quaternion, Math.min(g.delta * 3)); // Lerp body towards target quaternion
+    if (p.neck.quaternion.angleTo(p.body.quaternion) > maxAngleDiff) {
+      p.body.quaternion.slerp(targetQuaternion.quaternion.conjugate(), Math.min(g.delta * 3));
+    }
   }
 
   headPivot.rotation.x = (dir.y * Math.PI) / 2; // Set up/down head rotation
@@ -156,12 +164,14 @@ function updatePlayer(p) {
   // Get magnitude of velocity
   let v = Math.sqrt(p.vel.x * p.vel.x + p.vel.z * p.vel.z);
   v = clamp(v, 0, 1);
-  if (p.sneaking) v *= 2;
+
+  let isSlow = p.sneaking || p.bowCharge > 0;
+  if (isSlow) v *= 2;
 
   // Set speed of animation based on velocity
   let axis = new THREE.Vector3(1, 0, 0);
-  let speed = p.sneaking ? g.delta * 3 : g.delta * 10;
-  let maxRotation = p.sneaking ? Math.PI / 6 : Math.PI / 3;
+  let speed = isSlow ? g.delta * 3 : g.delta * 10;
+  let maxRotation = isSlow ? Math.PI / 6 : Math.PI / 3;
   speed *= v;
   maxRotation *= v;
 
@@ -239,9 +249,19 @@ function updatePlayer(p) {
   // Update nametag rotation
   p.nameTag.quaternion.copy(camera.getWorldQuaternion(new THREE.Quaternion()));
 
+  // let angle1 = new THREE.Euler().setFromQuaternion(p.body.quaternion).y;
+  // let angle2 = new THREE.Euler().setFromQuaternion(p.neck.quaternion).y;
+
+  // let v1 = new THREE.Vector2(Math.cos(angle1), Math.sin(angle1));
+  // let v2 = new THREE.Vector2(Math.cos(angle2), Math.sin(angle2));
+
+  // let yawDiff = Math.atan2(v1.y - v2.y, v1.x - v2.x);
+  // console.log(yawDiff);
+
   if (p.bowCharge > 0) {
-    p.leftShoulder.rotation.set(Math.PI / 2, -0.022, 0.74);
-    p.rightShoulder.rotation.x = Math.PI / 2;
+    let pitchDiff = (dir.y * Math.PI) / 2;
+    p.leftShoulder.rotation.set(Math.PI / 2 + pitchDiff, -0.022, 0.74);
+    p.rightShoulder.rotation.x = Math.PI / 2 + pitchDiff;
   } else if (p.sneaking) {
     p.leftShoulder.rotation.set(-Math.PI / 16, 0, 0);
     p.rightShoulder.rotation.x = -Math.PI / 16;
