@@ -11,6 +11,7 @@ class World {
         this.itemId = undefined;
         this.blockId = undefined;
         this.blockOrder = undefined;
+        this.entities = undefined;
     }
 
     computeVoxelOffset(x, y, z) {
