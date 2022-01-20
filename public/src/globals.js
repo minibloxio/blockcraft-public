@@ -65,7 +65,6 @@ setTimeout(() => {
   const raf = requestAnimationFrame;
   new Promise((r) => raf((t1) => raf((t2) => r(1000 / (t2 - t1))))).then((fps) => {
     g.refreshRate = fps;
-    console.log(fps);
   });
 }, 3000);
 

@@ -46,15 +46,15 @@ class ThreeStats {
     const time = (performance || Date).now();
     this.frames++;
     if (this.showStats) this.msPanel.update(time - this.beginTime, 4000 / g.refreshRate);
-    if (time >= this.prevTime + 250) {
-      if (this.showStats) this.fpsPanel.update((this.frames * 1000) / (time - this.prevTime), g.refreshRate * 1.2);
+    if (time >= this.prevTime + 300) {
+      this.fpsPanel.update((this.frames * 1000) / (time - this.prevTime), g.refreshRate * 1.2);
       this.fps = (this.frames * 1000) / (time - this.prevTime);
       this.prevTime = time;
       this.frames = 0;
       if (this.memPanel) {
         // @ts-ignore
         let memory = performance.memory;
-        if (this.showStats) this.memPanel.update(memory.usedJSHeapSize / 1048576, memory.jsHeapSizeLimit / 1048576);
+        this.memPanel.update(memory.usedJSHeapSize / 1048576, memory.jsHeapSizeLimit / 1048576);
       }
     }
     return time;

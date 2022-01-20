@@ -38,6 +38,7 @@ const keyMapping: [string, string][] = [
   // ["Toggle Perspective", "WIP"],
   ["Zoom", "x"],
   ["Respawn", "r"],
+  ["Debug Info", "f3"],
   ["HEADER", "Inventory"],
   ["Drop Selected Item", "q"],
   ["Open/Close Inventory", "e"],

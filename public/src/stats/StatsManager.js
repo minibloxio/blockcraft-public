@@ -82,7 +82,6 @@ class StatsManager {
     if (!hud.showStats) return;
 
     let index = 0;
-    drawText("", 10, 55, "20px Minecraft-Regular", "white", "left", "top");
     for (let i = 0; i < this.stats.length; i++) {
       let stat = this.stats[i];
       if (stat instanceof Array) {
