@@ -484,12 +484,26 @@ input:checked + .slider-span:before {
   line-height: 40px;
   width: 100%;
   height: 40px;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 #reset-keyboard:hover {
   cursor: pointer;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+#keyboard-settings-divider {
+  text-align: center;
+  line-height: 40px;
+  width: 100%;
+  height: 40px;
+  background-color: rgba(0, 0, 0, 0.3);
+  margin-top: 1.3em;
+  margin-bottom: 0.8em;
+}
+
+input.keyboard-none::placeholder {
+  color: red;
 }
 
 /* SCROLLBAR */

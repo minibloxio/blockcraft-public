@@ -1,7 +1,7 @@
 import * as $ from "jquery";
 import Cookies from "js-cookie";
+import { keyMap } from "kontra";
 import { axesHelper } from "..";
-import keyconfig from "../../json/keyconfig.json";
 import game from "../Game";
 import { camera, players } from "../globals";
 import hud from "../gui/HUD";
@@ -10,150 +10,124 @@ import chunkManager from "../managers/ChunkManager";
 import workerManager from "../managers/WorkerManager";
 import world from "../managers/WorldManager";
 import player from "../Player";
-import { getCookie, setCookie } from "../resources/cookie";
 import stage from "../Stage";
 
-let keymap = keyconfig.keymap;
-let keyorder = keyconfig.keyorder;
+const cookieName = "keymappings";
+const LONG_TIME = { expires: 100000 };
 
-// Add keys
-let savedKeymap = JSON.stringify(keymap);
-let savedKeyorder = JSON.stringify(keyorder);
+// mapping of name to internally hard coded key which represents the action
+const keyMapping: [string, string][] = [
+  ["HEADER", "Movement"],
+  ["Jump", "space"],
+  ["Sneak", "alt"],
+  ["Sprint", "shift"],
+  ["Strafe Left", "a"],
+  ["Strafe Right", "d"],
+  ["Walk Backwards", "s"],
+  ["Walk Forwards", "w"],
+  // ["HEADER", "Gameplay"],
+  // ["Attack/Destroy", ""],
+  // ["Pick Bock", ""],
+  // ["Use Item/Place Block", ""],
+  ["HEADER", "Multiplayer"],
+  ["List Players", "tab"],
+  ["Open Chat", "enter"],
+  ["Open Command", "slash"],
+  ["HEADER", "Miscellaneous"],
+  // ["Take Screenshot", "WIP"],
+  // ["Toggle Perspective", "WIP"],
+  ["Zoom", "x"],
+  ["Respawn", "r"],
+  ["HEADER", "Inventory"],
+  ["Drop Selected Item", "q"],
+  ["Open/Close Inventory", "e"],
+  ["Hotbar Slot 1", "1"],
+  ["Hotbar Slot 2", "2"],
+  ["Hotbar Slot 3", "3"],
+  ["Hotbar Slot 4", "4"],
+  ["Hotbar Slot 5", "5"],
+  ["Hotbar Slot 6", "6"],
+  ["Hotbar Slot 7", "7"],
+  ["Hotbar Slot 8", "8"],
+  ["Hotbar Slot 9", "9"],
+];
 
-const cookieExpiryTime = 365; // 1 year
+function loadSavedKeymappings() {
+  let loadedKeyMap;
+  try {
+    loadedKeyMap = JSON.parse(Cookies.get(cookieName));
+  } catch (e) {
+    loadedKeyMap = genDefaultKeyMap();
+  }
+
+  // reassign properties since whole object can't be assigned
+  for (var x in keyMap) delete keyMap[x];
+  Object.assign(keyMap, loadedKeyMap);
+}
+
+function saveKeymappings() {
+  Cookies.set(cookieName, JSON.stringify(keyMap), LONG_TIME);
+}
+
+function keyMapReverseLookup(name: string): string {
+  if (!name) return "NONE";
+  for (const key in keyMap) {
+    if (keyMap[key] === name) return key;
+  }
+  return "NONE";
+}
 
 export function addKeyboardControls() {
+  loadSavedKeymappings();
   $("#keyboard-settings").empty();
-
-  keymap = JSON.parse(savedKeymap);
-
-  // Adjust to cookies
-  let adjust = [];
-  for (let i = 0; i < keyorder.length; i++) {
-    let key = keyorder[i];
-    let cookie: any = getCookie(keymap[key][0]);
-    if (cookie) {
-      cookie = cookie.split(",");
-
-      delete keymap[key];
-
-      adjust.push(cookie);
-
-      keyorder[i] = cookie[0];
-    }
-  }
-
-  for (let cookie of adjust) {
-    keymap[cookie[0]] = [cookie[1], cookie[2]];
-  }
+  $("#keyboard-settings").append('<div id="reset-keyboard">Reset to Default</div>');
 
   // Add the key binds
-  for (let key of keyorder) {
-    let keyHTML = $(
-      '<div class="key"><span>' +
-        keymap[key][0] +
-        '</span><input class="change-key" placeholder="' +
-        keymap[key][1] +
-        '" data-keycode="' +
-        key +
-        '" readonly></div>'
-    );
-    $("#keyboard-settings").append(keyHTML);
-    keymap[key][2] = keymap[key][2] != undefined ? keymap[key][2] : true; // Enable
-    keymap[key][3] = keyHTML[0];
-    keymap[key][3].children[1].savedKey = key;
+  for (const [name, key] of keyMapping) {
+    if (name === "HEADER") {
+      $("#keyboard-settings").append(`<div id="keyboard-settings-divider">${key}</div>`);
+    } else {
+      const current = keyMapReverseLookup(key);
+      $("#keyboard-settings").append(
+        `<div class="key">
+          <span>${name}</span>
+          <input
+            class="change-key ${current === "NONE" ? "keyboard-none" : ""}"
+            placeholder="${current}"
+            data-keycode="${key}" readonly>
+          </div>`
+      );
+    }
   }
-
-  $("#keyboard-settings").append('<div id="reset-keyboard">Reset to Default</div>');
 
   $(".change-key").on("keydown", function (e) {
     if (e.keyCode == 32 || e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 18) e.preventDefault();
   });
 
   $(".change-key").on("keyup", function (e) {
-    let old_key = e.target.getAttribute("data-keycode");
-    e.target.style.color = "white";
-    let action = e.key;
-    if (e.key == " ") action = "SPACE";
+    let internal_key = e.target.getAttribute("data-keycode");
+    let key_input = e.code;
 
-    if (e.keyCode == old_key) {
-      keymap[old_key][2] = true;
-      e.target.value = action.toUpperCase();
-      return;
-    }
-
-    if (action == "Escape") {
-      e.target.value = "NONE";
-      keymap[old_key][2] = false;
-      //console.log("Escape")
-
-      setCookie(keymap[old_key][0], [old_key, keymap[old_key][0], keymap[old_key][1]], cookieExpiryTime);
-    } else if (keymap[e.keyCode] && keymap[old_key][2]) {
-      e.target.value = action.toUpperCase();
-      e.target.savedKey = e.keyCode;
-      e.target.style.color = "red";
-      //console.log("Error")
-    } else {
-      keymap[old_key][2] = true;
-      e.target.setAttribute("data-keycode", e.keyCode);
-      Object.defineProperty(keymap, e.keyCode, Object.getOwnPropertyDescriptor(keymap, old_key));
-      delete keymap[old_key];
-      e.target.value = action.toUpperCase();
-      e.target.savedKey = e.keyCode;
-      //console.log("Replace")
-
-      for (let i = 0; i < keyorder.length; i++) {
-        if (keyorder[i] == old_key) keyorder[i] = e.keyCode;
-      }
-
-      setCookie(keymap[e.keyCode][0], [e.keyCode, keymap[e.keyCode][0], action.toUpperCase()], cookieExpiryTime);
-    }
-
-    // Check if key has been cleared up
-    for (let key in keymap) {
-      let currKey = key;
-      let shownKey = keymap[key][3].children[1].savedKey;
-      if (shownKey && currKey != shownKey && keymap[shownKey]) {
-        if (keymap[shownKey][3].children[1].style.color == "red" || keymap[shownKey][3].children[1].value == "NONE") {
-          let copy = Object.getOwnPropertyDescriptor(keymap, shownKey);
-          Object.defineProperty(keymap, shownKey, Object.getOwnPropertyDescriptor(keymap, currKey));
-          Object.defineProperty(keymap, currKey, copy);
-          keymap[currKey][3].children[1].style.color = "white";
-          keymap[shownKey][3].children[1].style.color = "white";
-
-          keymap[currKey][3].children[1].savedKey = currKey;
-          keymap[shownKey][3].children[1].savedKey = shownKey;
-
-          keymap[currKey][3].children[1].setAttribute("data-keycode", currKey);
-          keymap[shownKey][3].children[1].setAttribute("data-keycode", shownKey);
-
-          setCookie(keymap[currKey][0], [currKey, keymap[currKey][0], keymap[shownKey][1]], cookieExpiryTime);
-          setCookie(keymap[shownKey][0], [shownKey, keymap[shownKey][0], keymap[currKey][1]], cookieExpiryTime);
-        }
+    // clear other binds
+    for (const key in keyMap) {
+      if (keyMap[key] === internal_key) {
+        keyMap[key] = null;
       }
     }
-  });
 
-  $(".change-key").on("blur", function (e) {
-    if (e.target.value) {
-      e.target.placeholder = e.target.value;
-      e.target.value = "";
-    }
+    keyMap[key_input] = internal_key;
+    saveKeymappings();
+    addKeyboardControls();
   });
 
   $("#reset-keyboard").click(function () {
-    for (let key of keyorder) {
-      Cookies.remove(keymap[key][0]);
-    }
-
-    keyorder = JSON.parse(savedKeyorder);
-
+    Cookies.remove(cookieName);
     addKeyboardControls();
   });
 }
 
 function addSliderControl(name, id, defaultValue, object, key, callback?) {
-  const val = getCookie(name);
+  const val = Cookies.get(name);
   // Sensitivity
   if (val) {
     object[key] = parseFloat(val);
@@ -166,7 +140,7 @@ function addSliderControl(name, id, defaultValue, object, key, callback?) {
   $("#" + id + "Slider").on("change mousemove", function (e) {
     object[key] = $("#" + id + "Slider")[0].value;
     $("#" + id + "Value").text(name + ": " + object[key]);
-    setCookie(name, object[key], cookieExpiryTime);
+    Cookies.set(name, object[key], LONG_TIME);
     if (callback) {
       callback();
     }
@@ -198,7 +172,7 @@ export function addVideoControls() {
 }
 
 function addSwitchControl(name, id, defaultValue, object, key, key2?, callback?) {
-  const val = getCookie(name);
+  const val = Cookies.get(name);
   if (val) {
     object[key] = val == "true" ? true : false;
     if (key2) object[key2] = object[key];
@@ -225,13 +199,13 @@ function addSwitchControl(name, id, defaultValue, object, key, key2?, callback?)
     if (key2) object[key2] = object[key];
     $("#" + id + "Value").text(name + ": " + (object[key] ? "ON" : "OFF"));
 
-    setCookie(name, object[key], cookieExpiryTime);
+    Cookies.set(name, object[key], LONG_TIME);
     if (callback) callback();
   });
 }
 
 function addSelectControl(name, id, defaultValue, object, key, callback) {
-  const val = getCookie(name);
+  const val = Cookies.get(name);
   if (val) {
     object[key] = val;
   } else {
@@ -240,7 +214,7 @@ function addSelectControl(name, id, defaultValue, object, key, callback) {
   $("#" + id + "Select")[0].value = object[key];
   $(document).on("change", "#" + id + "Select", function () {
     object[key] = $("#" + id + "Select")[0].value;
-    setCookie(name, object[key], cookieExpiryTime);
+    Cookies.set(name, object[key], LONG_TIME);
     if (callback) callback();
   });
 }
@@ -293,4 +267,31 @@ function updateDebug() {
     let line = chunkManager.debugLines[id];
     line.visible = game.debug;
   }
+}
+
+function genDefaultKeyMap() {
+  let keyMap = {
+    Enter: "enter",
+    Escape: "esc",
+    Space: "space",
+    ArrowLeft: "left",
+    ArrowUp: "up",
+    ArrowRight: "right",
+    ArrowDown: "down",
+    ShiftLeft: "shift",
+    CtrlLeft: "ctrl",
+    AltLeft: "alt",
+    Tab: "tab",
+    Slash: "slash",
+  };
+  let i;
+
+  for (i = 0; i < 26; i++) {
+    keyMap["Key" + String.fromCharCode(i + 65)] = String.fromCharCode(i + 97);
+  }
+
+  for (i = 0; i < 10; i++) {
+    keyMap["Digit" + i] = "" + i;
+  }
+  return keyMap;
 }

@@ -129,13 +129,11 @@ c.prevCommands = [
     '/help',
     '/tutorial',
 ];
-c.canChangeCommand = true;
 
 export { c };
 
 // Previous command
 export function prevCommand() {
-    c.canChangeCommand = false;
     if (c.prevCommands.length > 0) {
         if (g.commandIndex < c.prevCommands.length - 1) {
             g.commandIndex += 1;
@@ -148,7 +146,6 @@ export function prevCommand() {
 
 // Next command
 export function nextCommand() {
-    c.canChangeCommand = false;
     if (c.prevCommands.length > 0) {
         g.commandIndex -= 1;
         if (g.commandIndex >= 0) {

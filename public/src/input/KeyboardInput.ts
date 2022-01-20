@@ -1,8 +1,11 @@
-import { bindKeys, keyPressed } from "kontra";
+import * as $ from "jquery";
+import { bindKeys, keyPressed, keyMap } from "kontra";
 import player from "../Player";
 import chat from "../managers/ChatManager.js";
 import hud from "../gui/HUD";
 import { camera, g } from "../globals";
+import { giveCommandHint, nextCommand, prevCommand } from "../commands";
+import inventory from "../items/Inventory";
 
 var doublePressDelay = 200;
 var lastKeypressTime = 0;
@@ -35,7 +38,7 @@ bindKeys(
   ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
   (e) => {
     if (!player.controls.enabled || chat.showChatBar) return;
-    player.currentSlot = parseInt(e.key);
+    player.currentSlot = parseInt(keyMap[e.code]) - 1;
   },
   { preventDefault: false }
 );
@@ -95,3 +98,41 @@ bindKeys(
   },
   { preventDefault: false, handler: "keydown" }
 );
+
+bindKeys(
+  "up",
+  () => {
+    if (!g.initialized) return;
+    if (chat.showChatBar) {
+      prevCommand();
+    } else {
+      inventory.scroll(1);
+    }
+  },
+  { preventDefault: false }
+);
+
+bindKeys(
+  "down",
+  () => {
+    if (!g.initialized) return;
+    if (chat.showChatBar) {
+      nextCommand();
+    } else {
+      inventory.scroll(-1);
+    }
+  },
+  { preventDefault: false }
+);
+
+$(window).on("keyup", function (event) {
+  if (chat.showChatBar) {
+    chat.hintText = "";
+    let msg = $("#chat-input").val();
+    if (player && player.controls.enabled && msg && msg[0] == "/") {
+      chat.hintText = "";
+      msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
+      giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
+    }
+  }
+});
