@@ -4,7 +4,7 @@ import world from "./managers/WorldManager";
 import player from "./Player";
 import { players, g, camera } from "./globals";
 import PlayerManager from "./managers/PlayerManager";
-import { clamp } from "./lib/helper";
+import { clamp, round } from "./lib/helper";
 
 // Update server players
 export function updatePlayers(serverPlayers) {
@@ -249,29 +249,27 @@ function updatePlayer(p) {
   // Update nametag rotation
   p.nameTag.quaternion.copy(camera.getWorldQuaternion(new THREE.Quaternion()));
 
-  // let angle1 = new THREE.Euler().setFromQuaternion(p.body.quaternion).y;
-  // let angle2 = new THREE.Euler().setFromQuaternion(p.neck.quaternion).y;
+  let angle1 = new THREE.Euler().setFromQuaternion(p.body.quaternion).y;
+  let angle2 = new THREE.Euler().setFromQuaternion(p.neck.quaternion).y;
 
-  // let v1 = new THREE.Vector2(Math.cos(angle1), Math.sin(angle1));
-  // let v2 = new THREE.Vector2(Math.cos(angle2), Math.sin(angle2));
-
-  // let yawDiff = Math.atan2(v1.y - v2.y, v1.x - v2.x);
-  // console.log(yawDiff);
+  let diff = angle1 - angle2;
+  let yawDiff = round(((diff + Math.PI) % (Math.PI * 2)) - Math.PI, 2);
+  let yawDiff2 = -p.body.quaternion.angleTo(p.neck.quaternion) * (yawDiff * Math.sign(dir.z));
 
   if (p.bowCharge > 0) {
     let pitchDiff = (dir.y * Math.PI) / 2;
-    p.leftShoulder.rotation.set(Math.PI / 2 + pitchDiff, -0.022, 0.74);
-    p.rightShoulder.rotation.x = Math.PI / 2 + pitchDiff;
+    p.leftShoulder.rotation.set(Math.PI / 2 + pitchDiff, -0.022, 0.74 + yawDiff2);
+    p.rightShoulder.rotation.set(Math.PI / 2 + pitchDiff, 0, yawDiff2);
   } else if (p.sneaking) {
     p.leftShoulder.rotation.set(-Math.PI / 16, 0, 0);
-    p.rightShoulder.rotation.x = -Math.PI / 16;
+    p.rightShoulder.rotation.set(-Math.PI / 16, 0, 0);
   } else {
     p.leftShoulder.rotation.set(0, 0, 0);
-    p.rightShoulder.rotation.x = 0;
+    p.rightShoulder.rotation.set(0, 0, 0);
   }
 
   p.rightShoulder.rotation.x += (-Math.cos(p.punchingT * Math.PI * 2) + 1) / 2;
-  p.rightShoulder.rotation.z = Math.sin(p.punchingT * Math.PI * 2) / 2;
+  p.rightShoulder.rotation.z += Math.sin(p.punchingT * Math.PI * 2) / 2;
 }
 
 // Animate server players

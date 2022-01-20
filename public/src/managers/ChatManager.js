@@ -39,9 +39,9 @@ class ChatManager {
       this.showChat = true;
       this.hintText = "";
     } else {
-        $("#chat-input").blur();
-        $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0)" });
-        c.commandIndex = -1;
+      $("#chat-input").blur();
+      $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0)" });
+      c.commandIndex = -1;
     }
     this.chatChanged();
   }

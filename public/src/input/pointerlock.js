@@ -12,7 +12,7 @@ import chat from "../managers/ChatManager";
 import masterRenderer from "../graphics/MasterRenderer";
 import { g } from "../globals";
 import { updateGUISize } from "../lib/helper";
-import { keyMap } from "kontra"
+import { keyMap } from "kontra";
 
 // Request pointer lock
 export function requestPointerLock() {
@@ -94,8 +94,7 @@ function enterPointerLock() {
     if (!name) $("#name-input").val("");
 
     // Update cookie
-    if (name && Cookies.get("Name") != name)
-        Cookies.set("Name", name, { expires: 10000 });
+    if (name && Cookies.get("Name") != name) Cookies.set("Name", name, { expires: 10000 });
 
     g.socket.emit("updateUsername", {
       name: name,
@@ -151,7 +150,8 @@ export default function initPointerLock() {
       .keydown(function (event) {
         if (event.code == "Escape" && player.controls.enabled && !chat.showChatBar) document.exitPointerLock();
 
-        if ( keyMap[event.code] == "e" &&
+        if (
+          keyMap[event.code] == "e" &&
           !chat.showChatBar &&
           g.loaded >= g.maxLoaded + 1 &&
           (player.controls.enabled || inventory.showInventory)
