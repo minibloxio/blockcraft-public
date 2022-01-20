@@ -182,9 +182,10 @@ class ActiveItemVoxels {
     for (let y = 0; y < itemSize; ++y) {
       for (let z = 0; z < itemSize; ++z) {
         for (let i = 0; i < faces.length; i++) {
-          for (let i = 0; i < 4; i++) {
-            let uvX = y + uvVoxel * tileSize;
-            let uvY = z + uvRow * tileSize + 1;
+          let face = faces[i];
+          for (let { uv } of face.corners) {
+            let uvX = y + uv[0] + uvVoxel * tileSize;
+            let uvY = z - uv[1] + uvRow * tileSize + 1;
             uvs.push(uvX / tileTextureWidth, 1 - uvY / tileTextureHeight);
           }
         }
