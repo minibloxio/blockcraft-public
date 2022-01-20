@@ -432,9 +432,6 @@ g.socket.on("joinResponse", function (data) {
 
   // Check if blacklisted
   if (data.blacklisted) {
-    g.initialized = false;
-    g.joined = false;
-    g.currentServer = undefined;
     disconnectServer();
     prevState();
     connectError("banned", data.reason);
@@ -452,16 +449,12 @@ g.socket.on("joinResponse", function (data) {
 
   // Set chunk pos
   chunkManager.cellPos = world.computeCellFromPlayer(player.position.x, player.position.y, player.position.z);
-  console.log("Starting chunk pos:", chunkManager.cellPos);
 
   // Receive current server players
   let serverPlayers = data.serverPlayers;
   for (let id in serverPlayers) {
-    if (id != g.socket.id) {
-      players[id] = serverPlayers[id];
-      if (!players[id]) continue;
-      PlayerManager.addPlayer(players, id);
-    }
+    if (id == g.socket.id || !serverPlayers[id]) continue;
+    PlayerManager.addPlayer(players, id, serverPlayers[id]);
   }
 
   // Add pre-existing entities
@@ -513,14 +506,9 @@ g.socket.on("receiveChunk", async function (data) {
 
 // Add newcoming players
 g.socket.on("addPlayer", function (data) {
-  if (!g.joined) return;
-  // Add to players
-  if (data.id != g.socket.id) {
-    // Check if not own player
-    players[data.id] = data;
+  if (!g.joined || data.id == g.socket.id) return;
 
-    PlayerManager.addPlayer(players, data.id);
-  }
+  PlayerManager.addPlayer(players, data.id, data);
 });
 
 // Remove player
@@ -608,7 +596,7 @@ function updateClient(data) {
   entityManager.updateEntities(data.entities);
 
   // Update client player
-  if (player) player.updateClient(data.serverPlayers[g.socket.id]);
+  player.updateClient(data.serverPlayers[g.socket.id]);
 
   // Update server stats
   game.updateStatsMonitor(data);

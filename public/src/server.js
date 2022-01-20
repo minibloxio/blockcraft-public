@@ -96,7 +96,7 @@ function updatePlayer(p) {
   // Rotate body towards the head
   let angleDiff = Math.abs(p.neck.quaternion.dot(p.body.quaternion));
   if (angleDiff < 0.92) {
-    p.body.quaternion.slerp(p.neck.quaternion, g.delta * 4);
+    p.body.quaternion.slerp(p.neck.quaternion, g.delta * 2);
   }
 
   if (p.walking) {

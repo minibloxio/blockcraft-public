@@ -67,7 +67,6 @@ class Game {
 
   checkLatency(data) {
     if (Date.now() - this.lastLatencyCheck > 500) {
-      console.log("bruh");
       this.lastLatencyCheck = Date.now();
       g.socket.emit("latency", data.t);
     }
