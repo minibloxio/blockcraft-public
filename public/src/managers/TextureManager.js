@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import world from './WorldManager';
 import game from '../Game';
-import { getCookie } from "../resources/cookie";
+import Cookies from "js-cookie";
 
 import { g } from "../globals"
 
@@ -247,7 +247,7 @@ export class TextureManager {
             depthWrite: true
         }
 
-        let textureType = getCookie("Material Texture") || "lambert";
+        let textureType = Cookies.get("Material Texture") || "lambert";
 
         switch (textureType) {
             case "basic":

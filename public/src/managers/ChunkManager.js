@@ -348,8 +348,6 @@ class ChunkManager {
             if (meshT) meshT.material = textureManager.materialTransparent;
 
         }
-
-        //console.log("Updating texture to " + getCookie("Material Texture") + "...");
     }
 }
 

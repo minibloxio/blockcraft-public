@@ -7,7 +7,6 @@ import { drawCircle, drawRectangle, msToTime, round } from '../../lib/helper';
 import chunkManager from '../../managers/ChunkManager';
 import world from '../../managers/WorldManager';
 import player from '../../Player';
-import { getCookie } from "../../resources/cookie";
 
 export function refreshServers() {
     // Disconnect servers
@@ -154,7 +153,7 @@ export function showServerSelect() {
     $(".menu-button").hide(); // Hide menu buttons
     $(".tab-container").hide(); // Hide tab containers
 
-    let directConnect = getCookie("directConnect");
+    let directConnect = Cookies.get("directConnect");
     if (directConnect) {
         $("#direct-connect-input").val(directConnect).focus();
         $("#server-bar").text(`Direct Connect`);
@@ -310,7 +309,7 @@ function joinServer() {
 
         let joinInfo = {
             name: name,
-            token: getCookie('token'),
+            token: Cookies.get('token'),
             skin: player.skin,
         }
         g.socket.emit('join', joinInfo)

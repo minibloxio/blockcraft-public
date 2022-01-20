@@ -12,7 +12,7 @@ import chat from '../managers/ChatManager';
 import masterRenderer from '../graphics/MasterRenderer';
 import { g } from '../globals';
 import { updateGUISize } from '../lib/helper';
-import { getCookie, setCookie } from '../resources/cookie';
+import Cookies from "js-cookie";
 
 let keymap = keyconfig.keymap;
 
@@ -91,8 +91,8 @@ function enterPointerLock() {
         let name = $("#name-input").val().trim();
         if (!name) $("#name-input").val('');
 
-        if (name && getCookie("Name") != name) // Update cookie
-            setCookie("Name", name, 7);
+        if (name && Cookies.get("Name") != name) // Update cookie
+            Cookies.set("Name", name, { expires: 10000 });
 
         g.socket.emit('playerInfo', {
             name: name

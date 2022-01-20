@@ -105,12 +105,3 @@ $(document).on("ready", function () {
     inventory.updateItemSearch(search);
   });
 });
-
-keyMap["ShiftLeft"] = "shift";
-keyMap["ShiftRight"] = "shift";
-keyMap["CtrlLeft"] = "ctrl";
-keyMap["CtrlRight"] = "ctrl";
-keyMap["AltLeft"] = "alt";
-keyMap["AltRight"] = "alt";
-keyMap["Tab"] = "tab";
-keyMap["Slash"] = "slash";

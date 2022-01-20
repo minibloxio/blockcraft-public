@@ -22,7 +22,7 @@ import textureManager from './managers/TextureManager';
 import workerManager from './managers/WorkerManager';
 import world, { updateVoxelGeometry } from './managers/WorldManager';
 import player from './Player';
-import { getCookie, setCookie } from "./resources/cookie";
+import Cookies from "js-cookie";
 import { animateServerEntities, animateServerPlayers, updatePlayers } from './server';
 import stage from './Stage';
 import stats from "./stats/stats.js";
@@ -129,7 +129,8 @@ $(document).ready(function () {
         }
 
         let val = $("#direct-connect-input").val();
-        setCookie("directConnect", val, 365);
+        Cookies.set("directConnect", val, { expires: 365});
+
         if (val) {
             $("#server-bar").text(`Direct Connect`);
             $("#server-bar").css({ "background-color": "green" });
@@ -348,7 +349,7 @@ document.addEventListener('contextmenu', event => event.preventDefault());
 
 // Get cookie username
 
-let name = getCookie("Name");
+let name = Cookies.get("Name");
 if (name)
     $("#name-input").val(name);
 
@@ -415,7 +416,7 @@ g.socket.on('kick', function (reason) {
 
 // Update session token
 g.socket.on('uniqueToken', function (token) {
-    setCookie('token', token, 365);
+    Cookies.set('token', token, { expires: 10000 });
     game.token = token;
 })
 
