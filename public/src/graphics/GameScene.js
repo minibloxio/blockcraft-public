@@ -1,10 +1,10 @@
-import { scene, camera } from "../globals"
+import { scene, camera } from "../globals";
 
 class GameRenderer {
   init() {
     // TODO not have these in globals
-    this.camera = camera
-    this.scene = scene
+    this.camera = camera;
+    this.scene = scene;
   }
 }
 

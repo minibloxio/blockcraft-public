@@ -116,6 +116,7 @@ a {
   text-align: left;
   color: white;
   background-color: rgba(0, 0, 0, 0.7);
+  /* background-color: rgba(0, 0, 0, 0.2); */
   padding: 40px;
 }
 
