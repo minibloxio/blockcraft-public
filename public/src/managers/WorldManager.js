@@ -3,9 +3,17 @@ import * as THREE from "three";
 import textureManager from "./TextureManager";
 import workerManager from "./WorkerManager";
 import { g, scene } from "../globals";
-import { roughSizeOfObject } from "../lib/helper";
 
 class World {
+  constructor() {
+        this.blockSize = 16
+        this.buildHeight = undefined;
+        this.itemId = undefined;
+        this.blockId = undefined;
+        this.blockOrder = undefined;
+        this.entities = undefined;
+  }
+
   computeVoxelOffset(x, y, z) {
     const { cellSize, cellSliceSize } = this;
     const voxelX = THREE.MathUtils.euclideanModulo(x, cellSize) | 0;

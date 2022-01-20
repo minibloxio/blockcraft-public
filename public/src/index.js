@@ -9,7 +9,9 @@ import { connectError, refreshServers, showServerSelect, updateMenu } from "./gu
 import { showSettings } from "./gui/mainmenu/settings";
 import "./gui/mainmenu/tabs";
 import "./input/input";
+import { update as updateKeyboardInput } from './input/KeyboardInput';
 import initPointerLock, { onWindowResize, requestPointerLock } from "./input/pointerlock";
+import { addKeyboardControls, addVideoControls } from './input/settings';
 import inventory from "./items/Inventory";
 import { round, updateGUISize } from "./lib/helper";
 import chat from "./managers/ChatManager";
@@ -20,7 +22,7 @@ import textureManager from "./managers/TextureManager";
 import workerManager from "./managers/WorkerManager";
 import world, { updateVoxelGeometry } from "./managers/WorldManager";
 import player from "./Player";
-import { getCookie, setCookie } from "./resources/cookie";
+import Cookies from "js-cookie";
 import { animateServerEntities, animateServerPlayers, updatePlayers } from "./server";
 import { addKeyboardControls, addVideoControls } from "./settings";
 import stage from "./Stage";
@@ -100,8 +102,6 @@ export function disconnectServer() {
 
 // Menu progression logic
 $(document).ready(function () {
-  // Initialize game
-  init();
 
   // Refresh servers
   $("#refresh-servers").click(function () {
@@ -115,18 +115,18 @@ $(document).ready(function () {
 
   // Enter username input
   $("#name-input").keyup(function (event) {
-    if (event.keyCode == 13) nextState();
+        if (event.code === "Enter") nextState();
   });
 
   // Enter direct connect input
   $("#direct-connect-input").keyup(function (event) {
-    if (event.keyCode == 13) {
+        if (event.code === "Enter") {
       nextState();
       return;
     }
 
     let val = $("#direct-connect-input").val();
-    setCookie("directConnect", val, 365);
+    Cookies.set("directConnect", val, { expires: 365});
     if (val) {
       $("#server-bar").text(`Direct Connect`);
       $("#server-bar").css({ "background-color": "green" });
@@ -324,6 +324,8 @@ function animate() {
   }
 
   game.endMemoryMonitor();
+
+  updateKeyboardInput();
 }
 
 // Send packet to server
@@ -353,8 +355,11 @@ $("#welcome-button")[0].click();
 document.addEventListener("contextmenu", (event) => event.preventDefault()); // Prevent right-click
 
 // Get cookie username
-let name = getCookie("Name");
+
+let name = Cookies.get("Name");
 if (name) $("#name-input").val(name);
+
+
 
 // Connection to server successful
 g.socket.on("connect", function () {
@@ -417,10 +422,10 @@ g.socket.on("kick", function (reason) {
 });
 
 // Update session token
-g.socket.on("uniqueToken", function (token) {
-  setCookie("token", token, 365);
-  game.token = token;
-});
+g.socket.on('uniqueToken', function (token) {
+    Cookies.set('token', token, { expires: 10000 });
+    game.token = token;
+})
 
 // Initialize client
 g.socket.on("joinResponse", function (data) {

@@ -44,6 +44,8 @@ g.delta = 0;
 g.mouseLeft = false;
 g.mouseRight = false;
 g.commandIndex = -1;
+g.enableZoom = false;
+g.zoomLevel = 3;
 
 globalThis.g = g;
 
@@ -67,8 +69,6 @@ toolbar_selector.src = "./textures/hotbar-selector.png";
 // Icons
 export const icons = new Image();
 icons.src = "./textures/gui/icons.png";
-
-// console.log(`icons ${icons.}`)
 
 export function isState(check) {
   return g.state == states[check];

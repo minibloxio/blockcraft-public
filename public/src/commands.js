@@ -126,7 +126,6 @@ let commands = JSON.parse(commandsInit);
 
 let c = {};
 c.prevCommands = ["/help", "/tutorial"];
-c.canChangeCommand = true;
 
 export { c };
 
@@ -145,7 +144,6 @@ export function prevCommand() {
 
 // Next command
 export function nextCommand() {
-  c.canChangeCommand = false;
   if (c.prevCommands.length > 0) {
     g.commandIndex -= 1;
     if (g.commandIndex >= 0) {

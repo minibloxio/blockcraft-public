@@ -39,10 +39,11 @@ class ChatManager {
       this.showChat = true;
       this.hintText = "";
     } else {
-      $("#chat-input").blur();
-      $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0)" });
-      c.commandIndex = -1;
+        $("#chat-input").blur();
+        $("#chat-input").css({ "background-color": "rgba(0, 0, 0, 0)" });
+        c.commandIndex = -1;
     }
+    this.chatChanged();
   }
 
   get showChatBar() {
@@ -278,6 +279,26 @@ class ChatManager {
       opacity: opacity,
     });
     return lines;
+  }
+
+  chatChanged() {
+    let msg = $("#chat-input").val();
+    if (!this.showChatBar && msg) {
+      if (msg[0] != "/") {
+        // Send message to everyone
+        g.socket.emit("message", $("#chat-input").val());
+        $("#chat-input").val("");
+      } else {
+        // Check minecraft command
+        if (c.prevCommands[0] != $("#chat-input").val()) {
+          c.prevCommands.unshift($("#chat-input").val());
+        }
+        $("#chat-input").val("");
+        msg = msg.slice(1).removeExtraSpaces().split(" "); // Remove slash and split by spaces
+        checkCommand(msg);
+      }
+      c.commandIndex = -1;
+    }
   }
 }
 

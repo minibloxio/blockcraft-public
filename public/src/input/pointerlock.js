@@ -5,16 +5,14 @@ Provides pointer lock functionality and the ability to connect to the game serve
 */
 
 import * as THREE from "three";
+import Cookies from "js-cookie";
 import inventory from "../items/Inventory";
-import keyconfig from "../../json/keyconfig.json";
 import player from "../Player";
 import chat from "../managers/ChatManager";
 import masterRenderer from "../graphics/MasterRenderer";
 import { g } from "../globals";
 import { updateGUISize } from "../lib/helper";
-import { getCookie, setCookie } from "../resources/cookie";
-
-let keymap = keyconfig.keymap;
+import { keyMap } from "kontra"
 
 // Request pointer lock
 export function requestPointerLock() {
@@ -95,9 +93,9 @@ function enterPointerLock() {
     let name = $("#name-input").val().trim().removeExtraSpaces();
     if (!name) $("#name-input").val("");
 
-    if (name && getCookie("Name") != name)
-      // Update cookie
-      setCookie("Name", name, 7);
+    // Update cookie
+    if (name && Cookies.get("Name") != name)
+        Cookies.set("Name", name, { expires: 10000 });
 
     g.socket.emit("updateUsername", {
       name: name,
@@ -151,11 +149,9 @@ export default function initPointerLock() {
 
     $("body")
       .keydown(function (event) {
-        if (event.keyCode == 27 && player.controls.enabled && !chat.showChatBar) document.exitPointerLock();
+        if (event.code == "Escape" && player.controls.enabled && !chat.showChatBar) document.exitPointerLock();
 
-        if (
-          keymap[event.keyCode] &&
-          keymap[event.keyCode][0] == "Open Inventory" &&
+        if ( keyMap[event.code] == "e" &&
           !chat.showChatBar &&
           g.loaded >= g.maxLoaded + 1 &&
           (player.controls.enabled || inventory.showInventory)
@@ -176,11 +172,10 @@ export default function initPointerLock() {
           }
         }
 
-        if (event.keyCode == 9) event.preventDefault();
+        if (event.code == "Tab") event.preventDefault();
       })
       .keyup(function (event) {
-        if (event.keyCode == 27 && inventory.showInventory) {
-          // Escape key
+        if (event.code == "Escape" && inventory.showInventory) {
           // Ask the browser to lock the pointer
           requestPointerLock();
           g.socket.emit("updateInventory", inventory.inventory);

@@ -1,152 +1,191 @@
 import * as THREE from "three";
+import * as $ from "jquery";
+
 import { PointerLockControls } from "./input/pointerlock";
 import { camera, isState, g, scene, players } from "./globals";
 import textureManager from "./managers/TextureManager";
 import world, { updateVoxelGeometry } from "./managers/WorldManager";
-import game from "./Game";
+import gameObj from "./Game";
 import chunkManager from "./managers/ChunkManager";
 import chat from "./managers/ChatManager";
 import inventory from "./items/Inventory";
 import masterRenderer from "./graphics/MasterRenderer";
 import { random } from "./lib/helper";
+import activeItemVoxels from "./graphics/ActiveItemVoxels";
+import { keyPressedPlayer } from "./input/KeyboardInput";
 
-import activeItemVoxels from "./graphics/ActiveItemVoxels.ts";
+declare var DEV_MODE: boolean;
+declare global {
+  interface Number {
+    clamp: any;
+  }
+}
+const game: any = gameObj;
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
 
-class Player {
-  constructor() {
-    // 3d stuff
-    this.controls = new PointerLockControls(camera);
-    this.camera = camera;
-
-    // Sensitivity
-    this.sens = 0.5;
-
-    // Ray casting
-    this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0)); // block selecting / breaking / placing
-
-    // Collision helper
-    this.closest = {
-      distance: Infinity,
-    };
-
-    // Mode
-    this.mode = "survival";
-    this.god = false;
-
-    // Movement
-
-    this.position = this.controls.getObject().position;
-    this.savedPosition = this.position.clone();
-    this.velocity = new THREE.Vector3();
-    this.direction = new THREE.Vector3();
-
-    this.knockbackVelocity = new THREE.Vector3();
-
-    this.speed = 2;
-    this.walkSpeed = 2;
-    this.maxWalkSpeed = 2;
-    this.defaultMaxSprintSpeed = 2.9;
-    this.sprintSpeed = this.defaultMaxSprintSpeed;
-    this.maxSprintSpeed = this.defaultMaxSprintSpeed;
-    this.distanceMoved = 0;
-
-    this.initialJumpVelocity = 150;
-
-    this.fly = false;
-    this.clip = true;
-
-    this.onObject = false; // Sees if player is on object
-    this.onObjectTime = 0;
-
-    this.bhopTimeLimit = 0.05; // 50ms to jump before the sprint boost is reset
-    this.bhopMaxSpeed = this.defaultMaxSprintSpeed + 0.2; // Maximum speed that can be reached through bhopping
-    this.bhopRate = 0.05; // How much the speed ramps up after each successful bhop
-
-    this.deltaFov = 0;
-
-    // Events
-
-    this.key = {
-      forward: false,
-      backward: false,
-      left: false,
-      right: false,
-      up: false,
-      down: false,
-      jump: false,
-      sprint: false,
-      shift: false,
-      leftClick: false,
-      rightClick: false,
-      lastRightClick: false,
-    };
-
-    // World interaction
-    this.click = false;
-    this.prevBlock = undefined;
-
-    this.place = false;
-    this.placeType = 2; // Type of block being placed
-
-    this.blockT = 0;
-    this.punching = Date.now();
-
-    this.lastRaycast = Date.now();
-    this.nearbyMeshes = [];
-    this.playerBoxes = [];
-    this.picked = [];
-
-    this.neighborOffsets = [];
-    for (let x = -1; x <= 1; x++) {
-      for (let y = -1; y <= 1; y++) {
-        for (let z = -1; z <= 1; z++) {
-          this.neighborOffsets.push([x, y, z]);
-        }
-      }
+const neighborOffsets = [];
+for (let x = -1; x <= 1; x++) {
+  for (let y = -1; y <= 1; y++) {
+    for (let z = -1; z <= 1; z++) {
+      neighborOffsets.push([x, y, z]);
     }
-
-    // Player dimensions
-    let blockSize = 16;
-    this.dim = {
-      torso: 0.5 * blockSize,
-      torsoHeight: 0.75 * blockSize,
-      armSize: 0.25 * blockSize,
-      armSizeSlim: 0.18 * blockSize,
-      armHeight: 0.75 * blockSize,
-      legSize: 0.25 * blockSize,
-      legHeight: 0.75 * blockSize,
-      headSize: 0.5 * blockSize,
-      height: 1.8 * blockSize,
-    };
-    this.skin = undefined;
   }
+}
 
-  init() {
+const miningDelay = {
+  water: Infinity,
+  bedrock: Infinity,
+  leaves: 0.5,
+  obsidian: 15,
+};
+
+const blockSize = 16;
+
+class Player {
+  // 3d stuff
+  controls = new PointerLockControls(camera);
+
+  // Sensitivity
+  sens = 0.5;
+
+  // Ray casting
+  raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0)); // block selecting / breaking / placing
+
+  // Collision helper
+  closest: any = {
+    distance: Infinity,
+  };
+
+  // Mode
+  mode = "survival";
+  god = false;
+
+  // Movement
+
+  position = this.controls.getObject().position;
+  previousPosition = this.position.clone();
+  savedPosition = this.position.clone();
+  velocity = new THREE.Vector3();
+  direction = new THREE.Vector3();
+  knockbackVelocity = new THREE.Vector3();
+  newMove = new THREE.Vector3();
+
+  speed = 2;
+  walkSpeed = 2;
+  maxWalkSpeed = 2;
+  defaultMaxSprintSpeed = 2.9;
+  sprintSpeed = this.defaultMaxSprintSpeed;
+  maxSprintSpeed = this.defaultMaxSprintSpeed;
+  distanceMoved = 0;
+
+  initialJumpVelocity = 150;
+
+  fly = false;
+  noClip = true;
+  fallCooldown = 0;
+
+  onObject = false; // Sees if player is on object
+  onObjectTime = 0;
+
+  bhopTimeLimit = 0.05; // 50ms to jump before the sprint boost is reset
+  bhopMaxSpeed = this.defaultMaxSprintSpeed + 0.2; // Maximum speed that can be reached through bhopping
+  bhopRate = 0.05; // How much the speed ramps up after each successful bhop
+
+  deltaFov = 0;
+
+  // Events
+
+  key = {
+    forward: 0,
+    backward: 0,
+    left: 0,
+    right: 0,
+    up: 0,
+    down: 0,
+    jump: 0,
+    sprint: 0,
+    shift: 0,
+    leftClick: 0,
+    rightClick: 0,
+    lastRightClick: 0,
+  };
+
+  // World interaction
+  click = false;
+  prevBlock = undefined;
+
+  place = false;
+  placeType = 2; // Type of block being placed
+
+  blockT = 0;
+  punching = Date.now();
+
+  lastRaycast = Date.now();
+  nearbyMeshes = [];
+  playerBoxes = [];
+  picked = [];
+
+  // Player dimensions
+  dim = {
+    torso: 0.5 * blockSize,
+    torsoHeight: 0.75 * blockSize,
+    armSize: 0.25 * blockSize,
+    armSizeSlim: 0.18 * blockSize,
+    armHeight: 0.75 * blockSize,
+    legSize: 0.25 * blockSize,
+    legHeight: 0.75 * blockSize,
+    headSize: 0.5 * blockSize,
+    height: 1.8 * blockSize,
+  };
+  skin = undefined;
+  miningDelayConstant = 750;
+  placingDelay = 200;
+  respawnDelay = 1000;
+  respawnTimer = Date.now();
+  allowRespawn = true;
+
+  // Player info
+  hp = 20;
+  lastHp = this.hp;
+  oxygen = 300;
+  hunger = 100;
+
+  halfWidth: number;
+  halfDepth: number;
+  halfHeight: number;
+
+  headInWater: boolean;
+
+  select_wireframe: THREE.LineSegments;
+  mine_box: THREE.Mesh;
+  bowCharge: number;
+  currentSlot: number;
+  lastOxygenTick: number;
+  punchT: number;
+  stoppedPunching: boolean;
+  prevItem: string;
+  ping: number;
+  inWater: boolean;
+  prevHeight: number;
+  toolbar: any;
+
+  inventory: any;
+  biome: any;
+  name: any;
+  drawingBow: boolean;
+  blocking: number;
+  operator: boolean;
+  prevState: any;
+  heartBlink: any;
+  placing: number;
+  spawnpoint: any;
+
+  constructor() {
     // Player appearance
-    let blockSize = 16;
     this.halfWidth = blockSize * 0.3;
     this.halfDepth = blockSize * 0.3;
     this.halfHeight = blockSize * 0.8;
-
-    // Player constants
-    this.miningDelay = {
-      water: Infinity,
-      leaves: 0.5,
-      obsidian: 15,
-    };
-    this.miningDelayConstant = 750;
-    this.placingDelay = 200;
-    this.respawnDelay = 1000;
-    this.respawnTimer = Date.now();
-    this.allowRespawn = true;
-
-    // Player info
-    this.hp = 20;
-    this.oxygen = 300;
-    this.hunger = 100;
-
     // Select box wireframe
     this.addSelectBox();
 
@@ -190,7 +229,7 @@ class Player {
     }
   }
 
-  respawn(blockSize, pos) {
+  respawn(blockSize, pos?) {
     // Check if respawn is possible
     if (!pos && Date.now() - this.respawnTimer < this.respawnDelay) return;
 
@@ -282,9 +321,9 @@ class Player {
     return vel;
   }
 
-  updateHand(item) {
+  updateHand() {
     // OPTIMIZE
-    item = item || this.getCurrItem();
+    const item = this.getCurrItem();
 
     this.moveHand(item);
 
@@ -327,8 +366,8 @@ class Player {
       }
 
       // Update fov
-      game.fov = parseInt(game.fov);
-      if (camera.fov > game.fov - 10 && camera.dynFov) {
+      game.fov = parseInt(game.fov as string);
+      if (camera.fov > parseInt(game.fov as any) - 10) {
         this.deltaFov -= g.delta * 10;
       }
     } else {
@@ -342,8 +381,8 @@ class Player {
       }
       this.bowCharge = 0;
 
-      if (camera.fov < game.fov - 1) {
-        this.deltaFov += g.delta * 50;
+      if (camera.fov < (game.fov as number) - 1) {
+        this.deltaFov += (g.delta as any) * 50;
       }
     }
   }
@@ -384,7 +423,7 @@ class Player {
         //this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1)
         //this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta);
       } else {
-        this.key.rightClick = false;
+        this.key.rightClick = 0;
         this.blocking =
           this.key.rightClick && this.punchT > 1
             ? (this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1))
@@ -394,7 +433,7 @@ class Player {
       // Drawing a bow
       this.drawBow();
     } else {
-      this.key.rightClick = false;
+      this.key.rightClick = 0;
       this.blocking =
         this.key.rightClick && this.punchT > 1
           ? (this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1))
@@ -429,7 +468,7 @@ class Player {
     let cellPos = chunkManager.cellPos;
     if (!cellPos) return;
 
-    for (let offset of this.neighborOffsets) {
+    for (let offset of neighborOffsets) {
       let id = cellPos.x + offset[0] + "," + (cellPos.y + offset[1]) + "," + (cellPos.z + offset[2]);
       if (g.cellIdToMesh[id]) {
         if (g.cellIdToMesh[id][0]) this.nearbyMeshes.push(g.cellIdToMesh[id][0]);
@@ -448,7 +487,7 @@ class Player {
     }
 
     // Get the closest block
-    let closest = { distance: Infinity };
+    let closest: any = { distance: Infinity };
     for (let i = 0; i < this.picked.length; i++) {
       let block = this.picked[i];
       let x = Math.floor((block.point.x - block.face.normal.x) / blockSize);
@@ -505,7 +544,7 @@ class Player {
     }
 
     // Get the closest intersection
-    let closest = {
+    let closest: any = {
       distance: Infinity,
       object: {},
     };
@@ -628,18 +667,18 @@ class Player {
       let voxel = world.getVoxel(x, y, z);
       if (voxel <= 0) return;
 
-      let unbreakable = voxel == world.blockId["water"] || (voxel == world.blockId["bedrock"] && this.mode == "survival");
+      let unbreakable = voxel == world.blockId["water"];
       if (unbreakable) return;
 
       let item = this.getCurrItem();
 
       let constant =
         item && item.v == world.itemId["wood_pickaxe"] && item.class == "item" ? this.miningDelayConstant / 3 : this.miningDelayConstant;
-      let blockDelay = this.miningDelay[world.blockOrder[voxel - 1]] || 1;
-      let miningDelay = constant == 0 ? 0 : (this.onObject ? blockDelay : blockDelay * 3) * constant;
+      let blockDelay = miningDelay[world.blockOrder[voxel - 1]] || 1;
+      let computedMiningDelay = constant == 0 ? 0 : (this.onObject ? blockDelay : blockDelay * 3) * constant;
 
       // Continous mining of blocks by holding right click
-      if (this.key.leftClick && miningDelta > miningDelay) {
+      if (this.key.leftClick && miningDelta > computedMiningDelay) {
         // Break block
         this.mine_box.visible = false;
         this.select_wireframe.visible = false;
@@ -679,7 +718,7 @@ class Player {
 
         // Update mining progress indicator
 
-        let index = Math.floor((miningDelta / miningDelay) * mining_progress.length).clamp(0, mining_progress.length - 1);
+        let index = Math.floor((miningDelta / computedMiningDelay) * mining_progress.length).clamp(0, mining_progress.length - 1);
 
         if (mining_progress[index]) {
           this.mine_box.material = mining_progress[index].material;
@@ -773,18 +812,12 @@ class Player {
   }
 
   getDropDir() {
-    let dropDir = this.camera.getWorldDirection(new THREE.Vector3());
+    let dropDir = camera.getWorldDirection(new THREE.Vector3());
     dropDir.normalize();
     return dropDir;
   }
 
   dropItem() {
-    if (!this.allowDrop || !this.controls.enabled || chat.showChatBar) {
-      this.allowDrop = false;
-      return;
-    }
-
-    this.allowDrop = false;
     let item = this.getCurrItem();
     if (!item || item.c <= 0) return;
 
@@ -810,10 +843,11 @@ class Player {
 
     // Reset fly if in survival mode
     this.fly = this.mode == "survival" ? false : this.fly;
-    this.clip = this.mode == "survival" || this.mode == "creative" ? true : this.clip;
     if (this.mode == "spectator") {
       this.fly = true;
-      this.clip = false;
+      this.noClip = true;
+    } else {
+      this.noClip = false;
     }
 
     // Reduce velocity (friction)
@@ -821,8 +855,8 @@ class Player {
     this.velocity.x -= previousVelocity.x * 10.0 * delta;
     this.velocity.z -= previousVelocity.z * 10.0 * delta;
     // Determine direction vector
-    this.direction.x = this.key.left + this.key.right;
-    this.direction.z = this.key.forward + this.key.backward;
+    this.direction.x = (keyPressedPlayer("a") ? 1 : 0) + (keyPressedPlayer("d") ? -1 : 0);
+    this.direction.z = (keyPressedPlayer("w") ? 1 : 0) + (keyPressedPlayer("s") ? -1 : 0);
 
     // Normalize direction vector
     let mag = Math.sqrt(Math.abs(this.direction.x) + Math.abs(this.direction.z));
@@ -830,44 +864,13 @@ class Player {
       this.direction.x = this.direction.x / mag;
       this.direction.z = this.direction.z / mag;
     }
-    this.direction.y = this.key.up + this.key.down;
-
-    // // Check if double jump
-    // if (Date.now()-this.firstJump > 400) {
-    // 	this.firstJump = 0;
-    // }
-
-    // if (this.key.up && !this.secondJump) this.firstJump = Date.now(); // First jump
-    // else if (!this.key.up && this.secondJump) {
-    // 	this.secondJump = false;
-    // } else if (!this.key.up && !this.secondJump && this.firstJump && Date.now()-this.firstJump < 100) {
-    // 	this.secondJumpPossible = true; // Second jump possible
-    // }
-
-    // if (Date.now()-this.firstJump >= 100) {
-    // 	this.firstJump = false;
-    // 	this.secondJumpPossible = false;
-    // 	this.secondJump = false;
-    // }
-
-    // if (this.key.up && this.secondJumpPossible) { // Double jump
-    // 	this.secondJumpPossible = false;
-    // 	this.firstJump = undefined;
-    // 	this.secondJump = true;
-
-    // 	// Fly if allowed
-    // 	if (player.controls.enabled) {
-    // 		player.fly = !player.fly;
-    // 		player.allowFly = false;
-    // 	}
-    // }
 
     if (this.onObject && !this.fly) this.velocity.y = Math.max(0, this.velocity.y);
 
     if (this.fly) {
       this.velocity.y -= previousVelocity.y * 10.0 * delta;
-    } else if (this.inWater && this.direction.z > 0 && this.key.sprint) {
-      let dir = this.camera.getWorldDirection(new THREE.Vector3());
+    } else if (this.inWater && this.direction.z > 0 && keyPressedPlayer("shift")) {
+      let dir = camera.getWorldDirection(new THREE.Vector3());
       dir.z = dir.z;
       dir.multiplyScalar(Math.min(50 * delta * this.speed, 50 * delta * this.velocity.distanceTo(new THREE.Vector3(0, 0, 0))));
       this.velocity.divideScalar(Math.max(1 + delta * 50, 1.01));
@@ -880,7 +883,7 @@ class Player {
       this.newMove.add(move);
       this.halfHeight = blockSize * 0.4;
     } else {
-      if (this.key.up && this.inWater) {
+      if (keyPressedPlayer("space") && this.inWater) {
         this.velocity.y = 50;
       } else if (this.headInWater) {
         this.velocity.y = Math.min(-20, this.velocity.y * delta * 50);
@@ -889,7 +892,7 @@ class Player {
       }
 
       // Jump
-      if (this.key.up && !chat.showChatBar) {
+      if (keyPressedPlayer("space") && !chat.showChatBar) {
         if (this.onObject) {
           this.velocity.y += this.initialJumpVelocity;
           if (this.onObjectTime < this.bhopTimeLimit) {
@@ -897,23 +900,26 @@ class Player {
           } else {
             this.maxSprintSpeed = this.defaultMaxSprintSpeed;
           }
-        } else {
-          this.key.up = -1;
         }
       } else if (this.onObjectTime > this.bhopTimeLimit) {
         this.maxSprintSpeed = this.defaultMaxSprintSpeed;
       }
 
       // Reset shift position
+
       if (!this.fly) {
         this.position.y = this.savedPosition.y;
         this.halfHeight = blockSize * 0.8;
       }
     }
 
-    if (this.key.forward || this.key.backward) this.velocity.z -= this.direction.z * 400.0 * delta;
-    if (this.key.left || this.key.right) this.velocity.x -= this.direction.x * 400.0 * delta;
-    if ((this.key.down || this.key.up) && this.fly) this.velocity.y -= this.direction.y * 400.0 * delta;
+    if (keyPressedPlayer("w") || keyPressedPlayer("s")) this.velocity.z -= this.direction.z * 400.0 * delta;
+    if (keyPressedPlayer("a") || keyPressedPlayer("d")) this.velocity.x -= this.direction.x * 400.0 * delta;
+
+    if (this.fly) {
+      if (keyPressedPlayer("space")) this.velocity.y += 400.0 * delta;
+      if (keyPressedPlayer("alt")) this.velocity.y -= 400.0 * delta;
+    }
   }
 
   updateMoveAxis(delta) {
@@ -965,7 +971,7 @@ class Player {
     let test_axes = ["y", "x", "z", "xz"];
 
     // Check for collision
-    if (this.clip) {
+    if (!this.noClip) {
       let savedMove = this.newMove.clone();
 
       // Test each axis in collsion
@@ -1027,7 +1033,7 @@ class Player {
         for (let axis of separate_axes) {
           // Test for y during shift mode
           this.position.y += savedMove.y;
-          if (!this.collides() && this.onObject && this.key.sneak) {
+          if (!this.collides() && this.onObject && keyPressedPlayer("alt")) {
             this.velocity[axis] = 0;
             this.newMove[axis] = 0;
           }
@@ -1061,7 +1067,7 @@ class Player {
     }
 
     // Check if stuck
-    if (this.collides() && this.clip) {
+    if (this.collides() && !this.noClip) {
       this.position.y += blockSize * delta * 30; // Move up at a rate of 10 blocks per second
     }
 
@@ -1079,10 +1085,10 @@ class Player {
 
     this.sprintSpeed = this.inWater ? this.maxWalkSpeed * 1.5 : this.maxSprintSpeed;
     if (this.fly) this.sprintSpeed = this.maxSprintSpeed * 2;
-    if (this.key.backward && !this.fly) this.sprintSpeed = this.maxWalkSpeed;
+    if (keyPressedPlayer("s") && !this.fly) this.sprintSpeed = this.maxWalkSpeed;
     this.walkSpeed = this.inWater ? this.maxWalkSpeed / 2 : this.maxWalkSpeed;
     let acc = this.inWater ? 1 : 10;
-    if (this.key.sprint) {
+    if (keyPressedPlayer("shift")) {
       if (this.speed < this.sprintSpeed) {
         this.speed += delta * acc;
       } else {
@@ -1096,35 +1102,31 @@ class Player {
       }
       this.maxSprintSpeed = this.defaultMaxSprintSpeed;
     }
-    if (this.key.sneak && !this.fly && this.onObject) {
+    if (keyPressedPlayer("alt") && !this.fly && this.onObject) {
       this.speed = 0.75;
 
       this.position.y += -this.walkSpeed * 1.5;
       this.halfHeight = blockSize * 0.6;
     }
     if (this.drawingBow || (this.blocking && this.mode == "survival")) this.speed = 0.75;
-    if ((this.drawingBow || this.blocking) && this.key.sneak && this.mode == "survival") this.speed = 0.5;
-    // if (this.blocking && !this.fly && this.onObject)
-    //     this.speed = 0.75;
-    // if (this.blocking && this.key.sneak && !this.fly && this.onObject)
-    //     this.speed = 0.3;
+    if ((this.drawingBow || this.blocking) && keyPressedPlayer("alt") && this.mode == "survival") this.speed = 0.5;
 
     // Change camera fov when sprinting
 
     if (!this.drawingBow) {
-      game.fov = parseInt(game.fov);
+      game.fov = parseInt(game.fov as any);
       if (this.speed <= 2 || this.distanceMoved < 1.5) {
         if (camera.fov > game.fov) {
           this.deltaFov -= delta * 100;
         }
-      } else if (this.distanceMoved > 7 && camera.dynFov) {
+      } else if (this.distanceMoved > 7) {
         if (camera.fov < game.fov + 10) {
           this.deltaFov += delta * 100;
         }
       }
     }
 
-    camera.fov = game.fov + this.deltaFov;
+    camera.fov = (game.fov as number) + this.deltaFov;
     camera.updateProjectionMatrix();
   }
 
@@ -1168,13 +1170,12 @@ class Player {
 
     this.mine();
     this.placeBlock();
-    this.dropItem();
     this.updateHand();
     activeItemVoxels.update();
 
     this.move(delta);
 
-    this.updateVitals(delta);
+    this.updateVitals();
   }
 
   // Update client with server information
@@ -1285,7 +1286,12 @@ class Player {
       }
     }
   }
+
+  toggleFly() {
+    if (player.controls.enabled) {
+      player.fly = !player.fly;
+    }
+  }
 }
 const player = new Player();
-globalThis.player = player;
 export default player;

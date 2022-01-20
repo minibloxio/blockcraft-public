@@ -1,4 +1,4 @@
-import { getCookie } from './resources/cookie';
+import Cookies from "js-cookie";
 
 class Game {
     constructor() {
@@ -19,10 +19,10 @@ class Game {
     }
 
     initCookies() {
-        this.token = getCookie("token") || "";
-        this.fov = getCookie("fov") || 75;
-        this.debug = getCookie("debug") || false;
-        this.transparentLeaves = getCookie("transparentLeaves");
+        this.token = Cookies.get("token") || "";
+        this.fov = Cookies.get("fov") || 75;
+        this.debug = Cookies.get("debug") || false;
+        this.transparentLeaves = Cookies.get("transparentLeaves");
     }
 
     update() {

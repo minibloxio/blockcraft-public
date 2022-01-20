@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import Ola from "ola";
 import { io } from "socket.io-client";
 import { prevState } from '../..';
@@ -6,7 +7,6 @@ import { drawCircle, drawRectangle, msToTime, round } from '../../lib/helper';
 import chunkManager from '../../managers/ChunkManager';
 import world from '../../managers/WorldManager';
 import player from '../../Player';
-import { deleteCookie, getCookie } from "../../resources/cookie";
 
 export function refreshServers() {
     // Disconnect servers
@@ -153,7 +153,7 @@ export function showServerSelect() {
     $(".menu-button").hide(); // Hide menu buttons
     $(".tab-container").hide(); // Hide tab containers
 
-    let directConnect = getCookie("directConnect");
+    let directConnect = Cookies.get("directConnect");
     if (directConnect) {
         $("#direct-connect-input").val(directConnect).focus();
         $("#server-bar").text(`Direct Connect`);
@@ -184,9 +184,6 @@ export function connectError(type, reason) {
         bar.css({ "background-color": "red" });
     } else {
         console.error("Error connecting to server!");
-        $("#direct-connect-input").val('');
-        deleteCookie('directConnect');
-
         bar.text("Connection failed");
         bar.css({ "background-color": "red" });
     }
@@ -234,7 +231,7 @@ function clickServer(event, doubleClick) {
 
     // Remove direct connect cookie
     $("#direct-connect-input").val('');
-    deleteCookie('directConnect');
+    Cookies.remove('directConnect')
 
     // Set join button
     setJoinButton(g.currentServer.info);
@@ -312,7 +309,7 @@ function joinServer() {
 
         let joinInfo = {
             name: name,
-            token: getCookie('token'),
+            token: Cookies.get('token'),
             skin: player.skin,
         }
         g.socket.emit('join', joinInfo)
