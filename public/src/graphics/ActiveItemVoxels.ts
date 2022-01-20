@@ -5,6 +5,7 @@ import skinManager from "../managers/SkinManager";
 import player from "../Player";
 import world from "../managers/WorldManager";
 import { AnimationLerp, Keyframe } from "../lib/AnimationLerp";
+import { addDatControls } from "../lib/devDatGUI";
 
 const pixelSize = (1 / 16) * 2;
 const itemSize = 16;
@@ -207,7 +208,7 @@ class ActiveItemVoxels {
 
     let uvVoxel = item.v - 1;
     let item_geometry = new THREE.BufferGeometry();
-    const { positions, normals, uvs, indices } = world.generateGeometryDataForItem(uvVoxel);
+    const { positions, normals, uvs, indices } = world.generateGeometryBlockEntity(uvVoxel);
     item_geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), 3));
     item_geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
     item_geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), 2));

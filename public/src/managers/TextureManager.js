@@ -424,6 +424,8 @@ export class TextureManager {
 
     canvas = TextureManager.makeCanvasPowerOfTwo(canvas);
 
+    this.materialPixels = ctx_.getImageData(0, 0, canvas.width, canvas.height).data;
+
     let texture = new THREE.CanvasTexture(canvas);
     texture.minFilter = THREE.NearestFilter;
     texture.magFilter = THREE.NearestFilter;

@@ -20,6 +20,12 @@ a {
   color: white;
 }
 
+#gui {
+  position: absolute;
+  right: 0px;
+  z-index: 5;
+}
+
 /* Fonts */
 
 @font-face {
@@ -332,9 +338,7 @@ a {
   --switch-height: 20px;
   --switch-margin: 3px;
   --switch-width: 45px;
-  --switch-translate: calc(
-    var(--switch-width) - var(--switch-height) - var(--switch-margin) * 2
-  );
+  --switch-translate: calc(var(--switch-width) - var(--switch-height) - var(--switch-margin) * 2);
 }
 
 #video-settings {

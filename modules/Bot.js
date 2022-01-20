@@ -6,6 +6,7 @@ module.exports = class Bot {
     this.world = world;
 
     this.type = "bot";
+    this.lastHandUpdate = Date.now();
 
     let n = parseInt(data);
     let level = Number.isInteger(n) ? n : 0;
@@ -44,9 +45,14 @@ module.exports = class Bot {
 
     //bot.punching = true;
 
-    this.bot.sneaking = Date.now() % 1000 < 500;
+    //this.bot.sneaking = Date.now() % 1000 < 500;
 
-    this.bot.rot.y += 0.1;
+    //this.bot.rot.y += 0.04;
+
+    // if (Date.now() - this.lastHandUpdate > 500) {
+    //   this.lastHandUpdate = Date.now();
+    //   this.bot.currSlot = (this.bot.currSlot + 1) % 9;
+    // }
 
     //this.bot.walking = Date.now() % 6000 < 3000;
   }

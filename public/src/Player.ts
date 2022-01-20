@@ -225,7 +225,7 @@ class Player {
     // Check if operator
     if (data.operator) {
       this.operator = true;
-      //this.mode = "creative";
+      this.mode = "creative";
     }
   }
 
@@ -1294,4 +1294,5 @@ class Player {
   }
 }
 const player = new Player();
+globalThis.player = player;
 export default player;

@@ -116,7 +116,7 @@ class EntityManager {
         // Add block
         let uvVoxel = entity.v - 1;
         let block_geometry = new THREE.BufferGeometry();
-        const { positions, normals, uvs, indices } = world.generateGeometryDataForItem(uvVoxel);
+        const { positions, normals, uvs, indices } = world.generateGeometryBlockEntity(uvVoxel);
         block_geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), 3));
         block_geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
         block_geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), 2));

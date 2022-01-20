@@ -346,6 +346,7 @@ function sendPacket() {
       mode: player.mode,
       fps: round(stats.fps, 1),
       showInventory: inventory.showInventory,
+      bowCharge: player.bowCharge,
     });
   }
 }

@@ -14,8 +14,72 @@ import player from "../Player";
 import skinManager from "./SkinManager";
 import textureManager from "./TextureManager";
 import world from "./WorldManager";
+import { addDatControls } from "../lib/devDatGUI";
 
 const intrpDelay = 100;
+
+const faces = [
+  {
+    // left
+    dir: [-1, 0, 0],
+    corners: [
+      { pos: [0, 1, 0], uv: [0, 1] },
+      { pos: [0, 0, 0], uv: [0, 0] },
+      { pos: [0, 1, 1], uv: [1, 1] },
+      { pos: [0, 0, 1], uv: [1, 0] },
+    ],
+  },
+  {
+    // right
+    dir: [1, 0, 0],
+    corners: [
+      { pos: [1, 1, 1], uv: [0, 1] },
+      { pos: [1, 0, 1], uv: [0, 0] },
+      { pos: [1, 1, 0], uv: [1, 1] },
+      { pos: [1, 0, 0], uv: [1, 0] },
+    ],
+  },
+  {
+    // bottom
+    dir: [0, -1, 0],
+    corners: [
+      { pos: [1, 0, 1], uv: [1, 0] },
+      { pos: [0, 0, 1], uv: [0, 0] },
+      { pos: [1, 0, 0], uv: [1, 1] },
+      { pos: [0, 0, 0], uv: [0, 1] },
+    ],
+  },
+  {
+    // top
+    dir: [0, 1, 0],
+    corners: [
+      { pos: [0, 1, 1], uv: [1, 1] },
+      { pos: [1, 1, 1], uv: [0, 1] },
+      { pos: [0, 1, 0], uv: [1, 0] },
+      { pos: [1, 1, 0], uv: [0, 0] },
+    ],
+  },
+  {
+    // back
+    dir: [0, 0, -1],
+    corners: [
+      { pos: [1, 0, 0], uv: [0, 0] },
+      { pos: [0, 0, 0], uv: [1, 0] },
+      { pos: [1, 1, 0], uv: [0, 1] },
+      { pos: [0, 1, 0], uv: [1, 1] },
+    ],
+  },
+  {
+    // front
+    dir: [0, 0, 1],
+    corners: [
+      { pos: [0, 0, 1], uv: [0, 0] },
+      { pos: [1, 0, 1], uv: [1, 0] },
+      { pos: [0, 1, 1], uv: [0, 1] },
+      { pos: [1, 1, 1], uv: [1, 1] },
+    ],
+  },
+];
 
 class PlayerManager {
   // Add mesh
@@ -50,10 +114,7 @@ class PlayerManager {
 
     // Add hand
     let hand = p.toolbar[p.currSlot];
-    if (p.hand && p.hand.mesh) p.rightArm.remove(p.hand.mesh);
-    if (hand) {
-      PlayerManager.updatePlayerHand(hand, p);
-    }
+    if (hand) PlayerManager.updatePlayerHand(hand, p);
 
     // Entity (combine skeleton and nametag)
     p.entity = new THREE.Group();
@@ -130,7 +191,6 @@ class PlayerManager {
     }
   }
 
-  // Add head
   static addHead(p) {
     let { blockSize } = world;
 
@@ -158,7 +218,6 @@ class PlayerManager {
     p.neck.position.set(0, -blockSize * 0.075, 0);
   }
 
-  // Add torso
   static addTorso(p) {
     let { blockSize } = world;
 
@@ -186,7 +245,6 @@ class PlayerManager {
     p.torso.position.set(0, -blockSize * 0.45, 0);
   }
 
-  // Add arms
   static addArms(p) {
     let { blockSize } = world;
 
@@ -195,72 +253,39 @@ class PlayerManager {
 
     let dim = player.dim;
 
-    if (p.skin == "alex") {
-      // Skinny skins
-      p.mesh.arm = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSizeSlim, dim.armHeight, dim.armSize), playerMat.arm);
-      let armPlatesMesh = PlayerManager.addMesh(
-        new THREE.BoxBufferGeometry(dim.armSizeSlim + 1, (dim.armHeight * 5) / 12, dim.armSize + 1),
-        armMat
-      );
-      armPlatesMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
-      armPlatesMesh.position.y += (dim.armHeight * (1 - 5 / 12)) / 2 + 1;
+    const armSize = p.skin == "alex" ? dim.armSizeSlim : dim.armSize;
+    const leftShoulderOffset = p.skin == "alex" ? -5.45 : dim.armSize * -1.5;
+    const rightShoulderOffset = p.skin == "alex" ? -0.55 : dim.armSize * 1.5;
 
-      p.armorMesh.leftArm = armPlatesMesh.clone();
-      p.armorMesh.leftArm.rotation.y += Math.PI;
-      p.leftArm = new THREE.Group();
-      p.leftArm.add(p.mesh.arm, p.armorMesh.leftArm);
+    // Default skins
+    p.mesh.arm = PlayerManager.addMesh(new THREE.BoxBufferGeometry(armSize, dim.armHeight, dim.armSize), playerMat.arm);
+    let armPlatesMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(armSize + 1, (dim.armHeight * 5) / 12, armSize + 1), armMat);
+    armPlatesMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
+    armPlatesMesh.position.y += (dim.armHeight * (1 - 5 / 12)) / 2 + 1;
 
-      p.armorMesh.rightArm = armPlatesMesh.clone();
-      p.rightArm = new THREE.Group();
-      p.rightArm.add(p.mesh.arm.clone(), p.armorMesh.rightArm);
+    p.armorMesh.leftArm = armPlatesMesh.clone();
+    p.armorMesh.leftArm.rotation.y += Math.PI;
+    p.leftArm = new THREE.Group();
+    p.leftArm.add(p.mesh.arm, p.armorMesh.leftArm);
 
-      // Shoulder joints
-      p.leftShoulder = new THREE.Object3D();
-      p.leftShoulder.position.set(-5.45, -blockSize * 0.45, 0);
-      p.leftShoulder.add(p.leftArm);
+    p.armorMesh.rightArm = armPlatesMesh.clone();
+    p.rightArm = new THREE.Group();
+    p.rightArm.add(p.mesh.arm.clone(), p.armorMesh.rightArm);
 
-      p.rightShoulderJoint = new THREE.Object3D();
-      p.rightShoulderJoint.add(p.rightArm);
-      p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
+    // Shoulder joints
+    p.leftShoulder = new THREE.Object3D();
+    p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.45, 0);
+    p.leftShoulder.add(p.leftArm);
 
-      p.rightShoulder = new THREE.Object3D();
-      p.rightShoulder.position.set(-0.55, -blockSize * 0.45, 0);
-      p.rightShoulder.add(p.rightShoulderJoint);
-    } else {
-      // Default skins
-      p.mesh.arm = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSize, dim.armHeight, dim.armSize), playerMat.arm);
-      let armPlatesMesh = PlayerManager.addMesh(
-        new THREE.BoxBufferGeometry(dim.armSize + 1, (dim.armHeight * 5) / 12, dim.armSize + 1),
-        armMat
-      );
-      armPlatesMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
-      armPlatesMesh.position.y += (dim.armHeight * (1 - 5 / 12)) / 2 + 1;
+    p.rightShoulderJoint = new THREE.Object3D();
+    p.rightShoulderJoint.add(p.rightArm);
+    p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
 
-      p.armorMesh.leftArm = armPlatesMesh.clone();
-      p.armorMesh.leftArm.rotation.y += Math.PI;
-      p.leftArm = new THREE.Group();
-      p.leftArm.add(p.mesh.arm, p.armorMesh.leftArm);
-
-      p.armorMesh.rightArm = armPlatesMesh.clone();
-      p.rightArm = new THREE.Group();
-      p.rightArm.add(p.mesh.arm.clone(), p.armorMesh.rightArm);
-
-      // Shoulder joints
-      p.leftShoulder = new THREE.Object3D();
-      p.leftShoulder.position.set((-dim.armSize * 3) / 2, -blockSize * 0.45, 0);
-      p.leftShoulder.add(p.leftArm);
-
-      p.rightShoulderJoint = new THREE.Object3D();
-      p.rightShoulderJoint.add(p.rightArm);
-      p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
-
-      p.rightShoulder = new THREE.Object3D();
-      p.rightShoulder.position.set((dim.armSize * 3) / 2, -blockSize * 0.15, 0);
-      p.rightShoulder.add(p.rightShoulderJoint);
-    }
+    p.rightShoulder = new THREE.Object3D();
+    p.rightShoulder.position.set(rightShoulderOffset, -blockSize * 0.15, 0);
+    p.rightShoulder.add(p.rightShoulderJoint);
   }
 
-  // Add legs
   static addLegs(p) {
     let { blockSize } = world;
 
@@ -329,67 +354,127 @@ class PlayerManager {
     PlayerManager.addLegs(p); // Add legs
   }
 
-  static updatePlayerHand(entity, p) {
-    let atlas = textureManager.getTextureAtlas(entity.class);
-    if (!atlas) return;
+  static addFaceData(positions, dir, corners, normals, uvs, uvRow, indices, x, y, z, uvVoxel) {
+    const pixelSize = 1;
+    let { tileSize, tileTextureHeight, tileTextureWidth } = world;
 
-    let { blockSize } = world;
+    const ndx = positions.length / 3;
+    for (const { pos, uv } of corners) {
+      // Get position of the pixel
+      let xPos = pos[0] + x;
+      let yPos = pos[1] + y;
+      let zPos = pos[2] + z;
 
-    if (entity.class == "item") {
-      let canvas = document.createElement("canvas");
-      canvas.width = 16;
-      canvas.height = 16;
-      let ctx = canvas.getContext("2d");
-      ctx.drawImage(atlas, (entity.v - 1) * 16, 0, 16, 16, 0, 0, 16, 16);
-      let texture = new THREE.CanvasTexture(canvas);
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.repeat.x = -1;
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      let mat = new THREE.MeshLambertMaterial({ map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide });
+      positions.push(xPos * pixelSize, yPos * pixelSize, zPos * pixelSize);
+      normals.push(...dir);
 
-      let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(blockSize, blockSize), mat);
-      item_mesh.renderOrder = 1;
-      item_mesh.name = "item";
-      item_mesh.castShadow = true;
-      item_mesh.receiveShadow = true;
+      let uvX = y + uv[0] + uvVoxel * tileSize;
+      let uvY = z - uv[1] + uvRow * tileSize + 1;
 
-      item_mesh.position.set(0, -4, -8);
-      item_mesh.rotation.set(-Math.PI / 2 - Math.PI / 6, Math.PI / 2, 0);
-
-      p.hand = entity;
-      p.hand.mesh = item_mesh;
-
-      p.rightArm.add(p.hand.mesh);
-    } else {
-      let uvVoxel = entity.v - 1;
-      let block_geometry = new THREE.BufferGeometry();
-      const { positions, normals, uvs, indices } = world.generateGeometryDataForItem(uvVoxel);
-      const positionNumComponents = 3;
-      block_geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
-      const normalNumComponents = 3;
-      block_geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
-      const uvNumComponents = 2;
-      block_geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
-      block_geometry.setIndex(indices);
-      block_geometry.computeBoundingSphere();
-
-      let block_mesh = new THREE.Mesh(block_geometry, textureManager.materialTransparent);
-      block_mesh.name = "item";
-      block_mesh.castShadow = true;
-      block_mesh.receiveShadow = true;
-
-      block_mesh.position.set(-3, -player.dim.armHeight / 2, -player.dim.armSize);
-      block_mesh.rotation.set(0, Math.PI / 4, 0);
-
-      p.hand = entity;
-      p.hand.mesh = block_mesh;
-
-      p.rightArm.add(p.hand.mesh);
+      uvs.push(uvX / tileTextureWidth, 1 - uvY / tileTextureHeight);
     }
+    indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
   }
 
-  // Update player name tag
+  static getNeighborPixel(x, y) {
+    let pixels = textureManager.materialPixels;
+    let index = (x + y * world.tileTextureWidth) * 4;
+    let pixel = pixels[index + 3];
+    return pixel;
+  }
+
+  static updateItemMesh(p, entity) {
+    let data = {
+      positions: [],
+      normals: [],
+      indices: [],
+      uvs: [],
+    };
+
+    const itemSize = 16;
+    let material = textureManager.materialItem; // TODO: set this once
+
+    let uvVoxel = entity.v - 1;
+    let uvRow = p.bowCharge ? p.bowCharge : 0;
+
+    // Update the UV data of each face
+    for (let y = 0; y < itemSize; ++y) {
+      for (let z = 0; z < itemSize; ++z) {
+        for (const { dir, corners } of faces) {
+          let oy = y + uvVoxel * itemSize;
+          let oz = z + uvRow * itemSize;
+
+          let pixel = PlayerManager.getNeighborPixel(oy, oz);
+          if (pixel > 0) {
+            PlayerManager.addFaceData(data.positions, dir, corners, data.normals, data.uvs, uvRow, data.indices, 0, y, z, uvVoxel);
+          }
+        }
+      }
+    }
+
+    // Convert to ArrayBuffers
+    let positionBuffer = new Float32Array(new ArrayBuffer(data.positions.length * 4));
+    let normalBuffer = new Float32Array(new ArrayBuffer(data.normals.length * 4));
+    let uvBuffer = new Float32Array(new ArrayBuffer(data.uvs.length * 4));
+    let indexBuffer = new Uint16Array(new ArrayBuffer(data.indices.length * 2));
+    positionBuffer.set(data.positions);
+    normalBuffer.set(data.normals);
+    uvBuffer.set(data.uvs);
+    indexBuffer.set(data.indices);
+
+    // Set attributes
+    if (!p.handMesh) {
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.BufferAttribute(positionBuffer, 3));
+      geometry.setAttribute("normal", new THREE.BufferAttribute(normalBuffer, 3));
+      geometry.setAttribute("uv", new THREE.BufferAttribute(uvBuffer, 2));
+      geometry.setIndex(new THREE.BufferAttribute(indexBuffer, 1));
+
+      p.handMesh = new THREE.Mesh(geometry, material);
+    } else {
+      p.handMesh.geometry.setAttribute("position", new THREE.BufferAttribute(positionBuffer, 3));
+      p.handMesh.geometry.setAttribute("normal", new THREE.BufferAttribute(normalBuffer, 3));
+      p.handMesh.geometry.setAttribute("uv", new THREE.BufferAttribute(uvBuffer, 2));
+      p.handMesh.geometry.setIndex(new THREE.BufferAttribute(indexBuffer, 1));
+      p.handMesh.geometry.attributes.position.needsUpdate = true;
+      p.handMesh.geometry.attributes.normal.needsUpdate = true;
+      p.handMesh.geometry.attributes.uv.needsUpdate = true;
+      p.handMesh.geometry.index.needsUpdate = true;
+
+      p.handMesh.material = material;
+    }
+
+    return;
+  }
+
+  static updateBlockMesh(entity) {
+    let uvVoxel = entity.v - 1;
+    let block_geometry = new THREE.BufferGeometry();
+    const { positions, normals, uvs, indices } = world.generateGeometryBlockEntity(uvVoxel);
+    block_geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), 3));
+    block_geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
+    block_geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), 2));
+    block_geometry.setIndex(indices);
+    block_geometry.computeBoundingSphere();
+
+    return new THREE.Mesh(block_geometry, textureManager.materialTransparent);
+  }
+
+  static updatePlayerHand(entity, p) {
+    p.hand = entity;
+
+    if (entity.class == "item") {
+      PlayerManager.updateItemMesh(p, entity);
+    } else {
+      p.handMesh = PlayerManager.updateBlockMesh(entity);
+    }
+
+    p.handMesh.name = "item";
+    p.handMesh.castShadow = true;
+    p.handMesh.receiveShadow = true;
+    p.rightArm.add(p.handMesh);
+  }
+
   static updateNameTag(p, options) {
     if (!options) options = {};
     let { blockSize } = world;
@@ -460,7 +545,6 @@ class PlayerManager {
     }
   }
 
-  // Update player color
   static updatePlayerColor(p, color, opacity) {
     if (!p || !p.skeleton) return;
 

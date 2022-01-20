@@ -56,7 +56,7 @@ export function updatePlayers(serverPlayers) {
 
         let hand = p_.toolbar[p.currSlot];
 
-        if (p.hand && p.hand.mesh) p.rightArm.remove(p.hand.mesh);
+        if (p.hand && p.handMesh) p.rightArm.remove(p.handMesh);
         if (hand && hand.c > 0) PlayerManager.updatePlayerHand(hand, p);
       }
 
@@ -96,7 +96,8 @@ function updatePlayer(p) {
   // Rotate body towards the head
   let angleDiff = Math.abs(p.neck.quaternion.dot(p.body.quaternion));
   if (angleDiff < 0.92) {
-    p.body.quaternion.slerp(p.neck.quaternion, g.delta * 2);
+    let diff = Math.abs(0.92 - angleDiff) * 20 + 1;
+    p.body.quaternion.slerp(p.neck.quaternion, g.delta * diff);
   }
 
   if (p.walking) {
@@ -191,20 +192,17 @@ function updatePlayer(p) {
   }
 
   // Active hand item
-  if (p.hand) {
-    let hand = p.toolbar[p.currSlot];
-    let item_mesh = p.hand.mesh;
-    if (hand) {
-      if (p.blocking) {
-        item_mesh.position.set(-4, -2, -3);
-        item_mesh.rotation.set(0, -Math.PI / 8, 0);
-      } else if (hand.class == "item") {
-        item_mesh.position.set(0, -4, -8);
-        item_mesh.rotation.set(-Math.PI / 2 - Math.PI / 6, Math.PI / 2, 0);
-      } else {
-        item_mesh.position.set(-3, -dim.armHeight / 2, -dim.armSize);
-        item_mesh.rotation.set(0, Math.PI / 4, 0);
-      }
+  let hand = p.toolbar[p.currSlot];
+  if (p.hand && hand) {
+    if (p.blocking) {
+      p.handMesh.position.set(-4, -2, -3);
+      p.handMesh.rotation.set(0, -Math.PI / 8, 0);
+    } else if (hand.class == "item") {
+      p.handMesh.position.set(-0.5, -13, -10.2);
+      p.handMesh.rotation.set(-0.57, 0, 0);
+    } else {
+      p.handMesh.position.set(-3, -dim.armHeight / 2, -dim.armSize);
+      p.handMesh.rotation.set(0, Math.PI / 4, 0);
     }
   }
 
