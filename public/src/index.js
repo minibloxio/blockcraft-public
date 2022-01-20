@@ -348,14 +348,11 @@ function sendPacket() {
   }
 }
 
-// INDEX.HTML FILE CODE
-
 $("#welcome-button")[0].click();
-// Prevent right-click
-document.addEventListener("contextmenu", (event) => event.preventDefault());
+
+document.addEventListener("contextmenu", (event) => event.preventDefault()); // Prevent right-click
 
 // Get cookie username
-
 let name = getCookie("Name");
 if (name) $("#name-input").val(name);
 

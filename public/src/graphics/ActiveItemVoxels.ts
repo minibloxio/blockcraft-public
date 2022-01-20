@@ -12,7 +12,6 @@ const tileSize = 16;
 const tileTextureWidth = 4096;
 const tileTextureHeight = 64;
 const canvas = document.createElement("canvas");
-const ctx = canvas.getContext("2d");
 const ZERO_VEC = new THREE.Vector3();
 const ZERO_ROT = new THREE.Quaternion();
 canvas.width = itemSize;

@@ -3,6 +3,7 @@ import * as THREE from "three";
 import textureManager from "./TextureManager";
 import workerManager from "./WorkerManager";
 import { g, scene } from "../globals";
+import { roughSizeOfObject } from "../lib/helper";
 
 class World {
   computeVoxelOffset(x, y, z) {

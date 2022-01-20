@@ -13,7 +13,6 @@ import { random } from "./lib/helper";
 import activeItemVoxels from "./graphics/ActiveItemVoxels.ts";
 
 const SWORDS = ["wood_sword", "stone_sword", "iron_sword", "gold_sword", "diamond_sword"];
-const EMPTY = new THREE.Mesh();
 
 class Player {
   constructor() {
