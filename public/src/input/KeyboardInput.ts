@@ -6,6 +6,7 @@ import hud from "../gui/HUD";
 import { camera, g } from "../globals";
 import { giveCommandHint, nextCommand, prevCommand } from "../commands";
 import inventory from "../items/Inventory";
+import threeStats from "../stats/ThreeStats";
 
 var doublePressDelay = 200;
 var lastKeypressTime = 0;
@@ -135,4 +136,11 @@ $(window).on("keyup", function (event) {
       giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
     }
   }
+});
+
+// function keys
+// ###########################################
+bindKeys("f3", () => {
+  hud.showStats = !hud.showStats;
+  threeStats.showStats = hud.showStats;
 });

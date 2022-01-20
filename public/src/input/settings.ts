@@ -156,7 +156,6 @@ export function addVideoControls() {
   addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
   //addSliderControl("Web Workers", "workers", 2, game, "numOfVoxelWorkers");
 
-  addSwitchControl("Statistics", "stats", false, hud, "showStats");
   addSwitchControl("Invert Mouse", "invertMouse", false, game, "invertMouse");
   addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow");
   addSwitchControl("Clouds", "cloud", false, stage, "showClouds", "generate");
@@ -286,12 +285,22 @@ function genDefaultKeyMap() {
   };
   let i;
 
+  // letters
   for (i = 0; i < 26; i++) {
     keyMap["Key" + String.fromCharCode(i + 65)] = String.fromCharCode(i + 97);
   }
 
+  // numbers
   for (i = 0; i < 10; i++) {
     keyMap["Digit" + i] = "" + i;
   }
+
+  // function keys
+  for (i = 1; i <= 12; i++) {
+    keyMap["F" + i] = "f" + i;
+  }
+
   return keyMap;
 }
+
+globalThis.keyMap = keyMap;

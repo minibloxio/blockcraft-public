@@ -25,7 +25,7 @@ import world from "./managers/WorldManager";
 import player from "./Player";
 import { animateServerEntities, animateServerPlayers, updatePlayers } from "./server";
 import stage from "./Stage";
-import stats from "./stats/ThreeFPSDisplay.js";
+import stats from "./stats/ThreeStats.ts";
 import { initStatistics } from "./stats/statslist";
 import { keyPressedPlayer } from "./input/KeyboardInput";
 

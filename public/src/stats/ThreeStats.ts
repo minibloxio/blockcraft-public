@@ -1,52 +1,76 @@
 /**
  * @author mrdoob / http://mrdoob.com/
+ * @author qhyun2
+ *
  */
 
-let Stats = function () {
-  let container = document.createElement("div");
-  container.style.cssText = "position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000;display:flex";
+class ThreeStats {
+  dom = document.createElement("div");
+  frames = 0;
+  fps = 0;
+  beginTime = (performance || Date).now();
+  prevTime = this.beginTime;
+  fpsPanel = makePanel("FPS", "#0ff", "#002");
+  memPanel?: Panel;
+  msPanel = makePanel("MS", "#0f0", "#020");
+  _shown = false;
 
-  function addPanel(panel) {
-    container.appendChild(panel.dom);
-    return panel;
+  public set showStats(v: boolean) {
+    this._shown = v;
+    this.dom.style.display = v ? "block" : "none";
   }
 
-  let beginTime = (performance || Date).now(),
-    prevTime = beginTime,
-    frames = 0;
-  let fpsPanel = addPanel(new Stats.Panel("FPS", "#0ff", "#002"));
-  if (performance && performance.memory) var memPanel = addPanel(new Stats.Panel("MB", "#f08", "#201"));
-  let msPanel = addPanel(new Stats.Panel("MS", "#0f0", "#020"));
+  public get showStats() {
+    return this._shown;
+  }
 
-  return {
-    dom: container,
-    addPanel: addPanel,
-    begin: function () {
-      beginTime = (performance || Date).now();
-    },
-    end: function () {
-      frames++;
-      let time = (performance || Date).now();
-      msPanel.update(time - beginTime, 4000 / g.refreshRate);
-      if (time >= prevTime + 250) {
-        fpsPanel.update((frames * 1000) / (time - prevTime), g.refreshRate * 1.2);
-        stats.fps = (frames * 1000) / (time - prevTime);
-        prevTime = time;
-        frames = 0;
-        if (memPanel) {
-          let memory = performance.memory;
-          memPanel.update(memory.usedJSHeapSize / 1048576, memory.jsHeapSizeLimit / 1048576);
-        }
+  constructor() {
+    this.dom.style.cssText = "position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000;display:flex";
+
+    this.dom.appendChild(this.fpsPanel.dom);
+    // @ts-ignore
+    if (performance && performance.memory) {
+      this.memPanel = makePanel("MB", "#f08", "#201");
+      this.dom.appendChild(this.memPanel.dom);
+    }
+    this.dom.appendChild(this.msPanel.dom);
+    document.body.appendChild(this.dom);
+    this.showStats = false;
+  }
+
+  begin() {
+    this.beginTime = (performance || Date).now();
+  }
+
+  end() {
+    const time = (performance || Date).now();
+    this.frames++;
+    if (this.showStats) this.msPanel.update(time - this.beginTime, 4000 / g.refreshRate);
+    if (time >= this.prevTime + 250) {
+      if (this.showStats) this.fpsPanel.update((this.frames * 1000) / (time - this.prevTime), g.refreshRate * 1.2);
+      this.fps = (this.frames * 1000) / (time - this.prevTime);
+      this.prevTime = time;
+      this.frames = 0;
+      if (this.memPanel) {
+        // @ts-ignore
+        let memory = performance.memory;
+        if (this.showStats) this.memPanel.update(memory.usedJSHeapSize / 1048576, memory.jsHeapSizeLimit / 1048576);
       }
-      return time;
-    },
-    update: function () {
-      beginTime = this.end();
-    },
-  };
-};
+    }
+    return time;
+  }
 
-Stats.Panel = function (name, fg, bg) {
+  update() {
+    this.beginTime = this.end();
+  }
+}
+
+interface Panel {
+  dom: HTMLElement;
+  update: (value: number, maxValue: number) => void;
+}
+
+function makePanel(name: string, fg: string, bg: string): Panel {
   let min = Infinity;
   let max = 0;
   let round = Math.round;
@@ -82,7 +106,7 @@ Stats.Panel = function (name, fg, bg) {
 
   return {
     dom: canvas,
-    update: function (value, maxValue) {
+    update: (value: number, maxValue: number) => {
       min = Math.min(min, value);
       max = Math.max(max, value);
 
@@ -99,8 +123,7 @@ Stats.Panel = function (name, fg, bg) {
       context.fillRect(GRAPH_X + GRAPH_WIDTH - 1, GRAPH_Y, 1, round((1 - value / maxValue) * GRAPH_HEIGHT));
     },
   };
-};
+}
 
-const stats = new Stats();
-document.body.appendChild(stats.dom);
+const stats = new ThreeStats();
 export default stats;
