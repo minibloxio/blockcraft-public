@@ -5,7 +5,7 @@ import player from "../Player";
 import textureManager from "../managers/TextureManager";
 import { drawRectangle, drawRect, drawImage, drawImageTopLeft, drawText, clamp } from "../lib/helper";
 import { g, toolbar, toolbar_selector } from "../globals";
-import { mouse } from "../input/input";
+import { mouse } from "../input/MouseInput";
 import Recipe from "./RecipeChecker";
 import { getDroppedItems } from "../input/pointerlock";
 import { keyPressed } from "kontra"
@@ -22,6 +22,7 @@ class Inventory {
     this.limit = 36;
     this.showInventory = false;
     this.canShowInventory = true;
+    this.showCraftingTable = true;
 
     this.selectedItem = undefined;
     this.searchBlocks = undefined;

@@ -5,7 +5,7 @@ import hud from "../gui/HUD";
 import player from "../Player";
 import { players, g } from "../globals";
 import { drawRectangle, drawText } from "../lib/helper";
-import { c } from "../commands";
+import { c, checkCommand } from "../commands";
 
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");

@@ -1,8 +1,6 @@
 import * as $ from "jquery";
-import { c, giveCommandHint, nextCommand, prevCommand } from "../commands";
 import inventory from "../items/Inventory";
 import { initKeys } from "kontra";
-import chat from "../managers/ChatManager";
 import player from "../Player";
 
 import "./KeyboardInput";

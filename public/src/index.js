@@ -24,7 +24,6 @@ import world, { updateVoxelGeometry } from "./managers/WorldManager";
 import player from "./Player";
 import Cookies from "js-cookie";
 import { animateServerEntities, animateServerPlayers, updatePlayers } from "./server";
-import { addKeyboardControls, addVideoControls } from "./settings";
 import stage from "./Stage";
 import stats from "./stats/stats.js";
 import { initStatistics } from "./stats/statslist";
@@ -102,6 +101,7 @@ export function disconnectServer() {
 
 // Menu progression logic
 $(document).ready(function () {
+  init();
 
   // Refresh servers
   $("#refresh-servers").click(function () {
@@ -450,7 +450,6 @@ g.socket.on("joinResponse", function (data) {
   Object.assign(world, data.world);
 
   // Initalize player
-  player.init();
   player.join(data);
 
   // Set chunk pos

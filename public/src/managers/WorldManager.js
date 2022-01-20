@@ -7,6 +7,7 @@ import { g, scene } from "../globals";
 class World {
   constructor() {
         this.blockSize = 16
+        this.cellSize = undefined;
         this.buildHeight = undefined;
         this.itemId = undefined;
         this.blockId = undefined;
