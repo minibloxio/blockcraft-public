@@ -84,6 +84,7 @@ export function updatePlayers(serverPlayers) {
   }
 }
 
+// Update the player's visuals
 function updatePlayer(p) {
   let { blockSize } = world;
 
@@ -94,13 +95,14 @@ function updatePlayer(p) {
 
   p.neck.rotation.set(rot.x, rot.y, rot.z); // Set sideways head rotation
 
-  // Rotate body towards the head
+  // Rotate body towards the head when turning around
   let angleDiff = Math.abs(p.neck.quaternion.dot(p.body.quaternion));
   if (angleDiff < 0.92) {
     let diff = Math.abs(0.92 - angleDiff) * 20 + 1;
     p.body.quaternion.slerp(p.neck.quaternion, g.delta * diff);
   }
 
+  // Rotate body towards the head when walking
   if (p.walking) {
     let target = new THREE.Vector3(-p.vel.x, 0, -p.vel.z); // Target direction
     target.normalize();
@@ -136,7 +138,7 @@ function updatePlayer(p) {
     leftHip.position.set(-dim.legSize / 2, -blockSize * 0.45 - blockSize * 0.9 + shift, shift * 2);
     rightHip.position.set(dim.legSize / 2, -blockSize * 0.45 - blockSize * 0.9 + shift, shift * 2);
 
-    p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.42 - shift, blockSize * 0.05);
+    p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.12 - shift, blockSize * 0.05);
     p.rightShoulder.position.set(rightShoulderOffset, -blockSize * 0.12 - shift, 0);
   } else {
     p.torso.rotation.x = 0;
@@ -147,7 +149,7 @@ function updatePlayer(p) {
     leftHip.position.set(-dim.legSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
     rightHip.position.set(dim.armSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
 
-    p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.45, 0);
+    p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.15, 0);
     p.rightShoulder.position.set(rightShoulderOffset, -blockSize * 0.15, 0);
   }
 
@@ -166,21 +168,29 @@ function updatePlayer(p) {
   if (p.walking) {
     // Walking animation
     if (leftArm.rotation.x < -maxRotation) {
-      p.extendBody = false;
+      p.extendArms = false;
     } else if (leftArm.rotation.x > maxRotation) {
-      p.extendBody = true;
+      p.extendArms = true;
     }
 
-    if (p.extendBody) {
+    if (leftLeg.rotation.x > maxRotation) {
+      p.extendLegs = false;
+    } else if (leftLeg.rotation.x < -maxRotation) {
+      p.extendLegs = true;
+    }
+
+    if (p.extendArms && p.bowCharge == 0) {
       rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
       rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
+    } else if (p.bowCharge == 0) {
+      rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
+      rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
+    }
 
+    if (p.extendLegs) {
       rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, -speed);
       rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, speed);
     } else {
-      rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
-      rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
-
       rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, speed);
       rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, -speed);
     }
@@ -193,14 +203,20 @@ function updatePlayer(p) {
   }
 
   // Active hand item
+
   let hand = p.toolbar[p.currSlot];
   if (p.hand && hand) {
     if (p.blocking) {
       p.handMesh.position.set(-4, -2, -3);
       p.handMesh.rotation.set(0, -Math.PI / 8, 0);
     } else if (hand.class == "item") {
-      p.handMesh.position.set(-0.5, -13, -10.2);
-      p.handMesh.rotation.set(-0.57, 0, 0);
+      if (hand.v == world.itemId["bow"]) {
+        p.handMesh.position.set(-2.5, -16.9, -0.071);
+        p.handMesh.rotation.set(-0.8, 0.198, 0.088);
+      } else {
+        p.handMesh.position.set(-0.5, -13, -10.2);
+        p.handMesh.rotation.set(-0.57, 0, 0);
+      }
     } else {
       p.handMesh.position.set(-3, -dim.armHeight / 2, -dim.armSize);
       p.handMesh.rotation.set(0, Math.PI / 4, 0);
@@ -223,11 +239,14 @@ function updatePlayer(p) {
   // Update nametag rotation
   p.nameTag.quaternion.copy(camera.getWorldQuaternion(new THREE.Quaternion()));
 
-  if (p.sneaking) {
-    p.leftShoulder.rotation.x = -Math.PI / 16;
+  if (p.bowCharge > 0) {
+    p.leftShoulder.rotation.set(Math.PI / 2, -0.022, 0.74);
+    p.rightShoulder.rotation.x = Math.PI / 2;
+  } else if (p.sneaking) {
+    p.leftShoulder.rotation.set(-Math.PI / 16, 0, 0);
     p.rightShoulder.rotation.x = -Math.PI / 16;
   } else {
-    p.leftShoulder.rotation.x = 0;
+    p.leftShoulder.rotation.set(0, 0, 0);
     p.rightShoulder.rotation.x = 0;
   }
 

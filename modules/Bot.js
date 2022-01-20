@@ -45,7 +45,7 @@ module.exports = class Bot {
 
     //bot.punching = true;
 
-    //this.bot.sneaking = Date.now() % 1000 < 500;
+    this.bot.sneaking = Date.now() % 1000 < 500;
 
     //this.bot.rot.y += 0.04;
 

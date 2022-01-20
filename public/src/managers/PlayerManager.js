@@ -15,6 +15,7 @@ import skinManager from "./SkinManager";
 import textureManager from "./TextureManager";
 import world from "./WorldManager";
 import Item3D from "../graphics/Item3D";
+import { addDatControls } from "../lib/devDatGUI";
 
 const intrpDelay = 100;
 
@@ -210,9 +211,13 @@ class PlayerManager {
     p.rightArm.add(p.mesh.arm.clone(), p.armorMesh.rightArm);
 
     // Shoulder joints
+    p.leftShoulderJoint = new THREE.Object3D();
+    p.leftShoulderJoint.add(p.leftArm);
+    p.leftShoulderJoint.position.set(0, -blockSize * 0.3, 0);
+
     p.leftShoulder = new THREE.Object3D();
-    p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.45, 0);
-    p.leftShoulder.add(p.leftArm);
+    p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.15, 0);
+    p.leftShoulder.add(p.leftShoulderJoint);
 
     p.rightShoulderJoint = new THREE.Object3D();
     p.rightShoulderJoint.add(p.rightArm);
@@ -310,7 +315,9 @@ class PlayerManager {
     if (entity.class == "item") {
       let uvRow = p.bowCharge;
       let mesh = Item3D.getMesh(entity, 1, p.handMesh, uvRow);
-      if (mesh) p.handMesh = mesh;
+      if (mesh) {
+        p.handMesh = mesh;
+      }
     } else {
       p.handMesh = PlayerManager.updateBlockMesh(entity);
     }

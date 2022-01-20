@@ -27,6 +27,7 @@ import { animateServerEntities, animateServerPlayers, updatePlayers } from "./se
 import stage from "./Stage";
 import stats from "./stats/stats.js";
 import { initStatistics } from "./stats/statslist";
+import { keyPressedPlayer } from "./input/KeyboardInput";
 
 /*
 Authenticates the player and provides server details from each running server.
@@ -339,7 +340,7 @@ function sendPacket() {
       rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
       dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
       walking: new THREE.Vector3(player.velocity.x, 0, player.velocity.z).length() > 2, // CHANGED
-      sneaking: player.key.sneak,
+      sneaking: keyPressedPlayer("alt"),
       punching: player.punchT < 2,
       blocking: player.blockT > 0,
       currSlot: player.currentSlot,
