@@ -74,7 +74,7 @@ const faces = [
       { pos: [1, 1, 1], uv: [1, 1] },
     ],
   },
-]; // If the other faces are needed, they can be found in the WorldManager file.
+];
 
 class ActiveItemVoxels {
   root = new THREE.Group();
@@ -176,9 +176,10 @@ class ActiveItemVoxels {
     let uvVoxel = item.v - 1;
     let uvRow = player.bowCharge ? player.bowCharge : 0;
 
-    let uvs = []; // TODO: set this in the constructor (to reduce memory consumption)
+    let uvBuffer = new Float32Array(new ArrayBuffer(itemSize * itemSize * faces.length * 4 * 4 * 2)); // TODO: set this in the constructor (to reduce memory consumption)
 
     // Update the UV data of each face
+    let index = 0;
     for (let y = 0; y < itemSize; ++y) {
       for (let z = 0; z < itemSize; ++z) {
         for (let i = 0; i < faces.length; i++) {
@@ -186,15 +187,16 @@ class ActiveItemVoxels {
           for (let { uv } of face.corners) {
             let uvX = y + uv[0] + uvVoxel * tileSize;
             let uvY = z - uv[1] + uvRow * tileSize + 1;
-            uvs.push(uvX / tileTextureWidth, 1 - uvY / tileTextureHeight);
+
+            uvBuffer[index] = uvX / tileTextureWidth;
+            uvBuffer[index + 1] = 1 - uvY / tileTextureHeight;
+            index += 2;
           }
         }
       }
     }
 
     // Update the uv data of the item mesh
-    let uvBuffer = new Float32Array(new ArrayBuffer(uvs.length * 4));
-    uvBuffer.set(uvs);
     armItem.itemMesh.geometry.setAttribute("uv", new THREE.BufferAttribute(uvBuffer, 2));
     armItem.itemMesh.geometry.attributes.uv.needsUpdate = true;
   }
