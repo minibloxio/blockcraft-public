@@ -465,7 +465,7 @@ module.exports = class World {
   }
 
   static addItem(p, entity) {
-    if (entity.v < 3) return;
+    if (entity.v < 3 && entity.class == "block") return;
     // Add item to player's inventory if item already exists in inventory
     for (let slot of p.toolbar) {
       if (!slot || slot.v != entity.v || slot.class != entity.class) continue;
