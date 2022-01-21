@@ -1,6 +1,6 @@
 import { drawRectangle, drawText, round } from "../lib/helper";
 import hud from "../gui/HUD";
-import threeStats from "./ThreeStats";
+import game from "../Game";
 
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");
@@ -60,6 +60,17 @@ export class Stat {
     let text = this.getText();
 
     let fontSize = 20;
+    switch (game.guiSize) {
+      case "1":
+        fontSize = 15;
+        break;
+      case "2":
+        fontSize = 20;
+        break;
+      case "3":
+        fontSize = 25;
+        break;
+    }
     let margin = 5;
     let width = ctx.measureText(text).width + margin * 2;
     drawRectangle(10 - margin + offset, index * fontSize + marginTop, width, fontSize, "black", { alpha: 0.2 });

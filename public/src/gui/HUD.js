@@ -317,4 +317,5 @@ class HUD {
   }
 }
 const hud = new HUD();
+globalThis.hud = hud;
 export default hud;

@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import * as $ from "jquery";
 import { bindKeys, keyPressed, keyMap } from "kontra";
 import player from "../Player";
@@ -15,9 +16,15 @@ export function keyPressedPlayer(key) {
   return keyPressed(key) && player.controls.enabled && !chat.showChatBar && g.initialized;
 }
 
-bindKeys("f", () => {
-  chat.addChat({ text: "Double tap space in creative mode to fly", color: "cyan" });
-});
+bindKeys(
+  "f",
+  (event) => {
+    if (player.controls.enabled && !chat.showChatBar && player.mode != "survival") {
+      chat.addChat({ text: "Double tap space in creative mode to fly", color: "cyan" });
+    }
+  },
+  { preventDefault: false, handler: "keydown" }
+);
 
 bindKeys(
   "space",
@@ -143,4 +150,5 @@ $(window).on("keyup", function (event) {
 bindKeys("f3", () => {
   hud.showStats = !hud.showStats;
   threeStats.showStats = hud.showStats;
+  Cookies.set("showStats", hud.showStats ? "true" : "false", { expires: 365 });
 });

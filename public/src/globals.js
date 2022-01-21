@@ -22,7 +22,6 @@ const regionNames = {
 };
 let serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.online`);
 serverList = serverList.concat(Object.keys(regionNames).map((x) => `https://${x}.victorwei.com`));
-console.log(serverList);
 const connectionDelay = 2000;
 let players = {};
 globalThis.players = players;

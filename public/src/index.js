@@ -28,6 +28,7 @@ import stage from "./Stage";
 import stats from "./stats/ThreeStats.ts";
 import { initStatistics } from "./stats/statslist";
 import { keyPressedPlayer } from "./input/KeyboardInput";
+import threeStats from "./stats/ThreeStats";
 
 /*
 Authenticates the player and provides server details from each running server.
@@ -261,13 +262,15 @@ function init() {
 
   camera.add(axesHelper);
 
+  hud.showStats = Cookies.get("showStats") === "true";
+  threeStats.showStats = hud.showStats;
+
   addVideoControls(); // Add video settings
   addKeyboardControls(); // Add keyboard controls
   initStatistics(); // Add statistics to record
   masterRenderer.init();
   initPointerLock(); // Initialize pointer lock
   updateGUISize(); // Update the GUI size
-
   workerManager.init();
 
   console.log("Game initialized in " + (Date.now() - t) + "ms"); // Log time
