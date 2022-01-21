@@ -15,7 +15,6 @@ import skinManager from "./SkinManager";
 import textureManager from "./TextureManager";
 import world from "./WorldManager";
 import Item3D from "../graphics/Item3D";
-import { addDatControls } from "../lib/devDatGUI";
 import { clamp, round, euclideanModulo } from "../lib/helper";
 
 const intrpDelay = 100;
@@ -165,13 +164,13 @@ class PlayerManager {
       }
 
       if (p.extendArms && p.bowCharge == 0) {
-        if (!p.blocking) {
+        if (!p.blocking && !p.punching) {
           rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
         }
 
         rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
       } else if (p.bowCharge == 0) {
-        if (!p.blocking) {
+        if (!p.blocking && !p.punching) {
           rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
         } else {
           rightArm.position.set(0, 0, 0);
@@ -213,7 +212,6 @@ class PlayerManager {
     }
 
     // Active hand item
-
     let hand = p.toolbar[p.currSlot];
     if (p.handMesh && hand) {
       if (p.blocking) {
@@ -571,7 +569,6 @@ class PlayerManager {
       let mesh = Item3D.getMesh(entity, 1, p.handMesh, uvRow);
       if (mesh) {
         p.handMesh = mesh;
-        addDatControls(p.handMesh, 20);
       }
     } else {
       p.handMesh = PlayerManager.updateBlockMesh(entity);

@@ -170,8 +170,6 @@ fs.readFile(save_path, function (err, data) {
   world.loadSaveFile(data, worker, logger, server);
 });
 
-console.log(filter.clean("abs"));
-
 // Worker process
 worker.on("message", (data) => {
   let { socketId, chunks } = data;
