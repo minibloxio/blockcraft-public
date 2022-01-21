@@ -3,14 +3,14 @@
 */
 
 import * as THREE from "three";
+import { disconnectServer } from ".";
+import { g, players } from "./globals";
+import { clamp, round } from "./lib/helper";
 import chat from "./managers/ChatManager";
+import chunkManager from "./managers/ChunkManager";
 import world from "./managers/WorldManager";
 import player from "./Player";
-import chunkManager from "./managers/ChunkManager";
-
-import { players, g } from "./globals";
-import { round, clamp } from "./lib/helper";
-import { disconnectServer } from ".";
+import Screenshot from "./gui/Screenshot";
 
 let commandsInit = JSON.stringify({
   gamemode: {
@@ -120,6 +120,14 @@ let commandsInit = JSON.stringify({
   },
   spawn: {
     hint: "- Spawns a bot (requires operator status)",
+  },
+  screenshot: {
+    hint: "<all|renderer> - Takes a screenshot of the specified type",
+    hints: {
+      all: "Takes a screenshot of the entire screen",
+      renderer: "Takes a screenshot of the renderer",
+    },
+    error: "Invalid type to screenshot",
   },
 });
 let commands = JSON.parse(commandsInit);
@@ -479,6 +487,16 @@ export function checkCommand(msg) {
     damagePlayer(msg);
   } else if (msg[0] == "save") {
     saveWorld();
+  } else if (msg[0] == "spawn") {
+    spawnBot(msg);
+  } else if (msg[0] == "screenshot" || msg[0] == "ss") {
+    screenshot(msg[1]);
+  } else if (msg[0] == "spawn") {
+    spawnBot(msg);
+  } else if (msg[0] == "spawn") {
+    spawnBot(msg);
+  } else if (msg[0] == "spawn") {
+    spawnBot(msg);
   } else if (msg[0] == "spawn") {
     spawnBot(msg);
   } else {
@@ -1121,4 +1139,21 @@ function spawnBot(msg) {
     return;
   }
   g.socket.emit("spawnBot", msg[0]);
+}
+
+// Screenshot
+function screenshot(type) {
+  if (!type || type == "all") {
+    Screenshot.takeScreenshot();
+    chat.addChat({
+      text: "Screenshot taken of the entire screen",
+      color: "lime",
+    });
+  } else if (type == "renderer") {
+    Screenshot.takeScreenshot(true);
+    chat.addChat({
+      text: "Screenshot taken of the renderer",
+      color: "lime",
+    });
+  }
 }

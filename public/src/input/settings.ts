@@ -1,13 +1,11 @@
 import * as $ from "jquery";
 import Cookies from "js-cookie";
 import { keyMap } from "kontra";
-import { axesHelper } from "..";
 import game from "../Game";
-import { camera, players } from "../globals";
+import { camera } from "../globals";
 import { updateGUISize } from "../lib/helper";
 import chunkManager from "../managers/ChunkManager";
 import workerManager from "../managers/WorkerManager";
-import world from "../managers/WorldManager";
 import player from "../Player";
 import stage from "../Stage";
 
@@ -33,7 +31,7 @@ const keyMapping: [string, string][] = [
   ["Open Chat", "enter"],
   ["Open Command", "slash"],
   ["HEADER", "Miscellaneous"],
-  // ["Take Screenshot", "WIP"],
+  ["Take Screenshot", "f2"],
   // ["Toggle Perspective", "WIP"],
   ["Zoom", "x"],
   ["Respawn", "r"],

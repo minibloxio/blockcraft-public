@@ -1,14 +1,15 @@
-import Cookies from "js-cookie";
 import * as $ from "jquery";
-import { bindKeys, keyPressed, keyMap } from "kontra";
-import player from "../Player";
-import chat from "../managers/ChatManager.js";
-import hud from "../gui/HUD";
-import { camera, g } from "../globals";
+import Cookies from "js-cookie";
+import { bindKeys, keyMap, keyPressed } from "kontra";
 import { giveCommandHint, nextCommand, prevCommand } from "../commands";
-import inventory from "../items/Inventory";
-import threeStats from "../stats/ThreeStats";
+import { camera, g } from "../globals";
+import hud from "../gui/HUD";
 import { axesHelper } from "../index.js";
+import inventory from "../items/Inventory";
+import chat from "../managers/ChatManager.js";
+import player from "../Player";
+import threeStats from "../stats/ThreeStats";
+import screenshotter from "../gui/Screenshot";
 
 var doublePressDelay = 200;
 var lastKeypressTime = 0;
@@ -19,7 +20,7 @@ export function keyPressedPlayer(key) {
 
 bindKeys(
   "f",
-  (event) => {
+  () => {
     if (player.controls.enabled && !chat.showChatBar && player.mode != "survival") {
       chat.addChat({ text: "Double tap space in creative mode to fly", color: "cyan" });
     }
@@ -148,6 +149,11 @@ $(window).on("keyup", function (event) {
 
 // function keys
 // ###########################################
+
+bindKeys("f2", () => {
+  screenshotter.takeScreenshot();
+});
+
 bindKeys("f3", () => {
   hud.showStats = !hud.showStats;
   threeStats.showStats = hud.showStats;

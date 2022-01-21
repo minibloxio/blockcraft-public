@@ -7,10 +7,6 @@ import player from "../Player";
 import chat from "../managers/ChatManager.js";
 import { statsManager } from "../stats/StatsManager";
 
-// Initiate canvas
-let canvas = document.getElementById("canvas-hud");
-let ctx = canvas.getContext("2d");
-
 // Get player color
 function getPlayerColor(player) {
   let mode = player.mode;
@@ -27,6 +23,10 @@ function getPlayerColor(player) {
 
 class HUD {
   constructor() {
+    // Initiate canvas
+    this.canvas = document.getElementById("canvas-hud");
+    this.ctx = this.canvas.getContext("2d");
+
     this.heartT = 0;
     this.heartUp = false;
     this.heartS = 0;
@@ -52,17 +52,28 @@ class HUD {
     this.yOffset = inventory.selectorWidth + this.iconSize * 1.5;
   }
 
+  // Display death screen
+  displayDeathScreen() {
+    if (player && player.hp <= 0) {
+      // Player is dead
+      drawRectangle(0, 0, this.canvas.width, this.canvas.height, "red", { alpha: 0.5 });
+
+      drawText("You Died!", this.canvas.width / 2, this.canvas.height / 3, "100px Minecraft-Regular", "white", "center", "middle");
+      drawText(
+        "Press R to respawn.",
+        this.canvas.width / 2,
+        (this.canvas.height * 2) / 3,
+        "50px Minecraft-Regular",
+        "white",
+        "center",
+        "middle"
+      );
+    }
+  }
+
   // Display player health
   displayHealth() {
     if (!g.initialized) return;
-
-    if (player && player.hp <= 0) {
-      // Player is dead
-      drawRectangle(0, 0, canvas.width, canvas.height, "red", { alpha: 0.5 });
-
-      drawText("You Died!", canvas.width / 2, canvas.height / 3, "100px Minecraft-Regular", "white", "center", "middle");
-      drawText("Press R to respawn.", canvas.width / 2, (canvas.height * 2) / 3, "50px Minecraft-Regular", "white", "center", "middle");
-    }
 
     // Draw player health
     for (let i = 0; i < 10; i++) {
@@ -85,8 +96,8 @@ class HUD {
         yOffset += 5;
       }
 
-      let xPos = canvas.width / 2 - inventory.hotboxWidth * 4 + i * this.iconSize;
-      let yPos = canvas.height - yOffset;
+      let xPos = this.canvas.width / 2 - inventory.hotboxWidth * 4 + i * this.iconSize;
+      let yPos = this.canvas.height - yOffset;
       this.drawHearts(xPos, yPos, player, i);
     }
 
@@ -102,9 +113,11 @@ class HUD {
 
   // Draw hunger bar
   displayHunger() {
+    let ctx = this.ctx;
+
     for (let i = 0; i < 10; i++) {
-      let xPos = canvas.width / 2 + inventory.hotboxWidth * 4 + (i - 10) * this.iconSize;
-      let yPos = canvas.height - this.yOffset;
+      let xPos = this.canvas.width / 2 + inventory.hotboxWidth * 4 + (i - 10) * this.iconSize;
+      let yPos = this.canvas.height - this.yOffset;
       // Floor xPos and yPos
       xPos = Math.floor(xPos);
       yPos = Math.floor(yPos);
@@ -120,6 +133,8 @@ class HUD {
   // Display armor
   displayArmor() {
     if (!player.inventory) return;
+
+    let ctx = this.ctx;
 
     // Calculate armor level
     let defensePoints = 0;
@@ -144,8 +159,8 @@ class HUD {
 
     // Draw player armor
     for (let i = 0; i < 10; i++) {
-      let xPos = canvas.width / 2 - inventory.hotboxWidth * 4 + i * this.iconSize;
-      let yPos = canvas.height - this.yOffset - this.iconSize * 1.3;
+      let xPos = this.canvas.width / 2 - inventory.hotboxWidth * 4 + i * this.iconSize;
+      let yPos = this.canvas.height - this.yOffset - this.iconSize * 1.3;
       // Floor xPos and yPos
       xPos = Math.floor(xPos);
       yPos = Math.floor(yPos);
@@ -165,10 +180,12 @@ class HUD {
   displayOxygen() {
     if (!player.headInWater) return;
 
+    let ctx = this.ctx;
+
     // Draw air bubbles
     for (let i = 0; i < 10; i++) {
-      let xPos = canvas.width / 2 + inventory.hotboxWidth * 4 + (-1 - i) * this.iconSize;
-      let yPos = canvas.height - this.yOffset - this.iconSize * 1.3;
+      let xPos = this.canvas.width / 2 + inventory.hotboxWidth * 4 + (-1 - i) * this.iconSize;
+      let yPos = this.canvas.height - this.yOffset - this.iconSize * 1.3;
       // Floor xPos and yPos
       xPos = Math.floor(xPos);
       yPos = Math.floor(yPos);
@@ -185,18 +202,20 @@ class HUD {
   displayPlayerTab() {
     if (!this.showPlayerTab) return;
 
+    let ctx = this.ctx;
+
     let pad = 20;
     let top = 50;
     let width = 300 + this.iconSize * 11;
     let height = (Object.keys(players).length + 1) * 30 + 2 * pad + 20;
 
-    let leftX = canvas.width / 2 - width / 2 + pad;
-    let rightX = canvas.width / 2 + width / 2 - pad;
+    let leftX = this.canvas.width / 2 - width / 2 + pad;
+    let rightX = this.canvas.width / 2 + width / 2 - pad;
     let topY = top + pad;
-    let healthOffset = canvas.width / 2 - this.iconSize * 2;
+    let healthOffset = this.canvas.width / 2 - this.iconSize * 2;
 
     // Draw background
-    drawRectangle(canvas.width / 2 - width / 2, top, width, height, "black", { alpha: 0.5 });
+    drawRectangle(this.canvas.width / 2 - width / 2, top, width, height, "black", { alpha: 0.5 });
 
     // Draw title
     drawText("Username", leftX, topY, "20px Minecraft-Regular", "yellow", "left", "top");
@@ -234,7 +253,7 @@ class HUD {
     if (!p.ping) return;
 
     // Draw client name
-    let xPos = canvas.width / 2 - width / 2 + pad;
+    let xPos = this.canvas.width / 2 - width / 2 + pad;
     let yPos = topY + 30 * (index + 1);
     drawText(p.name, xPos, yPos, "20px Minecraft-Regular", getPlayerColor(player), "left", "top");
     let nameWidth = ctx.measureText(p.name).width;
@@ -254,6 +273,8 @@ class HUD {
   }
 
   drawHearts(xPos, yPos, p, i) {
+    let ctx = this.ctx;
+
     // Floor xPos and yPos
     xPos = Math.floor(xPos);
     yPos = Math.floor(yPos);
@@ -286,27 +307,29 @@ class HUD {
   // Display crosshair
   displayCrosshair() {
     if (!g.initialized || player.mode == "camera") return;
-    let { crosshairSize, crosshairWidth } = this;
+    let { crosshairSize, crosshairWidth, ctx } = this;
 
     // Draw crosshair
-    ctx.fillRect(canvas.width / 2 - crosshairWidth / 2, canvas.height / 2 - crosshairSize / 2, crosshairWidth, crosshairSize);
-    ctx.fillRect(canvas.width / 2 - crosshairSize / 2, canvas.height / 2 - crosshairWidth / 2, crosshairSize, crosshairWidth);
+    ctx.fillRect(this.canvas.width / 2 - crosshairWidth / 2, this.canvas.height / 2 - crosshairSize / 2, crosshairWidth, crosshairSize);
+    ctx.fillRect(this.canvas.width / 2 - crosshairSize / 2, this.canvas.height / 2 - crosshairWidth / 2, crosshairSize, crosshairWidth);
   }
 
   // Display all
   display() {
     this.displayCrosshair();
     this.displayPlayerTab();
+    this.displayDeathScreen();
 
     if (player.mode != "survival") return;
-    this.displayHealth(); // TODO: Display death screen in creative mode
+    this.displayHealth();
     this.displayHunger();
     this.displayArmor();
     this.displayOxygen();
   }
 
   update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let { ctx } = this;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (!g.initialized) return;
     ctx.imageSmoothingEnabled = false;
     hud.display();
