@@ -20,14 +20,6 @@ import { addDatControls } from "../lib/devDatGUI";
 const intrpDelay = 100;
 
 class PlayerManager {
-  // Add mesh
-  static addMesh(geometry, material) {
-    let mesh = new THREE.Mesh(geometry, material);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    return mesh;
-  }
-
   static addPlayer(players, id, data) {
     players[id] = data;
     let p = players[id];
@@ -37,9 +29,6 @@ class PlayerManager {
     p.rot = Ola(p.rot, intrpDelay);
     p.dir = Ola(p.dir, intrpDelay);
     p.vel = Ola(p.vel, intrpDelay);
-
-    p.mesh = {};
-    p.armorMesh = {};
 
     // Add player body
     PlayerManager.addPlayerMesh(p);
@@ -88,6 +77,14 @@ class PlayerManager {
     }
 
     if (needsUpdate) PlayerManager.setPlayerArmor(p);
+  }
+
+  // Add mesh
+  static addMesh(geometry, material) {
+    let mesh = new THREE.Mesh(geometry, material);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
   }
 
   static setPlayerArmor(p) {
@@ -290,6 +287,9 @@ class PlayerManager {
   }
 
   static addPlayerMesh(p) {
+    p.mesh = {};
+    p.armorMesh = {};
+
     PlayerManager.addHead(p); // Add head
     PlayerManager.addTorso(p); // Add torso
     PlayerManager.addArms(p); // Add arms

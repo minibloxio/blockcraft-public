@@ -17,6 +17,7 @@ import hud from "./gui/HUD";
 import threeStats from "./stats/ThreeStats";
 import Cookies from "js-cookie";
 import { rotation } from "./input/PointerLock";
+import PlayerManager from "./managers/PlayerManager";
 
 declare var DEV_MODE: boolean;
 declare global {
@@ -46,10 +47,15 @@ const miningDelay = {
 const blockSize = 16;
 
 class Player {
+  // Meta
+  name: any;
+  operator: boolean;
+
   // 3d stuff
   controls = new PointerLockControls(camera);
   perspective = 0;
   cinematicMode = false;
+  deltaFov = 0;
 
   // Sensitivity
   sens = 0.5;
@@ -67,7 +73,6 @@ class Player {
   god = false;
 
   // Movement
-
   position = this.controls.getObject().position;
   previousPosition = this.position.clone();
   savedPosition = this.position.clone();
@@ -90,6 +95,7 @@ class Player {
   noClip = true;
   fallCooldown = 0;
 
+  prevHeight: number;
   onObject = false; // Sees if player is on object
   onObjectTime = 0;
 
@@ -97,30 +103,25 @@ class Player {
   bhopMaxSpeed = this.defaultMaxSprintSpeed + 0.2; // Maximum speed that can be reached through bhopping
   bhopRate = 0.05; // How much the speed ramps up after each successful bhop
 
-  deltaFov = 0;
+  spawnpoint: any;
 
   // Events
-
   key = {
-    forward: 0,
-    backward: 0,
-    left: 0,
-    right: 0,
-    up: 0,
-    down: 0,
-    jump: 0,
-    sprint: 0,
-    shift: 0,
     leftClick: 0,
     rightClick: 0,
     lastRightClick: 0,
   };
 
   // World interaction
+  miningDelayConstant = 750;
+  placingDelay = 200;
+  respawnDelay = 1000;
+
   click = false;
   prevBlock = undefined;
 
   place = false;
+  placing: number;
   placeType = 2; // Type of block being placed
 
   blockT = 0;
@@ -130,6 +131,14 @@ class Player {
   nearbyMeshes = [];
   playerBoxes = [];
   picked = [];
+
+  // Wireframes
+  select_wireframe: THREE.LineSegments;
+  mine_box: THREE.Mesh;
+
+  // Water
+  headInWater: boolean;
+  inWater: boolean;
 
   // Player dimensions
   dim = {
@@ -143,49 +152,52 @@ class Player {
     headSize: 0.5 * blockSize,
     height: 1.8 * blockSize,
   };
-  skin = undefined;
-  miningDelayConstant = 750;
-  placingDelay = 200;
-  respawnDelay = 1000;
-  respawnTimer = Date.now();
-  allowRespawn = true;
-
-  // Player info
-  hp = 20;
-  lastHp = this.hp;
-  oxygen = 300;
-  hunger = 100;
 
   halfWidth: number;
   halfDepth: number;
   halfHeight: number;
 
-  headInWater: boolean;
+  // Respawn
+  respawnTimer = Date.now();
+  allowRespawn = true;
 
-  select_wireframe: THREE.LineSegments;
-  mine_box: THREE.Mesh;
-  bowCharge: number;
-  currentSlot: number;
+  // Player vitals
+  hp = 20;
+  lastHp = this.hp;
+  oxygen = 300;
   lastOxygenTick: number;
+  hunger = 100;
+
+  // Player appearance
+  skin = undefined;
+  armor = {
+    helmet: 0,
+    chestplate: 0,
+    leggings: 0,
+    boots: 0,
+  };
+
+  // Player inventory
+  toolbar: any;
+  inventory: any;
+  currentSlot: number;
+
+  // Player arm animation
+  bowCharge: number;
+  drawingBow: boolean;
   punchT: number;
   stoppedPunching: boolean;
+  blocking: number;
   prevItem: string;
-  ping: number;
-  inWater: boolean;
-  prevHeight: number;
-  toolbar: any;
+  prevState: any;
+
+  // Player GUI
+  heartBlink: any;
   toggleGUI: boolean;
 
-  inventory: any;
+  // Stats
+  ping: number;
   biome: any;
-  name: any;
-  drawingBow: boolean;
-  blocking: number;
-  operator: boolean;
-  prevState: any;
-  heartBlink: any;
-  placing: number;
-  spawnpoint: any;
 
   constructor() {
     // Player appearance
@@ -197,6 +209,13 @@ class Player {
 
     // Add to scene
     scene.add(this.controls.getObject());
+  }
+
+  // Add player mesh
+  initPlayerMesh() {
+    PlayerManager.addPlayerMesh(this);
+    PlayerManager.addSkeleton(this);
+    PlayerManager.setPlayerArmor(this);
   }
 
   addSelectBox() {
@@ -233,6 +252,9 @@ class Player {
       this.operator = true;
       this.mode = "creative";
     }
+
+    // Player mesh
+    this.initPlayerMesh();
   }
 
   respawn(blockSize, pos?) {
