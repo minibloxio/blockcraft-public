@@ -163,14 +163,14 @@ class PlayerManager {
         p.extendLegs = true;
       }
 
-      if (p.extendArms && p.bowCharge == 0 && !p.punching) {
-        if (!p.blocking) {
+      if (p.extendArms && p.bowCharge == 0) {
+        if (!p.blocking && !p.punching) {
           rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
         }
 
         rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
-      } else if (p.bowCharge == 0 && !p.punching) {
-        if (!p.blocking) {
+      } else if (p.bowCharge == 0) {
+        if (!p.blocking && !p.punching) {
           rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
         } else {
           rightArm.position.set(0, 0, 0);
