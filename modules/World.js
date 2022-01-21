@@ -336,18 +336,16 @@ module.exports = class World {
       let { dist, dir } = this.getDist(player, entity);
 
       // Add to player if within a block distance
-      if (dist < blockSize) {
+      if (dist < blockSize * 0.6) {
         World.addItem(player, entity);
         this.removeItem(entity);
         return;
       }
 
-      // Pull when 2 blocks away
-      if (dist < blockSize * 2) {
+      // Pull when 1.5 blocks away
+      if (dist < blockSize * 1.5) {
         entity.acc.set(dir.x, dir.y, dir.z);
-        let pullStrength = 3;
-        if (entity.name == "arrow") pullStrength = 16;
-        entity.acc.multiplyScalar(16 * blockSize);
+        entity.acc.multiplyScalar(8 * blockSize);
         entity.pulling = true;
       }
     }
@@ -465,7 +463,7 @@ module.exports = class World {
   }
 
   static addItem(p, entity) {
-    if (entity.v < 3) return;
+    if (entity.v < 3 && entity.class == "block") return;
     // Add item to player's inventory if item already exists in inventory
     for (let slot of p.toolbar) {
       if (!slot || slot.v != entity.v || slot.class != entity.class) continue;

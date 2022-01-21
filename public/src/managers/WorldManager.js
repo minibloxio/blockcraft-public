@@ -6,13 +6,13 @@ import { g, scene } from "../globals";
 
 class World {
   constructor() {
-        this.blockSize = 16
-        this.cellSize = undefined;
-        this.buildHeight = undefined;
-        this.itemId = undefined;
-        this.blockId = undefined;
-        this.blockOrder = undefined;
-        this.entities = undefined;
+    this.blockSize = 16;
+    this.cellSize = undefined;
+    this.buildHeight = undefined;
+    this.itemId = undefined;
+    this.blockId = undefined;
+    this.blockOrder = undefined;
+    this.entities = undefined;
   }
 
   computeVoxelOffset(x, y, z) {
@@ -139,7 +139,7 @@ class World {
     }
   }
 
-  generateGeometryDataForItem(uvVoxel) {
+  generateGeometryBlockEntity(uvVoxel) {
     const { tileSize, tileTextureWidth, tileTextureHeight } = this;
     const positions = [];
     const normals = [];

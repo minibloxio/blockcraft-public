@@ -321,6 +321,8 @@ module.exports = class World {
         boots: 0,
       },
       immune: Date.now(),
+      type: data.type,
+      bowCharge: 0,
     };
 
     return player;

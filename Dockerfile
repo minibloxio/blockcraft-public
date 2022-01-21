@@ -1,9 +1,10 @@
 # webpacker container
 FROM node:16-alpine AS webpack-builder
 WORKDIR /webpack
+COPY tsconfig.json ./
+COPY webpack.config.js ./
 COPY package.json ./
 COPY package-lock.json ./
-COPY webpack.config.js ./
 RUN npm install
 COPY ./public ./public
 RUN npm run webpack:build

@@ -34,7 +34,7 @@ statsManager.addStat([
     ]);
     statsManager.addStat([
         new Stat("RC", function () {
-            return masterRenderer.lastRenderRenderCalls;
+            return masterRenderer.renderer.info.render.calls;
         }),
         new Stat("Tri", function () {
             return masterRenderer.renderer.info.render.triangles / 1000;

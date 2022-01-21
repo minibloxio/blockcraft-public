@@ -14,6 +14,10 @@ import player from "../Player";
 import skinManager from "./SkinManager";
 import textureManager from "./TextureManager";
 import world from "./WorldManager";
+import Item3D from "../graphics/Item3D";
+import { addDatControls } from "../lib/devDatGUI";
+
+const intrpDelay = 100;
 
 class PlayerManager {
   // Add mesh
@@ -24,17 +28,18 @@ class PlayerManager {
     return mesh;
   }
 
-  static addPlayer(players, id) {
+  static addPlayer(players, id, data) {
+    players[id] = data;
     let p = players[id];
 
     // Set position, rotation and direction
-    p.pos = Ola({ x: 0, y: 0, z: 0 });
-    p.rot = Ola({ x: 0, y: 0, z: 0 }, 100);
-    p.dir = Ola({ x: 0, y: 0, z: 0 }, 100);
-
-    p.vel = Ola({ x: 0, y: 0, z: 0 });
+    p.pos = Ola(p.pos, intrpDelay);
+    p.rot = Ola(p.rot, intrpDelay);
+    p.dir = Ola(p.dir, intrpDelay);
+    p.vel = Ola(p.vel, intrpDelay);
 
     p.mesh = {};
+    p.armorMesh = {};
 
     // Add player body
     PlayerManager.addPlayerMesh(p);
@@ -47,10 +52,7 @@ class PlayerManager {
 
     // Add hand
     let hand = p.toolbar[p.currSlot];
-    if (p.hand && p.hand.mesh) p.rightArm.remove(p.hand.mesh);
-    if (hand) {
-      PlayerManager.updatePlayerHand(hand, p);
-    }
+    if (hand) PlayerManager.updatePlayerHand(hand, p);
 
     // Entity (combine skeleton and nametag)
     p.entity = new THREE.Group();
@@ -70,46 +72,22 @@ class PlayerManager {
   }
 
   static clearPlayerArmor(p) {
-    // Helmet
-    p.helmetMesh.visible = false;
-
-    // Chestplate
-    p.chestplateMesh.visible = false;
-    p.leftArmPlatesMesh.visible = false;
-    p.rightArmPlatesMesh.visible = false;
-
-    // Leggings
-    p.leggingsTopMesh.visible = false;
-    p.leftLeggingsMesh.visible = false;
-    p.rightLeggingsMesh.visible = false;
-
-    // Boots
-    p.leftBootsMesh.visible = false;
-    p.rightBootsMesh.visible = false;
+    for (let type in p.armorMesh) {
+      p.armorMesh[type].visible = false;
+    }
   }
 
   static updatePlayerArmor(p, p_) {
     let needsUpdate = false;
-    if (p.armor.helmet != p_.armor.helmet) {
-      p.armor.helmet = p_.armor.helmet;
-      needsUpdate = true;
-    }
-    if (p.armor.chestplate != p_.armor.chestplate) {
-      p.armor.chestplate = p_.armor.chestplate;
-      needsUpdate = true;
-    }
-    if (p.armor.leggings != p_.armor.leggings) {
-      p.armor.leggings = p_.armor.leggings;
-      needsUpdate = true;
-    }
-    if (p.armor.boots != p_.armor.boots) {
-      p.armor.boots = p_.armor.boots;
-      needsUpdate = true;
+
+    for (let type in p_.armor) {
+      if (p.armor[type] !== p_.armor[type]) {
+        p.armor[type] = p_.armor[type];
+        needsUpdate = true;
+      }
     }
 
-    if (needsUpdate) {
-      PlayerManager.setPlayerArmor(p);
-    }
+    if (needsUpdate) PlayerManager.setPlayerArmor(p);
   }
 
   static setPlayerArmor(p) {
@@ -121,37 +99,36 @@ class PlayerManager {
     let bootsType = skinManager.armorOrder[p.armor.boots];
 
     if (helmetType) {
-      p.helmetMesh.visible = true;
-      p.helmetMesh.material = skinManager.getArmor(helmetType).head;
+      p.armorMesh.helmet.visible = true;
+      p.armorMesh.helmet.material = skinManager.getArmor(helmetType).head;
     }
 
     if (chestplateType) {
-      p.chestplateMesh.visible = true;
-      p.chestplateMesh.material = skinManager.getArmor(chestplateType).body;
-      p.leftArmPlatesMesh.visible = true;
-      p.rightArmPlatesMesh.visible = true;
-      p.leftArmPlatesMesh.material = skinManager.getArmor(chestplateType).armPlates;
-      p.rightArmPlatesMesh.material = skinManager.getArmor(chestplateType).armPlates;
+      p.armorMesh.chestplate.visible = true;
+      p.armorMesh.chestplate.material = skinManager.getArmor(chestplateType).body;
+      p.armorMesh.leftArm.visible = true;
+      p.armorMesh.rightArm.visible = true;
+      p.armorMesh.leftArm.material = skinManager.getArmor(chestplateType).armPlates;
+      p.armorMesh.rightArm.material = skinManager.getArmor(chestplateType).armPlates;
     }
 
     if (leggingsType) {
-      p.leggingsTopMesh.visible = true;
-      p.leggingsTopMesh.material = skinManager.getArmor(leggingsType).leggingsTop;
-      p.leftLeggingsMesh.visible = true;
-      p.rightLeggingsMesh.visible = true;
-      p.leftLeggingsMesh.material = skinManager.getArmor(leggingsType).leggings;
-      p.rightLeggingsMesh.material = skinManager.getArmor(leggingsType).leggings;
+      p.armorMesh.leggingsTop.visible = true;
+      p.armorMesh.leggingsTop.material = skinManager.getArmor(leggingsType).leggingsTop;
+      p.armorMesh.leftLeggings.visible = true;
+      p.armorMesh.rightLeggings.visible = true;
+      p.armorMesh.leftLeggings.material = skinManager.getArmor(leggingsType).leggings;
+      p.armorMesh.rightLeggings.material = skinManager.getArmor(leggingsType).leggings;
     }
 
     if (bootsType) {
-      p.leftBootsMesh.visible = true;
-      p.leftBootsMesh.material = skinManager.getArmor(bootsType).boots;
-      p.rightBootsMesh.visible = true;
-      p.rightBootsMesh.material = skinManager.getArmor(bootsType).boots;
+      p.armorMesh.leftBoots.visible = true;
+      p.armorMesh.leftBoots.material = skinManager.getArmor(bootsType).boots;
+      p.armorMesh.rightBoots.visible = true;
+      p.armorMesh.rightBoots.material = skinManager.getArmor(bootsType).boots;
     }
   }
 
-  // Add head
   static addHead(p) {
     let { blockSize } = world;
 
@@ -161,10 +138,13 @@ class PlayerManager {
     let dim = player.dim;
 
     p.mesh.head = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.headSize, dim.headSize, dim.headSize), playerMat.head);
-    p.helmetMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.headSize + 1, dim.headSize + 1, dim.headSize + 1), helmetMat);
+    p.armorMesh.helmet = PlayerManager.addMesh(
+      new THREE.BoxBufferGeometry(dim.headSize + 1, dim.headSize + 1, dim.headSize + 1),
+      helmetMat
+    );
 
     p.head = new THREE.Group();
-    p.head.add(p.mesh.head, p.helmetMesh);
+    p.head.add(p.mesh.head, p.armorMesh.helmet);
     p.head.position.set(0, blockSize * 0.25, 0);
 
     p.headPivot = new THREE.Group();
@@ -176,7 +156,6 @@ class PlayerManager {
     p.neck.position.set(0, -blockSize * 0.075, 0);
   }
 
-  // Add torso
   static addTorso(p) {
     let { blockSize } = world;
 
@@ -187,24 +166,23 @@ class PlayerManager {
     let dim = player.dim;
 
     p.mesh.torso = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.torso, dim.torsoHeight, dim.legSize), playerMat.body);
-    p.chestplateMesh = PlayerManager.addMesh(
+    p.armorMesh.chestplate = PlayerManager.addMesh(
       new THREE.BoxBufferGeometry(dim.torso + 1, dim.torsoHeight + 1, dim.legSize + 1),
       chestplateMat
     );
-    p.leggingsTopMesh = PlayerManager.addMesh(
+    p.armorMesh.leggingsTop = PlayerManager.addMesh(
       new THREE.BoxBufferGeometry(dim.torso + 0.5, (dim.torsoHeight * 5) / 12, dim.legSize + 0.5),
       leggingsMath
     );
-    p.leggingsTopMesh.position.y -= (dim.torsoHeight * (1 - 5 / 12)) / 2 + 1;
+    p.armorMesh.leggingsTop.position.y -= (dim.torsoHeight * (1 - 5 / 12)) / 2 + 1;
 
     // Add body
     p.torso = new THREE.Group();
-    p.torso.add(p.mesh.torso, p.chestplateMesh, p.leggingsTopMesh);
+    p.torso.add(p.mesh.torso, p.armorMesh.chestplate, p.armorMesh.leggingsTop);
 
     p.torso.position.set(0, -blockSize * 0.45, 0);
   }
 
-  // Add arms
   static addArms(p) {
     let { blockSize } = world;
 
@@ -213,72 +191,43 @@ class PlayerManager {
 
     let dim = player.dim;
 
-    if (p.skin == "alex") {
-      // Skinny skins
-      p.mesh.arm = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSizeSlim, dim.armHeight, dim.armSize), playerMat.arm);
-      let armPlatesMesh = PlayerManager.addMesh(
-        new THREE.BoxBufferGeometry(dim.armSizeSlim + 1, (dim.armHeight * 5) / 12, dim.armSize + 1),
-        armMat
-      );
-      armPlatesMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
-      armPlatesMesh.position.y += (dim.armHeight * (1 - 5 / 12)) / 2 + 1;
+    const armSize = p.skin == "alex" ? dim.armSizeSlim : dim.armSize;
+    const leftShoulderOffset = p.skin == "alex" ? -5.45 : dim.armSize * -1.5;
+    const rightShoulderOffset = p.skin == "alex" ? -0.55 : dim.armSize * 1.5;
 
-      p.leftArmPlatesMesh = armPlatesMesh.clone();
-      p.leftArmPlatesMesh.rotation.y += Math.PI;
-      p.leftArm = new THREE.Group();
-      p.leftArm.add(p.mesh.arm, p.leftArmPlatesMesh);
+    // Default skins
+    p.mesh.arm = PlayerManager.addMesh(new THREE.BoxBufferGeometry(armSize, dim.armHeight, dim.armSize), playerMat.arm);
+    let armPlatesMesh = PlayerManager.addMesh(new THREE.BoxBufferGeometry(armSize + 1, (dim.armHeight * 5) / 12, armSize + 1), armMat);
+    armPlatesMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
+    armPlatesMesh.position.y += (dim.armHeight * (1 - 5 / 12)) / 2 + 1;
 
-      p.rightArmPlatesMesh = armPlatesMesh.clone();
-      p.rightArm = new THREE.Group();
-      p.rightArm.add(p.mesh.arm.clone(), p.rightArmPlatesMesh);
+    p.armorMesh.leftArm = armPlatesMesh.clone();
+    p.armorMesh.leftArm.rotation.y += Math.PI;
+    p.leftArm = new THREE.Group();
+    p.leftArm.add(p.mesh.arm, p.armorMesh.leftArm);
 
-      // Shoulder joints
-      p.leftShoulder = new THREE.Object3D();
-      p.leftShoulder.position.set(-5.45, -blockSize * 0.45, 0);
-      p.leftShoulder.add(p.leftArm);
+    p.armorMesh.rightArm = armPlatesMesh.clone();
+    p.rightArm = new THREE.Group();
+    p.rightArm.add(p.mesh.arm.clone(), p.armorMesh.rightArm);
 
-      p.rightShoulderJoint = new THREE.Object3D();
-      p.rightShoulderJoint.add(p.rightArm);
-      p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
+    // Shoulder joints
+    p.leftShoulderJoint = new THREE.Object3D();
+    p.leftShoulderJoint.add(p.leftArm);
+    p.leftShoulderJoint.position.set(0, -blockSize * 0.3, 0);
 
-      p.rightShoulder = new THREE.Object3D();
-      p.rightShoulder.position.set(-0.55, -blockSize * 0.45, 0);
-      p.rightShoulder.add(p.rightShoulderJoint);
-    } else {
-      // Default skins
-      p.mesh.arm = PlayerManager.addMesh(new THREE.BoxBufferGeometry(dim.armSize, dim.armHeight, dim.armSize), playerMat.arm);
-      let armPlatesMesh = PlayerManager.addMesh(
-        new THREE.BoxBufferGeometry(dim.armSize + 1, (dim.armHeight * 5) / 12, dim.armSize + 1),
-        armMat
-      );
-      armPlatesMesh.position.add(new THREE.Vector3().random().multiplyScalar(0.01));
-      armPlatesMesh.position.y += (dim.armHeight * (1 - 5 / 12)) / 2 + 1;
+    p.leftShoulder = new THREE.Object3D();
+    p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.15, 0);
+    p.leftShoulder.add(p.leftShoulderJoint);
 
-      p.leftArmPlatesMesh = armPlatesMesh.clone();
-      p.leftArmPlatesMesh.rotation.y += Math.PI;
-      p.leftArm = new THREE.Group();
-      p.leftArm.add(p.mesh.arm, p.leftArmPlatesMesh);
+    p.rightShoulderJoint = new THREE.Object3D();
+    p.rightShoulderJoint.add(p.rightArm);
+    p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
 
-      p.rightArmPlatesMesh = armPlatesMesh.clone();
-      p.rightArm = new THREE.Group();
-      p.rightArm.add(p.mesh.arm.clone(), p.rightArmPlatesMesh);
-
-      // Shoulder joints
-      p.leftShoulder = new THREE.Object3D();
-      p.leftShoulder.position.set((-dim.armSize * 3) / 2, -blockSize * 0.45, 0);
-      p.leftShoulder.add(p.leftArm);
-
-      p.rightShoulderJoint = new THREE.Object3D();
-      p.rightShoulderJoint.add(p.rightArm);
-      p.rightShoulderJoint.position.set(0, -blockSize * 0.3, 0);
-
-      p.rightShoulder = new THREE.Object3D();
-      p.rightShoulder.position.set((dim.armSize * 3) / 2, -blockSize * 0.15, 0);
-      p.rightShoulder.add(p.rightShoulderJoint);
-    }
+    p.rightShoulder = new THREE.Object3D();
+    p.rightShoulder.position.set(rightShoulderOffset, -blockSize * 0.15, 0);
+    p.rightShoulder.add(p.rightShoulderJoint);
   }
 
-  // Add legs
   static addLegs(p) {
     let { blockSize } = world;
 
@@ -299,15 +248,15 @@ class PlayerManager {
     leggingsMesh.position.y += dim.legHeight * 0.125;
     bootsMesh.position.y -= dim.legHeight * 0.3;
 
-    p.leftLeggingsMesh = leggingsMesh.clone();
-    p.leftBootsMesh = bootsMesh.clone();
+    p.armorMesh.leftLeggings = leggingsMesh.clone();
+    p.armorMesh.leftBoots = bootsMesh.clone();
     p.leftLeg = new THREE.Group();
-    p.leftLeg.add(p.mesh.leg, p.leftLeggingsMesh, p.leftBootsMesh);
+    p.leftLeg.add(p.mesh.leg, p.armorMesh.leftLeggings, p.armorMesh.leftBoots);
 
-    p.rightLeggingsMesh = leggingsMesh.clone();
-    p.rightBootsMesh = bootsMesh.clone();
+    p.armorMesh.rightLeggings = leggingsMesh.clone();
+    p.armorMesh.rightBoots = bootsMesh.clone();
     p.rightLeg = new THREE.Group();
-    p.rightLeg.add(p.mesh.leg.clone(), p.rightLeggingsMesh, p.rightBootsMesh);
+    p.rightLeg.add(p.mesh.leg.clone(), p.armorMesh.rightLeggings, p.armorMesh.rightBoots);
 
     p.leftHip = new THREE.Object3D();
     p.leftHip.add(p.leftLeg);
@@ -347,67 +296,38 @@ class PlayerManager {
     PlayerManager.addLegs(p); // Add legs
   }
 
-  static updatePlayerHand(entity, p) {
-    let atlas = textureManager.getTextureAtlas(entity.class);
-    if (!atlas) return;
+  static updateBlockMesh(entity) {
+    let uvVoxel = entity.v - 1;
+    let block_geometry = new THREE.BufferGeometry();
+    const { positions, normals, uvs, indices } = world.generateGeometryBlockEntity(uvVoxel);
+    block_geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), 3));
+    block_geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
+    block_geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), 2));
+    block_geometry.setIndex(indices);
+    block_geometry.computeBoundingSphere();
 
-    let { blockSize } = world;
-
-    if (entity.class == "item") {
-      let canvas = document.createElement("canvas");
-      canvas.width = 16;
-      canvas.height = 16;
-      let ctx = canvas.getContext("2d");
-      ctx.drawImage(atlas, (entity.v - 1) * 16, 0, 16, 16, 0, 0, 16, 16);
-      let texture = new THREE.CanvasTexture(canvas);
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.repeat.x = -1;
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      let mat = new THREE.MeshLambertMaterial({ map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide });
-
-      let item_mesh = new THREE.Mesh(new THREE.PlaneGeometry(blockSize, blockSize), mat);
-      item_mesh.renderOrder = 1;
-      item_mesh.name = "item";
-      item_mesh.castShadow = true;
-      item_mesh.receiveShadow = true;
-
-      item_mesh.position.set(0, -4, -8);
-      item_mesh.rotation.set(-Math.PI / 2 - Math.PI / 6, Math.PI / 2, 0);
-
-      p.hand = entity;
-      p.hand.mesh = item_mesh;
-
-      p.rightArm.add(p.hand.mesh);
-    } else {
-      let uvVoxel = entity.v - 1;
-      let block_geometry = new THREE.BufferGeometry();
-      const { positions, normals, uvs, indices } = world.generateGeometryDataForItem(uvVoxel);
-      const positionNumComponents = 3;
-      block_geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
-      const normalNumComponents = 3;
-      block_geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), normalNumComponents));
-      const uvNumComponents = 2;
-      block_geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents));
-      block_geometry.setIndex(indices);
-      block_geometry.computeBoundingSphere();
-
-      let block_mesh = new THREE.Mesh(block_geometry, textureManager.materialTransparent);
-      block_mesh.name = "item";
-      block_mesh.castShadow = true;
-      block_mesh.receiveShadow = true;
-
-      block_mesh.position.set(-3, -player.dim.armHeight / 2, -player.dim.armSize);
-      block_mesh.rotation.set(0, Math.PI / 4, 0);
-
-      p.hand = entity;
-      p.hand.mesh = block_mesh;
-
-      p.rightArm.add(p.hand.mesh);
-    }
+    return new THREE.Mesh(block_geometry, textureManager.materialTransparent);
   }
 
-  // Update player name tag
+  static updatePlayerHand(entity, p) {
+    p.hand = entity;
+
+    if (entity.class == "item") {
+      let uvRow = p.bowCharge;
+      let mesh = Item3D.getMesh(entity, 1, p.handMesh, uvRow);
+      if (mesh) {
+        p.handMesh = mesh;
+      }
+    } else {
+      p.handMesh = PlayerManager.updateBlockMesh(entity);
+    }
+
+    p.handMesh.name = "item";
+    p.handMesh.castShadow = true;
+    p.handMesh.receiveShadow = true;
+    p.rightArm.add(p.handMesh);
+  }
+
   static updateNameTag(p, options) {
     if (!options) options = {};
     let { blockSize } = world;
@@ -478,7 +398,6 @@ class PlayerManager {
     }
   }
 
-  // Update player color
   static updatePlayerColor(p, color, opacity) {
     if (!p || !p.skeleton) return;
 

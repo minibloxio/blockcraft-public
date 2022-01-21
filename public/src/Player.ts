@@ -225,7 +225,7 @@ class Player {
     // Check if operator
     if (data.operator) {
       this.operator = true;
-      //this.mode = "creative";
+      this.mode = "creative";
     }
   }
 
@@ -325,7 +325,7 @@ class Player {
     // OPTIMIZE
     const item = this.getCurrItem();
 
-    this.moveHand(item);
+    this.moveHand();
 
     let s = JSON.stringify(item);
     if (s == this.prevItem && this.bowCharge == this.prevState) {
@@ -404,7 +404,7 @@ class Player {
     }
   }
 
-  moveHand(entity) {
+  moveHand() {
     if (this.mode == "spectator" || this.mode == "camera") return;
 
     this.punchT = (Date.now() - this.punching) / 120; // Punching
@@ -420,8 +420,6 @@ class Player {
 
       if (isSword) {
         this.blocking = this.key.rightClick;
-        //this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1)
-        //this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta);
       } else {
         this.key.rightClick = 0;
         this.blocking =
@@ -1294,4 +1292,5 @@ class Player {
   }
 }
 const player = new Player();
+globalThis.player = player;
 export default player;

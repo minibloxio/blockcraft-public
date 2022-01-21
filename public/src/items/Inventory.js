@@ -8,13 +8,11 @@ import { g, toolbar, toolbar_selector } from "../globals";
 import { mouse } from "../input/MouseInput";
 import Recipe from "./RecipeChecker";
 import { getDroppedItems } from "../input/pointerlock";
-import { keyPressed } from "kontra"
+import { keyPressed } from "kontra";
 
 // Initiate canvas
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");
-
-console.log(ctx);
 
 class Inventory {
   constructor() {
@@ -280,13 +278,13 @@ class Inventory {
         let entity = {};
         if (i < searchBlocks.length) {
           entity.class = "block";
-          entity.c = keyPressed('shift') ? 64 : 1;
+          entity.c = keyPressed("shift") ? 64 : 1;
 
           let block = world.blockId[searchBlocks[i]]; // Get block id
           entity.v = block;
         } else if (i < searchBlocks.length + searchItems.length) {
           entity.class = "item";
-          entity.c = keyPressed('shift') ? 64 : 1;
+          entity.c = keyPressed("shift") ? 64 : 1;
 
           let item = world.itemId[searchItems[i - searchBlocks.length]]; // Get item id
           entity.v = item;
@@ -383,7 +381,7 @@ class Inventory {
         return;
       }
 
-      if (keyPressed('shift') && (type == "left" || type == "right" || type == "double")) {
+      if (keyPressed("shift") && (type == "left" || type == "right" || type == "double")) {
         // Shift click to move to another part of the inventory
 
         if (player.mode == "creative" && !this.showCraftingTable) {
@@ -716,7 +714,7 @@ class Inventory {
           let blockExists = block && block.c > 0;
           let item = this.copyItem(this.craftingOutput);
 
-          if (!selectedExists && blockExists && keyPressed('shift')) {
+          if (!selectedExists && blockExists && keyPressed("shift")) {
             // Add to preexisting item (if possible)
             let moved = false;
             for (let j = 0; j < this.limit; j++) {
@@ -1117,8 +1115,8 @@ class Inventory {
       // Left face
       ctx.transform(0.5, horizontalScale, 0, verticalScale, xPos, yPos);
       ctx.drawImage(atlas, index * 16, 0, 16, 16, 0, 0, width, width);
-      ctx.resetTransform();
       drawRectangle(0, 0, width, width, "rgba(0,0,0,0.1)"); // Shade the left face
+      ctx.resetTransform();
 
       // Right face
       ctx.transform(0.5, -horizontalScale, 0, verticalScale, xPos + width / 2, yPos + width * horizontalScale);
@@ -1222,7 +1220,7 @@ class Inventory {
   // Draw hover box
   drawHintBox(name) {
     if (this.selectedItem || !name || !this.showInventory) return;
-    if (keyPressed('ctrl')) name += " X: " + Math.floor(mouse.x) + " Y: " + Math.floor(mouse.y); // Show mouse position
+    if (keyPressed("ctrl")) name += " X: " + Math.floor(mouse.x) + " Y: " + Math.floor(mouse.y); // Show mouse position
 
     let hoverBoxPadding = 10;
     let hoverBoxWidth = Math.max(ctx.measureText(name).width + hoverBoxPadding * 2, 60);

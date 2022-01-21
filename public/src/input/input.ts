@@ -1,5 +1,4 @@
 import * as $ from "jquery";
-import inventory from "../items/Inventory";
 import { initKeys } from "kontra";
 import player from "../Player";
 
@@ -25,8 +24,8 @@ $(window).on("keydown", function (event) {
   }
 });
 
-// Inventory search
-$(document).on("ready", function () {
+// Creative menu search
+$(document).ready(function () {
   $("#search-input").on("input", function () {
     let search = $(this).val();
     inventory.updateItemSearch(search);

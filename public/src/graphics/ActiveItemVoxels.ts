@@ -5,12 +5,9 @@ import skinManager from "../managers/SkinManager";
 import player from "../Player";
 import world from "../managers/WorldManager";
 import { AnimationLerp, Keyframe } from "../lib/AnimationLerp";
+import Item3D from "./Item3D";
 
-const pixelSize = (1 / 16) * 2;
 const itemSize = 16;
-const tileSize = 16;
-const tileTextureWidth = 4096;
-const tileTextureHeight = 64;
 const canvas = document.createElement("canvas");
 const ZERO_VEC = new THREE.Vector3();
 const ZERO_ROT = new THREE.Quaternion();
@@ -99,63 +96,6 @@ class ActiveItemVoxels {
 
     // init block
     this.initBlockMesh();
-
-    // init item
-    this.initItemMesh();
-  }
-
-  addFaceData(positions, dir, corners, normals, indices, x, y, z) {
-    const ndx = positions.length / 3;
-    for (const { pos } of corners) {
-      // Get position of the pixel
-      let xPos = pos[0] + x;
-      let yPos = pos[1] + y;
-      let zPos = pos[2] + z;
-
-      positions.push(xPos * pixelSize, yPos * pixelSize, zPos * pixelSize);
-      normals.push(...dir);
-    }
-    indices.push(ndx, ndx + 1, ndx + 2, ndx + 2, ndx + 1, ndx + 3);
-  }
-
-  initItemMesh() {
-    let data = {
-      positions: [],
-      normals: [],
-      indices: [],
-    };
-
-    // Add face data
-    for (let y = 0; y < itemSize; ++y) {
-      for (let z = 0; z < itemSize; ++z) {
-        for (const { dir, corners } of faces) {
-          this.addFaceData(data.positions, dir, corners, data.normals, data.indices, 0, y, z);
-        }
-      }
-    }
-
-    // Convert to ArrayBuffers
-    let positionBuffer = new Float32Array(new ArrayBuffer(data.positions.length * 4));
-    let normalBuffer = new Float32Array(new ArrayBuffer(data.normals.length * 4));
-    let indexBuffer = new Uint16Array(new ArrayBuffer(data.indices.length * 2));
-    positionBuffer.set(data.positions);
-    normalBuffer.set(data.normals);
-    indexBuffer.set(data.indices);
-
-    // Set attributes
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(positionBuffer, 3));
-    geometry.setAttribute("normal", new THREE.BufferAttribute(normalBuffer, 3));
-    geometry.setIndex(new THREE.BufferAttribute(indexBuffer, 1));
-
-    const material = new THREE.MeshBasicMaterial();
-
-    // Add item mesh
-    this.itemMesh = new THREE.Mesh(geometry, material);
-    this.itemPixelsGroup.position.copy(itemOffsetPos);
-    this.itemPixelsGroup.quaternion.copy(itemOffsetRot);
-    this.itemPixelsGroup.add(this.itemMesh);
-    this.root.add(this.itemPixelsGroup);
   }
 
   initBlockMesh() {
@@ -168,37 +108,17 @@ class ActiveItemVoxels {
   updateItemGraphics(item: any) {
     if (item.v == this.currentItem && player.bowCharge == this.bowCharge) return;
 
-    this.itemMesh.material = textureManager.materialItem; // TODO: set this once
-
-    this.currentItem = item.v;
-    this.bowCharge = player.bowCharge;
-
-    let uvVoxel = item.v - 1;
-    let uvRow = player.bowCharge ? player.bowCharge : 0;
-
-    let uvBuffer = new Float32Array(new ArrayBuffer(itemSize * itemSize * faces.length * 4 * 4 * 2)); // TODO: set this in the constructor (to reduce memory consumption)
-
-    // Update the UV data of each face
-    let index = 0;
-    for (let y = 0; y < itemSize; ++y) {
-      for (let z = 0; z < itemSize; ++z) {
-        for (let i = 0; i < faces.length; i++) {
-          let face = faces[i];
-          for (let { uv } of face.corners) {
-            let uvX = y + uv[0] + uvVoxel * tileSize;
-            let uvY = z - uv[1] + uvRow * tileSize + 1;
-
-            uvBuffer[index] = uvX / tileTextureWidth;
-            uvBuffer[index + 1] = 1 - uvY / tileTextureHeight;
-            index += 2;
-          }
-        }
-      }
+    Item3D.getMesh(item, 1 / 8, this.itemMesh, player.bowCharge);
+    if (this.itemPixelsGroup.children.length == 0) {
+      this.itemPixelsGroup.position.copy(itemOffsetPos);
+      this.itemPixelsGroup.quaternion.copy(itemOffsetRot);
+      this.itemPixelsGroup.add(this.itemMesh);
+      this.root.add(this.itemPixelsGroup);
     }
 
-    // Update the uv data of the item mesh
-    armItem.itemMesh.geometry.setAttribute("uv", new THREE.BufferAttribute(uvBuffer, 2));
-    armItem.itemMesh.geometry.attributes.uv.needsUpdate = true;
+    this.bowCharge = player.bowCharge;
+
+    this.currentItem = item.v;
   }
 
   updateBlockGraphics(item: any) {
@@ -207,7 +127,7 @@ class ActiveItemVoxels {
 
     let uvVoxel = item.v - 1;
     let item_geometry = new THREE.BufferGeometry();
-    const { positions, normals, uvs, indices } = world.generateGeometryDataForItem(uvVoxel);
+    const { positions, normals, uvs, indices } = world.generateGeometryBlockEntity(uvVoxel);
     item_geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), 3));
     item_geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(normals), 3));
     item_geometry.setAttribute("uv", new THREE.BufferAttribute(new Float32Array(uvs), 2));

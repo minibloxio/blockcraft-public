@@ -6,6 +6,7 @@ import hud from "../gui/HUD";
 import { camera, g } from "../globals";
 import { giveCommandHint, nextCommand, prevCommand } from "../commands";
 import inventory from "../items/Inventory";
+import threeStats from "../stats/ThreeStats";
 
 var doublePressDelay = 200;
 var lastKeypressTime = 0;
@@ -35,7 +36,7 @@ bindKeys(
 
 // number keys for hotbar
 bindKeys(
-  ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+  ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
   (e) => {
     if (!player.controls.enabled || chat.showChatBar) return;
     player.currentSlot = parseInt(keyMap[e.code]) - 1;
@@ -135,4 +136,11 @@ $(window).on("keyup", function (event) {
       giveCommandHint(msg, [9].indexOf(event.keyCode) > -1);
     }
   }
+});
+
+// function keys
+// ###########################################
+bindKeys("f3", () => {
+  hud.showStats = !hud.showStats;
+  threeStats.showStats = hud.showStats;
 });

@@ -19,10 +19,6 @@ const io = new Server(httpServer, {
   },
 });
 
-// Cluster (used for multiple Node.js servers)
-const cluster = require("cluster");
-const numCPUs = require("os").cpus().length;
-
 // Worker threads (used for offloading chunk generation)
 const { Worker } = require("worker_threads");
 const worker = new Worker("./worker.js");
@@ -921,6 +917,7 @@ io.on("connection", function (socket_) {
         name: "Bot",
         pos: players[socket.id].pos,
         skin: data || "steve",
+        type: "bot",
       });
       bots[id] = new Bot(players[id], world, data);
       io.emit("addPlayer", players[id]);
