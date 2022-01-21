@@ -137,14 +137,14 @@ $(document).ready(function () {
     }
   });
 
-  if (DEV_MODE) {
-    // TODO: Add callbacks to nextState() so setTimeout isn't needed
-    nextState();
-    $("#direct-connect-input").val("localhost:3001");
-    nextState();
-    nextState();
-    setTimeout(nextState, 2000);
-  }
+  // if (DEV_MODE) {
+  //   // TODO: Add callbacks to nextState() so setTimeout isn't needed
+  //   nextState();
+  //   $("#direct-connect-input").val("localhost:3001");
+  //   nextState();
+  //   nextState();
+  //   setTimeout(nextState, 2000);
+  // }
 });
 
 // Menu progression states

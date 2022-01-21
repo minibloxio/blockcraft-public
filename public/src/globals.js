@@ -7,13 +7,22 @@ globalThis.camera = camera;
 const scene = new THREE.Scene(); // Scene
 globalThis.scene = scene;
 const serverNames = {
-  gold: "Gold Server (formerly North America East)",
-  coal: "Coal Server (formerly North America West)",
-  iron: "Iron Server (formerly Europe West)",
-  wood: "Wood Server (New map!)",
-  lava: "Lava Server (New map!)",
+  gold: "Gold Server",
+  coal: "Coal Server",
+  iron: "Iron Server",
+  wood: "Wood Server",
+  lava: "Lava Server",
 };
-const serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.online`);
+const regionNames = {
+  "na-east": "North America East",
+  "na-west": "North America West",
+  "eu-west": "Europe West",
+  "ap-south": "Asia Pacific South",
+  "ap-southeast": "Asia Pacific Southeast",
+};
+let serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.online`);
+serverList = serverList.concat(Object.keys(regionNames).map((x) => `https://${x}.victorwei.com`));
+console.log(serverList);
 const connectionDelay = 2000;
 let players = {};
 globalThis.players = players;
@@ -85,4 +94,4 @@ export function isState(check) {
 
 globalThis.g = g;
 
-export { camera, scene, players, g, serverNames, serverList, connectionDelay };
+export { camera, scene, players, g, serverNames, serverList, connectionDelay, regionNames };

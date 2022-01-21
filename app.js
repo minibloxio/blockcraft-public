@@ -29,8 +29,7 @@ const World = require("./modules/World.js");
 const GameServer = require("./modules/Server.js");
 const Bot = require("./modules/Bot.js");
 const THREE = require("three");
-var Filter = require("bad-words"),
-  filter = new Filter();
+var filter = require("leo-profanity");
 
 // Listen to server port
 httpServer.listen(serverPort, function () {
@@ -170,6 +169,8 @@ fs.readFile(save_path, function (err, data) {
 
   world.loadSaveFile(data, worker, logger, server);
 });
+
+console.log(filter.clean("abs"));
 
 // Worker process
 worker.on("message", (data) => {

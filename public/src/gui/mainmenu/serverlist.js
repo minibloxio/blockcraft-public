@@ -2,7 +2,7 @@ import Cookies from "js-cookie";
 import Ola from "ola";
 import { io } from "socket.io-client";
 import { prevState } from "../..";
-import { connectionDelay, g, isState, serverList, serverNames } from "../../globals";
+import { connectionDelay, g, isState, serverList, serverNames, regionNames } from "../../globals";
 import { drawCircle, drawRectangle, msToTime, round } from "../../lib/helper";
 import chunkManager from "../../managers/ChunkManager";
 import world from "../../managers/WorldManager";
@@ -18,8 +18,6 @@ export function refreshServers() {
   // Connect to servers
   g.servers = {};
   g.currentServer = undefined;
-
-  let time = performance.now() + 500;
 
   $("#server-container").empty();
   for (let i = 0; i < serverList.length; i++) {
@@ -58,7 +56,6 @@ export function refreshServers() {
     // Received server info
     server.socket.on("serverInfoResponse", function (data) {
       // Update server info
-      //console.log("Got response from " + data.link + " in " + round(performance.now()-time, 2) + "ms");
       g.servers[data.link].info = data;
 
       // Player names
@@ -70,9 +67,10 @@ export function refreshServers() {
 
       // Update server list
       let latency = Date.now() - data.ping;
+      let name = serverNames[data.region] || regionNames[data.region] || "Unknown";
       let serverHTML = $(`
                 <div class='server' data-link='${data.link}' id='server-${data.region}'>
-                    <p>Region: ${serverNames[data.region]}</p>
+                    <p>Region: ${name}</p>
                     <p>Players: ${Object.keys(data.players).length}/20</p>
                     <div class="animated"><p id="player-names">${playerNames}</p></div>
                     <div>
