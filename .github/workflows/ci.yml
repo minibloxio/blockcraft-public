@@ -28,4 +28,4 @@ jobs:
         with:
           file: Dockerfile
           push: true
-          tags: ghcr.io/victoryqwei/blockcraft:${{ env.BRANCH }}
+          tags: ghcr.io/blockcraftio/blockcraft:${{ env.BRANCH }}

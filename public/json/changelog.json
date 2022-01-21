@@ -1,187 +1,197 @@
-changelog = [{
-        "date": "Jan 9, 2022",
-        "version": "0.36.0",
-        "changes": "Updated stats info| Added ability to shift click for inventory management"
-    },
-    {
-        "date": "Jan 8, 2022",
-        "version": "0.35.0",
-        "changes": "Added armor| Added middle click to select blocks while in creative mode| Added the Alex skin which can be selected in the start menu| Added dynamic FOV while drawing bow| Added /save command| Updated the stats GUI| Added spawnable bots| Added debug GUI to view chunk boundaries and entity bounding boxes| Explosions now delete entities and damage players within range| Cleaned up a lot of code"
-    },
-    {
-        "date": "Jan 6, 2022",
-        "version": "0.34.0",
-        "changes": "Added /ban and /unban commands| Added several more blocks| Added a Discord server link for developmental progress| Added drowning in survival mode| Added leaves specific for each tree| Updated arrow mesh when fired| Updated health bar animations after regeneration or taking damage| Fixed issues where trees would re-generate after the server is restarted| Game shows a disconnect timer after the server is restarted"
-    },
-    {
-        "date": "Jan 4, 2022",
-        "version": "0.33.0",
-        "changes": "Added enderpearls and fireballs to the game| Added shapeless and mirrored crafting recipes| Updated inventory management to allow for drag clicking| Fixed bug that caused trees to regrow after the server is restarted"
-    },
-    {
-        "date": "Jan 2, 2022",
-        "version": "0.32.0",
-        "changes": "Added crafting table menu along with several new recipes| Added several new blocks and items| Added search bar and scrollbar to creative mode inventory| Disabled image smoothing for sharper item icons| Fixed bug where players do not show death screen when in creative mode"
-    },
-    {
-        "date": "Dec 30, 2021",
-        "version": "0.31.0",
-        "changes": "Added /leave /op /deop /kill /kick /spawnpoint /sethome /home /msg /reply and /list commands| Added several new blocks| Added nametag colors specific to each gamemode| Usernames must now be alphabetical| Fixed issue where players shared texture materials"
-    },
-    {
-        "date": "Dec 28, 2021",
-        "version": "0.30.0",
-        "changes": "Added a chat profanity filter| Added /give /setblock /clear and /reload commands| Added god mode| Added stars rotation to the background| Added ability to teleport relative to the player by using ~| Added server region names, ping and uptime indicators on the server list| Optimized raycaster function to only check meshes within a certain distance| Optimized chunk generation on the server| Updated player models for spectators"
-    },
-    {
-        "date": "Dec 25, 2021",
-        "version": "0.29.0",
-        "changes": "Massively optimized chunk generation by using SharedArrayBuffers in web workers| Added ability to change material texture to improve performance| Added FOV slider in video settings| Fixed teleporting to players and added ability to teleport to coordinates (usage: /tp <int> <int> <int>)"
-    },
-    {
-        "date": "Dec 24, 2021",
-        "version": "0.28.0",
-        "changes": "Reduced file sizes of world saves by 70% by removing chunks that have not been changed| Game now removes players and server entities after disconnection| Chat is now reset after disconnection| Offloaded chunk generation on the server using worker threads| Added a disconnection progress bar| Added multiple regional servers (eu-west, ap-south, ap-southeast)"
-    },
-    {
-        "date": "Dec 21, 2021",
-        "version": "0.27.0",
-        "changes": "Added spectator and camera gamemodes. Use /gamemode spectator or /gamemode camera| Added button to disconnect from servers"
-    },
-    {
-        "date": "Dec 19, 2021",
-        "version": "0.26.0",
-        "changes": "Updated menu UI| Added the ability to join servers from different regions| Added server logging| Added CORS support for servers| Increased the accuracy of shadows| Fixed empty chunks bug"
-    },
-    {
-        "date": "Dec 17, 2021",
-        "version": "0.25.0",
-        "changes": "Players now spawn on the ground if possible| Added CORS support| Fixed crosshair jerk due to a Chrome bug| Fixed z-fighting issue with transparent blocks/items| Fixed players join with a default name| Optimized chunk loading by reducing the latency of web workers"
-    },
-    {
-        "date": "Nov 8, 2020",
-        "version": "0.24.0",
-        "changes": "Added creative mode| Added commands such as /tp and /gamemode"
-    },
-    {
-        "date": "Nov 7, 2020",
-        "version": "0.23.0",
-        "changes": "Added multiple new blocks| Improved terrain generation| Simplified texture loading process"
-    },
-    {
-        "date": "Nov 6, 2020",
-        "version": "0.22.0",
-        "changes": "Added a versions tab to the start menu to see previous versions| Added multiplayer hand models| Added blocking functionality to the sword to reduce incoming damage and knockback| Added bunny hopping| Fixed blocks being able to be placed on water| Added cobblestone, sand, gravel, and obsidian blocks"
-    },
-    {
-        "date": "Nov 5, 2020",
-        "version": "0.21.0",
-        "changes": "Fixed players being able to punch through walls| Improved start menu UI| Added start menu loading bar| World save messages no longer clog up the chat| Added the ability to reassign controls| Added cookies so video and keyboard settings can be saved"
-    },
-    {
-        "date": "Nov 3, 2020",
-        "version": "0.20.0",
-        "changes": "Added stars| Improved night time lighting| Optimized texture atlas generation| Player arm now switches to the selected block| Added a sword| Added a tab so players are able to see who is online"
-    },
-    {
-        "date": "Oct 29, 2020",
-        "version": "0.19.0",
-        "changes": "Improved swimming mechanics| Items now snap to player instead of gravitate| Worlds are able to be saved now"
-    },
-    {
-        "date": "Oct 28, 2020",
-        "version": "0.18.0",
-        "changes": "Breaking blocks and placing blocks on chunk boundaries only update those chunks which are affected| Added the moon| Smoothed out day-night transition| Fixed diagonal collision resolution| Fixed crouch building"
-    },
-    {
-        "date": "Oct 27, 2020",
-        "version": "0.17.0",
-        "changes": "Players can take fall damage| Optimized chunk loading using web workers"
-    },
-    {
-        "date": "Oct 27, 2020",
-        "version": "0.16.1",
-        "changes": "Added water to terrain generation"
-    },
-    {
-        "date": "Apr 9, 2020",
-        "version": "0.16.0",
-        "changes": "Added a day night cycle"
-    },
-    {
-        "date": "Apr 1, 2020",
-        "version": "0.15.0",
-        "changes": "Added an inventory system with basic crafting abilities"
-    },
-    {
-        "date": "Mar 29, 2020",
-        "version": "0.14.0",
-        "changes": "Added ore generation| Added player knockback in multiplayer PvP"
-    },
-    {
-        "date": "Mar 27, 2020",
-        "version": "0.13.0",
-        "changes": "Added the ability to drop and collect items| Items despawn after 30 seconds if dropped"
-    },
-    {
-        "date": "Mar 27, 2020",
-        "version": "0.12.0",
-        "changes": "Added items with the ability to select items from the toolbar| Added fog"
-    },
-    {
-        "date": "Mar 26, 2020",
-        "version": "0.11.0",
-        "changes": "Added block breaking animation| Added trees"
-    },
-    {
-        "date": "Mar 24, 2020",
-        "version": "0.10.0",
-        "changes": "Added support for serverside chunk loading"
-    },
-    {
-        "date": "Mar 23, 2020",
-        "version": "0.9.0",
-        "changes": "Added automatic chunk loading and unloading"
-    },
-    {
-        "date": "Mar 22, 2020",
-        "version": "0.8.0",
-        "changes": "Added support for multiple chunks with unique textures"
-    },
-    {
-        "date": "Mar 21, 2020",
-        "version": "0.7.0",
-        "changes": "Added chat messaging"
-    },
-    {
-        "date": "Mar 21, 2020",
-        "version": "0.6.0",
-        "changes": "Added player health and regeneration| Added multiplayer PvP"
-    },
-    {
-        "date": "Mar 20, 2020",
-        "version": "0.5.0",
-        "changes": "Added nametags to players"
-    },
-    {
-        "date": "Mar 20, 2020",
-        "version": "0.4.0",
-        "changes": "Added steve skin| Added walking and punching animation to players"
-    },
-    {
-        "date": "Mar 19, 2020",
-        "version": "0.3.0",
-        "changes": "Added the basic skeletal structure for players"
-    },
-    {
-        "date": "Mar 18, 2020",
-        "version": "0.2.0",
-        "changes": "Added multiplayer world synchronization| Interpolated player movement"
-    },
-    {
-        "date": "Mar 18, 2020",
-        "version": "0.1.0",
-        "changes": "Added basic terrain generation| Add multiplayer support for players"
-    },
-
+[
+  {
+    "date": "Jan 20, 2022",
+    "version": "0.37.0",
+    "changes": "Bedrock is now breakable| New controls system! You can now double tap to fly| Graphics have been overhauled, there are now 3d items in the world and in the inventory, and awesome new player animations"
+  },
+  {
+    "date": "Jan 15, 2022",
+    "version": "0.37.0",
+    "changes": "Updated the infrastructure to leverage AWS Global Accelerator reducing latency| Dockerized the servers to streamline the development process"
+  },
+  {
+    "date": "Jan 9, 2022",
+    "version": "0.36.0",
+    "changes": "Updated stats info| Added ability to shift click for inventory management"
+  },
+  {
+    "date": "Jan 8, 2022",
+    "version": "0.35.0",
+    "changes": "Added armor| Added middle click to select blocks while in creative mode| Added the Alex skin which can be selected in the start menu| Added dynamic FOV while drawing bow| Added /save command| Updated the stats GUI| Added spawnable bots| Added debug GUI to view chunk boundaries and entity bounding boxes| Explosions now delete entities and damage players within range| Cleaned up a lot of code"
+  },
+  {
+    "date": "Jan 6, 2022",
+    "version": "0.34.0",
+    "changes": "Added /ban and /unban commands| Added several more blocks| Added a Discord server link for developmental progress| Added drowning in survival mode| Added leaves specific for each tree| Updated arrow mesh when fired| Updated health bar animations after regeneration or taking damage| Fixed issues where trees would re-generate after the server is restarted| Game shows a disconnect timer after the server is restarted"
+  },
+  {
+    "date": "Jan 4, 2022",
+    "version": "0.33.0",
+    "changes": "Added enderpearls and fireballs to the game| Added shapeless and mirrored crafting recipes| Updated inventory management to allow for drag clicking| Fixed bug that caused trees to regrow after the server is restarted"
+  },
+  {
+    "date": "Jan 2, 2022",
+    "version": "0.32.0",
+    "changes": "Added crafting table menu along with several new recipes| Added several new blocks and items| Added search bar and scrollbar to creative mode inventory| Disabled image smoothing for sharper item icons| Fixed bug where players do not show death screen when in creative mode"
+  },
+  {
+    "date": "Dec 30, 2021",
+    "version": "0.31.0",
+    "changes": "Added /leave /op /deop /kill /kick /spawnpoint /sethome /home /msg /reply and /list commands| Added several new blocks| Added nametag colors specific to each gamemode| Usernames must now be alphabetical| Fixed issue where players shared texture materials"
+  },
+  {
+    "date": "Dec 28, 2021",
+    "version": "0.30.0",
+    "changes": "Added a chat profanity filter| Added /give /setblock /clear and /reload commands| Added god mode| Added stars rotation to the background| Added ability to teleport relative to the player by using ~| Added server region names, ping and uptime indicators on the server list| Optimized raycaster function to only check meshes within a certain distance| Optimized chunk generation on the server| Updated player models for spectators"
+  },
+  {
+    "date": "Dec 25, 2021",
+    "version": "0.29.0",
+    "changes": "Massively optimized chunk generation by using SharedArrayBuffers in web workers| Added ability to change material texture to improve performance| Added FOV slider in video settings| Fixed teleporting to players and added ability to teleport to coordinates (usage: /tp <int> <int> <int>)"
+  },
+  {
+    "date": "Dec 24, 2021",
+    "version": "0.28.0",
+    "changes": "Reduced file sizes of world saves by 70% by removing chunks that have not been changed| Game now removes players and server entities after disconnection| Chat is now reset after disconnection| Offloaded chunk generation on the server using worker threads| Added a disconnection progress bar| Added multiple regional servers (eu-west, ap-south, ap-southeast)"
+  },
+  {
+    "date": "Dec 21, 2021",
+    "version": "0.27.0",
+    "changes": "Added spectator and camera gamemodes. Use /gamemode spectator or /gamemode camera| Added button to disconnect from servers"
+  },
+  {
+    "date": "Dec 19, 2021",
+    "version": "0.26.0",
+    "changes": "Updated menu UI| Added the ability to join servers from different regions| Added server logging| Added CORS support for servers| Increased the accuracy of shadows| Fixed empty chunks bug"
+  },
+  {
+    "date": "Dec 17, 2021",
+    "version": "0.25.0",
+    "changes": "Players now spawn on the ground if possible| Added CORS support| Fixed crosshair jerk due to a Chrome bug| Fixed z-fighting issue with transparent blocks/items| Fixed players join with a default name| Optimized chunk loading by reducing the latency of web workers"
+  },
+  {
+    "date": "Nov 8, 2020",
+    "version": "0.24.0",
+    "changes": "Added creative mode| Added commands such as /tp and /gamemode"
+  },
+  {
+    "date": "Nov 7, 2020",
+    "version": "0.23.0",
+    "changes": "Added multiple new blocks| Improved terrain generation| Simplified texture loading process"
+  },
+  {
+    "date": "Nov 6, 2020",
+    "version": "0.22.0",
+    "changes": "Added a versions tab to the start menu to see previous versions| Added multiplayer hand models| Added blocking functionality to the sword to reduce incoming damage and knockback| Added bunny hopping| Fixed blocks being able to be placed on water| Added cobblestone, sand, gravel, and obsidian blocks"
+  },
+  {
+    "date": "Nov 5, 2020",
+    "version": "0.21.0",
+    "changes": "Fixed players being able to punch through walls| Improved start menu UI| Added start menu loading bar| World save messages no longer clog up the chat| Added the ability to reassign controls| Added cookies so video and keyboard settings can be saved"
+  },
+  {
+    "date": "Nov 3, 2020",
+    "version": "0.20.0",
+    "changes": "Added stars| Improved night time lighting| Optimized texture atlas generation| Player arm now switches to the selected block| Added a sword| Added a tab so players are able to see who is online"
+  },
+  {
+    "date": "Oct 29, 2020",
+    "version": "0.19.0",
+    "changes": "Improved swimming mechanics| Items now snap to player instead of gravitate| Worlds are able to be saved now"
+  },
+  {
+    "date": "Oct 28, 2020",
+    "version": "0.18.0",
+    "changes": "Breaking blocks and placing blocks on chunk boundaries only update those chunks which are affected| Added the moon| Smoothed out day-night transition| Fixed diagonal collision resolution| Fixed crouch building"
+  },
+  {
+    "date": "Oct 27, 2020",
+    "version": "0.17.0",
+    "changes": "Players can take fall damage| Optimized chunk loading using web workers"
+  },
+  {
+    "date": "Oct 27, 2020",
+    "version": "0.16.1",
+    "changes": "Added water to terrain generation"
+  },
+  {
+    "date": "Apr 9, 2020",
+    "version": "0.16.0",
+    "changes": "Added a day night cycle"
+  },
+  {
+    "date": "Apr 1, 2020",
+    "version": "0.15.0",
+    "changes": "Added an inventory system with basic crafting abilities"
+  },
+  {
+    "date": "Mar 29, 2020",
+    "version": "0.14.0",
+    "changes": "Added ore generation| Added player knockback in multiplayer PvP"
+  },
+  {
+    "date": "Mar 27, 2020",
+    "version": "0.13.0",
+    "changes": "Added the ability to drop and collect items| Items despawn after 30 seconds if dropped"
+  },
+  {
+    "date": "Mar 27, 2020",
+    "version": "0.12.0",
+    "changes": "Added items with the ability to select items from the toolbar| Added fog"
+  },
+  {
+    "date": "Mar 26, 2020",
+    "version": "0.11.0",
+    "changes": "Added block breaking animation| Added trees"
+  },
+  {
+    "date": "Mar 24, 2020",
+    "version": "0.10.0",
+    "changes": "Added support for serverside chunk loading"
+  },
+  {
+    "date": "Mar 23, 2020",
+    "version": "0.9.0",
+    "changes": "Added automatic chunk loading and unloading"
+  },
+  {
+    "date": "Mar 22, 2020",
+    "version": "0.8.0",
+    "changes": "Added support for multiple chunks with unique textures"
+  },
+  {
+    "date": "Mar 21, 2020",
+    "version": "0.7.0",
+    "changes": "Added chat messaging"
+  },
+  {
+    "date": "Mar 21, 2020",
+    "version": "0.6.0",
+    "changes": "Added player health and regeneration| Added multiplayer PvP"
+  },
+  {
+    "date": "Mar 20, 2020",
+    "version": "0.5.0",
+    "changes": "Added nametags to players"
+  },
+  {
+    "date": "Mar 20, 2020",
+    "version": "0.4.0",
+    "changes": "Added steve skin| Added walking and punching animation to players"
+  },
+  {
+    "date": "Mar 19, 2020",
+    "version": "0.3.0",
+    "changes": "Added the basic skeletal structure for players"
+  },
+  {
+    "date": "Mar 18, 2020",
+    "version": "0.2.0",
+    "changes": "Added multiplayer world synchronization| Interpolated player movement"
+  },
+  {
+    "date": "Mar 18, 2020",
+    "version": "0.1.0",
+    "changes": "Added basic terrain generation| Add multiplayer support for players"
+  }
 ]
