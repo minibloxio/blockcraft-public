@@ -1234,6 +1234,38 @@ class Player {
   }
 
   updateCamera() {
+    if (this.perspective > 0) {
+      let sign = this.perspective == 1 ? 1 : -1;
+      camera.position.set(0, 3, 100 * sign);
+
+      let target = new THREE.Vector3();
+      camera.getWorldPosition(target);
+
+      let dir = new THREE.Vector3();
+      camera.getWorldDirection(dir);
+      dir.negate();
+
+      let pos = player.pos.clone();
+
+      this.raycaster.set(pos, dir);
+      this.raycaster.far = 100;
+
+      let intersects = this.raycaster.intersectObjects(this.nearbyMeshes);
+
+      let closest;
+      let closestDist = Infinity;
+      for (let i = 0; i < intersects.length; i++) {
+        if (intersects[i].distance < closestDist) {
+          closest = intersects[i];
+          closestDist = intersects[i].distance;
+        }
+      }
+
+      if (closest) {
+        camera.position.z = closest.distance * sign;
+      }
+    }
+
     if (!this.cinematicMode) return;
     let yawObject = this.controls.getObject();
     let pitchObject = yawObject.children[0];
