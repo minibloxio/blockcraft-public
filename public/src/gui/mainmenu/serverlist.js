@@ -1,15 +1,14 @@
+import axios from "axios";
 import Cookies from "js-cookie";
 import { io } from "socket.io-client";
 import { prevState } from "../..";
-import { connectionDelay, g, isState, serverList, serverNames } from "../../globals";
+import { connectionDelay, g, isState, sessionServerEndpoint } from "../../globals";
 import { drawCircle, drawRectangle, msToTime, round } from "../../lib/helper";
 import chunkManager from "../../managers/ChunkManager";
 import world from "../../managers/WorldManager";
 import player from "../../Player";
 
-const barToColour = ["", "red", "orange", "yellow", "green", "lime"];
-
-export function refreshServers() {
+export async function refreshServers() {
   // Disconnect servers
   for (let link in g.servers) {
     let server = g.servers[link];
@@ -19,6 +18,11 @@ export function refreshServers() {
   // Connect to servers
   g.servers = {};
   g.currentServer = undefined;
+
+  let serverList = (await axios.get(sessionServerEndpoint)).data;
+  if (!serverList) serverList = oldServerList;
+
+  console.log(serverList);
 
   $("#server-container").empty();
   for (let i = 0; i < serverList.length; i++) {
@@ -68,9 +72,10 @@ export function refreshServers() {
 
       // Update server list
       let latency = Date.now() - data.ping;
+      globalThis.a = data;
       let serverHTML = $(`
                 <div class='server' data-link='${data.link}' id='server-${data.region}'>
-                    <p>Region: ${serverNames[data.region]}</p>
+                    <p>Region: ${data.name}</p>
                     <p>Players: ${Object.keys(data.players).length}/20</p>
                     <div class="animated"><p id="player-names">${playerNames}</p></div>
                     <div>
@@ -118,6 +123,8 @@ export function refreshServers() {
     });
   }
 }
+
+const barToColour = ["", "red", "orange", "yellow", "green", "lime"];
 
 function drawConnectionBars(ctx, latency) {
   let numOfBars = Math.max(5 - Math.floor(latency / 60), 1);
