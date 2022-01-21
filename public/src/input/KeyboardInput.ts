@@ -150,6 +150,7 @@ $(window).on("keyup", function (event) {
 // function keys
 // ###########################################
 
+// Toggle camera mode
 let lastGamemode = undefined;
 bindKeys("f1", () => {
   if (player.mode == "camera" && !player.toggleGUI) return;
@@ -162,23 +163,39 @@ bindKeys("f1", () => {
   player.toggleGUI = !player.toggleGUI;
 });
 
+// Take a screenshot
 bindKeys("f2", () => {
   screenshotter.takeScreenshot();
 });
 
+// Toggle stats list
 bindKeys("f3", () => {
   hud.showStats = !hud.showStats;
   threeStats.showStats = hud.showStats;
   Cookies.set("showStats", hud.showStats ? "true" : "false", { expires: 365 });
 });
 
+// Toggle perspective
 bindKeys("f5", () => {});
 
+// Toggle debug mode
 bindKeys("f7", () => {
   game.debug = !game.debug;
   threeStats.showStats = game.debug || hud.showStats;
   Cookies.set("debug", game.debug ? "true" : "false", { expires: 365 });
   updateDebug();
+});
+
+// Toggle fullscreen
+bindKeys("f11", (event) => {
+  event.preventDefault();
+  if (!window.screenTop && !window.screenY) {
+    // fullscreen -> window
+    document.exitFullscreen();
+  } else {
+    // window -> fullscreen
+    document.documentElement.requestFullscreen();
+  }
 });
 
 function updateDebug() {
