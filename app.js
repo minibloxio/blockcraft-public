@@ -1,5 +1,12 @@
 require("dotenv").config(); // load server config from .env
 
+// add this server to the server list on the session server
+const axios = require("axios").default;
+const sessionServerEndpoint = "https://session.blockcraft.online/servers/heartbeat";
+setInterval(async () => {
+  await axios.post(sessionServerEndpoint, { url: process.env.LINK });
+}, 30000);
+
 const serverPort = process.env.PORT || 3002;
 // Initialize server variables
 const express = require("express");
