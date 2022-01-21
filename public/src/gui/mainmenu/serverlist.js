@@ -1,5 +1,4 @@
 import Cookies from "js-cookie";
-import Ola from "ola";
 import { io } from "socket.io-client";
 import { prevState } from "../..";
 import { connectionDelay, g, isState, serverList, serverNames } from "../../globals";
@@ -7,6 +6,8 @@ import { drawCircle, drawRectangle, msToTime, round } from "../../lib/helper";
 import chunkManager from "../../managers/ChunkManager";
 import world from "../../managers/WorldManager";
 import player from "../../Player";
+
+const barToColour = ["", "red", "orange", "yellow", "green", "lime"];
 
 export function refreshServers() {
   // Disconnect servers
@@ -18,8 +19,6 @@ export function refreshServers() {
   // Connect to servers
   g.servers = {};
   g.currentServer = undefined;
-
-  let time = performance.now() + 500;
 
   $("#server-container").empty();
   for (let i = 0; i < serverList.length; i++) {
@@ -58,7 +57,6 @@ export function refreshServers() {
     // Received server info
     server.socket.on("serverInfoResponse", function (data) {
       // Update server info
-      //console.log("Got response from " + data.link + " in " + round(performance.now()-time, 2) + "ms");
       g.servers[data.link].info = data;
 
       // Player names
@@ -110,39 +108,25 @@ export function refreshServers() {
       });
 
       let ctx_ = $("#" + data.region)[0].getContext("2d");
-      let numOfBars = Math.max(5 - Math.floor(latency / 60), 1);
-      let color;
-      switch (numOfBars) {
-        case 1:
-          color = "red";
-          break;
-        case 2:
-          color = "orange";
-          break;
-        case 3:
-          color = "yellow";
-          break;
-        case 4:
-          color = "green";
-          break;
-        case 5:
-          color = "lime";
-          break;
-      }
-      for (let i = 0; i < numOfBars; i++) {
-        drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, color, { ctx: ctx_ });
-      }
-      for (let i = numOfBars; i < 5; i++) {
-        drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, "grey", { ctx: ctx_ });
-      }
+      drawConnectionBars(ctx_, latency);
 
       ctx_ = $("#" + data.region + "-2")[0].getContext("2d");
       drawCircle(15, 12, 11, "white", { ctx: ctx_, fill: false, outline: true, outlineColor: "white", outlineWidth: 2 });
       drawCircle(15, 12, 2, "white", { ctx: ctx_ });
       drawRectangle(14, 3, 2, 7, "white", { ctx: ctx_ });
-
       server.socket.disconnect();
     });
+  }
+}
+
+function drawConnectionBars(ctx, latency) {
+  let numOfBars = Math.max(5 - Math.floor(latency / 60), 1);
+  let color = barToColour[numOfBars];
+  for (let i = 0; i < numOfBars; i++) {
+    drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, color, { ctx: ctx });
+  }
+  for (let i = numOfBars; i < 5; i++) {
+    drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, "grey", { ctx: ctx });
   }
 }
 
@@ -240,8 +224,6 @@ function clickServer(event, doubleClick) {
     $("#start-button").click();
   }
 }
-
-let disconnectedAnimate = new Ola(0); // Disconnection progress
 
 // Update menu state
 export function updateMenu(nextStateCB) {
