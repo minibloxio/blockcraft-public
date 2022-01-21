@@ -11,7 +11,7 @@ import { showSettings } from "./gui/mainmenu/settings";
 import "./gui/mainmenu/tabs";
 import "./input/input";
 import { update as updateKeyboardInput } from "./input/KeyboardInput";
-import initPointerLock, { onWindowResize, requestPointerLock } from "./input/pointerlock";
+import PointerLock, { onWindowResize } from "./input/PointerLock";
 import { addKeyboardControls, addVideoControls } from "./input/settings";
 import inventory from "./items/Inventory";
 import { round, updateGUISize } from "./lib/helper";
@@ -198,7 +198,7 @@ function nextState(e) {
   } else if (isState("loadingChunks") && Object.keys(chunkManager.currChunks).length >= g.maxChunks) {
     // Loading Chunks -> In Game
     console.log("Requesting pointer lock");
-    requestPointerLock();
+    PointerLock.requestPointerLock();
     updateGUISize();
     chat.initChat();
 
@@ -222,10 +222,10 @@ function nextState(e) {
         disconnectServer();
       } else {
         // Return to game
-        requestPointerLock();
+        PointerLock.requestPointerLock();
       }
     } else {
-      requestPointerLock();
+      PointerLock.requestPointerLock();
     }
   } else if (isState("disconnecting")) {
     // Disconnecting from server
@@ -270,7 +270,7 @@ function init() {
   addKeyboardControls(); // Add keyboard controls
   initStatistics(); // Add statistics to record
   masterRenderer.init();
-  initPointerLock(); // Initialize pointer lock
+  PointerLock.initPointerLock(); // Initialize pointer lock
   updateGUISize(); // Update the GUI size
   workerManager.init();
 

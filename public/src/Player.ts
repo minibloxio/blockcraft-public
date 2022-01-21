@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import * as $ from "jquery";
 
-import { PointerLockControls } from "./input/pointerlock";
+import { PointerLockControls } from "./input/PointerLock";
 import { camera, isState, g, scene, players } from "./globals";
 import textureManager from "./managers/TextureManager";
 import world, { updateVoxelGeometry } from "./managers/WorldManager";
@@ -48,6 +48,7 @@ class Player {
   // 3d stuff
   controls = new PointerLockControls(camera);
   perspective = 0;
+  cinematicMode = false;
 
   // Sensitivity
   sens = 0.5;

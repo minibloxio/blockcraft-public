@@ -33,7 +33,7 @@ class PlayerManager {
     let p = players[id];
 
     // Set position, rotation and direction
-    p.pos = Ola(p.pos, intrpDelay);
+    p.pos = Ola(p.pos);
     p.rot = Ola(p.rot, intrpDelay);
     p.dir = Ola(p.dir, intrpDelay);
     p.vel = Ola(p.vel, intrpDelay);

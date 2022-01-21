@@ -186,6 +186,12 @@ bindKeys("f7", () => {
   updateDebug();
 });
 
+// Toggle cinematic mode
+bindKeys("f8", (event) => {
+  event.preventDefault();
+  player.cinematicMode = !player.cinematicMode;
+});
+
 // Toggle fullscreen
 bindKeys("f11", (event) => {
   event.preventDefault();
