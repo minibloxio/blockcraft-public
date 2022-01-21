@@ -1,11 +1,11 @@
-name: Build containers
+name: Build webpack and push to staging S3
 
 on:
   push:
     branches:
-      - "master"
+      - "staging"
 jobs:
-  webpack-and-push:
+  main:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -27,7 +27,7 @@ jobs:
         with:
           args: --acl public-read --delete
         env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_PRODUCTION_BUCKET_NAME }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_STAGING_BUCKET_NAME }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
