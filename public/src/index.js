@@ -263,6 +263,7 @@ function init() {
   camera.add(axesHelper);
 
   hud.showStats = Cookies.get("showStats") === "true";
+  game.debug = Cookies.get("debug") === "true";
   threeStats.showStats = hud.showStats;
 
   addVideoControls(); // Add video settings

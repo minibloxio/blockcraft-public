@@ -8,6 +8,7 @@ import { camera, g } from "../globals";
 import { giveCommandHint, nextCommand, prevCommand } from "../commands";
 import inventory from "../items/Inventory";
 import threeStats from "../stats/ThreeStats";
+import { axesHelper } from "../index.js";
 
 var doublePressDelay = 200;
 var lastKeypressTime = 0;
@@ -152,3 +153,29 @@ bindKeys("f3", () => {
   threeStats.showStats = hud.showStats;
   Cookies.set("showStats", hud.showStats ? "true" : "false", { expires: 365 });
 });
+
+bindKeys("f7", () => {
+  game.debug = !game.debug;
+  threeStats.showStats = game.debug;
+  Cookies.set("debug", game.debug ? "true" : "false", { expires: 365 });
+  updateDebug();
+});
+
+function updateDebug() {
+  for (let id in players) {
+    let player = players[id];
+    player.bbox.visible = game.debug;
+  }
+
+  for (let id in world.entities) {
+    let entity = world.entities[id];
+    entity.bbox.visible = game.debug;
+  }
+
+  axesHelper.visible = !!game.debug;
+
+  for (let id in chunkManager.debugLines) {
+    let line = chunkManager.debugLines[id];
+    line.visible = game.debug;
+  }
+}

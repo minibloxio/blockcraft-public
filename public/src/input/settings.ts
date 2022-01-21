@@ -4,7 +4,6 @@ import { keyMap } from "kontra";
 import { axesHelper } from "..";
 import game from "../Game";
 import { camera, players } from "../globals";
-import hud from "../gui/HUD";
 import { updateGUISize } from "../lib/helper";
 import chunkManager from "../managers/ChunkManager";
 import workerManager from "../managers/WorkerManager";
@@ -162,7 +161,6 @@ export function addVideoControls() {
   addSwitchControl("Transparent Leaves", "transparentLeaves", false, game, "transparentLeaves", false, updateTransparency);
   addSwitchControl("Transparent Inventory", "transparentInventory", false, game, "transparentInventory");
   addSwitchControl("Depth Write", "depthWrite", false, game, "depthWrite", false, chunkManager.updateTexture);
-  addSwitchControl("Debug", "debug", false, game, "debug", false, updateDebug);
 
   addSelectControl("GUI Size", "guiSize", 2, game, "guiSize", updateGUISize);
   addSelectControl("Material Texture", "texture", "lambert", chunkManager, "texture", chunkManager.updateTexture);
@@ -245,25 +243,6 @@ function updateTransparency() {
     });
   }
   chunkManager.reload();
-}
-
-function updateDebug() {
-  for (let id in players) {
-    let player = players[id];
-    player.bbox.visible = game.debug;
-  }
-
-  for (let id in world.entities) {
-    let entity = world.entities[id];
-    entity.bbox.visible = game.debug;
-  }
-
-  axesHelper.visible = !!game.debug;
-
-  for (let id in chunkManager.debugLines) {
-    let line = chunkManager.debugLines[id];
-    line.visible = game.debug;
-  }
 }
 
 function genDefaultKeyMap() {
