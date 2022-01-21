@@ -338,16 +338,16 @@ function sendPacket() {
   if (Date.now() - game.lastPacket > game.packetDelay) {
     game.lastPacket = Date.now();
     g.socket.emit("packet", {
-      pos: player.position,
+      pos: player.pos,
       vel: player.newMove,
       onObject: player.onObject,
-      rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
-      dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
-      walking: new THREE.Vector3(player.velocity.x, 0, player.velocity.z).length() > 2, // CHANGED
-      sneaking: keyPressedPlayer("alt"),
-      punching: player.punchT < 2,
-      blocking: player.blockT > 0,
-      currSlot: player.currentSlot,
+      rot: player.rot, // Rotation of body
+      dir: player.dir, // Rotation of head
+      walking: player.walking, // CHANGED
+      sneaking: player.sneaking,
+      punching: player.punching,
+      blocking: player.blocking,
+      currSlot: player.currSlot,
       mode: player.mode,
       fps: round(stats.fps, 1),
       showInventory: inventory.showInventory,
@@ -454,7 +454,7 @@ g.socket.on("joinResponse", function (data) {
   player.join(data);
 
   // Set chunk pos
-  chunkManager.cellPos = world.computeCellFromPlayer(player.position.x, player.position.y, player.position.z);
+  chunkManager.cellPos = world.computeCellFromPlayer(player.pos.x, player.pos.y, player.pos.z);
 
   // Receive current server players
   let serverPlayers = data.serverPlayers;
@@ -522,16 +522,17 @@ g.socket.on("removePlayer", function (id) {
   if (!g.initialized || !players[id]) return;
 
   let isBot = players[id].type == "bot";
+  let name = players[id].name;
 
   scene.remove(players[id].entity);
+  delete players[id];
   if (isBot) return;
 
   chat.addChat({
-    text: players[id].name + " has left the server",
+    text: name + " has left the server",
     color: "yellow",
     timer: 3000,
   });
-  delete players[id];
 });
 
 // Receive knockback

@@ -396,7 +396,7 @@ export function giveCommandHint(msg, autocomplete) {
 function getCoord(msg, pos, decimalPlace) {
   let x, y, z;
   if (msg[0] && msg[0].includes("~")) {
-    x = round(player.position.x / world.blockSize, decimalPlace);
+    x = round(player.pos.x / world.blockSize, decimalPlace);
     let dx = parseInt(msg[0].replace("~", ""));
     if (!isNaN(dx)) x += dx;
   } else if (msg[0]) {
@@ -404,7 +404,7 @@ function getCoord(msg, pos, decimalPlace) {
     x = x == 0 ? "0" : x;
   }
   if (msg[1] && msg[1].includes("~")) {
-    y = round(player.position.y / world.blockSize, decimalPlace);
+    y = round(player.pos.y / world.blockSize, decimalPlace);
     let dy = parseInt(msg[1].replace("~", ""));
     if (!isNaN(dy)) y += dy;
   } else if (msg[1]) {
@@ -412,7 +412,7 @@ function getCoord(msg, pos, decimalPlace) {
     y = y == 0 ? "0" : y;
   }
   if (msg[2] && msg[2].includes("~")) {
-    z = round(player.position.z / world.blockSize, decimalPlace);
+    z = round(player.pos.z / world.blockSize, decimalPlace);
     let dz = parseInt(msg[2].replace("~", ""));
     if (!isNaN(dz)) z += dz;
   } else if (msg[2]) {
@@ -752,9 +752,9 @@ function giveItem(msg) {
 function clear(type) {
   if (type == "hand") {
     // Clear the hand
-    let item = player.toolbar[player.currentSlot];
+    let item = player.toolbar[player.currSlot];
     if (item) {
-      g.socket.emit("clearHand", player.currentSlot);
+      g.socket.emit("clearHand", player.currSlot);
       let thing = item.class == "block" ? world.blockOrder[item.v] : world.itemOrder[item.v];
       chat.addChat({
         text: "Cleared " + item.c + " " + thing + " from hand",
@@ -978,7 +978,7 @@ function killPlayer(msg) {
 
 // Set spawnpoint
 function setSpawn() {
-  player.spawnpoint = player.position.clone();
+  player.spawnpoint = player.pos.clone();
   chat.addChat({
     text: "Set spawnpoint to x: " + round(player.spawnpoint.x) + " y: " + round(player.spawnpoint.y) + " z: " + round(player.spawnpoint.z),
   });
@@ -986,7 +986,7 @@ function setSpawn() {
 
 // Set home
 function setHome() {
-  player.home = player.position.clone();
+  player.home = player.pos.clone();
   chat.addChat({
     text: "Set home to x: " + round(player.home.x) + " y: " + round(player.home.y) + " z: " + round(player.home.z),
   });

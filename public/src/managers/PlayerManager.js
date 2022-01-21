@@ -16,10 +16,234 @@ import textureManager from "./TextureManager";
 import world from "./WorldManager";
 import Item3D from "../graphics/Item3D";
 import { addDatControls } from "../lib/devDatGUI";
+import { clamp, round, euclideanModulo } from "../lib/helper";
 
 const intrpDelay = 100;
 
+// Rotate object around a 3D point
+function rotateAboutPoint(obj, point, axis, theta, pointIsWorld) {
+  pointIsWorld = pointIsWorld === undefined ? false : pointIsWorld;
+
+  if (pointIsWorld) {
+    obj.parent.localToWorld(obj.position); // compensate for world coordinate
+  }
+
+  obj.position.sub(point); // remove the offset
+  obj.position.applyAxisAngle(axis, theta); // rotate the POSITION
+  obj.position.add(point); // re-add the offset
+
+  if (pointIsWorld) {
+    obj.parent.worldToLocal(obj.position); // undo world coordinates compensation
+  }
+
+  obj.rotateOnAxis(axis, theta); // rotate the OBJECT
+}
+
 class PlayerManager {
+  // Update the player's visuals
+  static updatePlayer(p) {
+    let { blockSize } = world;
+
+    let dim = player.dim;
+    let { skin, leftArm, rightArm, leftLeg, rightLeg, leftHip, rightHip, headPivot, entity, pos, rot, dir } = p;
+
+    entity.position.set(pos.x, pos.y, pos.z); // Set player position
+
+    p.neck.rotation.set(rot.x, rot.y, rot.z); // Set sideways head rotation
+
+    // Rotate body towards the head when turning around
+    let angleDiff = p.neck.quaternion.angleTo(p.body.quaternion);
+    let maxAngleDiff = Math.PI / 4;
+    if (angleDiff > maxAngleDiff) {
+      let diff = angleDiff * 2 + maxAngleDiff;
+      p.body.quaternion.slerp(p.neck.quaternion, g.delta * diff);
+    }
+
+    p.bbox.rotation.setFromQuaternion(p.body.quaternion);
+
+    // Rotate body towards the head when walking
+    if (p.walking) {
+      let target = new THREE.Vector3(-p.vel.x, 0, -p.vel.z); // Target direction
+      target.normalize();
+
+      let bodyDir = new THREE.Vector3();
+      p.body.getWorldDirection(bodyDir);
+
+      bodyDir.normalize();
+      let quaternion = new THREE.Quaternion().setFromUnitVectors(bodyDir, target); // Get rotation quaternion from current and target direction
+
+      let targetQuaternion = p.body.clone(false); // TODO: OPTIMIZE
+      targetQuaternion.applyQuaternion(quaternion); // Apply rotation quaternion to body
+
+      // Lerp body towards target quaternion
+      if (p.neck.quaternion.angleTo(p.body.quaternion) < maxAngleDiff) {
+        p.body.quaternion.slerp(targetQuaternion.quaternion, Math.min(g.delta * 3));
+      }
+    }
+
+    headPivot.rotation.x = (dir.y * Math.PI) / 2; // Set up/down head rotation
+
+    // Offsets
+    let shift = 2; // blockSize / 8;
+    let armOffsetY = 4; // blockSize * 0.25;
+    let legOffsetY = 8; // blockSize * 0.5;
+    let rightShoulderOffset = skin == "steve" ? (dim.armSize * 3) / 2 : (dim.armSize * 3) / 2 - 0.6;
+    let leftShoulderOffset = skin == "steve" ? -6 : -5.45;
+
+    // Sneaking animation
+    let sneakable = !(p.mode == "spectator" || p.mode == "camera");
+    if (p.sneaking && sneakable) {
+      p.torso.rotation.x = -Math.PI / 8;
+
+      p.neck.position.set(0, -blockSize * 0.25, 0);
+      p.torso.position.set(0, -blockSize * 0.55, shift);
+
+      leftHip.position.set(-dim.legSize / 2, -blockSize * 0.45 - blockSize * 0.9 + shift, shift * 2);
+      rightHip.position.set(dim.legSize / 2, -blockSize * 0.45 - blockSize * 0.9 + shift, shift * 2);
+
+      p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.12 - shift, blockSize * 0.05);
+      p.rightShoulder.position.set(rightShoulderOffset, -blockSize * 0.12 - shift, 0);
+    } else {
+      p.torso.rotation.x = 0;
+
+      p.neck.position.set(0, -blockSize * 0.075, 0);
+      p.torso.position.set(0, -blockSize * 0.45, 0);
+
+      leftHip.position.set(-dim.legSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
+      rightHip.position.set(dim.armSize * 0.5, -blockSize * 0.45 - blockSize * 0.75, 0);
+
+      p.leftShoulder.position.set(leftShoulderOffset, -blockSize * 0.15, 0);
+      p.rightShoulder.position.set(rightShoulderOffset, -blockSize * 0.15, 0);
+    }
+
+    // Get magnitude of velocity
+    let v = Math.sqrt(p.vel.x * p.vel.x + p.vel.z * p.vel.z);
+    v = clamp(v, 0, 1);
+
+    let isSlow = p.sneaking || p.bowCharge > 0;
+    if (isSlow) v *= 2;
+
+    // Set speed of animation based on velocity
+    let axis = new THREE.Vector3(1, 0, 0);
+    let speed = isSlow ? g.delta * 3 : g.delta * 10;
+    let maxRotation = isSlow ? Math.PI / 6 : Math.PI / 3;
+    speed *= v;
+    maxRotation *= v;
+
+    if (p.walking) {
+      // Walking animation
+      if (leftArm.rotation.x < -maxRotation) {
+        p.extendArms = false;
+      } else if (leftArm.rotation.x > maxRotation) {
+        p.extendArms = true;
+      }
+
+      if (leftLeg.rotation.x > maxRotation) {
+        p.extendLegs = false;
+      } else if (leftLeg.rotation.x < -maxRotation) {
+        p.extendLegs = true;
+      }
+
+      if (p.extendArms && p.bowCharge == 0) {
+        rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
+        rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
+      } else if (p.bowCharge == 0) {
+        rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
+        rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
+      }
+
+      if (p.extendLegs) {
+        rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, -speed);
+        rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, speed);
+      } else {
+        rotateAboutPoint(rightLeg, new THREE.Vector3(0, legOffsetY, 0), axis, speed);
+        rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, -speed);
+      }
+    } else {
+      rotateAboutPoint(
+        rightArm,
+        new THREE.Vector3(0, armOffsetY, 0),
+        axis,
+        Math.abs(rightArm.rotation.x) * Math.sign(-rightArm.rotation.x)
+      );
+      rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, Math.abs(leftArm.rotation.x) * Math.sign(-leftArm.rotation.x));
+
+      rotateAboutPoint(
+        rightLeg,
+        new THREE.Vector3(0, legOffsetY, 0),
+        axis,
+        Math.abs(rightLeg.rotation.x) * Math.sign(-rightLeg.rotation.x)
+      );
+      rotateAboutPoint(leftLeg, new THREE.Vector3(0, legOffsetY, 0), axis, Math.abs(leftLeg.rotation.x) * Math.sign(-leftLeg.rotation.x));
+    }
+
+    // Active hand item
+
+    let hand = p.toolbar[p.currSlot];
+    if (p.handMesh && hand) {
+      if (p.blocking) {
+        p.handMesh.position.set(-4, -2, -3);
+        p.handMesh.rotation.set(0, -Math.PI / 8, 0);
+      } else if (hand.class == "item") {
+        if (hand.v == world.itemId["bow"]) {
+          p.handMesh.position.set(-2.5, -16.9, -0.071);
+          p.handMesh.rotation.set(-0.8, 0.198, 0.088);
+        } else {
+          p.handMesh.position.set(-0.5, -13, -10.2);
+          p.handMesh.rotation.set(-0.57, 0, 0);
+        }
+      } else {
+        p.handMesh.position.set(-3, -dim.armHeight / 2, -dim.armSize);
+        p.handMesh.rotation.set(0, Math.PI / 4, 0);
+      }
+    }
+
+    // Punching animation
+    if (p.punching) {
+      p.punchingT += g.delta * 5;
+
+      if (p.punchingT > 1) p.punchingT = 0;
+    } else {
+      if (p.punchingT < 1) {
+        p.punchingT += g.delta * 5;
+      } else {
+        p.punchingT = 1;
+      }
+    }
+
+    // Update nametag rotation
+    p.nameTag.quaternion.copy(camera.getWorldQuaternion(new THREE.Quaternion()));
+
+    const PI = Math.PI;
+    let angle1 = euclideanModulo(p.neck.rotation.y + PI, PI * 2);
+    let angle2 = new THREE.Quaternion();
+    p.body.getWorldQuaternion(angle2);
+    angle2 = new THREE.Euler().setFromQuaternion(angle2, "YXZ").y + PI;
+
+    // Get the delta between the two angles
+    let angleTo = p.neck.quaternion.angleTo(p.body.quaternion);
+    let diff = angle1 - angle2;
+    let yawDiff = round(((diff + PI) % (PI * 2)) - PI, 2);
+    let yawMod = euclideanModulo(yawDiff, PI * 2);
+    let sign = yawMod > 0 && yawMod < PI ? -0.6 : 0.6;
+    yawDiff = angleTo * sign;
+
+    if (p.bowCharge > 0) {
+      let pitchDiff = (dir.y * PI) / 2;
+      p.leftShoulder.rotation.set(PI / 2 + pitchDiff, -0.022, 0.74 + yawDiff);
+      p.rightShoulder.rotation.set(PI / 2 + pitchDiff, 0, yawDiff);
+    } else if (p.sneaking) {
+      p.leftShoulder.rotation.set(-PI / 16, 0, 0);
+      p.rightShoulder.rotation.set(-PI / 16, 0, 0);
+    } else {
+      p.leftShoulder.rotation.set(0, 0, 0);
+      p.rightShoulder.rotation.set(0, 0, 0);
+    }
+
+    p.rightShoulder.rotation.x += (-Math.cos(p.punchingT * Math.PI * 2) + 1) / 2;
+    p.rightShoulder.rotation.z += Math.sin(p.punchingT * Math.PI * 2) / 2;
+  }
+
   static addPlayer(players, id, data) {
     players[id] = data;
     let p = players[id];
@@ -45,7 +269,6 @@ class PlayerManager {
 
     // Entity (combine skeleton and nametag)
     p.entity = new THREE.Group();
-    p.entity.name = p.id;
     p.entity.add(p.skeleton);
     p.entity.type = "player";
 
@@ -281,8 +504,14 @@ class PlayerManager {
     p.skeleton.add(p.neck);
     p.skeleton.name = p.id;
 
-    p.bbox = new THREE.BoxHelper(p.skeleton, 0xffff00);
-    p.bbox.visible = game.debug || false;
+    p.bbox = new THREE.Group();
+    let bbox = new THREE.BoxHelper(p.skeleton, 0xffff00);
+    if (p.skin == "alex") bbox.position.x = 1.4;
+    bbox.matrixAutoUpdate = true;
+    bbox.visible = game.debug || false;
+    bbox.name = "bbox";
+    p.bbox.add(bbox);
+
     p.skeleton.add(p.bbox);
   }
 
@@ -310,7 +539,9 @@ class PlayerManager {
   }
 
   static updatePlayerHand(entity, p) {
-    p.hand = entity;
+    if (p.handMesh && p.handMesh.parent) p.handMesh.parent.remove(p.handMesh);
+
+    if (!entity || entity.c == 0) return;
 
     if (entity.class == "item") {
       let uvRow = p.bowCharge;

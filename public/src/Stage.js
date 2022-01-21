@@ -110,9 +110,9 @@ class Stage {
         cloud.name = "cloud";
         let renderDistance = blockSize * cellSize * chunkManager.renderDistance;
         cloud.position.set(
-          Math.random() * 3000 - renderDistance + player.position.x,
+          Math.random() * 3000 - renderDistance + player.pos.x,
           Math.random() * 200 + blockSize * 100,
-          Math.random() * 3000 - renderDistance + player.position.z
+          Math.random() * 3000 - renderDistance + player.pos.z
         );
         scene.add(cloud);
 
@@ -137,7 +137,7 @@ class Stage {
       let rotationAxis = new THREE.Vector3(1, 1, 1);
       rotationAxis.normalize();
       this.stars.setRotationFromAxisAngle(rotationAxis, tick * starRotationSpeed);
-      this.stars.position.set(player.position.x, player.position.y, player.position.z);
+      this.stars.position.set(player.pos.x, player.pos.y, player.pos.z);
     }
 
     // Update sun position
@@ -146,7 +146,7 @@ class Stage {
       this.offset.y = Math.sin(tick * this.daySpeed) * this.sunDist;
     }
 
-    var sun = player.position.clone();
+    var sun = player.pos.clone();
     sun.y = 0;
     sun.add(this.offset.clone());
     this.dir.position.set(sun.x, sun.y, sun.z); // Update directional light
@@ -161,7 +161,7 @@ class Stage {
       }
     }
 
-    var moon = player.position.clone();
+    var moon = player.pos.clone();
     moon.y = 0;
     moon.add(this.offset.clone().multiplyScalar(-1));
     this.dirM.position.set(moon.x, moon.y, moon.z);
@@ -187,11 +187,11 @@ class Stage {
     let renderDistance = blockSize * world.cellSize * chunkManager.renderDistance;
     for (let cloud of this.clouds) {
       cloud.position.add(new THREE.Vector3(0.3, 0, 0));
-      if (cloud.position.x > renderDistance + player.position.x) cloud.position.x = -renderDistance + player.position.x;
-      else if (cloud.position.x < -renderDistance + player.position.x) cloud.position.x = renderDistance + player.position.x;
+      if (cloud.position.x > renderDistance + player.pos.x) cloud.position.x = -renderDistance + player.pos.x;
+      else if (cloud.position.x < -renderDistance + player.pos.x) cloud.position.x = renderDistance + player.pos.x;
 
-      if (cloud.position.z > renderDistance + player.position.z) cloud.position.z = -renderDistance + player.position.z;
-      else if (cloud.position.z < -renderDistance + player.position.z) cloud.position.z = renderDistance + player.position.z;
+      if (cloud.position.z > renderDistance + player.pos.z) cloud.position.z = -renderDistance + player.pos.z;
+      else if (cloud.position.z < -renderDistance + player.pos.z) cloud.position.z = renderDistance + player.pos.z;
     }
 
     // Update sky lighting

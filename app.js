@@ -338,6 +338,7 @@ io.on("connection", function (socket_) {
         link: process.env.LINK,
       },
       operator: player.operator,
+      name: player.name,
     });
   });
 

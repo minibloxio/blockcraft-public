@@ -244,16 +244,13 @@ export function PointerLockControls(camera) {
     // Update rotation
     rotationY -= movementX * 0.00004 * player.sens;
     rotationX -= movementY * 0.00004 * player.sens;
+    rotationX = clamp(rotationX, -PI_2, PI_2);
 
     rotation.y = rotationY;
     rotation.x = rotationX;
 
     // Type of camera mode
-    if (player.cinematicMode) {
-      // Cinematic mode
-      // yawObject.rotation.y = rotation.y;
-      // pitchObject.rotation.x = rotation.x;
-    } else {
+    if (!player.cinematicMode) {
       // Normal mode
       yawObject.rotation.y = rotationY;
       pitchObject.rotation.x = clamp(rotationX, -PI_2, PI_2);

@@ -333,7 +333,7 @@ class ChunkManager {
     if (Date.now() - this.chunkTick < this.chunkDelay || this.chunkLoadingRate == 0) return;
 
     // Update chunks
-    this.cellPos = world.computeCellFromPlayer(player.position.x, player.position.y, player.position.z);
+    this.cellPos = world.computeCellFromPlayer(player.pos.x, player.pos.y, player.pos.z);
     this.chunkTick = Date.now();
 
     if (!isState("disconnecting") && !this.reloading) {

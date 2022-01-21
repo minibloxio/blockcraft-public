@@ -48,7 +48,7 @@ bindKeys(
   ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
   (e) => {
     if (!player.controls.enabled || chat.showChatBar) return;
-    player.currentSlot = parseInt(keyMap[e.code]) - 1;
+    player.currSlot = parseInt(keyMap[e.code]) - 1;
   },
   { preventDefault: false }
 );
@@ -178,7 +178,8 @@ bindKeys("f3", () => {
 
 // Toggle perspective
 bindKeys("f5", () => {
-  player.updateCameraPerspective();
+  player.perspective = (player.perspective + 1) % 3;
+  player.toggleCameraPerspective();
 });
 
 // Toggle debug mode
@@ -213,18 +214,23 @@ bindKeys("f11", (event) => {
 });
 
 function updateDebug() {
+  // Player bounding boxes
   for (let id in players) {
     let player = players[id];
     player.bbox.visible = game.debug;
   }
+  player.skeleton.getObjectByName("bbox").visible = game.debug ? true : false;
 
+  // Entity bounding boxes
   for (let id in world.entities) {
     let entity = world.entities[id];
     entity.bbox.visible = game.debug;
   }
 
+  // Axes helper
   axesHelper.visible = !!game.debug;
 
+  // Chunk lines
   for (let id in chunkManager.debugLines) {
     let line = chunkManager.debugLines[id];
     line.visible = game.debug;

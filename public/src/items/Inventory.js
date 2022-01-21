@@ -1255,7 +1255,7 @@ class Inventory {
     drawImageTopLeft(toolbar, toolbarX, canvas.height - hotboxWidth - 10, hotboxWidth * 8, hotboxWidth);
     drawImage(
       toolbar_selector,
-      toolbarSelectorX + player.currentSlot * hotboxWidth * this.toolbarRatio,
+      toolbarSelectorX + player.currSlot * hotboxWidth * this.toolbarRatio,
       canvas.height - hotboxWidth / 2 - 10,
       selectorWidth / 2,
       selectorWidth / 2
