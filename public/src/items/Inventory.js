@@ -1115,8 +1115,8 @@ class Inventory {
       // Left face
       ctx.transform(0.5, horizontalScale, 0, verticalScale, xPos, yPos);
       ctx.drawImage(atlas, index * 16, 0, 16, 16, 0, 0, width, width);
-      ctx.resetTransform();
       drawRectangle(0, 0, width, width, "rgba(0,0,0,0.1)"); // Shade the left face
+      ctx.resetTransform();
 
       // Right face
       ctx.transform(0.5, -horizontalScale, 0, verticalScale, xPos + width / 2, yPos + width * horizontalScale);

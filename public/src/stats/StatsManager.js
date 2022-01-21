@@ -1,8 +1,11 @@
 import { drawRectangle, drawText, round } from "../lib/helper";
 import hud from "../gui/HUD";
+import threeStats from "./ThreeStats";
 
 let canvas = document.getElementById("canvas-hud");
 let ctx = canvas.getContext("2d");
+
+const marginTop = 105;
 
 export class Stat {
   constructor(name, value, key, round, func) {
@@ -59,8 +62,8 @@ export class Stat {
     let fontSize = 20;
     let margin = 5;
     let width = ctx.measureText(text).width + margin * 2;
-    drawRectangle(10 - margin + offset, index * fontSize + 55, width, fontSize, "black", { alpha: 0.2 });
-    drawText(text, 10 + offset, index * fontSize + 55, fontSize + "px Minecraft-Regular", "white", "left", "top");
+    drawRectangle(10 - margin + offset, index * fontSize + marginTop, width, fontSize, "black", { alpha: 0.2 });
+    drawText(text, 10 + offset, index * fontSize + marginTop, fontSize + "px Minecraft-Regular", "white", "left", "top");
 
     return width;
   }
@@ -79,7 +82,6 @@ class StatsManager {
     if (!hud.showStats) return;
 
     let index = 0;
-    drawText("", 10, 55, "20px Minecraft-Regular", "white", "left", "top");
     for (let i = 0; i < this.stats.length; i++) {
       let stat = this.stats[i];
       if (stat instanceof Array) {

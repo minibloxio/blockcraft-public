@@ -46,6 +46,7 @@ g.mouseRight = false;
 g.commandIndex = -1;
 g.enableZoom = false;
 g.zoomLevel = 3;
+g.refreshRate = -1;
 
 globalThis.g = g;
 
@@ -58,6 +59,14 @@ let states = {
   inGame: 5,
   disconnecting: 6,
 };
+
+// compute refresh rate after things have loaded
+setTimeout(() => {
+  const raf = requestAnimationFrame;
+  new Promise((r) => raf((t1) => raf((t2) => r(1000 / (t2 - t1))))).then((fps) => {
+    g.refreshRate = fps;
+  });
+}, 3000);
 
 // Toolbar
 export const toolbar = new Image();
@@ -73,5 +82,7 @@ icons.src = "./textures/gui/icons.png";
 export function isState(check) {
   return g.state == states[check];
 }
+
+globalThis.g = g;
 
 export { camera, scene, players, g, serverNames, serverList, connectionDelay };

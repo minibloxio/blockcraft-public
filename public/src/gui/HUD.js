@@ -32,7 +32,7 @@ class HUD {
     this.heartS = 0;
     this.heartShake = new Array(10).fill(0);
 
-    this.showStats = true;
+    this.showStats = false;
     this.updateInterval = 0;
     this.hudTime = Date.now();
 

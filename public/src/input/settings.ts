@@ -38,6 +38,7 @@ const keyMapping: [string, string][] = [
   // ["Toggle Perspective", "WIP"],
   ["Zoom", "x"],
   ["Respawn", "r"],
+  ["Debug Info", "f3"],
   ["HEADER", "Inventory"],
   ["Drop Selected Item", "q"],
   ["Open/Close Inventory", "e"],
@@ -101,10 +102,7 @@ export function addKeyboardControls() {
   }
 
   $(".change-key").on("keydown", function (e) {
-    if (e.keyCode == 32 || e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 18) e.preventDefault();
-  });
-
-  $(".change-key").on("keyup", function (e) {
+    e.preventDefault();
     let internal_key = e.target.getAttribute("data-keycode");
     let key_input = e.code;
 
@@ -156,7 +154,6 @@ export function addVideoControls() {
   addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
   //addSliderControl("Web Workers", "workers", 2, game, "numOfVoxelWorkers");
 
-  addSwitchControl("Statistics", "stats", false, hud, "showStats");
   addSwitchControl("Invert Mouse", "invertMouse", false, game, "invertMouse");
   addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow");
   addSwitchControl("Clouds", "cloud", false, stage, "showClouds", "generate");
@@ -286,12 +283,22 @@ function genDefaultKeyMap() {
   };
   let i;
 
+  // letters
   for (i = 0; i < 26; i++) {
     keyMap["Key" + String.fromCharCode(i + 65)] = String.fromCharCode(i + 97);
   }
 
+  // numbers
   for (i = 0; i < 10; i++) {
     keyMap["Digit" + i] = "" + i;
   }
+
+  // function keys
+  for (i = 1; i <= 12; i++) {
+    keyMap["F" + i] = "f" + i;
+  }
+
   return keyMap;
 }
+
+globalThis.keyMap = keyMap;
