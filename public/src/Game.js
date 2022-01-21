@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 import { g } from "./globals";
+import Ola from "ola";
 
 class Game {
   constructor() {

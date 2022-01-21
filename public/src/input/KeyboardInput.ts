@@ -1,23 +1,32 @@
 import * as $ from "jquery";
-import { bindKeys, keyPressed, keyMap } from "kontra";
-import player from "../Player";
-import chat from "../managers/ChatManager.js";
-import hud from "../gui/HUD";
-import { camera, g } from "../globals";
+import Cookies from "js-cookie";
+import { bindKeys, keyMap, keyPressed } from "kontra";
 import { giveCommandHint, nextCommand, prevCommand } from "../commands";
+import { camera, g } from "../globals";
+import hud from "../gui/HUD";
+import { axesHelper } from "../index.js";
 import inventory from "../items/Inventory";
+import chat from "../managers/ChatManager.js";
+import player from "../Player";
 import threeStats from "../stats/ThreeStats";
+import screenshotter from "../gui/Screenshot";
 
-var doublePressDelay = 200;
-var lastKeypressTime = 0;
+let doublePressDelay = 200;
+let lastKeypressTime = 0;
 
 export function keyPressedPlayer(key) {
   return keyPressed(key) && player.controls.enabled && !chat.showChatBar && g.initialized;
 }
 
-bindKeys("f", () => {
-  chat.addChat({ text: "Double tap space in creative mode to fly", color: "cyan" });
-});
+bindKeys(
+  "f",
+  () => {
+    if (player.controls.enabled && !chat.showChatBar && player.mode != "survival") {
+      chat.addChat({ text: "Double tap space in creative mode to fly", color: "cyan" });
+    }
+  },
+  { preventDefault: false, handler: "keydown" }
+);
 
 bindKeys(
   "space",
@@ -39,7 +48,7 @@ bindKeys(
   ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
   (e) => {
     if (!player.controls.enabled || chat.showChatBar) return;
-    player.currentSlot = parseInt(keyMap[e.code]) - 1;
+    player.currSlot = parseInt(keyMap[e.code]) - 1;
   },
   { preventDefault: false }
 );
@@ -140,7 +149,90 @@ $(window).on("keyup", function (event) {
 
 // function keys
 // ###########################################
+
+// Toggle camera mode
+let lastGamemode = undefined;
+bindKeys("f1", () => {
+  if (player.mode == "camera" && !player.toggleGUI) return;
+  lastGamemode = !player.toggleGUI ? player.mode : player.mode != "camera" ? player.mode : lastGamemode;
+  player.mode = !player.toggleGUI ? "camera" : lastGamemode;
+  hud.showStats = player.toggleGUI && Cookies.get("showStats") == "true";
+  threeStats.showStats = player.toggleGUI && (hud.showStats || game.debug == true);
+  !player.toggleGUI ? $("#chat-input").attr("placeholder", "") : $("#chat-input").attr("placeholder", "> Press Enter to Chat");
+
+  player.toggleGUI = !player.toggleGUI;
+});
+
+// Take a screenshot
+bindKeys("f2", () => {
+  screenshotter.takeScreenshot();
+});
+
+// Toggle stats list
 bindKeys("f3", () => {
   hud.showStats = !hud.showStats;
   threeStats.showStats = hud.showStats;
+  Cookies.set("showStats", hud.showStats ? "true" : "false", { expires: 365 });
+  chat.addChat({ text: "Stats list " + (hud.showStats ? "enabled" : "disabled"), discard: true });
 });
+
+// Toggle perspective
+bindKeys("f5", () => {
+  player.perspective = (player.perspective + 1) % 3;
+  player.toggleCameraPerspective();
+});
+
+// Toggle debug mode
+bindKeys("f7", () => {
+  game.debug = !game.debug;
+  threeStats.showStats = game.debug || hud.showStats;
+  Cookies.set("debug", game.debug ? "true" : "false", { expires: 365 });
+  updateDebug();
+
+  chat.addChat({ text: "Debug mode " + (game.debug ? "enabled" : "disabled"), discard: true });
+});
+
+// Toggle cinematic mode
+bindKeys("f8", (event) => {
+  event.preventDefault();
+  player.cinematicMode = !player.cinematicMode;
+  chat.addChat({ text: "Cinematic mode " + (player.cinematicMode ? "enabled" : "disabled"), discard: true });
+});
+
+// Toggle fullscreen
+bindKeys("f11", (event) => {
+  event.preventDefault();
+  if (!window.screenTop && !window.screenY) {
+    // fullscreen -> window
+    document.exitFullscreen();
+    chat.addChat({ text: "Exited fullscreen", discard: true });
+  } else {
+    // window -> fullscreen
+    document.documentElement.requestFullscreen();
+    chat.addChat({ text: "Entered fullscreen", discard: true });
+  }
+});
+
+function updateDebug() {
+  // Player bounding boxes
+  for (let id in players) {
+    let player = players[id];
+    player.bbox.visible = game.debug;
+  }
+  player.skeleton.getObjectByName("bbox").visible = game.debug ? true : false;
+
+  // Entity bounding boxes
+  for (let id in world.entities) {
+    let entity = world.entities[id];
+    entity.bbox.visible = game.debug;
+  }
+
+  // Axes helper
+  axesHelper.visible = !!game.debug;
+
+  // Chunk lines
+  for (let id in chunkManager.debugLines) {
+    let line = chunkManager.debugLines[id];
+    line.visible = game.debug;
+  }
+}

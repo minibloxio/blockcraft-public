@@ -684,3 +684,7 @@ export function updateGUISize() {
   chat.resize();
   hud.resize();
 }
+
+export function euclideanModulo(a, b) {
+  return ((a % b) + b) % b;
+}

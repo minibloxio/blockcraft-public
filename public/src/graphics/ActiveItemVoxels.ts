@@ -6,6 +6,7 @@ import player from "../Player";
 import world from "../managers/WorldManager";
 import { AnimationLerp, Keyframe } from "../lib/AnimationLerp";
 import Item3D from "./Item3D";
+import PlayerManager from "../managers/PlayerManager";
 
 const itemSize = 16;
 const canvas = document.createElement("canvas");
@@ -117,7 +118,6 @@ class ActiveItemVoxels {
     }
 
     this.bowCharge = player.bowCharge;
-
     this.currentItem = item.v;
   }
 
@@ -139,6 +139,10 @@ class ActiveItemVoxels {
     this.blockGroup.add(this.block);
   }
 
+  updateExternalItem(item) {
+    PlayerManager.updatePlayerHand(item, player);
+  }
+
   update() {
     // init arm
     if (!this.arm) {
@@ -149,12 +153,41 @@ class ActiveItemVoxels {
       this.root.add(this.arm);
     }
 
+    let currItem = player.getCurrItem();
+
+    // move hand
+    const timeSincePunch = Date.now() - player.lastPunch;
+    const punchLerp = timeSincePunch / 250;
+
     this.itemPixelsGroup.visible = false;
     this.blockGroup.visible = false;
     this.arm.visible = false;
 
     if (player.mode == "spectator" || player.mode == "camera") return;
-    let currItem = player.getCurrItem();
+
+    if (player.perspective > 0) {
+      if (currItem) {
+        if (currItem.class == "block") {
+          if (currItem.v == this.currentBlock) return;
+
+          this.currentBlock = currItem.v;
+          this.currentItem = null;
+          this.updateExternalItem(currItem);
+        } else if (currItem.class == "item") {
+          if (currItem.v == this.currentItem && player.bowCharge == this.bowCharge) return;
+
+          this.currentItem = currItem.v;
+          this.currentBlock = null;
+          this.bowCharge = player.bowCharge;
+          this.updateExternalItem(currItem);
+        }
+      } else {
+        this.updateExternalItem(currItem);
+        this.currentItem = null;
+        this.currentBlock = null;
+      }
+      return;
+    }
 
     // Update arm based on current item in hand
     if (currItem) {
@@ -171,11 +204,8 @@ class ActiveItemVoxels {
       this.arm.visible = true;
     }
 
-    // Move hand
-    const timeSincePunch = Date.now() - player.punching;
-    const punchLerp = timeSincePunch / 250;
-
-    if (player.blocking) {
+    // Update arm animation
+    if (player.isBlocking) {
       this.root.position.copy(swordBlockPos);
       this.root.quaternion.copy(swordBlockRot);
     } else if (punchLerp <= 1) {

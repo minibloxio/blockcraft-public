@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import * as $ from "jquery";
 
-import { PointerLockControls } from "./input/pointerlock";
+import { PointerLockControls } from "./input/PointerLock";
 import { camera, isState, g, scene, players } from "./globals";
 import textureManager from "./managers/TextureManager";
 import world, { updateVoxelGeometry } from "./managers/WorldManager";
@@ -13,6 +13,11 @@ import masterRenderer from "./graphics/MasterRenderer";
 import { random } from "./lib/helper";
 import activeItemVoxels from "./graphics/ActiveItemVoxels";
 import { keyPressedPlayer } from "./input/KeyboardInput";
+import hud from "./gui/HUD";
+import threeStats from "./stats/ThreeStats";
+import Cookies from "js-cookie";
+import { rotation } from "./input/PointerLock";
+import PlayerManager from "./managers/PlayerManager";
 
 declare var DEV_MODE: boolean;
 declare global {
@@ -35,7 +40,6 @@ for (let x = -1; x <= 1; x++) {
 
 const miningDelay = {
   water: Infinity,
-  bedrock: Infinity,
   leaves: 0.5,
   obsidian: 15,
 };
@@ -43,8 +47,15 @@ const miningDelay = {
 const blockSize = 16;
 
 class Player {
+  // Meta
+  name: any;
+  operator: boolean;
+
   // 3d stuff
   controls = new PointerLockControls(camera);
+  perspective = 0;
+  cinematicMode = false;
+  deltaFov = 0;
 
   // Sensitivity
   sens = 0.5;
@@ -61,16 +72,31 @@ class Player {
   mode = "survival";
   god = false;
 
-  // Movement
-
-  position = this.controls.getObject().position;
-  previousPosition = this.position.clone();
-  savedPosition = this.position.clone();
+  // Position, velocity, and direction
+  pos = this.controls.getObject().position;
+  previousPosition = this.pos.clone();
+  savedPosition = this.pos.clone();
   velocity = new THREE.Vector3();
   direction = new THREE.Vector3();
   knockbackVelocity = new THREE.Vector3();
   newMove = new THREE.Vector3();
+  fallCooldown = 0;
 
+  // Mesh velocity, rotation, and direction
+  vel = new THREE.Vector3();
+  rot = new THREE.Vector3();
+  dir = new THREE.Vector3();
+  localVel = new THREE.Vector3();
+
+  // Player animation variables
+  punching = false;
+  blocking = false;
+  walking = false;
+  sneaking = false;
+
+  // Player external hand
+
+  // Movement constants
   speed = 2;
   walkSpeed = 2;
   maxWalkSpeed = 2;
@@ -78,53 +104,57 @@ class Player {
   sprintSpeed = this.defaultMaxSprintSpeed;
   maxSprintSpeed = this.defaultMaxSprintSpeed;
   distanceMoved = 0;
-
   initialJumpVelocity = 150;
 
-  fly = false;
-  noClip = true;
-  fallCooldown = 0;
-
-  onObject = false; // Sees if player is on object
-  onObjectTime = 0;
-
+  // Bhop constants
   bhopTimeLimit = 0.05; // 50ms to jump before the sprint boost is reset
   bhopMaxSpeed = this.defaultMaxSprintSpeed + 0.2; // Maximum speed that can be reached through bhopping
   bhopRate = 0.05; // How much the speed ramps up after each successful bhop
 
-  deltaFov = 0;
+  // Movement types
+  fly = false;
+  noClip = true;
+
+  prevHeight: number;
+  onObject = false; // Sees if player is on object
+  onObjectTime = 0;
+
+  spawnpoint: any;
 
   // Events
-
   key = {
-    forward: 0,
-    backward: 0,
-    left: 0,
-    right: 0,
-    up: 0,
-    down: 0,
-    jump: 0,
-    sprint: 0,
-    shift: 0,
     leftClick: 0,
     rightClick: 0,
     lastRightClick: 0,
   };
 
   // World interaction
+  miningDelayConstant = 750;
+  placingDelay = 200;
+  respawnDelay = 1000;
+
   click = false;
   prevBlock = undefined;
 
   place = false;
+  placing: number;
   placeType = 2; // Type of block being placed
 
   blockT = 0;
-  punching = Date.now();
+  lastPunch = Date.now();
 
   lastRaycast = Date.now();
   nearbyMeshes = [];
   playerBoxes = [];
   picked = [];
+
+  // Wireframes
+  select_wireframe: THREE.LineSegments;
+  mine_box: THREE.Mesh;
+
+  // Water
+  headInWater: boolean;
+  inWater: boolean;
 
   // Player dimensions
   dim = {
@@ -138,48 +168,54 @@ class Player {
     headSize: 0.5 * blockSize,
     height: 1.8 * blockSize,
   };
-  skin = undefined;
-  miningDelayConstant = 750;
-  placingDelay = 200;
-  respawnDelay = 1000;
-  respawnTimer = Date.now();
-  allowRespawn = true;
-
-  // Player info
-  hp = 20;
-  lastHp = this.hp;
-  oxygen = 300;
-  hunger = 100;
 
   halfWidth: number;
   halfDepth: number;
   halfHeight: number;
 
-  headInWater: boolean;
+  // Respawn
+  respawnTimer = Date.now();
+  allowRespawn = true;
 
-  select_wireframe: THREE.LineSegments;
-  mine_box: THREE.Mesh;
-  bowCharge: number;
-  currentSlot: number;
+  // Player vitals
+  hp = 20;
+  lastHp = this.hp;
+  oxygen = 300;
   lastOxygenTick: number;
+  hunger = 100;
+
+  // Player appearance
+  skin = undefined;
+  armor = {
+    helmet: 0,
+    chestplate: 0,
+    leggings: 0,
+    boots: 0,
+  };
+  entity = new THREE.Group();
+  skeleton = new THREE.Group();
+
+  // Player inventory
+  toolbar: any;
+  inventory: any;
+  currSlot: number;
+
+  // Player arm animation
+  bowCharge: number;
+  drawingBow: boolean;
   punchT: number;
   stoppedPunching: boolean;
+  isBlocking: any;
   prevItem: string;
-  ping: number;
-  inWater: boolean;
-  prevHeight: number;
-  toolbar: any;
-
-  inventory: any;
-  biome: any;
-  name: any;
-  drawingBow: boolean;
-  blocking: number;
-  operator: boolean;
   prevState: any;
+
+  // Player GUI
   heartBlink: any;
-  placing: number;
-  spawnpoint: any;
+  toggleGUI: boolean;
+
+  // Stats
+  ping: number;
+  biome: any;
 
   constructor() {
     // Player appearance
@@ -210,9 +246,31 @@ class Player {
     scene.add(this.select_wireframe);
   }
 
+  // Add player mesh
+  initPlayerMesh() {
+    PlayerManager.addPlayerMesh(this);
+    PlayerManager.addSkeleton(this);
+    PlayerManager.setPlayerArmor(this);
+    let hand = this.toolbar[this.currSlot];
+    if (hand) PlayerManager.updatePlayerHand(hand, this);
+    this.entity = new THREE.Group();
+    this.entity.add(this.skeleton);
+
+    PlayerManager.updateNameTag(this, { hidden: true });
+    PlayerManager.setPlayerGamemode(this, this.mode);
+
+    // Add to scene
+    scene.add(this.entity);
+
+    this.toggleCameraPerspective();
+  }
+
   join(data) {
+    // Username
+    this.name = data.name;
+
     // Inventory
-    this.currentSlot = 0;
+    this.currSlot = 0;
     this.toolbar = [];
 
     // Spawn
@@ -227,6 +285,9 @@ class Player {
       this.operator = true;
       this.mode = "creative";
     }
+
+    // Player mesh
+    this.initPlayerMesh();
   }
 
   respawn(blockSize, pos?) {
@@ -239,7 +300,7 @@ class Player {
     // Respawn at given location
     if (pos) {
       // Set player position
-      this.position.set(pos.x, pos.y, pos.z);
+      this.pos.set(pos.x, pos.y, pos.z);
       this.controls.getObject().position.y = pos.y;
       this.savedPosition.y = pos.y;
     } else {
@@ -260,7 +321,7 @@ class Player {
         }
       }
       // Set player position
-      this.position.set(randomX * blockSize, resetHeight, randomZ * blockSize);
+      this.pos.set(randomX * blockSize, resetHeight, randomZ * blockSize);
       this.controls.getObject().position.y = resetHeight;
       this.savedPosition.y = resetHeight;
     }
@@ -275,10 +336,10 @@ class Player {
   }
 
   setCoords(coord) {
-    this.position.copy(coord);
-    this.previousPosition = this.position.clone();
-    this.savedPosition = this.position.clone();
-    this.prevHeight = this.position.y;
+    this.pos.copy(coord);
+    this.previousPosition = this.pos.clone();
+    this.savedPosition = this.pos.clone();
+    this.prevHeight = this.pos.y;
   }
 
   updateGamemode(god) {
@@ -296,14 +357,21 @@ class Player {
       console.log("Updated gamemode to " + this.mode);
       if (this.mode == "camera") {
         $("#chat-input").attr("placeholder", "");
+        hud.showStats = false;
+        threeStats.showStats = false;
       } else {
         $("#chat-input").attr("placeholder", "> Press Enter to Chat");
+        hud.showStats = Cookies.get("showStats") == "true";
+        threeStats.showStats = hud.showStats;
+        this.toggleGUI = false;
       }
+
+      PlayerManager.setPlayerGamemode(this, this.mode);
     }
   }
 
   getCurrItem() {
-    let item = this.toolbar[this.currentSlot];
+    let item = this.toolbar[this.currSlot];
     if (item && item.c > 0) return item;
   }
 
@@ -312,6 +380,10 @@ class Player {
     let vel = new THREE.Vector3();
     let mag = this.velocity.distanceTo(vel);
     camera.getWorldDirection(vel);
+    if (this.perspective == 2) {
+      vel.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+      vel.y *= -1;
+    }
     let playerVel = this.velocity.clone();
     let playerVelY = playerVel.y;
     playerVel.normalize();
@@ -374,7 +446,7 @@ class Player {
       if (this.bowCharge > 0) {
         // Release bow
         g.socket.emit("fireArrow", {
-          pos: this.position.clone(),
+          pos: this.pos.clone(),
           dir: this.getItemVel(),
           force: this.bowCharge,
         });
@@ -398,7 +470,7 @@ class Player {
       g.socket.emit("throwItem", {
         id: g.socket.id,
         name: throwable,
-        pos: this.position.clone(),
+        pos: this.pos.clone(),
         dir: this.getItemVel(),
       });
     }
@@ -407,7 +479,7 @@ class Player {
   moveHand() {
     if (this.mode == "spectator" || this.mode == "camera") return;
 
-    this.punchT = (Date.now() - this.punching) / 120; // Punching
+    this.punchT = (Date.now() - this.lastPunch) / 120; // Punching
 
     let hand = this.getCurrItem();
     let blockingSpeed = 10;
@@ -419,10 +491,10 @@ class Player {
       const isSword = SWORDS.map((x) => world.itemId[x]).includes(hand.v);
 
       if (isSword) {
-        this.blocking = this.key.rightClick;
+        this.isBlocking = this.key.rightClick;
       } else {
         this.key.rightClick = 0;
-        this.blocking =
+        this.isBlocking =
           this.key.rightClick && this.punchT > 1
             ? (this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1))
             : (this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta));
@@ -432,7 +504,7 @@ class Player {
       this.drawBow();
     } else {
       this.key.rightClick = 0;
-      this.blocking =
+      this.isBlocking =
         this.key.rightClick && this.punchT > 1
           ? (this.blockT = Math.min(this.blockT + blockingSpeed * g.delta, 1))
           : (this.blockT = Math.max(0, this.blockT - blockingSpeed * g.delta));
@@ -522,12 +594,12 @@ class Player {
 
   punch() {
     if (this.mode == "spectator" || this.mode == "camera") return;
-    if (this.blocking || !this.raycaster.camera || this.click) return;
+    if (this.isBlocking || !this.raycaster.camera || this.click) return;
     // Punch players
     let { blockSize } = world;
     this.raycaster.far = blockSize * 4;
     this.key.leftClick = Date.now();
-    this.punching = Date.now();
+    this.lastPunch = Date.now();
 
     this.playerBoxes.length = 0;
     for (let id in players) this.playerBoxes.push(players[id].skeleton);
@@ -579,7 +651,6 @@ class Player {
     }
   }
 
-  // Gets the block that the player is looking at
   getBlock() {
     if (this.mode != "creative") return;
 
@@ -608,17 +679,17 @@ class Player {
             for (let j = 0; j < 9; j++) {
               if (!this.toolbar[j] || this.toolbar[j].c == 0) {
                 this.toolbar[j] = item;
-                this.currentSlot = j;
+                this.currSlot = j;
                 foundSpace = true;
                 break;
               }
             }
             if (!foundSpace) {
-              this.toolbar[this.currentSlot] = item;
+              this.toolbar[this.currSlot] = item;
             }
             g.socket.emit("updateInventory", this.toolbar);
           } else {
-            this.currentSlot = i;
+            this.currSlot = i;
           }
 
           exists = true;
@@ -632,7 +703,7 @@ class Player {
         for (let i = 0; i < 9; i++) {
           let t = this.toolbar[i];
           if ((t && t.c == 0) || !t) {
-            this.currentSlot = i;
+            this.currSlot = i;
             this.toolbar[i] = { v: voxel, c: 1, class: "block" };
             g.socket.emit("updateInventory", this.toolbar);
             break;
@@ -640,14 +711,14 @@ class Player {
         }
       } else if (!exists && total == 9) {
         // Replace current slot with selected block
-        this.toolbar[this.currentSlot] = { v: voxel, c: 1, class: "block" };
+        this.toolbar[this.currSlot] = { v: voxel, c: 1, class: "block" };
         g.socket.emit("updateInventory", this.toolbar);
       }
     }
   }
 
   mine() {
-    if (this.blocking || this.mode == "spectator" || this.mode == "camera") return;
+    if (this.isBlocking || this.mode == "spectator" || this.mode == "camera") return;
 
     this.miningDelayConstant = this.mode == "survival" ? 750 : 200;
 
@@ -659,6 +730,8 @@ class Player {
       let x = Math.floor((this.closest.point.x - this.closest.face.normal.x) / blockSize);
       let y = Math.floor((this.closest.point.y - this.closest.face.normal.y) / blockSize);
       let z = Math.floor((this.closest.point.z - this.closest.face.normal.z) / blockSize);
+
+      if (y == 0) return;
 
       let miningDelta = Date.now() - this.key.leftClick; // How much time passed while mining
 
@@ -700,7 +773,7 @@ class Player {
         });
       } else if (this.key.leftClick && this.stoppedPunching) {
         // Continue punching animation
-        this.punching = Date.now();
+        this.lastPunch = Date.now();
         this.stoppedPunching = false;
       } else {
         // Stopped mining
@@ -744,9 +817,9 @@ class Player {
     if (this.place && typeof index == "number") {
       let armor = JSON.stringify(item);
       if (this.toolbar[inventory.limit + index]) {
-        this.toolbar[this.currentSlot] = JSON.parse(JSON.stringify(this.toolbar[inventory.limit + index]));
+        this.toolbar[this.currSlot] = JSON.parse(JSON.stringify(this.toolbar[inventory.limit + index]));
       } else {
-        this.toolbar[this.currentSlot] = undefined;
+        this.toolbar[this.currSlot] = undefined;
       }
       this.toolbar[inventory.limit + index] = JSON.parse(armor);
       g.socket.emit("updateInventory", this.toolbar);
@@ -800,7 +873,7 @@ class Player {
             t: item.v,
             class: item.class,
           });
-          this.punching = Date.now();
+          this.lastPunch = Date.now();
         }
 
         this.place = false;
@@ -819,7 +892,7 @@ class Player {
     let item = this.getCurrItem();
     if (!item || item.c <= 0) return;
 
-    let position = this.position.clone();
+    let position = this.pos.clone();
     position.y -= 8;
 
     let droppedItem = {
@@ -873,8 +946,8 @@ class Player {
       dir.multiplyScalar(Math.min(50 * delta * this.speed, 50 * delta * this.velocity.distanceTo(new THREE.Vector3(0, 0, 0))));
       this.velocity.divideScalar(Math.max(1 + delta * 50, 1.01));
 
-      this.previousPosition = this.position.clone();
-      let currentPosition = this.position.clone();
+      this.previousPosition = this.pos.clone();
+      let currentPosition = this.pos.clone();
 
       currentPosition.add(dir);
       let move = currentPosition.sub(this.previousPosition);
@@ -906,7 +979,7 @@ class Player {
       // Reset shift position
 
       if (!this.fly) {
-        this.position.y = this.savedPosition.y;
+        this.pos.y = this.savedPosition.y;
         this.halfHeight = blockSize * 0.8;
       }
     }
@@ -940,7 +1013,7 @@ class Player {
         currentVel = [original * 1.3, original, original * 1.3];
       }
 
-      this.previousPosition = this.position.clone();
+      this.previousPosition = this.pos.clone();
       let currentPosition = this.controls.getObject().clone(false);
       currentPosition.translateOnAxis(axesVec, currentVel[i]);
       let move = currentPosition.position.sub(this.previousPosition);
@@ -973,17 +1046,17 @@ class Player {
       let savedMove = this.newMove.clone();
 
       // Test each axis in collsion
-      let previousPosition = this.position.clone();
+      let previousPosition = this.pos.clone();
 
       for (let axes of test_axes) {
         if (axes === "y" && !this.fly) {
           // Test for y
-          this.position.y += this.newMove.y;
+          this.pos.y += this.newMove.y;
           let collision = this.collides();
           if (!collision) continue;
 
-          if ((!this.inWater && this.velocity.y <= 0) || this.position.y <= blockSize) {
-            let jumpDiff = Math.floor((this.prevHeight - this.position.y) / blockSize) - 3;
+          if ((!this.inWater && this.velocity.y <= 0) || this.pos.y <= blockSize) {
+            let jumpDiff = Math.floor((this.prevHeight - this.pos.y) / blockSize) - 3;
 
             if (jumpDiff > 0 && jumpDiff < 500 && this.mode == "survival" && !this.god) {
               // Fall damage
@@ -994,7 +1067,7 @@ class Player {
               camera.rotation.order = "YXZ";
               camera.rotation.z = Math.PI / 12; // Yoink the camera
               this.fallCooldown = Date.now();
-              this.prevHeight = this.position.y;
+              this.prevHeight = this.pos.y;
             }
 
             this.velocity.y = 0;
@@ -1009,7 +1082,7 @@ class Player {
             this.maxSprintSpeed = Math.min(this.bhopMaxSpeed, this.maxSprintSpeed + this.bhopRate * 10);
           }
           // Put back before testing y
-          this.position.y = previousPosition.y;
+          this.pos.y = previousPosition.y;
         }
 
         let separate_axes = axes.split("");
@@ -1030,30 +1103,30 @@ class Player {
 
         for (let axis of separate_axes) {
           // Test for y during shift mode
-          this.position.y += savedMove.y;
+          this.pos.y += savedMove.y;
           if (!this.collides() && this.onObject && keyPressedPlayer("alt")) {
             this.velocity[axis] = 0;
             this.newMove[axis] = 0;
           }
           // Put back before testing y
-          this.position.y = previousPosition.y;
+          this.pos.y = previousPosition.y;
 
-          this.position[axis] = previousPosition[axis];
+          this.pos[axis] = previousPosition[axis];
         }
       }
     }
 
     // Update player position
-    this.position.x += this.newMove.x;
+    this.pos.x += this.newMove.x;
     if (!(!this.onObject && this.newMove.y === 0) && !this.fly) {
-      this.position.y += this.newMove.y;
+      this.pos.y += this.newMove.y;
     } else {
-      this.position.y += this.newMove.y;
+      this.pos.y += this.newMove.y;
     }
-    this.position.z += this.newMove.z;
+    this.pos.z += this.newMove.z;
 
     // Stop sprinting if you hit a block
-    this.distanceMoved = this.previousPosition.sub(this.position).length() / delta / blockSize;
+    this.distanceMoved = this.previousPosition.sub(this.pos).length() / delta / blockSize;
     if (this.distanceMoved < 1.5 && this.onObject === false && !this.fly) {
       this.speed = 2;
       this.maxSprintSpeed = this.defaultMaxSprintSpeed;
@@ -1061,16 +1134,16 @@ class Player {
 
     // Record last height on ground
     if (this.onObject || this.fly || this.inWater) {
-      this.prevHeight = this.position.y;
+      this.prevHeight = this.pos.y;
     }
 
     // Check if stuck
     if (this.collides() && !this.noClip) {
-      this.position.y += blockSize * delta * 30; // Move up at a rate of 10 blocks per second
+      this.pos.y += blockSize * delta * 30; // Move up at a rate of 10 blocks per second
     }
 
     // Save position
-    this.savedPosition = this.position.clone();
+    this.savedPosition = this.pos.clone();
 
     // BHOP
     if (this.onObject) {
@@ -1100,14 +1173,14 @@ class Player {
       }
       this.maxSprintSpeed = this.defaultMaxSprintSpeed;
     }
-    if (keyPressedPlayer("alt") && !this.fly && this.onObject) {
+    if (keyPressedPlayer("alt") && !this.fly && this.onObject && this.mode != "spectator") {
       this.speed = 0.75;
 
-      this.position.y += -this.walkSpeed * 1.5;
+      this.pos.y += -this.walkSpeed * 1.5;
       this.halfHeight = blockSize * 0.6;
     }
-    if (this.drawingBow || (this.blocking && this.mode == "survival")) this.speed = 0.75;
-    if ((this.drawingBow || this.blocking) && keyPressedPlayer("alt") && this.mode == "survival") this.speed = 0.5;
+    if (this.drawingBow || (this.isBlocking && this.mode == "survival")) this.speed = 0.75;
+    if ((this.drawingBow || this.isBlocking) && keyPressedPlayer("alt") && this.mode == "survival") this.speed = 0.5;
 
     // Change camera fov when sprinting
 
@@ -1136,7 +1209,6 @@ class Player {
     this.checkCollision(delta);
   }
 
-  // Update vitals
   updateVitals() {
     if (this.mode != "survival") return;
 
@@ -1161,6 +1233,57 @@ class Player {
     }
   }
 
+  updateCamera() {
+    if (!this.cinematicMode) return;
+    let yawObject = this.controls.getObject();
+    let pitchObject = yawObject.children[0];
+
+    yawObject.rotation.y = rotation.y;
+    pitchObject.rotation.x = rotation.x;
+  }
+
+  toggleCameraPerspective() {
+    // Reset to default camera
+    camera.position.set(0, 0, 0);
+    camera.rotation.set(0, 0, 0);
+    this.entity.visible = false;
+
+    if (this.perspective == 0) {
+      chat.addChat({ text: "Camera Perspective: First Person", discard: true });
+    } else if (this.perspective == 1) {
+      camera.position.z = 100;
+      camera.position.y = 3;
+
+      chat.addChat({ text: "Camera Perspective: Third Person (back)", discard: true });
+      this.entity.visible = true;
+    } else if (this.perspective == 2) {
+      camera.rotation.y = Math.PI;
+      camera.position.z = -100;
+      camera.position.y = 3;
+
+      chat.addChat({ text: "Camera Perspective: Third Person (front)", discard: true });
+      this.entity.visible = true;
+    }
+
+    activeItemVoxels.currentItem = null;
+    activeItemVoxels.currentBlock = null;
+  }
+
+  updatePlayerMesh() {
+    if (this.perspective == 0) return;
+
+    this.punching = player.punchT < 2;
+    this.blocking = player.isBlocking > 0;
+    this.walking = new THREE.Vector3(player.velocity.x, 0, player.velocity.z).length() > 2;
+    this.sneaking = keyPressedPlayer("alt");
+    this.rot = this.controls.getObject().rotation.toVector3();
+    camera.getWorldDirection(this.dir);
+    if (this.perspective == 2) this.dir.y *= -1;
+    this.vel = this.newMove;
+    this.localVel = this.velocity;
+    PlayerManager.updatePlayer(this);
+  }
+
   update(delta) {
     if (this.hp <= 0 || !g.initialized || !g.joined || !isState("inGame")) return;
 
@@ -1174,10 +1297,12 @@ class Player {
     this.move(delta);
 
     this.updateVitals();
+    this.updateCamera();
+    this.updatePlayerMesh();
   }
 
-  // Update client with server information
   updateClient(data) {
+    // Update health
     if (data && data.hp != this.hp) {
       this.heartBlink = game.tick.value;
       if (!this.lastHp || data.hp > this.lastHp) {
@@ -1203,18 +1328,18 @@ class Player {
   collides() {
     let { blockSize } = world;
 
-    let posX = Math.floor(this.position.x / blockSize);
-    let posZ = Math.floor(this.position.z / blockSize);
+    let posX = Math.floor(this.pos.x / blockSize);
+    let posZ = Math.floor(this.pos.z / blockSize);
 
     // Check  if under water
     let x = posX;
-    let y = Math.floor((this.position.y - blockSize * 1.62) / blockSize);
+    let y = Math.floor((this.pos.y - blockSize * 1.62) / blockSize);
     let z = posZ;
 
     let voxel1 = world.getVoxel(x, y, z);
 
     x = posX;
-    y = Math.floor((this.position.y + blockSize * 0.2) / blockSize);
+    y = Math.floor((this.pos.y + blockSize * 0.2) / blockSize);
     z = posZ;
 
     let voxel2 = world.getVoxel(x, y, z);
@@ -1225,7 +1350,7 @@ class Player {
     this.inWater = voxel1 == world.blockId["water"] || voxel2 == world.blockId["water"];
 
     x = posX;
-    y = Math.floor(this.position.y / blockSize);
+    y = Math.floor(this.pos.y / blockSize);
     z = posZ;
 
     let voxel = world.getVoxel(x, y, z);
@@ -1237,13 +1362,13 @@ class Player {
     // Head and feet
 
     x = posX;
-    y = Math.floor((this.position.y - this.halfHeight * 2) / blockSize);
+    y = Math.floor((this.pos.y - this.halfHeight * 2) / blockSize);
     z = posZ;
 
     if (this.collideVoxel(x, y, z)) return true;
 
     x = posX;
-    y = Math.floor((this.position.y + blockSize * 0.2) / blockSize);
+    y = Math.floor((this.pos.y + blockSize * 0.2) / blockSize);
     z = posZ;
 
     if (this.collideVoxel(x, y, z)) return true;
@@ -1252,9 +1377,9 @@ class Player {
 
     for (let i = -1; i < 2; i += 2) {
       for (let j = -1; j < 2; j += 2) {
-        x = Math.floor((this.position.x + i * blockSize * 0.25) / blockSize);
-        y = Math.floor(this.position.y / blockSize);
-        z = Math.floor((this.position.z + i * blockSize * 0.25) / blockSize);
+        x = Math.floor((this.pos.x + i * blockSize * 0.25) / blockSize);
+        y = Math.floor(this.pos.y / blockSize);
+        z = Math.floor((this.pos.z + i * blockSize * 0.25) / blockSize);
 
         if (this.collideVoxel(x, y, z)) return true;
       }
@@ -1264,9 +1389,9 @@ class Player {
 
     for (let i = -1; i < 2; i += 2) {
       for (let j = -1; j < 2; j += 2) {
-        x = Math.floor((this.position.x + i * blockSize * 0.25) / blockSize);
-        y = Math.floor((this.position.y - blockSize * 0.8) / blockSize);
-        z = Math.floor((this.position.z + j * blockSize * 0.25) / blockSize);
+        x = Math.floor((this.pos.x + i * blockSize * 0.25) / blockSize);
+        y = Math.floor((this.pos.y - blockSize * 0.8) / blockSize);
+        z = Math.floor((this.pos.z + j * blockSize * 0.25) / blockSize);
 
         if (this.collideVoxel(x, y, z)) return true;
       }
@@ -1276,9 +1401,9 @@ class Player {
 
     for (let i = -1; i < 2; i += 2) {
       for (let j = -1; j < 2; j += 2) {
-        x = Math.floor((this.position.x + i * blockSize * 0.25) / blockSize);
-        y = Math.floor((this.position.y - this.halfHeight * 2) / blockSize);
-        z = Math.floor((this.position.z + j * blockSize * 0.25) / blockSize);
+        x = Math.floor((this.pos.x + i * blockSize * 0.25) / blockSize);
+        y = Math.floor((this.pos.y - this.halfHeight * 2) / blockSize);
+        z = Math.floor((this.pos.z + j * blockSize * 0.25) / blockSize);
 
         if (this.collideVoxel(x, y, z)) return true;
       }

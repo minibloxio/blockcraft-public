@@ -47,7 +47,7 @@ module.exports = class Bot {
 
     this.bot.sneaking = Date.now() % 1000 < 500;
 
-    //this.bot.rot.y += 0.04;
+    this.bot.rot.y += 0.04;
 
     // if (Date.now() - this.lastHandUpdate > 500) {
     //   this.lastHandUpdate = Date.now();

@@ -32,11 +32,11 @@ $(document).bind("wheel", function (e) {
     camera.zoom = g.zoomLevel;
   } else {
     if (scrollDelta * scrollDirection > 0) {
-      player.currentSlot += 1;
-      if (player.currentSlot > 8) player.currentSlot = 0;
+      player.currSlot += 1;
+      if (player.currSlot > 8) player.currSlot = 0;
     } else {
-      player.currentSlot -= 1;
-      if (player.currentSlot < 0) player.currentSlot = 8;
+      player.currSlot -= 1;
+      if (player.currSlot < 0) player.currSlot = 8;
     }
   }
 });

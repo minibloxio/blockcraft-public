@@ -7,7 +7,7 @@ import { drawRectangle, drawRect, drawImage, drawImageTopLeft, drawText, clamp }
 import { g, toolbar, toolbar_selector } from "../globals";
 import { mouse } from "../input/MouseInput";
 import Recipe from "./RecipeChecker";
-import { getDroppedItems } from "../input/pointerlock";
+import PointerLock from "../input/PointerLock";
 import { keyPressed } from "kontra";
 
 // Initiate canvas
@@ -643,12 +643,12 @@ class Inventory {
     if (type != "hover" && !this.withinInventory() && !this.drop && !this.pickup && selectedItem && selectedItem.c > 0) {
       if (type == "left") {
         // Drop all items from hand
-        g.socket.emit("dropItems", getDroppedItems([this.selectedItem]));
+        g.socket.emit("dropItems", PointerLock.getDroppedItems([this.selectedItem]));
 
         this.selectedItem = undefined;
       } else if (type == "right") {
         // Drop one item from hand
-        g.socket.emit("dropItems", getDroppedItems([this.selectedItem], 1));
+        g.socket.emit("dropItems", PointerLock.getDroppedItems([this.selectedItem], 1));
         if (this.selectedItem.c > 0 && !this.drop) {
           // Remove one item
           this.selectedItem.c -= 1;
@@ -1255,7 +1255,7 @@ class Inventory {
     drawImageTopLeft(toolbar, toolbarX, canvas.height - hotboxWidth - 10, hotboxWidth * 8, hotboxWidth);
     drawImage(
       toolbar_selector,
-      toolbarSelectorX + player.currentSlot * hotboxWidth * this.toolbarRatio,
+      toolbarSelectorX + player.currSlot * hotboxWidth * this.toolbarRatio,
       canvas.height - hotboxWidth / 2 - 10,
       selectorWidth / 2,
       selectorWidth / 2

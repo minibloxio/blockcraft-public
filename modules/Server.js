@@ -288,6 +288,7 @@ module.exports = class World {
       vel: { x: 0, y: 0, z: 0 },
       rot: { x: 0, y: 0, z: 0 },
       dir: { x: 0, y: 0, z: 0 },
+      localVel: { x: 0, y: 0, z: 0 },
       hp: 20,
       dead: false,
       toolbar: [

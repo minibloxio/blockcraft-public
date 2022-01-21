@@ -3,14 +3,14 @@
 */
 
 import * as THREE from "three";
+import { disconnectServer } from ".";
+import { g, players } from "./globals";
+import { clamp, round } from "./lib/helper";
 import chat from "./managers/ChatManager";
+import chunkManager from "./managers/ChunkManager";
 import world from "./managers/WorldManager";
 import player from "./Player";
-import chunkManager from "./managers/ChunkManager";
-
-import { players, g } from "./globals";
-import { round, clamp } from "./lib/helper";
-import { disconnectServer } from ".";
+import Screenshot from "./gui/Screenshot";
 
 let commandsInit = JSON.stringify({
   gamemode: {
@@ -120,6 +120,14 @@ let commandsInit = JSON.stringify({
   },
   spawn: {
     hint: "- Spawns a bot (requires operator status)",
+  },
+  screenshot: {
+    hint: "<all|renderer> - Takes a screenshot of the specified type",
+    hints: {
+      all: "Takes a screenshot of the entire screen",
+      renderer: "Takes a screenshot of the renderer",
+    },
+    error: "Invalid type to screenshot",
   },
 });
 let commands = JSON.parse(commandsInit);
@@ -388,7 +396,7 @@ export function giveCommandHint(msg, autocomplete) {
 function getCoord(msg, pos, decimalPlace) {
   let x, y, z;
   if (msg[0] && msg[0].includes("~")) {
-    x = round(player.position.x / world.blockSize, decimalPlace);
+    x = round(player.pos.x / world.blockSize, decimalPlace);
     let dx = parseInt(msg[0].replace("~", ""));
     if (!isNaN(dx)) x += dx;
   } else if (msg[0]) {
@@ -396,7 +404,7 @@ function getCoord(msg, pos, decimalPlace) {
     x = x == 0 ? "0" : x;
   }
   if (msg[1] && msg[1].includes("~")) {
-    y = round(player.position.y / world.blockSize, decimalPlace);
+    y = round(player.pos.y / world.blockSize, decimalPlace);
     let dy = parseInt(msg[1].replace("~", ""));
     if (!isNaN(dy)) y += dy;
   } else if (msg[1]) {
@@ -404,7 +412,7 @@ function getCoord(msg, pos, decimalPlace) {
     y = y == 0 ? "0" : y;
   }
   if (msg[2] && msg[2].includes("~")) {
-    z = round(player.position.z / world.blockSize, decimalPlace);
+    z = round(player.pos.z / world.blockSize, decimalPlace);
     let dz = parseInt(msg[2].replace("~", ""));
     if (!isNaN(dz)) z += dz;
   } else if (msg[2]) {
@@ -479,6 +487,16 @@ export function checkCommand(msg) {
     damagePlayer(msg);
   } else if (msg[0] == "save") {
     saveWorld();
+  } else if (msg[0] == "spawn") {
+    spawnBot(msg);
+  } else if (msg[0] == "screenshot" || msg[0] == "ss") {
+    screenshot(msg[1]);
+  } else if (msg[0] == "spawn") {
+    spawnBot(msg);
+  } else if (msg[0] == "spawn") {
+    spawnBot(msg);
+  } else if (msg[0] == "spawn") {
+    spawnBot(msg);
   } else if (msg[0] == "spawn") {
     spawnBot(msg);
   } else {
@@ -734,9 +752,9 @@ function giveItem(msg) {
 function clear(type) {
   if (type == "hand") {
     // Clear the hand
-    let item = player.toolbar[player.currentSlot];
+    let item = player.toolbar[player.currSlot];
     if (item) {
-      g.socket.emit("clearHand", player.currentSlot);
+      g.socket.emit("clearHand", player.currSlot);
       let thing = item.class == "block" ? world.blockOrder[item.v] : world.itemOrder[item.v];
       chat.addChat({
         text: "Cleared " + item.c + " " + thing + " from hand",
@@ -960,7 +978,7 @@ function killPlayer(msg) {
 
 // Set spawnpoint
 function setSpawn() {
-  player.spawnpoint = player.position.clone();
+  player.spawnpoint = player.pos.clone();
   chat.addChat({
     text: "Set spawnpoint to x: " + round(player.spawnpoint.x) + " y: " + round(player.spawnpoint.y) + " z: " + round(player.spawnpoint.z),
   });
@@ -968,7 +986,7 @@ function setSpawn() {
 
 // Set home
 function setHome() {
-  player.home = player.position.clone();
+  player.home = player.pos.clone();
   chat.addChat({
     text: "Set home to x: " + round(player.home.x) + " y: " + round(player.home.y) + " z: " + round(player.home.z),
   });
@@ -1121,4 +1139,13 @@ function spawnBot(msg) {
     return;
   }
   g.socket.emit("spawnBot", msg[0]);
+}
+
+// Screenshot
+function screenshot(type) {
+  if (!type || type == "all") {
+    Screenshot.takeScreenshot();
+  } else if (type == "renderer") {
+    Screenshot.takeScreenshot(true);
+  }
 }

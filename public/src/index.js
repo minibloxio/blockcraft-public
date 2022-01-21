@@ -11,7 +11,7 @@ import { showSettings } from "./gui/mainmenu/settings";
 import "./gui/mainmenu/tabs";
 import "./input/input";
 import { update as updateKeyboardInput } from "./input/KeyboardInput";
-import initPointerLock, { onWindowResize, requestPointerLock } from "./input/pointerlock";
+import PointerLock, { onWindowResize } from "./input/PointerLock";
 import { addKeyboardControls, addVideoControls } from "./input/settings";
 import inventory from "./items/Inventory";
 import { round, updateGUISize } from "./lib/helper";
@@ -28,6 +28,7 @@ import stage from "./Stage";
 import stats from "./stats/ThreeStats.ts";
 import { initStatistics } from "./stats/statslist";
 import { keyPressedPlayer } from "./input/KeyboardInput";
+import threeStats from "./stats/ThreeStats";
 
 /*
 Authenticates the player and provides server details from each running server.
@@ -137,14 +138,14 @@ $(document).ready(function () {
     }
   });
 
-  if (DEV_MODE) {
-    // TODO: Add callbacks to nextState() so setTimeout isn't needed
-    nextState();
-    $("#direct-connect-input").val("localhost:3001");
-    nextState();
-    nextState();
-    setTimeout(nextState, 2000);
-  }
+  // if (DEV_MODE) {
+  //   // TODO: Add callbacks to nextState() so setTimeout isn't needed
+  //   nextState();
+  //   $("#direct-connect-input").val("localhost:3001");
+  //   nextState();
+  //   nextState();
+  //   setTimeout(nextState, 2000);
+  // }
 });
 
 // Menu progression states
@@ -197,7 +198,7 @@ function nextState(e) {
   } else if (isState("loadingChunks") && Object.keys(chunkManager.currChunks).length >= g.maxChunks) {
     // Loading Chunks -> In Game
     console.log("Requesting pointer lock");
-    requestPointerLock();
+    PointerLock.requestPointerLock();
     updateGUISize();
     chat.initChat();
 
@@ -221,10 +222,10 @@ function nextState(e) {
         disconnectServer();
       } else {
         // Return to game
-        requestPointerLock();
+        PointerLock.requestPointerLock();
       }
     } else {
-      requestPointerLock();
+      PointerLock.requestPointerLock();
     }
   } else if (isState("disconnecting")) {
     // Disconnecting from server
@@ -261,13 +262,16 @@ function init() {
 
   camera.add(axesHelper);
 
+  hud.showStats = Cookies.get("showStats") === "true";
+  game.debug = Cookies.get("debug") === "true";
+  threeStats.showStats = hud.showStats;
+
   addVideoControls(); // Add video settings
   addKeyboardControls(); // Add keyboard controls
   initStatistics(); // Add statistics to record
   masterRenderer.init();
-  initPointerLock(); // Initialize pointer lock
+  PointerLock.initPointerLock(); // Initialize pointer lock
   updateGUISize(); // Update the GUI size
-
   workerManager.init();
 
   console.log("Game initialized in " + (Date.now() - t) + "ms"); // Log time
@@ -334,16 +338,17 @@ function sendPacket() {
   if (Date.now() - game.lastPacket > game.packetDelay) {
     game.lastPacket = Date.now();
     g.socket.emit("packet", {
-      pos: player.position,
+      pos: player.pos,
       vel: player.newMove,
+      localVel: player.velocity,
       onObject: player.onObject,
-      rot: player.controls.getObject().rotation.toVector3(), // Rotation of body
-      dir: camera.getWorldDirection(new THREE.Vector3()), // Rotation of head
-      walking: new THREE.Vector3(player.velocity.x, 0, player.velocity.z).length() > 2, // CHANGED
-      sneaking: keyPressedPlayer("alt"),
-      punching: player.punchT < 2,
-      blocking: player.blockT > 0,
-      currSlot: player.currentSlot,
+      rot: player.rot, // Rotation of body
+      dir: player.dir, // Rotation of head
+      walking: player.walking, // CHANGED
+      sneaking: player.sneaking,
+      punching: player.punching,
+      blocking: player.blocking,
+      currSlot: player.currSlot,
       mode: player.mode,
       fps: round(stats.fps, 1),
       showInventory: inventory.showInventory,
@@ -450,7 +455,7 @@ g.socket.on("joinResponse", function (data) {
   player.join(data);
 
   // Set chunk pos
-  chunkManager.cellPos = world.computeCellFromPlayer(player.position.x, player.position.y, player.position.z);
+  chunkManager.cellPos = world.computeCellFromPlayer(player.pos.x, player.pos.y, player.pos.z);
 
   // Receive current server players
   let serverPlayers = data.serverPlayers;
@@ -518,16 +523,17 @@ g.socket.on("removePlayer", function (id) {
   if (!g.initialized || !players[id]) return;
 
   let isBot = players[id].type == "bot";
+  let name = players[id].name;
 
   scene.remove(players[id].entity);
+  delete players[id];
   if (isBot) return;
 
   chat.addChat({
-    text: players[id].name + " has left the server",
+    text: name + " has left the server",
     color: "yellow",
     timer: 3000,
   });
-  delete players[id];
 });
 
 // Receive knockback

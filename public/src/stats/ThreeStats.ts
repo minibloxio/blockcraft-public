@@ -18,6 +18,7 @@ class ThreeStats {
   public set showStats(v: boolean) {
     this._shown = v;
     this.dom.style.display = v ? "block" : "none";
+    this.dom.style.zIndex = "1";
   }
 
   public get showStats() {
@@ -54,7 +55,10 @@ class ThreeStats {
       if (this.memPanel) {
         // @ts-ignore
         let memory = performance.memory;
-        this.memPanel.update(memory.usedJSHeapSize / 1048576, memory.jsHeapSizeLimit / 1048576);
+        const MB = 1024 * 1024;
+        let maxMemory = memory.jsHeapSizeLimit / MB;
+        maxMemory /= 4;
+        this.memPanel.update(memory.usedJSHeapSize / MB, maxMemory);
       }
     }
     return time;
