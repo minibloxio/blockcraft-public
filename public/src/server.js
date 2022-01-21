@@ -249,20 +249,27 @@ function updatePlayer(p) {
   // Update nametag rotation
   p.nameTag.quaternion.copy(camera.getWorldQuaternion(new THREE.Quaternion()));
 
-  let angle1 = new THREE.Euler().setFromQuaternion(p.body.quaternion).y;
-  let angle2 = new THREE.Euler().setFromQuaternion(p.neck.quaternion).y;
+  const PI = Math.PI;
+  let angle1 = euclideanModulo(p.neck.rotation.y + PI, PI * 2);
+  let angle2 = new THREE.Quaternion();
+  p.body.getWorldQuaternion(angle2);
+  angle2 = new THREE.Euler().setFromQuaternion(angle2, "YXZ").y + PI;
 
+  // Get the delta between the two angles
+  let angleTo = p.neck.quaternion.angleTo(p.body.quaternion);
   let diff = angle1 - angle2;
-  let yawDiff = round(((diff + Math.PI) % (Math.PI * 2)) - Math.PI, 2);
-  let yawDiff2 = -p.body.quaternion.angleTo(p.neck.quaternion) * (yawDiff * Math.sign(dir.z));
+  let yawDiff = round(((diff + PI) % (PI * 2)) - PI, 2);
+  let yawMod = euclideanModulo(yawDiff, PI * 2);
+  let sign = yawMod > 0 && yawMod < PI ? -0.6 : 0.6;
+  yawDiff = angleTo * sign;
 
   if (p.bowCharge > 0) {
-    let pitchDiff = (dir.y * Math.PI) / 2;
-    p.leftShoulder.rotation.set(Math.PI / 2 + pitchDiff, -0.022, 0.74 + yawDiff2);
-    p.rightShoulder.rotation.set(Math.PI / 2 + pitchDiff, 0, yawDiff2);
+    let pitchDiff = (dir.y * PI) / 2;
+    p.leftShoulder.rotation.set(PI / 2 + pitchDiff, -0.022, 0.74 + yawDiff);
+    p.rightShoulder.rotation.set(PI / 2 + pitchDiff, 0, yawDiff);
   } else if (p.sneaking) {
-    p.leftShoulder.rotation.set(-Math.PI / 16, 0, 0);
-    p.rightShoulder.rotation.set(-Math.PI / 16, 0, 0);
+    p.leftShoulder.rotation.set(-PI / 16, 0, 0);
+    p.rightShoulder.rotation.set(-PI / 16, 0, 0);
   } else {
     p.leftShoulder.rotation.set(0, 0, 0);
     p.rightShoulder.rotation.set(0, 0, 0);
