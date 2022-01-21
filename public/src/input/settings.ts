@@ -102,10 +102,7 @@ export function addKeyboardControls() {
   }
 
   $(".change-key").on("keydown", function (e) {
-    if (e.keyCode == 32 || e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 18) e.preventDefault();
-  });
-
-  $(".change-key").on("keyup", function (e) {
+    e.preventDefault();
     let internal_key = e.target.getAttribute("data-keycode");
     let key_input = e.code;
 
