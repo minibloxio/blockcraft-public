@@ -394,6 +394,7 @@ io.on("connection", function (socket_) {
 
     // Update punching status
     if (!data.cmd) player.punching = true;
+    if (data.y == 0) return;
     world.setVoxel(data.x, data.y, data.z, data.t, true, true);
     world.updatedBlocks.push(data);
 

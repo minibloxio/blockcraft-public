@@ -35,7 +35,6 @@ for (let x = -1; x <= 1; x++) {
 
 const miningDelay = {
   water: Infinity,
-  bedrock: Infinity,
   leaves: 0.5,
   obsidian: 15,
 };
@@ -659,6 +658,8 @@ class Player {
       let x = Math.floor((this.closest.point.x - this.closest.face.normal.x) / blockSize);
       let y = Math.floor((this.closest.point.y - this.closest.face.normal.y) / blockSize);
       let z = Math.floor((this.closest.point.z - this.closest.face.normal.z) / blockSize);
+
+      if (y == 0) return;
 
       let miningDelta = Date.now() - this.key.leftClick; // How much time passed while mining
 
