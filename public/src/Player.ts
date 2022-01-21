@@ -16,6 +16,7 @@ import { keyPressedPlayer } from "./input/KeyboardInput";
 import hud from "./gui/HUD";
 import threeStats from "./stats/ThreeStats";
 import Cookies from "js-cookie";
+import { rotation } from "./input/PointerLock";
 
 declare var DEV_MODE: boolean;
 declare global {
@@ -1173,6 +1174,35 @@ class Player {
     }
   }
 
+  updateCamera() {
+    if (!this.cinematicMode) return;
+    let yawObject = this.controls.getObject();
+    let pitchObject = yawObject.children[0];
+
+    yawObject.rotation.y = rotation.y;
+    pitchObject.rotation.x = rotation.x;
+  }
+
+  updateCameraPerspective() {
+    // Reset to default camera
+    camera.position.set(0, 0, 0);
+    camera.rotation.set(0, 0, 0);
+
+    this.perspective = (this.perspective + 1) % 3;
+    if (this.perspective == 0) {
+      chat.addChat({ text: "Camera Perspective: First Person", discard: true });
+    } else if (this.perspective == 1) {
+      camera.position.z = 100;
+
+      chat.addChat({ text: "Camera Perspective: Third Person (back)", discard: true });
+    } else if (this.perspective == 2) {
+      camera.rotation.y = Math.PI;
+      camera.position.z = -100;
+
+      chat.addChat({ text: "Camera Perspective: Third Person (front)", discard: true });
+    }
+  }
+
   update(delta) {
     if (this.hp <= 0 || !g.initialized || !g.joined || !isState("inGame")) return;
 
@@ -1186,6 +1216,7 @@ class Player {
     this.move(delta);
 
     this.updateVitals();
+    this.updateCamera();
   }
 
   // Update client with server information

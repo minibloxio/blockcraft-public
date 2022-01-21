@@ -1,7 +1,7 @@
 [
   {
     "date": "Jan 20, 2022",
-    "version": "0.37.0",
+    "version": "0.38.0",
     "changes": "Bedrock is now breakable| New controls system! You can now double tap to fly| Graphics have been overhauled, there are now 3d items in the world and in the inventory, and awesome new player animations"
   },
   {

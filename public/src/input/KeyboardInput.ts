@@ -173,10 +173,13 @@ bindKeys("f3", () => {
   hud.showStats = !hud.showStats;
   threeStats.showStats = hud.showStats;
   Cookies.set("showStats", hud.showStats ? "true" : "false", { expires: 365 });
+  chat.addChat({ text: "Stats list " + (hud.showStats ? "enabled" : "disabled"), discard: true });
 });
 
 // Toggle perspective
-bindKeys("f5", () => {});
+bindKeys("f5", () => {
+  player.updateCameraPerspective();
+});
 
 // Toggle debug mode
 bindKeys("f7", () => {
@@ -184,12 +187,15 @@ bindKeys("f7", () => {
   threeStats.showStats = game.debug || hud.showStats;
   Cookies.set("debug", game.debug ? "true" : "false", { expires: 365 });
   updateDebug();
+
+  chat.addChat({ text: "Debug mode " + (game.debug ? "enabled" : "disabled"), discard: true });
 });
 
 // Toggle cinematic mode
 bindKeys("f8", (event) => {
   event.preventDefault();
   player.cinematicMode = !player.cinematicMode;
+  chat.addChat({ text: "Cinematic mode " + (player.cinematicMode ? "enabled" : "disabled"), discard: true });
 });
 
 // Toggle fullscreen
@@ -198,9 +204,11 @@ bindKeys("f11", (event) => {
   if (!window.screenTop && !window.screenY) {
     // fullscreen -> window
     document.exitFullscreen();
+    chat.addChat({ text: "Exited fullscreen", discard: true });
   } else {
     // window -> fullscreen
     document.documentElement.requestFullscreen();
+    chat.addChat({ text: "Entered fullscreen", discard: true });
   }
 });
 

@@ -1,5 +1,6 @@
 import masterRenderer from "../graphics/MasterRenderer";
 import html2canvas from "html2canvas";
+import chat from "../managers/ChatManager";
 
 class Screenshot {
   constructor() {}
@@ -18,6 +19,17 @@ class Screenshot {
   }
 
   takeScreenshot(onlyRenderer) {
+    if (onlyRenderer) {
+      chat.addChat({
+        text: "Screenshot taken of the renderer",
+        color: "lime",
+      });
+    } else {
+      chat.addChat({
+        text: "Screenshot taken of the entire screen",
+        color: "lime",
+      });
+    }
     let self = this;
     setTimeout(function () {
       let strDownloadMime = "image/octet-stream";
@@ -30,8 +42,6 @@ class Screenshot {
           ssData = ssData.replace(strMime, strDownloadMime);
 
           self.saveFile(ssData, "screenshot.png");
-
-          $("#video-settings").append(canvas);
         });
 
         return;

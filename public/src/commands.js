@@ -1145,15 +1145,7 @@ function spawnBot(msg) {
 function screenshot(type) {
   if (!type || type == "all") {
     Screenshot.takeScreenshot();
-    chat.addChat({
-      text: "Screenshot taken of the entire screen",
-      color: "lime",
-    });
   } else if (type == "renderer") {
     Screenshot.takeScreenshot(true);
-    chat.addChat({
-      text: "Screenshot taken of the renderer",
-      color: "lime",
-    });
   }
 }

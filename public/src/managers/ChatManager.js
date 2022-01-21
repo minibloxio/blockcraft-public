@@ -86,7 +86,7 @@ class ChatManager {
       timer: timer,
       id: options.id,
     });
-    this.chatTimer = options.timer ? options.timer : undefined;
+    this.chatTimer = options.timer ? options.timer : timer;
     if (this.chatTimer) this.hideChatTimer(timer);
     if (this.chat.length > 100) {
       this.chat.pop();

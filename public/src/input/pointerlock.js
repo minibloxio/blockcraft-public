@@ -13,6 +13,8 @@ import masterRenderer from "../graphics/MasterRenderer";
 import { g } from "../globals";
 import { updateGUISize } from "../lib/helper";
 import { keyMap } from "kontra";
+import { clamp } from "../lib/helper";
+import Ola from "ola";
 
 export default class PointerLock {
   // Init pointer lock
@@ -200,19 +202,34 @@ export default class PointerLock {
   }
 }
 
+let rotation = Ola(
+  {
+    x: 0,
+    y: 0,
+  },
+  800 // Interpolation time
+);
+
+export { rotation };
+
 export function PointerLockControls(camera) {
   let self = this;
 
   camera.rotation.set(0, 0, 0);
 
+  // Add pitch
   let pitchObject = new THREE.Object3D();
   pitchObject.add(camera);
 
+  // Add yaw
   let yawObject = new THREE.Object3D();
   yawObject.position.y = 10;
   yawObject.add(pitchObject);
 
   let PI_2 = Math.PI / 2;
+
+  let rotationX = 0;
+  let rotationY = 0;
 
   let onMouseMove = function (event) {
     if (self.enabled === false) return;
@@ -220,13 +237,27 @@ export function PointerLockControls(camera) {
     let movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
     let movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
 
+    // TODO: Could be causing problems in some browsers
     if (Math.abs(movementX) > 300) return;
     if (Math.abs(movementY) > 300) return;
 
-    yawObject.rotation.y -= movementX * 0.00004 * player.sens;
-    pitchObject.rotation.x -= movementY * 0.00004 * player.sens;
+    // Update rotation
+    rotationY -= movementX * 0.00004 * player.sens;
+    rotationX -= movementY * 0.00004 * player.sens;
 
-    pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
+    rotation.y = rotationY;
+    rotation.x = rotationX;
+
+    // Type of camera mode
+    if (player.cinematicMode) {
+      // Cinematic mode
+      // yawObject.rotation.y = rotation.y;
+      // pitchObject.rotation.x = rotation.x;
+    } else {
+      // Normal mode
+      yawObject.rotation.y = rotationY;
+      pitchObject.rotation.x = clamp(rotationX, -PI_2, PI_2);
+    }
   };
 
   this.dispose = function () {
@@ -240,18 +271,6 @@ export function PointerLockControls(camera) {
   this.getObject = function () {
     return yawObject;
   };
-
-  this.getDirection = (function () {
-    // assumes the camera itself is not rotated
-    let direction = new THREE.Vector3(0, 0, 1);
-    let rotation = new THREE.Euler(0, 0, 0, "YXZ");
-
-    return function (v) {
-      rotation.set(pitchObject.rotation.x, yawObject.rotation.y, 0);
-      v.copy(direction).applyEuler(rotation);
-      return v;
-    };
-  })();
 }
 
 // Window resize
