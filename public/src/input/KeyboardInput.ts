@@ -11,8 +11,8 @@ import player from "../Player";
 import threeStats from "../stats/ThreeStats";
 import screenshotter from "../gui/Screenshot";
 
-var doublePressDelay = 200;
-var lastKeypressTime = 0;
+let doublePressDelay = 200;
+let lastKeypressTime = 0;
 
 export function keyPressedPlayer(key) {
   return keyPressed(key) && player.controls.enabled && !chat.showChatBar && g.initialized;
@@ -150,6 +150,18 @@ $(window).on("keyup", function (event) {
 // function keys
 // ###########################################
 
+let lastGamemode = undefined;
+bindKeys("f1", () => {
+  if (player.mode == "camera" && !player.toggleGUI) return;
+  lastGamemode = !player.toggleGUI ? player.mode : player.mode != "camera" ? player.mode : lastGamemode;
+  player.mode = !player.toggleGUI ? "camera" : lastGamemode;
+  hud.showStats = player.toggleGUI && Cookies.get("showStats") == "true";
+  threeStats.showStats = player.toggleGUI && (hud.showStats || game.debug == true);
+  !player.toggleGUI ? $("#chat-input").attr("placeholder", "") : $("#chat-input").attr("placeholder", "> Press Enter to Chat");
+
+  player.toggleGUI = !player.toggleGUI;
+});
+
 bindKeys("f2", () => {
   screenshotter.takeScreenshot();
 });
@@ -160,9 +172,11 @@ bindKeys("f3", () => {
   Cookies.set("showStats", hud.showStats ? "true" : "false", { expires: 365 });
 });
 
+bindKeys("f5", () => {});
+
 bindKeys("f7", () => {
   game.debug = !game.debug;
-  threeStats.showStats = game.debug;
+  threeStats.showStats = game.debug || hud.showStats;
   Cookies.set("debug", game.debug ? "true" : "false", { expires: 365 });
   updateDebug();
 });

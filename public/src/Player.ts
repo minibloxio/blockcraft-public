@@ -13,6 +13,9 @@ import masterRenderer from "./graphics/MasterRenderer";
 import { random } from "./lib/helper";
 import activeItemVoxels from "./graphics/ActiveItemVoxels";
 import { keyPressedPlayer } from "./input/KeyboardInput";
+import hud from "./gui/HUD";
+import threeStats from "./stats/ThreeStats";
+import Cookies from "js-cookie";
 
 declare var DEV_MODE: boolean;
 declare global {
@@ -44,6 +47,7 @@ const blockSize = 16;
 class Player {
   // 3d stuff
   controls = new PointerLockControls(camera);
+  perspective = 0;
 
   // Sensitivity
   sens = 0.5;
@@ -168,6 +172,7 @@ class Player {
   inWater: boolean;
   prevHeight: number;
   toolbar: any;
+  toggleGUI: boolean;
 
   inventory: any;
   biome: any;
@@ -295,8 +300,13 @@ class Player {
       console.log("Updated gamemode to " + this.mode);
       if (this.mode == "camera") {
         $("#chat-input").attr("placeholder", "");
+        hud.showStats = false;
+        threeStats.showStats = false;
       } else {
         $("#chat-input").attr("placeholder", "> Press Enter to Chat");
+        hud.showStats = Cookies.get("showStats") == "true";
+        threeStats.showStats = hud.showStats;
+        this.toggleGUI = false;
       }
     }
   }
