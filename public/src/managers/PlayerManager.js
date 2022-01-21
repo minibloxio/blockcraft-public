@@ -51,6 +51,21 @@ class PlayerManager {
 
     p.neck.rotation.set(rot.x, rot.y, rot.z); // Set sideways head rotation
 
+    // Get angles of the neck and body
+    const PI = Math.PI;
+    let angle1 = euclideanModulo(p.neck.rotation.y + PI, PI * 2);
+    let angle2 = new THREE.Quaternion();
+    p.body.getWorldQuaternion(angle2);
+    angle2 = new THREE.Euler().setFromQuaternion(angle2, "YXZ").y + PI;
+
+    // Get the delta between the two angles
+    let angleTo = p.neck.quaternion.angleTo(p.body.quaternion);
+    let diff = angle1 - angle2;
+    let yawDiff = round(((diff + PI) % (PI * 2)) - PI, 2);
+    let yawMod = euclideanModulo(yawDiff, PI * 2);
+    let sign = yawMod > 0 && yawMod < PI ? -0.6 : 0.6;
+    yawDiff = angleTo * sign;
+
     // Rotate body towards the head when turning around
     let angleDiff = p.neck.quaternion.angleTo(p.body.quaternion);
     let maxAngleDiff = Math.PI / 4;
@@ -75,10 +90,15 @@ class PlayerManager {
       let targetQuaternion = p.body.clone(false); // TODO: OPTIMIZE
       targetQuaternion.applyQuaternion(quaternion); // Apply rotation quaternion to body
 
+      let diff = Math.abs(maxAngleDiff - angleDiff) + 0.2;
+      if (p.localVel.z < 0 && Math.abs(p.localVel.z) > Math.abs(p.localVel.x)) {
+        diff = 1;
+      }
       // Lerp body towards target quaternion
       if (p.neck.quaternion.angleTo(p.body.quaternion) < maxAngleDiff) {
-        p.body.quaternion.slerp(targetQuaternion.quaternion, Math.min(g.delta * 3));
+        p.body.quaternion.slerp(targetQuaternion.quaternion, diff * g.delta * 3);
       }
+      p.prevDiff = diff;
     }
 
     headPivot.rotation.x = (dir.y * Math.PI) / 2; // Set up/down head rotation
@@ -145,11 +165,26 @@ class PlayerManager {
       }
 
       if (p.extendArms && p.bowCharge == 0) {
-        rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
+        if (!p.blocking) {
+          rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
+        }
+
         rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
       } else if (p.bowCharge == 0) {
-        rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
+        if (!p.blocking) {
+          rotateAboutPoint(rightArm, new THREE.Vector3(0, armOffsetY, 0), axis, -speed);
+        } else {
+          rightArm.position.set(0, 0, 0);
+          rightArm.rotation.set(0, 0, 0);
+        }
+
         rotateAboutPoint(leftArm, new THREE.Vector3(0, armOffsetY, 0), axis, speed);
+      } else {
+        rightArm.position.set(0, 0, 0);
+        rightArm.rotation.set(0, 0, 0);
+
+        leftArm.position.set(0, 0, 0);
+        leftArm.rotation.set(0, 0, 0);
       }
 
       if (p.extendLegs) {
@@ -182,8 +217,8 @@ class PlayerManager {
     let hand = p.toolbar[p.currSlot];
     if (p.handMesh && hand) {
       if (p.blocking) {
-        p.handMesh.position.set(-4, -2, -3);
-        p.handMesh.rotation.set(0, -Math.PI / 8, 0);
+        p.handMesh.position.set(-13.4, -6.4, 2);
+        p.handMesh.rotation.set(0.09, Math.PI / 2, -0.9);
       } else if (hand.class == "item") {
         if (hand.v == world.itemId["bow"]) {
           p.handMesh.position.set(-2.5, -16.9, -0.071);
@@ -214,21 +249,10 @@ class PlayerManager {
     // Update nametag rotation
     p.nameTag.quaternion.copy(camera.getWorldQuaternion(new THREE.Quaternion()));
 
-    const PI = Math.PI;
-    let angle1 = euclideanModulo(p.neck.rotation.y + PI, PI * 2);
-    let angle2 = new THREE.Quaternion();
-    p.body.getWorldQuaternion(angle2);
-    angle2 = new THREE.Euler().setFromQuaternion(angle2, "YXZ").y + PI;
-
-    // Get the delta between the two angles
-    let angleTo = p.neck.quaternion.angleTo(p.body.quaternion);
-    let diff = angle1 - angle2;
-    let yawDiff = round(((diff + PI) % (PI * 2)) - PI, 2);
-    let yawMod = euclideanModulo(yawDiff, PI * 2);
-    let sign = yawMod > 0 && yawMod < PI ? -0.6 : 0.6;
-    yawDiff = angleTo * sign;
-
-    if (p.bowCharge > 0) {
+    // Update player arm animation
+    if (p.blocking) {
+      p.rightShoulder.rotation.set(PI / 4, 0, 0);
+    } else if (p.bowCharge > 0) {
       let pitchDiff = (dir.y * PI) / 2;
       p.leftShoulder.rotation.set(PI / 2 + pitchDiff, -0.022, 0.74 + yawDiff);
       p.rightShoulder.rotation.set(PI / 2 + pitchDiff, 0, yawDiff);
@@ -302,7 +326,6 @@ class PlayerManager {
     if (needsUpdate) PlayerManager.setPlayerArmor(p);
   }
 
-  // Add mesh
   static addMesh(geometry, material) {
     let mesh = new THREE.Mesh(geometry, material);
     mesh.castShadow = true;
@@ -548,6 +571,7 @@ class PlayerManager {
       let mesh = Item3D.getMesh(entity, 1, p.handMesh, uvRow);
       if (mesh) {
         p.handMesh = mesh;
+        addDatControls(p.handMesh, 20);
       }
     } else {
       p.handMesh = PlayerManager.updateBlockMesh(entity);
@@ -580,6 +604,10 @@ class PlayerManager {
       p.nameTag.material.depthTest = false;
       p.nameTag.material.dithering = true;
       p.nameTag.position.y += (blockSize * 3) / 4;
+    }
+
+    if (options.hidden) {
+      p.nameTag.visible = false;
     }
 
     p.entity.add(p.nameTag);

@@ -86,6 +86,7 @@ class Player {
   vel = new THREE.Vector3();
   rot = new THREE.Vector3();
   dir = new THREE.Vector3();
+  localVel = new THREE.Vector3();
 
   // Player animation variables
   punching = false;
@@ -247,8 +248,6 @@ class Player {
 
   // Add player mesh
   initPlayerMesh() {
-    console.log(this.name);
-
     PlayerManager.addPlayerMesh(this);
     PlayerManager.addSkeleton(this);
     PlayerManager.setPlayerArmor(this);
@@ -257,7 +256,7 @@ class Player {
     this.entity = new THREE.Group();
     this.entity.add(this.skeleton);
 
-    PlayerManager.updateNameTag(this);
+    PlayerManager.updateNameTag(this, { hidden: true });
     PlayerManager.setPlayerGamemode(this, this.mode);
 
     // Add to scene
@@ -1274,13 +1273,14 @@ class Player {
     if (this.perspective == 0) return;
 
     this.punching = player.punchT < 2;
-    this.blocking = player.blockT > 0;
+    this.blocking = player.isBlocking > 0;
     this.walking = new THREE.Vector3(player.velocity.x, 0, player.velocity.z).length() > 2;
     this.sneaking = keyPressedPlayer("alt");
     this.rot = this.controls.getObject().rotation.toVector3();
     camera.getWorldDirection(this.dir);
     if (this.perspective == 2) this.dir.y *= -1;
     this.vel = this.newMove;
+    this.localVel = this.velocity;
     PlayerManager.updatePlayer(this);
   }
 

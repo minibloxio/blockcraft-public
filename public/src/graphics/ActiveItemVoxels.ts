@@ -153,13 +153,17 @@ class ActiveItemVoxels {
       this.root.add(this.arm);
     }
 
+    let currItem = player.getCurrItem();
+
+    // move hand
+    const timeSincePunch = Date.now() - player.lastPunch;
+    const punchLerp = timeSincePunch / 250;
+
     this.itemPixelsGroup.visible = false;
     this.blockGroup.visible = false;
     this.arm.visible = false;
 
     if (player.mode == "spectator" || player.mode == "camera") return;
-
-    let currItem = player.getCurrItem();
 
     if (player.perspective > 0) {
       if (currItem) {
@@ -200,11 +204,8 @@ class ActiveItemVoxels {
       this.arm.visible = true;
     }
 
-    // Move hand
-    const timeSincePunch = Date.now() - player.lastPunch;
-    const punchLerp = timeSincePunch / 250;
-
-    if (player.blocking) {
+    // Update arm animation
+    if (player.isBlocking) {
       this.root.position.copy(swordBlockPos);
       this.root.quaternion.copy(swordBlockRot);
     } else if (punchLerp <= 1) {

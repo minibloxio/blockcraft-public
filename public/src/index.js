@@ -340,6 +340,7 @@ function sendPacket() {
     g.socket.emit("packet", {
       pos: player.pos,
       vel: player.newMove,
+      localVel: player.velocity,
       onObject: player.onObject,
       rot: player.rot, // Rotation of body
       dir: player.dir, // Rotation of head
