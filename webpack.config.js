@@ -65,6 +65,7 @@ module.exports = (env, argv) => {
           { from: "./public/src/workers", to: "./src/workers" },
           { from: "./public/assets/textures", to: "./textures" },
           { from: "./public/assets/images", to: "./images" },
+          { from: "./public/assets/audio", to: "./assets/audio" },
         ],
       }),
     ],
