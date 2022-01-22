@@ -6,13 +6,14 @@ on:
       - "staging"
 jobs:
   main:
+    defaults:
+      run:
+        working-directory: client
+
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Go into client folder
-        run: cd client
 
       - name: Setup Node.Js
         uses: actions/setup-node@v2
@@ -34,4 +35,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          SOURCE_DIR: "dist"
+          SOURCE_DIR: "client/dist"
