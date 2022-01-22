@@ -19,6 +19,7 @@ import Cookies from "js-cookie";
 import { rotation } from "../../input/PointerLock";
 import PlayerManager from "../../managers/PlayerManager";
 import PlayerMesh from "../../graphics/PlayerMesh";
+import audioManager from "../../audio/AudioManager";
 
 declare var DEV_MODE: boolean;
 declare global {
@@ -445,6 +446,7 @@ class Player {
     } else {
       if (this.bowCharge > 0) {
         // Release bow
+        audioManager.play("random.bow");
         g.socket.emit("fireArrow", {
           pos: this.pos.clone(),
           dir: this.getItemVel(),
@@ -647,6 +649,7 @@ class Player {
       let crit = false;
       if (this.velocity.y < 0) crit = true;
 
+      audioManager.play("game.player.hurt");
       g.socket.emit("punchPlayer", {
         // Send to server (IBRAHIM I'M LOOKING AT YOU)
         id: playerId,
@@ -771,6 +774,7 @@ class Player {
         updateVoxelGeometry(x, y, z, true, true);
 
         // Send data to server
+        audioManager.play("dig.stone");
         g.socket.emit("setBlock", {
           x: x,
           y: y,
@@ -873,6 +877,8 @@ class Player {
         } else {
           updateVoxelGeometry(outerPos.x, outerPos.y, outerPos.z, true);
           // Send data to server
+
+          audioManager.play("dig.stone");
           g.socket.emit("setBlock", {
             x: outerPos.x,
             y: outerPos.y,
@@ -1067,6 +1073,9 @@ class Player {
 
             if (jumpDiff > 0 && jumpDiff < 500 && this.mode == "survival" && !this.god) {
               // Fall damage
+
+              audioManager.play("game.player.hurt");
+              audioManager.play("game.player.hurt.fall.big");
               g.socket.emit("takeDamage", {
                 dmg: jumpDiff,
                 type: "fall",
@@ -1345,6 +1354,7 @@ class Player {
     // Update health
     if (data && data.hp != this.hp) {
       this.heartBlink = game.tick.value;
+      if (data.hp < this.hp) audioManager.play("game.player.hurt");
       if (!this.lastHp || data.hp > this.lastHp) {
         this.lastHp = this.hp;
       }

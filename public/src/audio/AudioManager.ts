@@ -20,15 +20,17 @@ class AudioManager {
     });
   }
 
-  playSound(name: string) {
-    if (!(name in soundData)) return;
+  play(name: string) {
+    if (!(name in soundData)) {
+      console.log(`Unknown sound: ${name}`);
+      return;
+    }
 
     // dig and step sounds have same names and need to be differentiated
     const prefix = name.split(".")[0] === "dig" ? "dig_" : "";
 
     const options = soundData[name]["sounds"];
     const soundName = prefix + sample<string>(options).split("/").pop();
-    console.log(soundName);
     this.sprite.play(soundName);
   }
 }
