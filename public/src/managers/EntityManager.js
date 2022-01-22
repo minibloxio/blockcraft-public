@@ -5,6 +5,7 @@ import world from "./WorldManager";
 import textureManager from "./TextureManager";
 import { scene } from "../globals";
 import Item3D from "../graphics/Item3D";
+import player from "../Player";
 
 class EntityManager {
   // Get the canvas for the entity
@@ -38,7 +39,7 @@ class EntityManager {
   }
 
   // Add item mesh to the scene
-  addToScene(entity, mesh, type) {
+  addToScene(entity, mesh, type, isThrowable) {
     let entities = world.entities;
     let id = entity.id;
 
@@ -47,16 +48,26 @@ class EntityManager {
       entities[id].mesh = mesh;
       mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
     } else {
+      let innerMesh = new THREE.Group();
+      innerMesh.add(mesh);
       entities[id].mesh = new THREE.Group();
-      if (type == "block") mesh.position.set(-2, 0, -2);
-      if (type == "item") mesh.position.set(0, 0, -2);
+      if (type == "block") innerMesh.position.set(-2, 0, -2);
+      if (type == "item" && !isThrowable) {
+        mesh.rotation.x = Math.PI / 2;
+        mesh.position.y += 8;
+        innerMesh.position.set(0, 0, -4);
+      } else if (type == "item") {
+        mesh.rotation.set(0, 0, 0);
+        innerMesh.rotation.y = Math.PI / 2;
+        innerMesh.position.set(-4, -4, 0);
+      }
 
-      entities[id].bbox = new THREE.BoxHelper(mesh, 0xffff00);
+      entities[id].bbox = new THREE.BoxHelper(innerMesh, 0xffff00);
       entities[id].bbox.matrixAutoUpdate = true;
       entities[id].bbox.visible = false;
       entities[id].bbox.visible = game.debug || false;
       entities[id].mesh.add(entities[id].bbox);
-      entities[id].mesh.add(mesh);
+      entities[id].mesh.add(innerMesh);
     }
     mesh.name = "item";
 
@@ -66,6 +77,7 @@ class EntityManager {
   // Add entity to the world
   addEntity(entity) {
     let { blockSize } = world;
+    let throwables = ["ender_pearl", "fireball", "snowball", "egg"]; // TODO: Turn this into a singleton
     if (entity.type == "item") {
       if (!entity.pos) return;
 
@@ -99,11 +111,14 @@ class EntityManager {
         arrow.setRotationFromQuaternion(entity.qt);
 
         this.addToScene(entity, arrow, "arrow");
+      } else if (entity.class == "item" && throwables.includes(entity.name)) {
+        // Add throwable
+        let pixelSize = blockSize / 2;
+        let item_mesh = Item3D.getMesh(entity, pixelSize / 16);
+        this.addToScene(entity, item_mesh, "item", true);
       } else if (entity.class == "item") {
         // Add item
-        let pixelSize = blockSize / 4;
-        let throwables = ["ender_pearl", "fireball", "snowball", "egg"]; // TODO: Turn this into a singleton
-        if (throwables.includes(entity.name)) pixelSize = blockSize / 2;
+        let pixelSize = blockSize / 2;
         let item_mesh = Item3D.getMesh(entity, pixelSize / 16);
         this.addToScene(entity, item_mesh, "item");
       } else {
@@ -127,8 +142,15 @@ class EntityManager {
       if (mesh.type == "Group") {
         for (let i = 0; i < mesh.children.length; i++) {
           let child = mesh.children[i];
-          child.geometry.dispose();
-          child.material.dispose();
+          if (child.type == "Group") {
+            for (let c of child.children) {
+              c.geometry.dispose();
+              c.material.dispose();
+            }
+          } else {
+            child.geometry.dispose();
+            child.material.dispose();
+          }
         }
         scene.remove(mesh);
       } else {
@@ -154,14 +176,12 @@ class EntityManager {
       let entity = entities[id];
       if (entity.type == "item" && world.entities[id]) {
         world.entities[id].onObject = entity.onGround;
-
         if (entity.name == "arrow" && !entity.onObject) {
           world.entities[id].pos = entity.pos;
           world.entities[id].vel.set(entity.vel);
         } else {
           world.entities[id].pos = entity.pos;
         }
-
         if (world.entities[id].mesh && world.entities[id].mesh.position.length() == 0) {
           world.entities[id].mesh.position.set(entity.pos.x, entity.pos.y, entity.pos.z);
         }

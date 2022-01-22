@@ -2,7 +2,7 @@ import * as THREE from "three";
 import game from "./Game";
 import world from "./managers/WorldManager";
 import player from "./Player";
-import { players, g, camera } from "./globals";
+import { players } from "./globals";
 import PlayerManager from "./managers/PlayerManager";
 
 // Update server players
@@ -86,7 +86,6 @@ export function animateServerPlayers() {
   for (let id in players) {
     let p = players[id];
     if (!p.entity) continue;
-
     PlayerManager.updatePlayer(p);
   }
 }
@@ -110,7 +109,7 @@ export function animateServerEntities(delta) {
         // Animate server entities on the ground
         let offset = Math.sin(((Date.now() - entity.t + 500) / 1000) * Math.PI) * 2 - 2;
         if (entity.class == "item") {
-          let target = new THREE.Vector3(0, offset, -2);
+          let target = new THREE.Vector3(0, offset, -4);
           mesh[1].position.lerp(target, delta * 10);
           mesh[0].position.set(0, mesh[1].position.y, 0);
         } else if ((entity.class = "block")) {
