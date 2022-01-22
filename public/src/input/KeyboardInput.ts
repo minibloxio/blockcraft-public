@@ -20,7 +20,9 @@ export function keyPressedPlayer(key) {
 
 bindKeys(
   "f",
-  () => {
+  (event) => {
+    if (event.repeat) return;
+
     if (player.controls.enabled && !chat.showChatBar && player.mode != "survival") {
       chat.addChat({ text: "Double tap space in creative mode to fly", color: "cyan" });
     }
@@ -102,6 +104,8 @@ export function update() {
 bindKeys(
   ["enter", "slash"],
   (e) => {
+    if (e.repeat) return;
+
     if (!player.controls.enabled) return;
     const slashOpen = e.code === "Slash" && !chat.showChatBar; // slash key to toggle chat when it isn't already open
     if (e.code == "Enter" || slashOpen) chat.showChatBar = !chat.showChatBar;
@@ -152,7 +156,9 @@ $(window).on("keyup", function (event) {
 
 // Toggle camera mode
 let lastGamemode = undefined;
-bindKeys("f1", () => {
+bindKeys("f1", (event) => {
+  if (event.repeat) return;
+
   if (player.mode == "camera" && !player.toggleGUI) return;
   lastGamemode = !player.toggleGUI ? player.mode : player.mode != "camera" ? player.mode : lastGamemode;
   player.mode = !player.toggleGUI ? "camera" : lastGamemode;
@@ -164,12 +170,16 @@ bindKeys("f1", () => {
 });
 
 // Take a screenshot
-bindKeys("f2", () => {
+bindKeys("f2", (event) => {
+  if (event.repeat) return;
+
   screenshotter.takeScreenshot();
 });
 
 // Toggle stats list
-bindKeys("f3", () => {
+bindKeys("f3", (event) => {
+  if (event.repeat) return;
+
   hud.showStats = !hud.showStats;
   threeStats.showStats = hud.showStats;
   Cookies.set("showStats", hud.showStats ? "true" : "false", { expires: 365 });
@@ -177,13 +187,17 @@ bindKeys("f3", () => {
 });
 
 // Toggle perspective
-bindKeys("f5", () => {
+bindKeys("f5", (event) => {
+  if (event.repeat) return;
+
   player.perspective = (player.perspective + 1) % 3;
   player.toggleCameraPerspective();
 });
 
 // Toggle debug mode
-bindKeys("f7", () => {
+bindKeys("f7", (event) => {
+  if (event.repeat) return;
+
   game.debug = !game.debug;
   threeStats.showStats = game.debug || hud.showStats;
   Cookies.set("debug", game.debug ? "true" : "false", { expires: 365 });
@@ -194,6 +208,8 @@ bindKeys("f7", () => {
 
 // Toggle cinematic mode
 bindKeys("f8", (event) => {
+  if (event.repeat) return;
+
   event.preventDefault();
   player.cinematicMode = !player.cinematicMode;
   chat.addChat({ text: "Cinematic mode " + (player.cinematicMode ? "enabled" : "disabled"), discard: true });
@@ -201,6 +217,8 @@ bindKeys("f8", (event) => {
 
 // Toggle fullscreen
 bindKeys("f11", (event) => {
+  if (event.repeat) return;
+
   event.preventDefault();
   if (!window.screenTop && !window.screenY) {
     // fullscreen -> window

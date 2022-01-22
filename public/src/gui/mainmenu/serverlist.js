@@ -5,7 +5,7 @@ import { prevState } from "../..";
 import { connectionDelay, g, isState, sessionServerEndpoint } from "../../globals";
 import { drawCircle, drawRectangle, msToTime, round } from "../../lib/helper";
 import chunkManager from "../../managers/ChunkManager";
-import world from "../../managers/WorldManager";
+import world from "../../world/WorldManager";
 import player from "../../Player";
 
 export async function refreshServers() {

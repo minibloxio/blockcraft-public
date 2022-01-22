@@ -1,6 +1,6 @@
 import recipes from "../../json/recipes.json";
 import game from "../Game";
-import world from "../managers/WorldManager";
+import world from "../world/WorldManager";
 import player from "../Player";
 import textureManager from "../managers/TextureManager";
 import { drawRectangle, drawRect, drawImage, drawImageTopLeft, drawText, clamp } from "../lib/helper";

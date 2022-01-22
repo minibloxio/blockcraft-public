@@ -4,7 +4,7 @@ import * as $ from "jquery";
 import { PointerLockControls } from "./input/PointerLock";
 import { camera, isState, g, scene, players } from "./globals";
 import textureManager from "./managers/TextureManager";
-import world, { updateVoxelGeometry } from "./managers/WorldManager";
+import world, { updateVoxelGeometry } from "./world/WorldManager";
 import gameObj from "./Game";
 import chunkManager from "./managers/ChunkManager";
 import chat from "./managers/ChatManager";

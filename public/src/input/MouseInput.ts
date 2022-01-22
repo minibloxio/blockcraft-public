@@ -8,13 +8,35 @@ import { clamp } from "../lib/helper";
 import { camera, g } from "../globals";
 
 // Scrolling
+let scrollProgress = 0;
+let lastDirection = 0;
 $(document).bind("wheel", function (e) {
-  let scrollDelta = e.originalEvent.wheelDelta / 120;
-
   if (!g.initialized) return;
 
+  let scrollDelta = e.originalEvent.wheelDelta / 120;
+  if (Math.sign(scrollDelta) != lastDirection) {
+    scrollProgress = 0;
+  }
+  scrollProgress += scrollDelta;
+  lastDirection = Math.sign(scrollDelta);
+
+  let scroll = 0;
+  let scrollSensitivity = 8 / parseInt(game.scrollSens);
+  if (scrollProgress > scrollSensitivity) {
+    scroll = 1;
+    scrollProgress = 0;
+  } else if (scrollProgress < -scrollSensitivity) {
+    scroll = -1;
+    scrollProgress = 0;
+  }
+
   if (inventory.showInventory && player.mode == "creative") {
-    inventory.scroll(scrollDelta > 0 ? 1 : -1);
+    if (scroll > 0) {
+      inventory.scroll(1);
+    } else if (scroll < 0) {
+      inventory.scroll(-1);
+    }
+
     return;
   }
 
@@ -23,27 +45,28 @@ $(document).bind("wheel", function (e) {
   let scrollDirection = game.invertMouse ? 1 : -1;
   let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   if (isSafari && keyPressed("shift")) {
-    console.log("switch");
     scrollDirection *= -1;
   }
 
+  // Zoom with X
   if (g.enableZoom) {
-    if (scrollDelta * scrollDirection * -1 > 0) {
-      g.zoomLevel = clamp(g.zoomLevel + 0.2, -10, 10);
-    } else {
-      g.zoomLevel = clamp(g.zoomLevel - 0.2, -10, 10);
+    if (scroll * scrollDirection < 0) {
+      g.zoomLevel = clamp(g.zoomLevel + 0.2, 0.1, 10);
+    } else if (scroll * scrollDirection > 0) {
+      g.zoomLevel = clamp(g.zoomLevel - 0.2, 0.1, 10);
     }
     camera.zoom = g.zoomLevel;
-  } else {
-    if (scrollDelta * scrollDirection > 0) {
-      console.log("up");
-      player.currSlot += 1;
-      if (player.currSlot > 8) player.currSlot = 0;
-    } else {
-      console.log("down");
-      player.currSlot -= 1;
-      if (player.currSlot < 0) player.currSlot = 8;
-    }
+
+    return;
+  }
+
+  // Scroll in toolbar
+  if (scroll * scrollDirection > 0) {
+    player.currSlot += 1;
+    if (player.currSlot > 8) player.currSlot = 0;
+  } else if (scroll * scrollDirection < 0) {
+    player.currSlot -= 1;
+    if (player.currSlot < 0) player.currSlot = 8;
   }
 });
 

@@ -7,7 +7,10 @@ import { updateGUISize } from "../lib/helper";
 import chunkManager from "../managers/ChunkManager";
 import workerManager from "../managers/WorkerManager";
 import player from "../Player";
-import stage from "../Stage";
+import lighting from "../world/Lighting";
+import stage from "../world/Stage";
+import stars from "../world/Stars";
+import clouds from "../world/Clouds";
 
 const cookieName = "keymappings";
 const LONG_TIME = { expires: 100000 };
@@ -145,16 +148,17 @@ function addSliderControl(name, id, defaultValue, object, key, callback?) {
 export function addVideoControls() {
   $("#switch-container").empty();
   //addSliderControl("FPS", "fps", 60, game, "fps")
-  addSliderControl("Sensitivity", "sensitivity", 50, player, "sens");
+  addSliderControl("Mouse Sensitivity", "mouseSens", 50, player, "sens");
+  addSliderControl("Scroll Sensitivity", "scrollSens", 10, game, "scrollSens");
   addSliderControl("FOV", "fov", 75, game, "fov");
   addSliderControl("Render Distance", "renderDistance", 8, chunkManager, "renderDistance");
   addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
   //addSliderControl("Web Workers", "workers", 2, game, "numOfVoxelWorkers");
 
   addSwitchControl("Invert Mouse", "invertMouse", false, game, "invertMouse");
-  addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow");
-  addSwitchControl("Clouds", "cloud", false, stage, "showClouds", "generate");
-  addSwitchControl("Stars", "stars", true, stage.stars, "visible");
+  addSwitchControl("Shadow Effect", "shadow", false, lighting.dir, "enableShadow", "castShadow");
+  addSwitchControl("Clouds", "cloud", false, clouds, "showClouds", "generate");
+  addSwitchControl("Stars", "stars", true, stars.stars, "visible");
   addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov");
   addSwitchControl("Transparent Leaves", "transparentLeaves", false, game, "transparentLeaves", false, updateTransparency);
   addSwitchControl("Transparent Inventory", "transparentInventory", false, game, "transparentInventory");
