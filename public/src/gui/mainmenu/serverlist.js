@@ -19,13 +19,14 @@ export async function refreshServers() {
   g.servers = {};
   g.currentServer = undefined;
 
-  let serverList = (await axios.get(sessionServerEndpoint)).data;
+  let serverList = (await axios.get(sessionServerEndpoint)).data.servers;
   if (!serverList) serverList = oldServerList;
 
   console.log(serverList);
 
   $("#server-container").empty();
   for (let i = 0; i < serverList.length; i++) {
+    console.log(serverList[i]);
     let serverLink = serverList[i];
     g.servers[serverLink] = {
       socket: io(serverLink, {
