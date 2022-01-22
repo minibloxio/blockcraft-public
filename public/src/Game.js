@@ -17,6 +17,7 @@ class Game {
     this.memDecrease = [];
     this.depthWrite = false;
     this.invertMouse = false;
+    this.scrollSens = "8";
 
     this.initCookies();
   }

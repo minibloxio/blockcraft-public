@@ -145,7 +145,8 @@ function addSliderControl(name, id, defaultValue, object, key, callback?) {
 export function addVideoControls() {
   $("#switch-container").empty();
   //addSliderControl("FPS", "fps", 60, game, "fps")
-  addSliderControl("Sensitivity", "sensitivity", 50, player, "sens");
+  addSliderControl("Mouse Sensitivity", "mouseSens", 50, player, "sens");
+  addSliderControl("Scroll Sensitivity", "scrollSens", 10, game, "scrollSens");
   addSliderControl("FOV", "fov", 75, game, "fov");
   addSliderControl("Render Distance", "renderDistance", 8, chunkManager, "renderDistance");
   addSliderControl("Chunk Loading Rate", "chunkLoadingRate", 1, chunkManager, "chunkLoadingRate");
