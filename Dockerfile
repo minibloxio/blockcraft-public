@@ -1,31 +1,35 @@
 # webpacker container
 FROM node:16-alpine AS webpack-builder
 WORKDIR /webpack
-COPY tsconfig.json ./
-COPY webpack.config.js ./
-COPY package.json ./
-COPY package-lock.json ./
+COPY ./client/tsconfig.json ./
+COPY ./client/webpack.config.js ./
+COPY ./client/package.json ./
+COPY ./client/package-lock.json ./
 RUN npm install
-COPY ./public ./public
-RUN npm run webpack:build
+COPY ./client/public ./public
+COPY ./client/assets ./assets
+COPY ./client/src ./src
+RUN npm run build
 
 # production container
 FROM node:16-alpine AS node
 # Install app dependencies
-COPY package.json ./
-COPY package-lock.json ./
+COPY ./server/package.json ./
+COPY ./server/package-lock.json ./
 RUN npm ci --only=production
 
 WORKDIR /usr/src/app
-COPY ./public/textures/blocks ./public/textures/blocks
-COPY ./public/textures/entity ./public/textures/entity
-COPY ./public/textures/items ./public/textures/items
+
+ENV TEXTURES_PATH="/textures"
+COPY ./client/assets/textures/blocks /textures/blocks
+COPY ./client/assets/textures/entity /textures/entity
+COPY ./client/assets/textures/items /textures/items
 
 COPY --from=webpack-builder /webpack/dist ./dist
 
-COPY ./worker.js .
-COPY ./app.js .
-COPY ./modules ./modules
+COPY ./server/worker.js .
+COPY ./server/app.js .
+COPY ./server/modules ./modules
 
 # set port for server
 ENV PORT=3000

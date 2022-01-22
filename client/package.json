@@ -1,0 +1,54 @@
+{
+  "name": "blockcraft",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "axios": "^0.25.0",
+    "howler": "^2.2.3",
+    "html2canvas": "^1.4.0",
+    "jquery": "^3.6.0",
+    "js-cookie": "^3.0.1",
+    "kontra": "^7.3.1",
+    "lodash": "^4.17.21",
+    "ola": "^1.2.1",
+    "socket.io-client": "^4.4.0",
+    "three": "^0.136.0"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --mode=development",
+    "build": "webpack --mode=production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victoryqwei/Interplanetarium.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/victoryqwei/Interplanetarium/issues"
+  },
+  "homepage": "https://github.com/victoryqwei/Interplanetarium#readme",
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.1",
+    "@types/dat.gui": "^0.7.7",
+    "@types/howler": "^2.2.4",
+    "@types/lodash": "^4.14.178",
+    "@types/ola": "^1.2.0",
+    "@types/three": "^0.136.1",
+    "copy-webpack-plugin": "^10.2.0",
+    "css-loader": "^6.5.1",
+    "dat.gui": "^0.7.7",
+    "favicons": "^6.2.2",
+    "favicons-webpack-plugin": "^5.0.2",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.4",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.66.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.7.3"
+  }
+}
