@@ -615,7 +615,7 @@ io.on("connection", function (socket_) {
     world.removePlayerItem(player, data.name);
 
     let entityId = Function.randomString(5);
-    let force = blockSize * 30;
+    let force = blockSize * 26;
     let entity = server.addEntity(entityId, {
       pos: data.pos || { x: player.pos.x, y: player.pos.y, z: player.pos.z },
       vel: { x: data.dir.x * force, y: data.dir.y * force, z: data.dir.z * force },

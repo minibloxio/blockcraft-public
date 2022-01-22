@@ -526,7 +526,6 @@ class Player {
     if (this.mode == "spectator" || this.mode == "camera") return;
     let { blockSize } = world;
     // Crosshair selection for blocks
-
     let intersects;
 
     // Update the picking ray with the camera and mouse position
@@ -1311,8 +1310,6 @@ class Player {
   }
 
   updatePlayerMesh() {
-    if (this.perspective == 0) return;
-
     this.punching = player.punchT < 2;
     this.blocking = player.isBlocking > 0;
     this.walking = new THREE.Vector3(player.velocity.x, 0, player.velocity.z).length() > 2;
@@ -1322,6 +1319,8 @@ class Player {
     if (this.perspective == 2) this.dir.y *= -1;
     this.vel = this.newMove;
     this.localVel = this.velocity;
+
+    if (this.perspective == 0) return;
     PlayerManager.updatePlayer(this);
   }
 

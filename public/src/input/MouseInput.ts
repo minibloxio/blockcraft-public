@@ -21,7 +21,11 @@ $(document).bind("wheel", function (e) {
   if (!player.controls.enabled || player.mode == "spectator" || player.mode == "camera") return;
 
   let scrollDirection = game.invertMouse ? 1 : -1;
-  if (navigator.userAgent.includes("Safari") && !navigator.userAgent.includes("Chrome") && keyPressed("shift")) scrollDirection *= -1;
+  let isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  if (isSafari && keyPressed("shift")) {
+    console.log("switch");
+    scrollDirection *= -1;
+  }
 
   if (g.enableZoom) {
     if (scrollDelta * scrollDirection * -1 > 0) {
@@ -32,9 +36,11 @@ $(document).bind("wheel", function (e) {
     camera.zoom = g.zoomLevel;
   } else {
     if (scrollDelta * scrollDirection > 0) {
+      console.log("up");
       player.currSlot += 1;
       if (player.currSlot > 8) player.currSlot = 0;
     } else {
+      console.log("down");
       player.currSlot -= 1;
       if (player.currSlot < 0) player.currSlot = 8;
     }

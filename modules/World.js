@@ -286,17 +286,20 @@ module.exports = class World {
 
     // Check if entity is on ground
     if (throwables.includes(entity.name)) {
+      let player = players[entity.playerId];
+      if (!player) return;
+
       if (entity.name == "ender_pearl" && deltaVoxel > 1) {
         // ENDER PEARL
         entity.pos.y += blockSize * 1.6;
-        if (players[entity.playerId].mode == "survival") {
-          players[entity.playerId].hp -= 5;
-          players[entity.playerId].dmgType = "ender_pearl";
+        if (player.mode == "survival") {
+          player.hp -= 5;
+          player.dmgType = "ender_pearl";
         }
         io.to(`${entity.playerId}`).emit("teleport", entity);
       } else if (entity.name == "fireball" && deltaVoxel > 1) {
         // FIREBALL
-        if (players[entity.playerId].operator) {
+        if (player.operator) {
           // Check if player is operator
           let explosionRadius = 4;
           this.explode(x, y, z, explosionRadius, players, io);
