@@ -6,7 +6,6 @@ import "./KeyboardInput";
 import "./MouseInput";
 
 initKeys();
-
 $(window).on("keydown", function (event) {
   if (!g.initialized) return;
   if (!player.controls.enabled) return;
@@ -31,9 +30,3 @@ $(document).ready(function () {
     inventory.updateItemSearch(search);
   });
 });
-
-// Prevent accidental navigation away from the game
-window.onbeforeunload = confirmExit;
-function confirmExit() {
-  return "You have attempted to leave this page. Are you sure?";
-}

@@ -219,7 +219,8 @@ function addSelectControl(name, id, defaultValue, object, key, callback) {
 $(document).ready(function () {
   $("#reset-video").click(function () {
     let videoCookies = [
-      "Sensitivity",
+      "Mouse Sensitivity",
+      "Scroll Sensitivity",
       "Render Distance",
       "Chunk Loading Rate",
       "FOV",

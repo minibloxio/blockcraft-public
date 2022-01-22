@@ -18,6 +18,7 @@ import threeStats from "./stats/ThreeStats";
 import Cookies from "js-cookie";
 import { rotation } from "./input/PointerLock";
 import PlayerManager from "./managers/PlayerManager";
+import PlayerMesh from "./graphics/PlayerMesh";
 
 declare var DEV_MODE: boolean;
 declare global {
@@ -248,9 +249,8 @@ class Player {
 
   // Add player mesh
   initPlayerMesh() {
-    PlayerManager.addPlayerMesh(this);
-    PlayerManager.addSkeleton(this);
-    PlayerManager.setPlayerArmor(this);
+    PlayerMesh.initPlayerMesh(this);
+
     let hand = this.toolbar[this.currSlot];
     if (hand) PlayerManager.updatePlayerHand(hand, this);
     this.entity = new THREE.Group();
@@ -1349,6 +1349,8 @@ class Player {
         this.lastHp = this.hp;
       }
     }
+
+    PlayerMesh.updateArmor(this, data);
 
     // Update server-side data
     this.hp = data.hp;
