@@ -225,17 +225,17 @@ module.exports = class World {
     this.textures = {};
     let self = this;
     // Get block file names
-    fs.readdir(public_path + "/assets/textures/blocks", function (err, data) {
+    fs.readdir(public_path + "/textures/blocks", function (err, data) {
       if (err) console.log(err);
       self.textures.blocks = data;
     });
     // Get item file names
-    fs.readdir(public_path + "/assets/textures/items", function (err, data) {
+    fs.readdir(public_path + "/textures/items", function (err, data) {
       if (err) console.log(err);
       self.textures.items = data;
     });
     // Get entity file names
-    fs.readdir(public_path + "/assets/textures/entity", function (err, data) {
+    fs.readdir(public_path + "/textures/entity", function (err, data) {
       if (err) console.log(err);
       self.textures.entity = data;
     });
