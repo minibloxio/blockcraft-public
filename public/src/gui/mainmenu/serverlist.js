@@ -1,14 +1,14 @@
+import axios from "axios";
 import Cookies from "js-cookie";
-import Ola from "ola";
 import { io } from "socket.io-client";
 import { prevState } from "../..";
-import { connectionDelay, g, isState, serverList, serverNames, regionNames } from "../../globals";
+import { connectionDelay, g, isState, sessionServerEndpoint } from "../../globals";
 import { drawCircle, drawRectangle, msToTime, round } from "../../lib/helper";
 import chunkManager from "../../managers/ChunkManager";
 import world from "../../managers/WorldManager";
 import player from "../../Player";
 
-export function refreshServers() {
+export async function refreshServers() {
   // Disconnect servers
   for (let link in g.servers) {
     let server = g.servers[link];
@@ -19,8 +19,14 @@ export function refreshServers() {
   g.servers = {};
   g.currentServer = undefined;
 
+  let serverList = (await axios.get(sessionServerEndpoint)).data.servers;
+  if (!serverList) serverList = oldServerList;
+
+  console.log(serverList);
+
   $("#server-container").empty();
   for (let i = 0; i < serverList.length; i++) {
+    console.log(serverList[i]);
     let serverLink = serverList[i];
     g.servers[serverLink] = {
       socket: io(serverLink, {
@@ -67,10 +73,10 @@ export function refreshServers() {
 
       // Update server list
       let latency = Date.now() - data.ping;
-      let name = serverNames[data.region] || regionNames[data.region] || "Unknown";
+      let name = data.name || "Unnamed";
       let serverHTML = $(`
                 <div class='server' data-link='${data.link}' id='server-${data.region}'>
-                    <p>Region: ${name}</p>
+                    <p>Name: ${name}</p>
                     <p>Players: ${Object.keys(data.players).length}/20</p>
                     <div class="animated"><p id="player-names">${playerNames}</p></div>
                     <div>
@@ -108,39 +114,27 @@ export function refreshServers() {
       });
 
       let ctx_ = $("#" + data.region)[0].getContext("2d");
-      let numOfBars = Math.max(5 - Math.floor(latency / 60), 1);
-      let color;
-      switch (numOfBars) {
-        case 1:
-          color = "red";
-          break;
-        case 2:
-          color = "orange";
-          break;
-        case 3:
-          color = "yellow";
-          break;
-        case 4:
-          color = "green";
-          break;
-        case 5:
-          color = "lime";
-          break;
-      }
-      for (let i = 0; i < numOfBars; i++) {
-        drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, color, { ctx: ctx_ });
-      }
-      for (let i = numOfBars; i < 5; i++) {
-        drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, "grey", { ctx: ctx_ });
-      }
+      drawConnectionBars(ctx_, latency);
 
       ctx_ = $("#" + data.region + "-2")[0].getContext("2d");
       drawCircle(15, 12, 11, "white", { ctx: ctx_, fill: false, outline: true, outlineColor: "white", outlineWidth: 2 });
       drawCircle(15, 12, 2, "white", { ctx: ctx_ });
       drawRectangle(14, 3, 2, 7, "white", { ctx: ctx_ });
-
       server.socket.disconnect();
     });
+  }
+}
+
+const barToColour = ["", "red", "orange", "yellow", "green", "lime"];
+
+function drawConnectionBars(ctx, latency) {
+  let numOfBars = Math.max(5 - Math.floor(latency / 60), 1);
+  let color = barToColour[numOfBars];
+  for (let i = 0; i < numOfBars; i++) {
+    drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, color, { ctx: ctx });
+  }
+  for (let i = numOfBars; i < 5; i++) {
+    drawRectangle(i * 6, 16 - i * 4, 5, (i + 1) * 4, "grey", { ctx: ctx });
   }
 }
 
@@ -238,8 +232,6 @@ function clickServer(event, doubleClick) {
     $("#start-button").click();
   }
 }
-
-let disconnectedAnimate = new Ola(0); // Disconnection progress
 
 // Update menu state
 export function updateMenu(nextStateCB) {
