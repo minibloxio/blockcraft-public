@@ -27,7 +27,6 @@ import { animateServerEntities, animateServerPlayers, updatePlayers } from "./se
 import stage from "./world/Stage";
 import stats from "./stats/ThreeStats.ts";
 import { initStatistics } from "./stats/statslist";
-import { keyPressedPlayer } from "./input/KeyboardInput";
 import threeStats from "./stats/ThreeStats";
 
 /*
@@ -362,7 +361,6 @@ $("#welcome-button")[0].click();
 document.addEventListener("contextmenu", (event) => event.preventDefault()); // Prevent right-click
 
 // Get cookie username
-
 let name = Cookies.get("Name");
 if (name) $("#name-input").val(name);
 

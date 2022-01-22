@@ -31,3 +31,9 @@ $(document).ready(function () {
     inventory.updateItemSearch(search);
   });
 });
+
+// Prevent accidental navigation away from the game
+window.onbeforeunload = confirmExit;
+function confirmExit() {
+  return "You have attempted to leave this page. Are you sure?";
+}
