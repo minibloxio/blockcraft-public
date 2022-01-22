@@ -1,5 +1,6 @@
 import * as $ from "jquery";
 import { initKeys, initPointer } from "kontra";
+import { loadSavedKeymappings } from "./settings";
 import player from "../entity/player/Player";
 
 import "./KeyboardInput";
@@ -7,6 +8,7 @@ import "./MouseInput";
 
 export function initInput() {
   initKeys();
+  loadSavedKeymappings();
   initPointer();
 
   $(window).on("keydown", function (event) {

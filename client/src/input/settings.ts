@@ -53,7 +53,7 @@ const keyMapping: [string, string][] = [
   ["Hotbar Slot 9", "9"],
 ];
 
-function loadSavedKeymappings() {
+export function loadSavedKeymappings() {
   let loadedKeyMap;
   try {
     loadedKeyMap = JSON.parse(Cookies.get(cookieName));
