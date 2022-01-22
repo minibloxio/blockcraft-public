@@ -61,9 +61,10 @@ module.exports = (env, argv) => {
       }),
       new CopyPlugin({
         patterns: [
-          { from: "./public/textures", to: "./textures" },
-          { from: "./public/src/workers", to: "./src/workers" },
           { from: "./public/robots.txt", to: "robots.txt" },
+          { from: "./public/src/workers", to: "./src/workers" },
+          { from: "./public/assets/textures", to: "./textures" },
+          { from: "./public/assets/images", to: "./images" },
         ],
       }),
     ],
