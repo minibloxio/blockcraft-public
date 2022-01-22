@@ -1,5 +1,5 @@
 import world from "../world/WorldManager";
-import player from "../Player";
+import player from "../entity/player/Player";
 import chunkManager from "../managers/ChunkManager";
 
 class Clouds {

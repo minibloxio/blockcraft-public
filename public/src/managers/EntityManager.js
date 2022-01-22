@@ -5,7 +5,7 @@ import world from "../world/WorldManager";
 import textureManager from "./TextureManager";
 import { scene } from "../globals";
 import Item3D from "../graphics/Item3D";
-import player from "../Player";
+import player from "../entity/player/Player";
 
 class EntityManager {
   // Get the canvas for the entity

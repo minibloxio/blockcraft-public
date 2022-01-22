@@ -6,7 +6,7 @@ import { connectionDelay, g, isState, serverList, serverNames, regionNames } fro
 import { drawCircle, drawRectangle, msToTime, round } from "../../lib/helper";
 import chunkManager from "../../managers/ChunkManager";
 import world from "../../world/WorldManager";
-import player from "../../Player";
+import player from "../../entity/player/Player";
 
 export function refreshServers() {
   // Disconnect servers

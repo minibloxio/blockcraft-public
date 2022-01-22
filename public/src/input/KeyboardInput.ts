@@ -7,7 +7,7 @@ import hud from "../gui/HUD";
 import { axesHelper } from "../index.js";
 import inventory from "../items/Inventory";
 import chat from "../managers/ChatManager.js";
-import player from "../Player";
+import player from "../entity/player/Player";
 import threeStats from "../stats/ThreeStats";
 import screenshotter from "../gui/Screenshot";
 

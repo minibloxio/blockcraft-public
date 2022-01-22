@@ -1,6 +1,6 @@
 import * as $ from "jquery";
 import { initKeys } from "kontra";
-import player from "../Player";
+import player from "../entity/player/Player";
 
 import "./KeyboardInput";
 import "./MouseInput";

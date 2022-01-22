@@ -7,7 +7,7 @@ Provides pointer lock functionality and the ability to connect to the game serve
 import * as THREE from "three";
 import Cookies from "js-cookie";
 import inventory from "../items/Inventory";
-import player from "../Player";
+import player from "../entity/player/Player";
 import chat from "../managers/ChatManager";
 import masterRenderer from "../graphics/MasterRenderer";
 import { g } from "../globals";

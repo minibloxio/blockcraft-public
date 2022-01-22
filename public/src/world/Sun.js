@@ -1,7 +1,7 @@
 import textureManager from "../managers/TextureManager";
 import { scene } from "../globals";
 import game from "../Game";
-import player from "../Player";
+import player from "../entity/player/Player";
 import lighting from "./Lighting";
 
 class Sun {

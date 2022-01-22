@@ -9,7 +9,7 @@ import Ola from "ola";
 import * as THREE from "three";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { scene } from "../globals";
-import player from "../Player";
+import player from "../entity/player/Player";
 import textureManager from "./TextureManager";
 import world from "../world/WorldManager";
 import Item3D from "../graphics/Item3D";

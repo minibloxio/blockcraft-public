@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import game from "./Game";
 import world from "./world/WorldManager";
-import player from "./Player";
+import player from "./entity/player/Player";
 import { players } from "./globals";
 import PlayerManager from "./managers/PlayerManager";
 import PlayerMesh from "./graphics/PlayerMesh";

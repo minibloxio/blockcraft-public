@@ -22,7 +22,7 @@ import PlayerManager from "./managers/PlayerManager";
 import textureManager from "./managers/TextureManager";
 import workerManager from "./managers/WorkerManager";
 import world from "./world/WorldManager";
-import player from "./Player";
+import player from "./entity/player/Player";
 import { animateServerEntities, animateServerPlayers, updatePlayers } from "./server";
 import stage from "./world/Stage";
 import stats from "./stats/ThreeStats.ts";

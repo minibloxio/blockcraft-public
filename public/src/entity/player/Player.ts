@@ -1,24 +1,24 @@
 import * as THREE from "three";
 import * as $ from "jquery";
 
-import { PointerLockControls } from "./input/PointerLock";
-import { camera, isState, g, scene, players } from "./globals";
-import textureManager from "./managers/TextureManager";
-import world, { updateVoxelGeometry } from "./world/WorldManager";
-import gameObj from "./Game";
-import chunkManager from "./managers/ChunkManager";
-import chat from "./managers/ChatManager";
-import inventory from "./items/Inventory";
-import masterRenderer from "./graphics/MasterRenderer";
-import { random } from "./lib/helper";
-import activeItemVoxels from "./graphics/ActiveItemVoxels";
-import { keyPressedPlayer } from "./input/KeyboardInput";
-import hud from "./gui/HUD";
-import threeStats from "./stats/ThreeStats";
+import { PointerLockControls } from "../../input/PointerLock";
+import { camera, isState, g, scene, players } from "../../globals";
+import textureManager from "../../managers/TextureManager";
+import world, { updateVoxelGeometry } from "../../world/WorldManager";
+import gameObj from "../../Game";
+import chunkManager from "../../managers/ChunkManager";
+import chat from "../../managers/ChatManager";
+import inventory from "../../items/Inventory";
+import masterRenderer from "../../graphics/MasterRenderer";
+import { random } from "../../lib/helper";
+import activeItemVoxels from "../../graphics/ActiveItemVoxels";
+import { keyPressedPlayer } from "../../input/KeyboardInput";
+import hud from "../../gui/HUD";
+import threeStats from "../../stats/ThreeStats";
 import Cookies from "js-cookie";
-import { rotation } from "./input/PointerLock";
-import PlayerManager from "./managers/PlayerManager";
-import PlayerMesh from "./graphics/PlayerMesh";
+import { rotation } from "../../input/PointerLock";
+import PlayerManager from "../../managers/PlayerManager";
+import PlayerMesh from "../../graphics/PlayerMesh";
 
 declare var DEV_MODE: boolean;
 declare global {
