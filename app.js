@@ -596,7 +596,6 @@ io.on("connection", function (socket_) {
 
   // Take player damage if in survival mode
   socket.on("takeDamage", function (data) {
-    audioManager.play("game.player.hurt")
     let player = players[socket.id];
     if (!player) return;
 

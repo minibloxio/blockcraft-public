@@ -27,6 +27,7 @@ import { initStatistics } from "./stats/statslist";
 import threeStats from "./stats/ThreeStats";
 import { initInput } from "./input/input";
 import { init as initKontra } from "kontra";
+import audioManager from "./audio/AudioManager";
 // side effect based
 import "../style.css";
 import "./gui/mainmenu/tabs";
@@ -594,6 +595,10 @@ g.socket.on("message", function (data) {
 
 g.socket.on("refresh", function () {
   location.reload(true);
+});
+
+g.socket.on("ding", function () {
+  audioManager.play("random.orb");
 });
 
 function updateClient(data) {

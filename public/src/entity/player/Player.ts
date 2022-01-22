@@ -1074,7 +1074,6 @@ class Player {
             if (jumpDiff > 0 && jumpDiff < 500 && this.mode == "survival" && !this.god) {
               // Fall damage
 
-              audioManager.play("game.player.hurt");
               audioManager.play("game.player.hurt.fall.big");
               g.socket.emit("takeDamage", {
                 dmg: jumpDiff,

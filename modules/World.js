@@ -398,6 +398,8 @@ module.exports = class World {
         entity.force *= 300;
         entity.dir = entity.vel; // Update direction of arrow based on velocity
         io.to(`${id}`).emit("knockback", entity);
+        console.log("ding", entity);
+        io.to(`${entity.playerId}`).emit("ding");
         io.emit("punch", id); // Update player color
       }
 
