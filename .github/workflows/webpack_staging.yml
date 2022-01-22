@@ -11,6 +11,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Go into client folder
+        run: cd client
+
       - name: Setup Node.Js
         uses: actions/setup-node@v2
         with:

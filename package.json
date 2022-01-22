@@ -1,0 +1,20 @@
+{
+  "name": "blockcraft",
+  "version": "1.0.0",
+  "description": "BlockCraft is a WebGL implementation of an infinite procedurally-generated voxel world that runs on the browser. This project originally spawned as a Minecraft Classic clone but has expanded to include multiplayer PvP, crafting, shaders and much more!",
+  "main": "index.js",
+  "scripts": {
+    "docker:build": "docker build . -t blockcraft",
+    "docker:start": "docker run --rm --name blockcraft -p 3000:3000 blockcraft"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blockcraftio/blockcraft.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/blockcraftio/blockcraft/issues"
+  },
+  "homepage": "https://github.com/blockcraftio/blockcraft#readme"
+}

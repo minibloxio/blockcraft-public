@@ -4,10 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon",
-    "docker:build": "docker build . -t blockcraft",
-    "docker:start": "docker run --rm --name blockcraft -p 3000:3000 blockcraft"
+    "start": "nodemon"
   },
   "repository": {
     "type": "git",
@@ -31,5 +28,8 @@
     "socket.io": "^4.4.1",
     "three": "^0.136.0",
     "winston": "^3.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }

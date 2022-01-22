@@ -16,11 +16,8 @@
     "three": "^0.136.0"
   },
   "scripts": {
-    "start": "node app.js",
-    "dev": "webpack-dev-server --mode=development",
-    "webpack:build": "webpack --mode=production",
-    "docker:build": "docker build . -t blockcraft",
-    "docker:start": "docker run --rm --name blockcraft -p 3000:3000 blockcraft"
+    "start": "webpack-dev-server --mode=development",
+    "build": "webpack --mode=production"
   },
   "repository": {
     "type": "git",

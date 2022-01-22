@@ -224,7 +224,7 @@ module.exports = class World {
     this.textures = {};
     let self = this;
 
-    const assetsPath = process.env.PUBLIC_PATH || __dirname + "/../../client/assets/textures";
+    const assetsPath = process.env.TEXTURES_PATH || __dirname + "/../../client/assets/textures";
     // Get block file names
     fs.readdir(assetsPath + "/blocks", function (err, data) {
       if (err) console.log(err);
