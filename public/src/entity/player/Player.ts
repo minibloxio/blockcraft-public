@@ -1,23 +1,24 @@
 import * as THREE from "three";
 import * as $ from "jquery";
 
-import { PointerLockControls } from "./input/PointerLock";
-import { camera, isState, g, scene, players } from "./globals";
-import textureManager from "./managers/TextureManager";
-import world, { updateVoxelGeometry } from "./world/WorldManager";
-import gameObj from "./Game";
-import chunkManager from "./managers/ChunkManager";
-import chat from "./managers/ChatManager";
-import inventory from "./items/Inventory";
-import masterRenderer from "./graphics/MasterRenderer";
-import { random } from "./lib/helper";
-import activeItemVoxels from "./graphics/ActiveItemVoxels";
-import { keyPressedPlayer } from "./input/KeyboardInput";
-import hud from "./gui/HUD";
-import threeStats from "./stats/ThreeStats";
+import { PointerLockControls } from "../../input/PointerLock";
+import { camera, isState, g, scene, players } from "../../globals";
+import textureManager from "../../managers/TextureManager";
+import world, { updateVoxelGeometry } from "../../world/WorldManager";
+import gameObj from "../../Game";
+import chunkManager from "../../managers/ChunkManager";
+import chat from "../../managers/ChatManager";
+import inventory from "../../items/Inventory";
+import masterRenderer from "../../graphics/MasterRenderer";
+import { random } from "../../lib/helper";
+import activeItemVoxels from "../../graphics/ActiveItemVoxels";
+import { keyPressedPlayer } from "../../input/KeyboardInput";
+import hud from "../../gui/HUD";
+import threeStats from "../../stats/ThreeStats";
 import Cookies from "js-cookie";
-import { rotation } from "./input/PointerLock";
-import PlayerManager from "./managers/PlayerManager";
+import { rotation } from "../../input/PointerLock";
+import PlayerManager from "../../managers/PlayerManager";
+import PlayerMesh from "../../graphics/PlayerMesh";
 
 declare var DEV_MODE: boolean;
 declare global {
@@ -248,9 +249,8 @@ class Player {
 
   // Add player mesh
   initPlayerMesh() {
-    PlayerManager.addPlayerMesh(this);
-    PlayerManager.addSkeleton(this);
-    PlayerManager.setPlayerArmor(this);
+    PlayerMesh.initPlayerMesh(this);
+
     let hand = this.toolbar[this.currSlot];
     if (hand) PlayerManager.updatePlayerHand(hand, this);
     this.entity = new THREE.Group();
@@ -1349,6 +1349,8 @@ class Player {
         this.lastHp = this.hp;
       }
     }
+
+    PlayerMesh.updateArmor(this, data);
 
     // Update server-side data
     this.hp = data.hp;

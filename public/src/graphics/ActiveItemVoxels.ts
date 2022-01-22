@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { camera } from "./ActiveItemScene";
 import textureManager from "../managers/TextureManager";
 import skinManager from "../managers/SkinManager";
-import player from "../Player";
+import player from "../entity/player/Player";
 import world from "../world/WorldManager";
 import { AnimationLerp, Keyframe } from "../lib/AnimationLerp";
 import Item3D from "./Item3D";

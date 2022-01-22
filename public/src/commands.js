@@ -9,7 +9,7 @@ import { clamp, round } from "./lib/helper";
 import chat from "./managers/ChatManager";
 import chunkManager from "./managers/ChunkManager";
 import world from "./world/WorldManager";
-import player from "./Player";
+import player from "./entity/player/Player";
 import Screenshot from "./gui/Screenshot";
 
 let commandsInit = JSON.stringify({

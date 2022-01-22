@@ -7,7 +7,7 @@ Provides pointer lock functionality and the ability to connect to the game serve
 import * as THREE from "three";
 import Cookies from "js-cookie";
 import inventory from "../items/Inventory";
-import player from "../Player";
+import player from "../entity/player/Player";
 import chat from "../managers/ChatManager";
 import masterRenderer from "../graphics/MasterRenderer";
 import { g } from "../globals";
@@ -17,6 +17,10 @@ import { clamp } from "../lib/helper";
 import Ola from "ola";
 
 export default class PointerLock {
+  static confirmExit() {
+    return "You have attempted to leave this page. Are you sure?";
+  }
+
   // Init pointer lock
   static initPointerLock() {
     let havePointerLock = "pointerLockElement" in document || "mozPointerLockElement" in document || "webkitPointerLockElement" in document;
@@ -113,6 +117,8 @@ export default class PointerLock {
 
   // Enter pointer lock
   static onEnter() {
+    // Prevent accidental navigation away from the game
+    window.onbeforeunload = PointerLock.confirmExit;
     player.controls.enabled = true;
     blocker.style.display = "none";
     $("#background-image").hide();
@@ -156,6 +162,7 @@ export default class PointerLock {
 
   // Exit pointer lock
   static onExit() {
+    window.onbeforeunload = null;
     if (!inventory.showInventory) {
       blocker.style.display = "block";
     }
@@ -169,9 +176,9 @@ export default class PointerLock {
   // Get item entity TODO: Move to items
   static getItemEntity(player, item, dropDir) {
     let pos = {
-      x: player.position.x,
-      y: player.position.y - 8,
-      z: player.position.z,
+      x: player.pos.x,
+      y: player.pos.y - 8,
+      z: player.pos.z,
     };
 
     let entity = {

@@ -19,7 +19,7 @@ import PlayerManager from "./managers/PlayerManager";
 import textureManager from "./managers/TextureManager";
 import workerManager from "./managers/WorkerManager";
 import world from "./world/WorldManager";
-import player from "./Player";
+import player from "./entity/player/Player";
 import { animateServerEntities, animateServerPlayers, updatePlayers } from "./server";
 import stage from "./world/Stage";
 import stats from "./stats/ThreeStats.ts";
@@ -372,7 +372,6 @@ $("#welcome-button")[0].click();
 document.addEventListener("contextmenu", (event) => event.preventDefault()); // Prevent right-click
 
 // Get cookie username
-
 let name = Cookies.get("Name");
 if (name) $("#name-input").val(name);
 

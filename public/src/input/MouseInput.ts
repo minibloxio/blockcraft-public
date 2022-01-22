@@ -1,7 +1,7 @@
 import Ola from "ola";
 import * as $ from "jquery";
 import { keyPressed } from "kontra";
-import player from "../Player";
+import player from "../entity/player/Player";
 import game from "../Game";
 import inventory from "../items/Inventory";
 import { clamp } from "../lib/helper";

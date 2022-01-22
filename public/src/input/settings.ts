@@ -6,7 +6,7 @@ import { camera } from "../globals";
 import { updateGUISize } from "../lib/helper";
 import chunkManager from "../managers/ChunkManager";
 import workerManager from "../managers/WorkerManager";
-import player from "../Player";
+import player from "../entity/player/Player";
 import lighting from "../world/Lighting";
 import stage from "../world/Stage";
 import stars from "../world/Stars";
@@ -219,7 +219,8 @@ function addSelectControl(name, id, defaultValue, object, key, callback) {
 $(document).ready(function () {
   $("#reset-video").click(function () {
     let videoCookies = [
-      "Sensitivity",
+      "Mouse Sensitivity",
+      "Scroll Sensitivity",
       "Render Distance",
       "Chunk Loading Rate",
       "FOV",
