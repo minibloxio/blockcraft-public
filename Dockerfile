@@ -17,9 +17,9 @@ COPY package-lock.json ./
 RUN npm ci --only=production
 
 WORKDIR /usr/src/app
-COPY ./public/textures/blocks ./public/textures/blocks
-COPY ./public/textures/entity ./public/textures/entity
-COPY ./public/textures/items ./public/textures/items
+COPY ./public/assets/textures/blocks ./public/textures/blocks
+COPY ./public/assets/textures/entity ./public/textures/entity
+COPY ./public/assets/textures/items ./public/textures/items
 
 COPY --from=webpack-builder /webpack/dist ./dist
 
