@@ -6,16 +6,13 @@ const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
 
 module.exports = (env, argv) => {
   return {
-    entry: "./public/src/index.js",
+    entry: "./src/index.js",
     output: {
       filename: "main.js",
       path: path.resolve(__dirname, "dist"),
     },
     devtool: "eval-cheap-source-map",
     devServer: {
-      static: {
-        directory: path.join(__dirname, "dist"),
-      },
       compress: true,
       port: 3001,
       proxy: {
@@ -49,7 +46,7 @@ module.exports = (env, argv) => {
     },
     plugins: [
       new webpack.DefinePlugin({ DEV_MODE: argv.mode == "development" }),
-      new FaviconsWebpackPlugin("./public/assets/favicon.png"),
+      new FaviconsWebpackPlugin("./public/favicon.png"),
       new HtmlWebpackPlugin({
         template: "./public/index.html",
         filename: "index.html",
@@ -62,10 +59,10 @@ module.exports = (env, argv) => {
       new CopyPlugin({
         patterns: [
           { from: "./public/robots.txt", to: "robots.txt" },
-          { from: "./public/src/workers", to: "./src/workers" },
-          { from: "./public/assets/textures", to: "./textures" },
-          { from: "./public/assets/images", to: "./images" },
-          { from: "./public/assets/audio", to: "./assets/audio" },
+          { from: "./src/workers", to: "./src/workers" },
+          { from: "./assets/textures", to: "./textures" },
+          { from: "./assets/images", to: "./images" },
+          { from: "./assets/audio", to: "./assets/audio" },
         ],
       }),
     ],

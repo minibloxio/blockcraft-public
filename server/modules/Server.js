@@ -1,6 +1,5 @@
 let fs = require("fs");
 const THREE = require("three");
-const public_path = __dirname + "/../public/";
 var Filter = require("bad-words"),
   filter = new Filter();
 
@@ -224,18 +223,20 @@ module.exports = class World {
 
     this.textures = {};
     let self = this;
+
+    const assetsPath = process.env.PUBLIC_PATH || __dirname + "/../../client/assets/textures";
     // Get block file names
-    fs.readdir(public_path + "/textures/blocks", function (err, data) {
+    fs.readdir(assetsPath + "/blocks", function (err, data) {
       if (err) console.log(err);
       self.textures.blocks = data;
     });
     // Get item file names
-    fs.readdir(public_path + "/textures/items", function (err, data) {
+    fs.readdir(assetsPath + "/items", function (err, data) {
       if (err) console.log(err);
       self.textures.items = data;
     });
     // Get entity file names
-    fs.readdir(public_path + "/textures/entity", function (err, data) {
+    fs.readdir(assetsPath + "/entity", function (err, data) {
       if (err) console.log(err);
       self.textures.entity = data;
     });

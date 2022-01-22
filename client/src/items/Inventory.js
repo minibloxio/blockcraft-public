@@ -1,4 +1,4 @@
-import recipes from "../../json/recipes.json";
+import recipes from "../../public/json/recipes.json";
 import game from "../Game";
 import world from "../world/WorldManager";
 import player from "../entity/player/Player";

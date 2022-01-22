@@ -29,7 +29,7 @@ import { initInput } from "./input/input";
 import { init as initKontra } from "kontra";
 import audioManager from "./audio/AudioManager";
 // side effect based
-import "../style.css";
+import "../public/style.css";
 import "./gui/mainmenu/tabs";
 
 /*

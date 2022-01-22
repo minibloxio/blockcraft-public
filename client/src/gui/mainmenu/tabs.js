@@ -1,4 +1,4 @@
-import changelog from "../../../json/changelog.json";
+import changelog from "../../../public/json/changelog.json";
 
 // Change tab
 function changeTab(evt, elementId) {

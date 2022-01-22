@@ -1,4 +1,4 @@
-import changelog from "../../json/changelog.json";
+import changelog from "../../public/json/changelog.json";
 import game from "../Game";
 import inventory from "../items/Inventory";
 import hud from "../gui/HUD";
