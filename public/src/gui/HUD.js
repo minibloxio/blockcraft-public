@@ -2,7 +2,7 @@ import game from "../Game";
 import { g, icons, players } from "../globals";
 import inventory from "../items/Inventory";
 import { drawRectangle, drawText, round } from "../lib/helper";
-import world from "../managers/WorldManager";
+import world from "../world/WorldManager";
 import player from "../Player";
 import chat from "../managers/ChatManager.js";
 import { statsManager } from "../stats/StatsManager";

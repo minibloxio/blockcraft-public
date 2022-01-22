@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import game from "./Game";
-import world from "./managers/WorldManager";
+import world from "./world/WorldManager";
 import player from "./Player";
 import { players } from "./globals";
 import PlayerManager from "./managers/PlayerManager";

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Ola from "ola";
 import game from "../Game";
-import world from "./WorldManager";
+import world from "../world/WorldManager";
 import textureManager from "./TextureManager";
 import { scene } from "../globals";
 import Item3D from "../graphics/Item3D";

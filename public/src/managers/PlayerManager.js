@@ -13,7 +13,7 @@ import { scene } from "../globals";
 import player from "../Player";
 import skinManager from "./SkinManager";
 import textureManager from "./TextureManager";
-import world from "./WorldManager";
+import world from "../world/WorldManager";
 import Item3D from "../graphics/Item3D";
 import { clamp, round, euclideanModulo } from "../lib/helper";
 

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import world, { updateVoxelGeometry, updateCellMesh } from "./WorldManager";
+import world, { updateVoxelGeometry, updateCellMesh } from "../world/WorldManager";
 import game from "../Game";
 import workerManager from "./WorkerManager";
 import textureManager from "./TextureManager";

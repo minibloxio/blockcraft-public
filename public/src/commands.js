@@ -8,7 +8,7 @@ import { g, players } from "./globals";
 import { clamp, round } from "./lib/helper";
 import chat from "./managers/ChatManager";
 import chunkManager from "./managers/ChunkManager";
-import world from "./managers/WorldManager";
+import world from "./world/WorldManager";
 import player from "./Player";
 import Screenshot from "./gui/Screenshot";
 

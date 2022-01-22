@@ -8,7 +8,7 @@ class Game {
     this.lastPacket = Date.now();
     this.numOfVoxelWorkers = 2;
     this.guiSize = 1;
-    this.tick = 0;
+    this.tick = Ola(0);
     this.lastUpdate = Date.now();
     this.lastLatencyCheck = Date.now();
     this.updates = [];

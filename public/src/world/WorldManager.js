@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
-import textureManager from "./TextureManager";
-import workerManager from "./WorkerManager";
+import textureManager from "../managers/TextureManager";
+import workerManager from "../managers/WorkerManager";
 import { g, scene } from "../globals";
 
 class World {

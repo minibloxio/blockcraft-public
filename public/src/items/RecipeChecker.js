@@ -1,4 +1,4 @@
-import world from "../managers/WorldManager.js";
+import world from "../world/WorldManager.js";
 
 export default class Recipe {
   static getEntityName(entity) {

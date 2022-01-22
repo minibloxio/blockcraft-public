@@ -3,7 +3,7 @@ import { camera } from "./ActiveItemScene";
 import textureManager from "../managers/TextureManager";
 import skinManager from "../managers/SkinManager";
 import player from "../Player";
-import world from "../managers/WorldManager";
+import world from "../world/WorldManager";
 import { AnimationLerp, Keyframe } from "../lib/AnimationLerp";
 import Item3D from "./Item3D";
 import PlayerManager from "../managers/PlayerManager";

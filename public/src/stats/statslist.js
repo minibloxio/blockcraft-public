@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { statsManager, Stat } from "./StatsManager.js";
 import game from "../Game";
 import player from "../Player";
-import world from "../managers/WorldManager.js";
+import world from "../world/WorldManager.js";
 import { g, camera } from "../globals";
 import masterRenderer from "../graphics/MasterRenderer";
 

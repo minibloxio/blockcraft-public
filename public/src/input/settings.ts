@@ -7,7 +7,10 @@ import { updateGUISize } from "../lib/helper";
 import chunkManager from "../managers/ChunkManager";
 import workerManager from "../managers/WorkerManager";
 import player from "../Player";
-import stage from "../Stage";
+import lighting from "../world/Lighting";
+import stage from "../world/Stage";
+import stars from "../world/Stars";
+import clouds from "../world/Clouds";
 
 const cookieName = "keymappings";
 const LONG_TIME = { expires: 100000 };
@@ -153,9 +156,9 @@ export function addVideoControls() {
   //addSliderControl("Web Workers", "workers", 2, game, "numOfVoxelWorkers");
 
   addSwitchControl("Invert Mouse", "invertMouse", false, game, "invertMouse");
-  addSwitchControl("Shadow Effect", "shadow", false, stage.dir, "enableShadow", "castShadow");
-  addSwitchControl("Clouds", "cloud", false, stage, "showClouds", "generate");
-  addSwitchControl("Stars", "stars", true, stage.stars, "visible");
+  addSwitchControl("Shadow Effect", "shadow", false, lighting.dir, "enableShadow", "castShadow");
+  addSwitchControl("Clouds", "cloud", false, clouds, "showClouds", "generate");
+  addSwitchControl("Stars", "stars", true, stars.stars, "visible");
   addSwitchControl("Dynamic FOV", "dynFov", true, camera, "dynFov");
   addSwitchControl("Transparent Leaves", "transparentLeaves", false, game, "transparentLeaves", false, updateTransparency);
   addSwitchControl("Transparent Inventory", "transparentInventory", false, game, "transparentInventory");
