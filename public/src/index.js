@@ -85,8 +85,15 @@ export function disconnectServer() {
     if (mesh.type == "Group") {
       for (let i = 0; i < mesh.children.length; i++) {
         let child = mesh.children[i];
-        child.geometry.dispose();
-        child.material.dispose();
+        if (child.type == "Group") {
+          for (let c of child.children) {
+            c.geometry.dispose();
+            c.material.dispose();
+          }
+        } else {
+          child.geometry.dispose();
+          child.material.dispose();
+        }
       }
       scene.remove(mesh);
     } else {
