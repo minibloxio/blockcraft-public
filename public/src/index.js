@@ -1,15 +1,12 @@
 import Cookies from "js-cookie";
 import Ola from "ola";
 import * as THREE from "three";
-import "../style.css";
 import game from "./Game";
 import { camera, connectionDelay, g, isState, players, scene } from "./globals";
 import masterRenderer from "./graphics/MasterRenderer";
 import hud from "./gui/HUD";
 import { connectError, refreshServers, showServerSelect, updateMenu } from "./gui/mainmenu/serverlist";
 import { showSettings } from "./gui/mainmenu/settings";
-import "./gui/mainmenu/tabs";
-import "./input/input";
 import { update as updateKeyboardInput } from "./input/KeyboardInput";
 import PointerLock, { onWindowResize } from "./input/PointerLock";
 import { addKeyboardControls, addVideoControls } from "./input/settings";
@@ -27,8 +24,12 @@ import { animateServerEntities, animateServerPlayers, updatePlayers } from "./se
 import stage from "./Stage";
 import stats from "./stats/ThreeStats.ts";
 import { initStatistics } from "./stats/statslist";
-import { keyPressedPlayer } from "./input/KeyboardInput";
 import threeStats from "./stats/ThreeStats";
+import { initInput } from "./input/input";
+import { init as initKontra } from "kontra";
+// side effect based
+import "../style.css";
+import "./gui/mainmenu/tabs";
 
 /*
 Authenticates the player and provides server details from each running server.
@@ -111,6 +112,8 @@ export function disconnectServer() {
 // Menu progression logic
 $(document).ready(function () {
   init();
+  initKontra();
+  initInput();
 
   // Refresh servers
   $("#refresh-servers").click(function () {

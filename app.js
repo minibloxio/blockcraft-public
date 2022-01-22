@@ -4,12 +4,14 @@ require("dotenv").config(); // load server config from .env
 const axios = require("axios").default;
 const sessionServerEndpoint = "https://session.blockcraft.online/servers/heartbeat";
 
-setTimeout(async () => {
-  await axios.post(sessionServerEndpoint, { url: process.env.LINK });
-});
-setInterval(async () => {
-  await axios.post(sessionServerEndpoint, { url: process.env.LINK });
-}, 30000);
+if (process.env.LINK && !process.env.PRIVATE) {
+  setTimeout(async () => {
+    await axios.post(sessionServerEndpoint, { url: process.env.LINK });
+  });
+  setInterval(async () => {
+    await axios.post(sessionServerEndpoint, { url: process.env.LINK });
+  }, 30000);
+}
 
 const serverPort = process.env.PORT || 3002;
 // Initialize server variables
