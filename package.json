@@ -5,6 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "@types/js-cookie": "^3.0.1",
+    "axios": "^0.25.0",
     "bad-words": "^3.0.4",
     "body-parser": "^1.19.1",
     "cluster": "^0.7.7",

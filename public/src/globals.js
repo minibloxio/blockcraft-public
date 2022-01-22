@@ -6,23 +6,9 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 globalThis.camera = camera;
 const scene = new THREE.Scene(); // Scene
 globalThis.scene = scene;
-const serverNames = {
-  gold: "Gold Server",
-  coal: "Coal Server",
-  iron: "Iron Server",
-  wood: "Wood Server",
-  lava: "Lava Server",
-};
-const regionNames = {
-  "na-east": "North America East",
-  "na-west": "North America West",
-  "eu-west": "Europe West",
-  "ap-south": "Asia Pacific South",
-  "ap-southeast": "Asia Pacific Southeast",
-};
-let serverList = Object.keys(serverNames).map((x) => `https://${x}.blockcraft.online`);
-serverList = serverList.concat(Object.keys(regionNames).map((x) => `https://${x}.victorwei.com`));
 const connectionDelay = 2000;
+export const sessionServerEndpoint = "https://session.blockcraft.online/servers/list";
+
 let players = {};
 globalThis.players = players;
 
@@ -93,4 +79,4 @@ export function isState(check) {
 
 globalThis.g = g;
 
-export { camera, scene, players, g, serverNames, serverList, connectionDelay, regionNames };
+export { camera, scene, players, g, connectionDelay };
